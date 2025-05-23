@@ -108,7 +108,8 @@ const Chat = () => {
   }
 
   return (
-    <div className="chat-wrapper">
+   <div className="container">
+     <div className="chat-wrapper">
       <ChatSidebar />
       <div className="chat-container">
         <div className="chat-messages">
@@ -153,6 +154,7 @@ const Chat = () => {
         </div>
       </div>
     </div>
+   </div>
   );
 };
 
