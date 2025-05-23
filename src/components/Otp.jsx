@@ -5,10 +5,12 @@ export default function Otp() {
     const [mobile, setMobile] = useState("");
     const [message, setMessage] = useState({ type: "", text: "" });
     const [isLoading, setIsLoading] = useState(false);
+    const [isLoading2, setIsLoading2] = useState(false);
 
     const sendOtp = (e) => {
+        setIsLoading(true)
         e.preventDefault();
-        fetch("http://localhost:8000/send-otp", {
+        fetch("https://mygram-1-1nua.onrender.com/send-otp", {
             method: "POST",
             body: JSON.stringify({ mobile }),
             headers: {
@@ -22,6 +24,8 @@ export default function Otp() {
                 setMessage({ type: "success", text: data.message });
 
                 setTimeout(()=>{
+                    setIsLoading(false)
+                    setIsLoading2(false)
                     setMessage({type:"",text:""})
                 },5000)
             })
@@ -32,8 +36,9 @@ export default function Otp() {
     };
 
     const verifyOtp = (e) => {
+        setIsLoading2(true)
         e.preventDefault();
-        fetch("http://localhost:8000/verify-otp", {
+        fetch("https://mygram-1-1nua.onrender.com/verify-otp", {
             method: "POST",
             body: JSON.stringify({ mobile, otp }),
             headers: {
@@ -56,6 +61,8 @@ export default function Otp() {
            })
             .then((data) => {
                 if (data) {
+                    localStorage.setItem("mobileVerified", "true");
+
                    
                     setMessage({ type: "success", text: "OTP verified successfully" });
                     setTimeout(()=>{
@@ -94,11 +101,11 @@ export default function Otp() {
                 <button type="submit" className="btn" disabled={isLoading} onClick={sendOtp}>
                 {isLoading ? "Loading..." : "send otp"}
                 </button>
-                <button type="submit" className="btn" disabled={isLoading} onClick={verifyOtp}>
-                {isLoading ? "Loading..." : "verify otp"}
+                <button type="submit" className="btn" disabled={isLoading2} onClick={verifyOtp}>
+                {isLoading2 ? "Loading..." : "verify otp"}
                 </button>
                 {message.text && <div><p className={message.type}>{message.text}</p></div>}
-                <p><Link to="/login">Go to login page</Link></p>
+                <p><Link to="/profile">Go back to Profile page</Link></p>
             </form>
         </section>
     );

@@ -12,16 +12,18 @@ export default function Profile() {
   const [isFollowing, setIsFollowing] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef();
+  const [message,setMessage] = useState({text:"",data:""})
 
   const isOwnProfile = loggedUser && (!id || id === loggedUser.userid);
-  const targetUserId = id || loggedUser?.userid;
+  const targetUserId =  loggedUser?.userid;
+  console.log(loggedUser)
 
   useEffect(() => {
     if (!targetUserId || !loggedUser?.token) return;
 
     async function fetchStatsAndPosts() {
       try {
-        const res = await fetch(`http://localhost:8000/users/${targetUserId}/stats`, {
+        const res = await fetch(`https://mygram-1-1nua.onrender.com/users/${targetUserId}/stats`, {
           headers: {
             Authorization: `Bearer ${loggedUser.token}`,
           },
@@ -29,7 +31,7 @@ export default function Profile() {
         const data = await res.json();
         setStats(data);
 
-        const postsRes = await fetch("http://localhost:8000/allposts", {
+        const postsRes = await fetch("https://mygram-1-1nua.onrender.com/allposts", {
           headers: {
             Authorization: `Bearer ${loggedUser.token}`,
           },
@@ -54,7 +56,7 @@ export default function Profile() {
       if (!targetUserId || isOwnProfile) return;
 
       try {
-        const res = await fetch(`http://localhost:8000/follow-status/${targetUserId}`, {
+        const res = await fetch(`https://mygram-1-1nua.onrender.com/follow-status/${targetUserId}`, {
           headers: {
             Authorization: `Bearer ${loggedUser.token}`,
           },
@@ -74,62 +76,41 @@ export default function Profile() {
     checkFollowStatus();
   }, [id, loggedUser]);
 
-  const toggleFollow = async () => {
-    if (!targetUserId) return;
-
-    const url = isFollowing
-      ? `http://localhost:8000/unfollow/${targetUserId}`
-      : `http://localhost:8000/follow/${targetUserId}`;
-
-    try {
-      const res = await fetch(url, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${loggedUser.token}`,
-        },
-      });
-
-      const data = await res.json();
-      if (res.ok) {
-        setIsFollowing(prev => !prev);
-      } else {
-        console.error("Follow/unfollow error:", data.error || data.message);
-      }
-    } catch (err) {
-      console.error("Follow/unfollow failed:", err);
-    }
-  };
-
+  
   const handleFileChange = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
 
     const formData = new FormData();
     formData.append("profilePic", file);
+    console.log(loggedUser.token);
 
     setIsUploading(true);
-    const res = await fetch("http://localhost:8000/user/profile-pic", {
+    const res = await fetch("https://mygram-1-1nua.onrender.com/user/profile-pic", {
       method: "POST",
-      headers: {
-        Authorization: `Bearer ${loggedUser.token}`,
-      },
+     headers: {
+  Authorization: `Bearer ${loggedUser.token?.trim()}`,
+},
+
+      
       body: formData,
     });
 
     const data = await res.json();
     setIsUploading(false);
+    console.log(data)
 
-    if (res.ok) {
+
       setStats((prev) => ({ ...prev, profilePic: data.profilePic }));
-    } else {
-      alert("Failed to upload photo");
-    }
+    
+ 
   };
+  // console.log(posts)
+    // console.log(stats)
 
   const handleLike = async (postId) => {
     try {
-      const res = await fetch(`http://localhost:8000/like/${postId}`, {
+      const res = await fetch(`https://mygram-1-1nua.onrender.com/like/${postId}`, {
         method: "PUT",
         headers: {
           Authorization: `Bearer ${loggedUser.token}`,
@@ -145,7 +126,7 @@ export default function Profile() {
   const handleComment = async (postId, text) => {
     if (!text) return;
     try {
-      const res = await fetch(`http://localhost:8000/comment/${postId}`, {
+      const res = await fetch(`https://mygram-1-1nua.onrender.com/comment/${postId}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -161,14 +142,42 @@ export default function Profile() {
     }
   };
 
+ const handledeletePost = async (deletePostId) => {
+  try {
+    const deleteres = await fetch(`https://mygram-1-1nua.onrender.com/delete-post/${deletePostId}`, {
+      method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${loggedUser.token}`,
+      },
+    });
+
+    const data = await deleteres.json();
+    setMessage({text:"delete",data:data.message})
+    setTimeout(()=>{
+        setMessage({text:"",data:""})
+      },3000)
+    if (deleteres.ok) {
+      // Remove the deleted post from the posts state
+      
+      setPosts(prevPosts => prevPosts.filter(post => post._id !== deletePostId));
+      
+    } else {
+      console.error("Failed to delete post:", data.error || data.message);
+    }
+  } catch (err) {
+    console.error("Delete post failed:", err);
+  }
+};
+
+
   if (!loggedUser || !stats) return <p>Loading...</p>;
 
   return (
     <div className="profile-page">
       <div className="profile-header">
-        <div className="profile-photo" style={{ position: "relative" }}>
+        <div className="profile-photo2" style={{ position: "relative" }}>
           <img
-            src={`http://localhost:8000${stats.profilePic || "/uploads/profile_pics/default.jpg"}`}
+            src={stats.profilePic}
             alt="Profile"
             className="profile-photo-img"
             style={{
@@ -219,26 +228,28 @@ export default function Profile() {
         <p>Following: {stats.followingCount}</p>
         <p>Total Likes: {stats.likesReceived}</p>
 
-         {!isOwnProfile && (
-          <button className="follow-btn" onClick={toggleFollow}>
-            {isFollowing ? "Unfollow" : "Follow"}
-          </button>
-        )}
-      
+        
       </div>
 
-      <h3>Posts</h3>
+   <div className="delete-message">
+       <h3>Posts</h3>
+      {message && <p className={message.text}>{message.data}</p>}
+   </div>
       
-      { 
+      {
       posts.map((post) => (
         <div key={post._id} className="post">
+          <p>delete post</p>
+         
+          <button onClick={()=>handledeletePost(post._id)}>Delete</button>
+          
           <p><strong>{post.caption}</strong></p>
     {post.mediaUrl.endsWith(".mp4") ? (
   <video
     ref={videoRef}
     controls
     width="100%"
-    src={`http://localhost:8000/${post.mediaUrl}`}
+    src={post.mediaUrl}
     onPlay={() => {
       setCurrentlyPlayingId(null); // Stop music
     }}

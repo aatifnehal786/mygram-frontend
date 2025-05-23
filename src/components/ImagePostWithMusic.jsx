@@ -32,13 +32,13 @@ export default function ImagePostWithMusic({ post, currentlyPlayingId, setCurren
   return (
     <div className="image-post">
       {post.backgroundMusic && (
-        <audio ref={audioRef} src={`http://localhost:8000/${post.backgroundMusic}`} />
+        <audio ref={audioRef} src={post.backgroundMusic} />
       )}
 
       <div className="image-post-with-music" style={{ position: "relative" }}>
         <img
           className="post-image"
-          src={`http://localhost:8000/${post.mediaUrl}`}
+          src={post.mediaUrl}
           alt="Post"
           onClick={handlePlay}
           style={{ cursor: "pointer" }}

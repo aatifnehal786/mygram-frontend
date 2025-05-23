@@ -15,13 +15,16 @@ import Otp from './components/Otp';
 import EmailOtp from './components/EmailOtp';
 import Layout from './components/Layout'; // 👈 import the layout
 import ToggleTheme from './components/ToggleTheme';
+import ChatSidebar from './components/ChatSideBar';
+
 
 
 
 function App() {
-   const [loggedUser, setLoggedUser] = useState(
-    JSON.parse(localStorage.getItem('token-auth'))
-  );
+  const [loggedUser, setLoggedUser] = useState(
+  JSON.parse(sessionStorage.getItem('token-auth'))
+);
+
  
 
 
@@ -50,14 +53,21 @@ const router = createBrowserRouter([
         path: '/profile',
         element: <Private Component={Profile} />,
       },
-      {
-        path: '/chat',
-        element: <Private Component={Chat} />,
-      },
+   
+{
+  path: '/chat/:targetUserId',
+  element: <Private Component={Chat} />,
+},
+{
+  path: '/chatsidebar',
+  element: <Private Component={ChatSidebar} />,
+},
+
       {
         path: '/createpost',
         element: <Private Component={CreatePost} />,
       },
+      
     ],
   },
   {

@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import hide from '../assets/hide.png'
+import show from '../assets/show.png'
 
 export default function SignUp(){
 
@@ -16,6 +18,7 @@ export default function SignUp(){
     })
 
     const [isLoading, setIsLoading] = useState(false);
+      const [isPassword,setIsPassword] = useState(false)
 
     const handleInput = (e)=>{
         e.preventDefault();
@@ -27,10 +30,15 @@ export default function SignUp(){
 
     }
 
+    
+    const showHide = ()=>{
+        setIsPassword((prev)=>!prev)
+    }
+
     const handleSubmit = (e)=>{
         e.preventDefault();
        
-        fetch("http://localhost:8000/signup",{
+        fetch("https://mygram-1-1nua.onrender.com/signup",{
             method:"POST",
             body:JSON.stringify(userDetails),
             headers:{
@@ -39,17 +47,8 @@ export default function SignUp(){
         })
         .then((res)=>{
             
-            setIsLoading(false);
-                // if (!res.ok) {
-                //     if (res.status === 404) {
-                //         setMessage({ type: "error", text: "User Not Found With this Email, Please Login Again" });
-                //     } else if (res.status === 401) {
-                //         setMessage({ type: "error", text: "Wrong Password" });
-                //     } else {
-                //         setMessage({ type: "error", text: "Something went wrong. Please try again later." });
-                //     }
-                //     throw new Error(`HTTP error! status: ${res.status}`);
-                // }
+            setIsLoading(true);
+              
                 return res.json();
         })
         .then((data)=>{
@@ -59,6 +58,7 @@ export default function SignUp(){
 
             setTimeout(()=>{
                 setMessage({type:"",text:""})
+                setIsLoading(false);
                 setUserDetails({
                     username:"",
                     email:"",
@@ -85,9 +85,9 @@ export default function SignUp(){
 
 <input className="inp" type="text" onChange={handleInput} placeholder="Enter Username" required name="username" value={userDetails.username} />
 <input className="inp" type="email" onChange={handleInput} placeholder="Enter Email" required name="email" value={userDetails.email} />
-<input className="inp" type="password" onChange={handleInput} placeholder="Enter Password" maxLength={16} required name="password" value={userDetails.password} />
+<input className="inp" type={isPassword ? "password" : "text"} onChange={handleInput} placeholder="Enter Password" maxLength={16} required name="password" value={userDetails.password} />
+<img className="pass1" onClick={showHide} src={isPassword ? hide : show} alt="" />
 <input className="inp" type="text" onChange={handleInput} placeholder="Enter Mobile" minLength={12} required name="mobile" value={userDetails.mobile} />
-
 <button onClick={handleSubmit} className="btn" disabled={isLoading}>{isLoading ? "Loading..." : "Join"}</button>
 
 <div className="form-content">

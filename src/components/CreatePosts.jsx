@@ -30,7 +30,7 @@ const CreatePost = () => {
     formData.append('image', mediaFile);
 
     try {
-      const res = await fetch('http://localhost:8000/create-post', {
+      const res = await fetch('https://mygram-1-1nua.onrender.com/create-post', {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${loggedUser.token}`,

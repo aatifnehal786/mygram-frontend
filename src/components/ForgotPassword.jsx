@@ -14,7 +14,7 @@ export default function ForgotPassword(){
 
         try {
             setIsLoading(true)
-           fetch("http://localhost:8000/send-otp",{
+           fetch("https://mygram-1-1nua.onrender.com/send-otp",{
             method:"POST",
             body:JSON.stringify({email}),
             headers:{
@@ -51,7 +51,7 @@ export default function ForgotPassword(){
         }
         setIsLoading2(true)
 
-        fetch("http://localhost:8000/reset-password", {
+        fetch("https://mygram-1-1nua.onrender.com/reset-password", {
             method: "POST",
             body: JSON.stringify({ email:email, newPass: newPassword , otp: otp}),
             headers: {

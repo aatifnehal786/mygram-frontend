@@ -4,11 +4,13 @@ export default function EmailOtp() {
     const [otp, setOtp] = useState("");
     const [email, setEmail] = useState("");
     const [message, setMessage] = useState({ type: "", text: "" });
-    const [isLoading, setIsLoading] = useState(false);
+    const [isLoading1, setIsLoading1] = useState(false);
+    const [isLoading2, setIsLoading2] = useState(false);
 
     const sendOtp = (e) => {
+        setIsLoading1(true)
         e.preventDefault();
-        fetch("http://localhost:8000/send-email-otp", {
+        fetch("https://mygram-1-1nua.onrender.com/send-email-otp", {
             method: "POST",
             body: JSON.stringify({ email }),
             headers: {
@@ -16,13 +18,16 @@ export default function EmailOtp() {
             },
         })
         .then((res)=>{
+            
             return res.json()
             })
         .then((data) => {
+                 setIsLoading1(false)
                 setMessage({ type: "success", text: data.message });
-
+                
                 setTimeout(()=>{
                     setMessage({type:"",text:""})
+                   
                 },5000)
             })
             .catch((err) => {
@@ -32,8 +37,9 @@ export default function EmailOtp() {
     };
 
     const verifyOtp = (e) => {
+         setIsLoading2(true);
         e.preventDefault();
-        fetch("http://localhost:8000/verify-email-otp", {
+        fetch("https://mygram-1-1nua.onrender.com/verify-email-otp", {
             method: "POST",
             body: JSON.stringify({ email, otp }),
             headers: {
@@ -41,7 +47,7 @@ export default function EmailOtp() {
             },
         })
            .then((res)=>{
-            setIsLoading(false);
+           
                 if (!res.ok) {
                     if (res.status === 404) {
                         setMessage({ type: "error", text: "User Not Found With this Email, Please Login Again" });
@@ -56,9 +62,11 @@ export default function EmailOtp() {
            })
             .then((data) => {
                 if (data) {
+                    setIsLoading2(false);
                    
                     setMessage({ type: "success", text: "OTP verified successfully" });
                     setTimeout(()=>{
+                         
                         setMessage({type:"",text:""})
                     },5000)
                 } else {
@@ -91,11 +99,11 @@ export default function EmailOtp() {
                     name="otp"
                     value={otp}
                 />
-                <button type="submit" className="btn" disabled={isLoading} onClick={sendOtp}>
-                {isLoading ? "Loading..." : "send otp"}
+                <button type="submit" className="btn" disabled={isLoading1} onClick={sendOtp}>
+                {isLoading1 ? "Loading..." : "send otp"}
                 </button>
-                <button type="submit" className="btn" disabled={isLoading} onClick={verifyOtp}>
-                {isLoading ? "Loading..." : "verify otp"}
+                <button type="submit" className="btn" disabled={isLoading2} onClick={verifyOtp}>
+                {isLoading2 ? "Loading..." : "verify otp"}
                 </button>
                 {message.text && <div><p className={message.type}>{message.text}</p></div>}
                 <p><Link to="/login">Go to login page</Link></p>
