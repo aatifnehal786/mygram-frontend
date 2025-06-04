@@ -34,17 +34,18 @@
 
 /* LIGHT MODE */
 body.light {
-  background-color: var(--bg-color-light);
+  background-color: #ddd;
   color: var(--text-color-light);
 }
 
-body.light .nav-bar {
-  background-color: #007bff;
+body.light .nav-bar{
+  background-color: #9559aa;
 }
+
 
 body.light .create-post-container,
 body.light .input-field {
-  background-color: #ff6347;
+  background-color: #080808;
   color: #007bff;
   border-color: var(--border-color-light);
 }
@@ -231,7 +232,7 @@ body.dark .delete-message h3{
 }
 
 /* NAVIGATION */
-.navbar, .nav-bar {
+.nav-bar {
   width: 100%;
   
   display: flex;
@@ -240,7 +241,7 @@ body.dark .delete-message h3{
   padding: 16px 24px;
   /* background-color: var(--navbar-bg);
   border-bottom: 1px solid var(--border-color); */
-  position: sticky;
+  /* position: sticky; */
   top: 0;
   z-index: 1000;
   color: white;
@@ -293,9 +294,16 @@ body.dark .nav-bar a:hover {
   font-size: 15px;
   transition: background-color 0.3s;
   position: absolute;
-  top: 150%;
+  top: 15%;
   left: 80%;
-  transform: translateY(100%);
+  /* transform: translateY(100%); */
+}
+
+.post-form input::placeholder{
+  color: #e53e3e;
+}
+.body.light .post-form p{
+  color: #007bff;
 }
 
 .btn-logout:hover {
@@ -316,6 +324,10 @@ body.dark .nav-bar a:hover {
   /* background: var(--bg-color); */
   /* color: var(--text-color); */
   transition: all 0.3s ease-in-out;
+}
+
+.body.light .create-post-container{
+  background-color: #9559aa;
 }
 
 .title {
@@ -530,27 +542,30 @@ input[type="text"]:focus {
 
 
 .users{
-  width: 800px;
-  height: 500px;
+  width: 400px;
+  height: 200px;
   display: flex;
   flex-direction: row;
   justify-content: center;
-  margin: 1rem auto;
+  /* margin: 1rem auto; */
+ 
   padding: 1rem;
 }
 
 .users img{
-  margin: 1rem;
+  margin-left: -10rem;
 }
 .users h5{
   font-size: 1.6rem;
-  text-align: center;
+  /* text-align: center; */
+   margin-left: -9rem;
+
 }
 
 .follow-btn{
   padding: 0.5rem 1rem;
   margin-top: 1rem;
-  margin-left: 1rem;
+  margin-left: -9rem;
   border: none;
   border-radius: 5px;
   font-weight: bold;
@@ -576,6 +591,23 @@ input[type="text"]:focus {
     left: 90%;
     top: 80%;
 
+  }
+  .nav-bar{
+    width: 1200px;
+    display: block;
+    position: relative;
+    height: fit-content;
+  }
+  .nav-bar .btn-logout{
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(90%,60%);
+  }
+  .create-post-container{
+    width: 500px;
+    height: fit-content;
+   margin: 50px 5rem 5rem 5rem;
   }
   
 }

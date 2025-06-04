@@ -10,6 +10,7 @@ const ChatWindow = ({ selectedUser }) => {
   const currentUserId = loggedUser?.userid;
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
+  const [isOnline, setIsOnline] = useState(false);
 //   const [allowed, setAllowed] = useState(false);
   const messagesEndRef = useRef(null);
 
@@ -63,6 +64,24 @@ const ChatWindow = ({ selectedUser }) => {
     setInput('');
   };
 
+  
+
+useEffect(() => {
+  socket.on('onlineUsers', (users) => {
+    setIsOnline(users.includes(selectedUser?._id));
+  });
+
+  // Fetch initial online status (optional if relying only on onlineUsers broadcast)
+  socket.emit('getOnlineStatus', selectedUser?._id, (status) => {
+    setIsOnline(status);
+  });
+
+  return () => {
+    socket.off('onlineUsers');
+  };
+}, [selectedUser]);
+
+
   const handleFileUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -93,13 +112,14 @@ const ChatWindow = ({ selectedUser }) => {
   <img src={selectedUser?.profilePic} alt={selectedUser?.username} className="chat-header-pic" />
   <div className="chat-header-info">
     <h2>{selectedUser?.username}</h2>
-    <p>
-      {selectedUser?.isOnline
-        ? 'Online'
-        : selectedUser?.lastSeen
-        ? `Last seen ${new Date(selectedUser.lastSeen).toLocaleString()}`
-        : 'Offline'}
-    </p>
+ <p>
+  {isOnline
+    ? 'Online'
+    : selectedUser?.lastSeen
+    ? `Last seen ${new Date(selectedUser.lastSeen).toLocaleString()}`
+    : 'Offline'}
+</p>
+
   </div>
 </div>
 

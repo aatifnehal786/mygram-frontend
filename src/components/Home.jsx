@@ -44,7 +44,7 @@ export default function Home() {
         });
     }
   });
-}, []); // ✅ only run when users are loaded
+}, [users]); // ✅ only run when users are loaded
 
 
 

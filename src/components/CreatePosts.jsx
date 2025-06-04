@@ -84,20 +84,24 @@ const CreatePost = () => {
 
             {/* Show audio file upload only for image posts */}
             {mediaType === "image" && (
-              <input
+             
+              <div>
+                <p>Choose Audio File</p>
+                <input
                 type="file"
                 accept="audio/*"
                 onChange={(e) => setMusicFile(e.target.files[0])}
-                className="file-input"
+                className="file-input" placeholder='Choose Audio'
               />
+              </div>
               )}
 
-
+            <p>Choose image or video</p>
             <input
               type="file"
               accept="image/*,video/*"
               onChange={(e) => setMediaFile(e.target.files[0])}
-              className="file-input"
+              className="file-input" placeholder='Choose image or Video File'
               required
             />
             <button type="submit" className="submit-button">
