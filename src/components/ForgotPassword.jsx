@@ -1,5 +1,8 @@
 import { useState } from "react"
 import { Link } from "react-router-dom";
+import hide from '../assets/hide.png'
+import show from '../assets/show.png'
+import { useRef } from "react";
 
 export default function ForgotPassword(){
 
@@ -9,14 +12,29 @@ export default function ForgotPassword(){
     const [newPassword, setNewPassword] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     const [isLoading2, setIsLoading2] = useState(false);
+     const [isPassword,setIsPassword] = useState(false)
+
+      const buttonRef1 = useRef();
+      const buttonRef2 = useRef();
+
+  const handleKeyDown1 = (e) => {
+    if (e.key === 'Enter') {
+      buttonRef1.current.click(); // Trigger button click
+    }
+  };
+  const handleKeyDown2 = (e) => {
+    if (e.key === 'Enter') {
+      buttonRef2.current.click(); // Trigger button click
+    }
+  };
 
     const Forgotpassword = async ()=>{
 
         try {
             setIsLoading(true)
-           fetch("https://mygram-1-1nua.onrender.com/send-otp",{
+           fetch("https://mygram-1-1nua.onrender.com/forgot-password",{
             method:"POST",
-            body:JSON.stringify({email}),
+            body:JSON.stringify({email:email}),
             headers:{
                 "Content-Type":"application/json"
             }
@@ -90,28 +108,34 @@ export default function ForgotPassword(){
            
     };
 
+      const showHide = ()=>{
+        setIsPassword((prev)=>!prev)
+    }
+
     return (
 
         <section className="container">
 
-            <div className="form">
-                <h4>Enter your Email to get reset Link</h4>
-                <input onChange={(e)=>setEmail(e.target.value)} placeholder="Enter Your Email" className="inp" type="email" name="email" id="" value={email} />
-                <button type="submit" onClick={Forgotpassword} className="btn btn-2"  disabled={isLoading}>{isLoading ? "Loading..." : "send"}</button>
+            <div className="form3">
+                <h4>Enter your Email to get otp</h4>
+                <input onKeyDown={handleKeyDown1} onChange={(e)=>setEmail(e.target.value)} placeholder="Enter Your Email" className="inp" type="email" name="email" id="" value={email} />
+                <button ref={buttonRef1} type="submit" onClick={Forgotpassword} className=" btn-2"  disabled={isLoading}>{isLoading ? "Loading..." : "send"}</button>
                 <input 
-            className="input" onChange={(e)=>setOtp(e.target.value)}
+            className="inp" onChange={(e)=>setOtp(e.target.value)}
             type="otp" placeholder="Enter Otp" value={otp}/>
             
             <input
-                className="input"
+                className="inp"
                 type="password"
                 placeholder="Enter your new password"
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
+                onKeyDown={handleKeyDown2}
             />
-            <button type="submit" className="btn btn-1" onClick={handleResetPassword} disabled={isLoading2}>{isLoading2 ? "Loading..." : "reset"}</button>
+             <img className="pass3" onClick={showHide} src={isPassword ? hide : show} alt="" />
+            <button ref= {buttonRef2}type="submit" className=" btn-1" onClick={handleResetPassword} disabled={isLoading2}>{isLoading2 ? "Loading..." : "reset"}</button>
             
-            <Link to='/login'>Go to Login page</Link>
+            <Link className="link" to='/login'>Go to Login page</Link>
                 {message && <p className={message.type}>{message.text}</p>}
                 
             </div>

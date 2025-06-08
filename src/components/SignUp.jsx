@@ -80,7 +80,7 @@ export default function SignUp(){
 
     return (
 <section className="container">
-<form>
+<form className="form4">
 <h1>SignUp to Create Account</h1>
 
 <input className="inp" type="text" onChange={handleInput} placeholder="Enter Username" required name="username" value={userDetails.username} />

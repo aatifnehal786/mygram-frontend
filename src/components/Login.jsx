@@ -93,7 +93,7 @@ export default function Login() {
                 </button>
                 <div className="form-content">
                     <p>Don't Have Account? <Link to='/register'>Register Now</Link></p>
-                    <Link to='/forgot-password'>Forgot Password</Link>
+                    <Link className="forgot" to='/forgot-password'>Forgot Password</Link>
                     <p className={message.type}>{message.text}</p>
                 </div>
             </form>
