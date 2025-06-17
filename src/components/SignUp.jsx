@@ -86,7 +86,7 @@ export default function SignUp(){
 <input className="inp" type="text" onChange={handleInput} placeholder="Enter Username" required name="username" value={userDetails.username} />
 <input className="inp" type="email" onChange={handleInput} placeholder="Enter Email" required name="email" value={userDetails.email} />
 <input className="inp" type={isPassword ? "text" : "password"} onChange={handleInput} placeholder="Enter Password" maxLength={16} required name="password" value={userDetails.password} />
-<img className="pass1" onClick={showHide} src={isPassword ? hide : show} alt="" />
+<img className="pass1" onClick={showHide} src={isPassword ? show : hide} alt="" />
 <input className="inp" type="text" onChange={handleInput} placeholder="Enter Mobile" minLength={12} required name="mobile" value={userDetails.mobile} />
 <button onClick={handleSubmit} className="btn" disabled={isLoading}>{isLoading ? "Loading..." : "Join"}</button>
 
