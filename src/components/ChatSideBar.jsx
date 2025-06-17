@@ -11,13 +11,15 @@ const ChatSidebar = ({ onSelectUser, selectedUserId, onSelectForwardUser, isForw
   useEffect(() => {
     if (!loggedUser?.token) return;
 
-    fetch(`https://mygram-1-1nua.onrender.com/following/${loggedUser.userid}`, {
+    fetch(`https://mygram-1-1nua.onrender.com/followers/${loggedUser.userid}`, {
       headers: { Authorization: `Bearer ${loggedUser.token}` },
     })
       .then(res => res.json())
-      .then(data => setFollowedUsers(data))
+      .then(data => setFollowedUsers(data.followers || []))
       .catch(err => console.error('Error fetching followed users:', err));
   }, [loggedUser]);
+
+  console.log(followedUsers)
 
   const handleSearch = async (q) => {
     setSearchQuery(q);
