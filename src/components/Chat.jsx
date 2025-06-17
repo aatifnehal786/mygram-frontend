@@ -94,7 +94,7 @@ if (res.ok) {
 
   return (
     <div className="chat-layout">
-      <ChatSidebar
+      <ChatSidebar className='chat-container'
         onSelectUser={setSelectedUser}
         selectedUserId={selectedUser?._id}
         onSelectForwardUser={handleSelectForwardUser}

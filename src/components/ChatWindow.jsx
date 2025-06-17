@@ -89,8 +89,9 @@ const ChatWindow = ({ selectedUser, triggerForwardMode, socket, chatList, messag
   if (!selectedUser) return <div className="chat-container">Select a user to start chatting</div>;
 
   return (
-    <div className="chat-container">
-      <div className="chat-header">
+    <div className="chat">
+      <div className="chat-container">
+        <div className="chat-header">
         <img src={selectedUser.profilePic} alt={selectedUser.username} className="chat-header-pic" />
         <div className="chat-header-info">
           <h2>{selectedUser.username}</h2>
@@ -112,12 +113,13 @@ const ChatWindow = ({ selectedUser, triggerForwardMode, socket, chatList, messag
               <a href={msg.fileUrl} target="_blank" rel="noopener noreferrer">📄 File</a>
             )}
              <small className="timestamp">
-      {msg.createdAt ? new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ''}
-    </small>
+           {msg.createdAt ? new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ''}
+            </small>
             <button className='forward-btn' onClick={() => handleForwardMessage(msg)}><img className='forward-img' src={forward}/></button>
           </div>
         ))}
         <div ref={messagesEndRef} />
+      </div>
       </div>
 
       <div className="chat-input-area">
