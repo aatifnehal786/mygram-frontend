@@ -157,9 +157,6 @@ body.dark .chat-list h1{
   flex-direction: column;
 }
 
-.hide-on-mobile {
-  display: none;
-}
 
 .back-button {
   padding: 8px 16px;
