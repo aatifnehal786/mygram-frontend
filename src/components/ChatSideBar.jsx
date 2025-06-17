@@ -2,25 +2,22 @@ import React, { useState, useEffect, useContext } from 'react';
 import { UserContext } from '../contexts/UserContext';
 import './chat.css';
 
-const ChatSidebar = ( { onSelectUser, selectedUserId } ) => {
+const ChatSidebar = ({ onSelectUser, selectedUserId, onSelectForwardUser, isForwarding = false }) => {
   const { loggedUser } = useContext(UserContext);
   const [searchQuery, setSearchQuery] = useState('');
   const [results, setResults] = useState([]);
-  const [chatList, setChatList] = useState([]);
+  const [followedUsers, setFollowedUsers] = useState([]);
 
   useEffect(() => {
     if (!loggedUser?.token) return;
-    fetch('https://mygram-1-1nua.onrender.com/chat-list', {
+
+    fetch(`https://mygram-1-1nua.onrender.com/following/${loggedUser.userid}`, {
       headers: { Authorization: `Bearer ${loggedUser.token}` },
     })
-      .then((res) => res.json())
-      .then(setChatList)
-      .catch((err) => console.error('Chat list error:', err));
+      .then(res => res.json())
+      .then(data => setFollowedUsers(data))
+      .catch(err => console.error('Error fetching followed users:', err));
   }, [loggedUser]);
-
-   const handleUserClick = (userId) => {
-    onUserSelect(userId); // Notify parent
-  };
 
   const handleSearch = async (q) => {
     setSearchQuery(q);
@@ -36,7 +33,7 @@ const ChatSidebar = ( { onSelectUser, selectedUserId } ) => {
     }
   };
 
-  const usersToDisplay = searchQuery ? results : chatList;
+  const usersToDisplay = searchQuery ? results : followedUsers;
 
   return (
     <div className="chat-sidebar">
@@ -45,23 +42,33 @@ const ChatSidebar = ( { onSelectUser, selectedUserId } ) => {
         value={searchQuery}
         placeholder="Search users..."
         onChange={(e) => handleSearch(e.target.value)}
+        className="chat-search"
       />
-
       <div className="chat-list">
-    {usersToDisplay.map(user => (
-  <div
-    key={user._id}
-    onClick={() => onSelectUser(user)}
-    className={`chat-user ${selectedUserId === user._id ? 'active' : ''}`}
-  >
-    <img className="profile-photo" src={user.profilePic} alt={user.username} />
-    <div className="user-info">
-      <h1>{user.username}</h1>
-      <span className={`status-dot ${user.isOnline ? 'online' : 'offline'}`}></span>
-    </div>
-  </div>
-))}
-
+        {usersToDisplay.map(user => (
+          <div
+            key={user._id}
+            onClick={() => !isForwarding && onSelectUser(user)}
+            className={`chat-user ${selectedUserId === user._id ? 'active' : ''}`}
+          >
+            <img className="profile-photo" src={user.profilePic} alt={user.username} />
+            <div className="user-info">
+              <h1>{user.username}</h1>
+              <span className={`status-dot ${user.isOnline ? 'online' : 'offline'}`}></span>
+              {isForwarding && onSelectForwardUser && (
+                <button
+                  className="forward-btn"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onSelectForwardUser(user);
+                  }}
+                >
+                  Forward Here
+                </button>
+              )}
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   );

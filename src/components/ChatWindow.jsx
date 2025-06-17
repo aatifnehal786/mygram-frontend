@@ -1,44 +1,35 @@
 import React, { useEffect, useRef, useState, useContext } from 'react';
-import io from 'socket.io-client';
 import { UserContext } from '../contexts/UserContext';
 import './chat.css';
+import forward from '../assets/forward.png'
 
-const socket = io('https://mygram-1-1nua.onrender.com');
-
-const ChatWindow = ({ selectedUser }) => {
+const ChatWindow = ({ selectedUser, triggerForwardMode, socket, chatList, messages,setMessages }) => {
   const { loggedUser } = useContext(UserContext);
   const currentUserId = loggedUser?.userid;
-  const [messages, setMessages] = useState([]);
+ 
+
   const [input, setInput] = useState('');
   const [isOnline, setIsOnline] = useState(false);
-//   const [allowed, setAllowed] = useState(false);
   const messagesEndRef = useRef(null);
 
   useEffect(() => {
-    if (!selectedUser?._id || !loggedUser?.token) return;
+    if (!selectedUser || !loggedUser?.token || !socket) return;
 
     socket.emit('join', currentUserId);
+
     fetch(`https://mygram-1-1nua.onrender.com/chat/${selectedUser._id}`, {
       headers: { Authorization: `Bearer ${loggedUser.token}` },
     })
-      .then((res) => {
-        if (!res.ok) {
-          return [];
-        }
-       
-        return res.json();
-      })
+      .then((res) => res.ok ? res.json() : [])
       .then((data) => setMessages(data || []))
-      .catch((err) => {
-        console.error('Fetch chat error:', err);
-       
-      });
+      .catch((err) => console.error('Fetch chat error:', err));
 
     socket.on('receiveMessage', (msg) => {
-      if (
+      const isCurrentChat =
         (msg.sender === currentUserId && msg.receiver === selectedUser._id) ||
-        (msg.sender === selectedUser._id && msg.receiver === currentUserId)
-      ) {
+        (msg.receiver === currentUserId && msg.sender === selectedUser._id);
+
+      if (isCurrentChat) {
         setMessages((prev) => [...prev, msg]);
       }
     });
@@ -46,7 +37,7 @@ const ChatWindow = ({ selectedUser }) => {
     return () => {
       socket.off('receiveMessage');
     };
-  }, [selectedUser, loggedUser]);
+  }, [selectedUser, loggedUser, socket]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -55,32 +46,15 @@ const ChatWindow = ({ selectedUser }) => {
   const sendMessage = () => {
     if (!input.trim()) return;
 
-    socket.emit('sendMessage', {
+    const msg = {
       senderId: currentUserId,
       receiverId: selectedUser._id,
       message: input.trim(),
-    });
+    };
 
+    socket.emit('sendMessage', msg);
     setInput('');
   };
-
-  
-
-useEffect(() => {
-  socket.on('onlineUsers', (users) => {
-    setIsOnline(users.includes(selectedUser?._id));
-  });
-
-  // Fetch initial online status (optional if relying only on onlineUsers broadcast)
-  socket.emit('getOnlineStatus', selectedUser?._id, (status) => {
-    setIsOnline(status);
-  });
-
-  return () => {
-    socket.off('onlineUsers');
-  };
-}, [selectedUser]);
-
 
   const handleFileUpload = async (e) => {
     const file = e.target.files[0];
@@ -93,6 +67,7 @@ useEffect(() => {
       method: 'POST',
       body: formData,
     });
+
     const { fileUrl, fileType } = await res.json();
 
     socket.emit('sendMessage', {
@@ -103,28 +78,28 @@ useEffect(() => {
     });
   };
 
+  const handleForwardMessage = (msg) => {
+    triggerForwardMode(msg);
+  };
+
+  const sortedMessages = [...messages].sort(
+    (a, b) => new Date(a.createdAt) - new Date(b.createdAt)
+  );
+
   if (!selectedUser) return <div className="chat-container">Select a user to start chatting</div>;
-  
 
   return (
     <div className="chat-container">
-        <div className="chat-header">
-  <img src={selectedUser?.profilePic} alt={selectedUser?.username} className="chat-header-pic" />
-  <div className="chat-header-info">
-    <h2>{selectedUser?.username}</h2>
- <p>
-  {isOnline
-    ? 'Online'
-    : selectedUser?.lastSeen
-    ? `Last seen ${new Date(selectedUser.lastSeen).toLocaleString()}`
-    : 'Offline'}
-</p>
-
-  </div>
-</div>
+      <div className="chat-header">
+        <img src={selectedUser.profilePic} alt={selectedUser.username} className="chat-header-pic" />
+        <div className="chat-header-info">
+          <h2>{selectedUser.username}</h2>
+          <p>{isOnline ? 'Online' : selectedUser.lastSeen ? `Last seen ${new Date(selectedUser.lastSeen).toLocaleString()}` : 'Offline'}</p>
+        </div>
+      </div>
 
       <div className="chat-messages">
-        {messages.map((msg, idx) => (
+        {sortedMessages.map((msg, idx) => (
           <div
             key={msg._id || idx}
             className={`message-bubble ${msg.sender === currentUserId ? 'own' : 'other'}`}
@@ -134,10 +109,12 @@ useEffect(() => {
             {msg.fileType?.includes('video') && <video src={msg.fileUrl} controls className="chat-video" />}
             {msg.fileType?.includes('audio') && <audio src={msg.fileUrl} controls className="chat-audio" />}
             {msg.fileType?.includes('application') && (
-              <a href={msg.fileUrl} target="_blank" rel="noopener noreferrer">
-                📄 File
-              </a>
+              <a href={msg.fileUrl} target="_blank" rel="noopener noreferrer">📄 File</a>
             )}
+             <small className="timestamp">
+      {msg.createdAt ? new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ''}
+    </small>
+            <button className='forward-btn' onClick={() => handleForwardMessage(msg)}><img className='forward-img' src={forward}/></button>
           </div>
         ))}
         <div ref={messagesEndRef} />

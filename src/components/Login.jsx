@@ -79,7 +79,7 @@ export default function Login() {
                 
                 <input
                     className="inp"
-                    type={isPassword ? "password" : "text"}
+                    type={isPassword ? "text" : "password"}
                     placeholder="Enter Password"
                     maxLength={16}
                     onChange={handleInput}
@@ -87,7 +87,7 @@ export default function Login() {
                     name="password"
                     value={user.password}
                 />
-                <img className="pass" onClick={showHide} src={isPassword ? hide : show} alt="" />
+                <img className="pass" onClick={showHide} src={isPassword ? show : hide} alt="" />
                 <button type="submit" className="btn" disabled={isLoading}>
                     {isLoading ? "Loading..." : "Join"}
                 </button>
