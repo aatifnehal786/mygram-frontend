@@ -190,11 +190,12 @@ const ChatWindow = ({ selectedUser, triggerForwardMode, socket, chatList, messag
           <div className="modal-content">
             <h3>Forward Message</h3>
             <select value={forwardRecipient} onChange={(e) => setForwardRecipient(e.target.value)}>
-              <option value={currentUserId}>Send to Myself</option>
-              {followers.map(user => (
-                <option key={user._id} value={user._id}>{user.username}</option>
-              ))}
-            </select>
+  <option value={currentUserId}>Send to Myself</option>
+  {(followers || []).map(user => (
+    <option key={user._id} value={user._id}>{user.username}</option>
+  ))}
+</select>
+
             {forwardPreview.fileType?.includes('image') && <img src={forwardPreview.fileUrl} className="chat-img" />}
             {forwardPreview.fileType?.includes('video') && <video src={forwardPreview.fileUrl} controls className="chat-video" />}
             {forwardPreview.fileType?.includes('audio') && <audio src={forwardPreview.fileUrl} controls className="chat-audio" />}
