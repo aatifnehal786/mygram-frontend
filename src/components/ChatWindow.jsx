@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState, useContext } from 'react';
 import { UserContext } from '../contexts/UserContext';
 import './chat.css';
 
-const ChatWindow = ({ selectedUser, triggerForwardMode, socket, chatList, messages, setMessages, followers }) => {
+const ChatWindow = ({ selectedUser, triggerForwardMode, socket, chatList, messages, setMessages, followers = [] }) => {
   const { loggedUser } = useContext(UserContext);
   const currentUserId = loggedUser?.userid;
 

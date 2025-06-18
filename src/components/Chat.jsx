@@ -105,6 +105,7 @@ if (res.ok) {
       />
      <ChatWindow
   selectedUser={selectedUser}
+  followers={followers}
   chatList={chatList}
   messages={messages} // ✅ Add this
   setMessages={setMessages}
