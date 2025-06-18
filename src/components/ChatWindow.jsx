@@ -137,6 +137,13 @@ const ChatWindow = ({ selectedUser, triggerForwardMode, socket, chatList, messag
   return (
     <div className="chat">
       <div className="chat-container">
+         <div className="chat-header">
+          <img src={selectedUser.profilePic} alt={selectedUser.username} className="chat-header-pic" />
+          <div className="chat-header-info">
+            <h2>{selectedUser.username}</h2>
+            <p>{isOnline ? 'Online' : selectedUser.lastSeen ? `Last seen ${new Date(selectedUser.lastSeen).toLocaleString()}` : 'Offline'}</p>
+          </div>
+        </div>
         <div className="chat-messages">
           {sortedMessages.map((msg, idx) => (
             <div key={msg._id || idx} className={`message-bubble ${msg.sender === currentUserId ? 'own' : 'other'}`}>
