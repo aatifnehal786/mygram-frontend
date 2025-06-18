@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState, useContext } from 'react';
 import { UserContext } from '../contexts/UserContext';
 import './chat.css';
 
-const ChatWindow = ({ selectedUser, triggerForwardMode, socket, chatList, messages, setMessages }) => {
+const ChatWindow = ({ selectedUser, triggerForwardMode, socket, chatList, messages, setMessages, followers }) => {
   const { loggedUser } = useContext(UserContext);
   const currentUserId = loggedUser?.userid;
 
@@ -17,6 +17,7 @@ const ChatWindow = ({ selectedUser, triggerForwardMode, socket, chatList, messag
   const [showForwardModal, setShowForwardModal] = useState(false);
   const [forwardPreview, setForwardPreview] = useState(null);
   const [forwardCaption, setForwardCaption] = useState('');
+  const [forwardRecipient, setForwardRecipient] = useState(currentUserId);
 
   const messagesEndRef = useRef(null);
 
@@ -103,14 +104,15 @@ const ChatWindow = ({ selectedUser, triggerForwardMode, socket, chatList, messag
     setForwardPreview(msg);
     setForwardCaption(msg.message || '');
     setShowForwardModal(true);
+    setForwardRecipient(currentUserId);
   };
 
   const confirmForward = () => {
-    if (!forwardPreview) return;
+    if (!forwardPreview || !forwardRecipient) return;
 
     const forwardMsg = {
       senderId: currentUserId,
-      receiverId: selectedUser._id,
+      receiverId: forwardRecipient,
     };
 
     if (forwardCaption) {
@@ -127,6 +129,7 @@ const ChatWindow = ({ selectedUser, triggerForwardMode, socket, chatList, messag
     setShowForwardModal(false);
     setForwardPreview(null);
     setForwardCaption('');
+    setForwardRecipient(currentUserId);
   };
 
   const sortedMessages = [...messages].sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
@@ -134,13 +137,6 @@ const ChatWindow = ({ selectedUser, triggerForwardMode, socket, chatList, messag
   return (
     <div className="chat">
       <div className="chat-container">
-         <div className="chat-header">
-          <img src={selectedUser.profilePic} alt={selectedUser.username} className="chat-header-pic" />
-          <div className="chat-header-info">
-            <h2>{selectedUser.username}</h2>
-            <p>{isOnline ? 'Online' : selectedUser.lastSeen ? `Last seen ${new Date(selectedUser.lastSeen).toLocaleString()}` : 'Offline'}</p>
-          </div>
-        </div>
         <div className="chat-messages">
           {sortedMessages.map((msg, idx) => (
             <div key={msg._id || idx} className={`message-bubble ${msg.sender === currentUserId ? 'own' : 'other'}`}>
@@ -193,6 +189,12 @@ const ChatWindow = ({ selectedUser, triggerForwardMode, socket, chatList, messag
         <div className="modal-overlay">
           <div className="modal-content">
             <h3>Forward Message</h3>
+            <select value={forwardRecipient} onChange={(e) => setForwardRecipient(e.target.value)}>
+              <option value={currentUserId}>Send to Myself</option>
+              {followers.map(user => (
+                <option key={user._id} value={user._id}>{user.username}</option>
+              ))}
+            </select>
             {forwardPreview.fileType?.includes('image') && <img src={forwardPreview.fileUrl} className="chat-img" />}
             {forwardPreview.fileType?.includes('video') && <video src={forwardPreview.fileUrl} controls className="chat-video" />}
             {forwardPreview.fileType?.includes('audio') && <audio src={forwardPreview.fileUrl} controls className="chat-audio" />}
