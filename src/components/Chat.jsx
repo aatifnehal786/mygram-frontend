@@ -16,10 +16,30 @@ const Chat = () => {
   const [messageToForward, setMessageToForward] = useState(null);
   const socketRef = useRef(null);
   const [messages, setMessages] = useState([]);
+  
 
   const [loggedUser, setLoggedUser] = useState(
     JSON.parse(sessionStorage.getItem('token-auth'))
   );
+
+  const [followers, setFollowers] = useState([]);
+
+useEffect(() => {
+  const fetchFollowers = async () => {
+    try {
+      const res = await fetch(`https://mygram-1-1nua.onrender.com/followers/${loggedUser.userid}`, {
+        headers: { Authorization: `Bearer ${yourToken}` }
+      });
+      const data = await res.json();
+      setFollowers(data || []);
+    } catch (err) {
+      console.error('Failed to fetch followers:', err);
+    }
+  };
+
+  fetchFollowers();
+}, []);
+
 
   console.log(loggedUser)
 
@@ -105,7 +125,7 @@ if (res.ok) {
       />
      <ChatWindow
   selectedUser={selectedUser}
-  followers={followers}
+   followers={followers || []} 
   chatList={chatList}
   messages={messages} // ✅ Add this
   setMessages={setMessages}
