@@ -157,6 +157,20 @@ const ChatWindow = ({ selectedUser, triggerForwardMode, socket, chatList, messag
                         setMessageToDelete(msg._id);
                         setShowConfirmModal(true);
                       }}>Delete</button></li>
+                      {/* ✅ Download Button */}
+                      {msg.fileUrl && (
+                        <li>
+                          <a
+                            href={msg.fileUrl}
+                            download
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="download-btn"
+                          >
+                            Download
+                          </a>
+                        </li>
+                      )}
                     </ul>
                   </div>
                 )}

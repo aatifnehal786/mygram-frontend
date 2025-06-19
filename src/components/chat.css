@@ -231,46 +231,23 @@ body.dark .chat-header-info h2,p{
   background-color: #f0f0f0;
 }
 
-.modal-overlay {
-  position: fixed;
-  top: 0; left: 0;
-  width: 100vw; height: 100vh;
-  background: rgba(0,0,0,0.5);
-  display: flex; align-items: center; justify-content: center;
-  z-index: 200;
-}
-
-.modal-content {
-  background: white;
-  padding: 20px 30px;
-  border-radius: 8px;
-  box-shadow: 0 6px 12px rgba(0,0,0,0.2);
-  max-width: 90%;
-  width: 300px;
-  text-align: center;
-}
-
-.modal-actions {
-  margin-top: 20px;
-  display: flex;
-  justify-content: space-around;
-}
-
-.modal-actions button {
-  padding: 8px 16px;
+.option-menu ul li .download-btn {
+  background: none;
   border: none;
-  border-radius: 4px;
+  color: #007bff;
+  text-align: left;
+  padding: 8px 12px;
+  width: 100%;
+  display: block;
   cursor: pointer;
+  text-decoration: none;
 }
 
-.modal-actions button:first-child {
-  background-color: #dc3545;
-  color: white;
-}
-
-.modal-actions button:last-child {
+.option-menu ul li .download-btn:hover {
   background-color: #f0f0f0;
 }
+
+
 
 .forward-btn {
   margin-top: 4px;
@@ -294,47 +271,6 @@ body.dark .chat-header-info h2,p{
   background-color: greenyellow;
   margin: 5px;
 }
-
-.preview-modal {
-  width: 90%;
-  max-width: 400px;
-  background: white;
-  padding: 20px;
-  border-radius: 10px;
-  text-align: center;
-}
-
-.preview-img, .preview-video {
-  max-width: 100%;
-  max-height: 300px;
-  margin-bottom: 15px;
-}
-
-.preview-audio {
-  width: 100%;
-  margin-bottom: 15px;
-}
-
-.modal-overlay2 {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0,0,0,0.6);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 10;
-}
-
-.modal-actions {
-  display: flex;
-  justify-content: space-around;
-  margin-top: 20px;
-}
-
-
 
 
 
