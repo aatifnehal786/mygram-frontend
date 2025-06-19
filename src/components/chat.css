@@ -247,6 +247,70 @@ body.dark .chat-header-info h2,p{
   background-color: #f0f0f0;
 }
 
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5); /* Dim background */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background-color: #fff;
+  padding: 24px 30px;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+  max-width: 400px;
+  width: 90%;
+  text-align: center;
+}
+
+.modal-content p {
+  font-size: 16px;
+  color: #333;
+  margin-bottom: 20px;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.modal-actions button {
+  flex: 1;
+  padding: 10px;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.modal-actions button:first-child {
+  background-color: #e53935; /* red for delete */
+  color: white;
+}
+
+.modal-actions button:first-child:hover {
+  background-color: #c62828;
+}
+
+.modal-actions button:last-child {
+  background-color: #e0e0e0;
+  color: #333;
+}
+
+.modal-actions button:last-child:hover {
+  background-color: #cfcfcf;
+}
+
+
 
 
 .forward-btn {
