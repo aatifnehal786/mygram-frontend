@@ -79,7 +79,7 @@ export default function SignUp(){
 
 
     return (
-<section className="container">
+<section className="container4">
 <form className="form4">
 <h1>SignUp to Create Account</h1>
 
@@ -92,9 +92,12 @@ export default function SignUp(){
 
 <div className="form-content">
     <p>Already Registered ? <Link to='/login'>Login</Link></p>
-<p><Link to='/emailotp'>verify email to login</Link></p>
-<p className={message.type}>{message.text}</p>
+
 </div>
+<div className="emailotp">
+    <p><Link to='/emailotp'>verify email to login</Link></p>
+</div>
+<p className={message.type}>{message.text}</p>
 </form>
 
 </section>

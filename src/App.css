@@ -103,10 +103,14 @@ body{
   margin: 0 auto;
 }
 .container2 {
-  /* height: 90vh; */
   width: 1200px;
  
   margin: 0 auto;
+}
+.container4 {
+  width: 500px;
+ 
+  margin: 1rem auto;
 }
 .container .form{
   display: flex;
@@ -117,7 +121,19 @@ body{
   width: 80%;
   margin: 0 auto;
   position: absolute;
-  left: 120%;
+  
+
+}
+.container .form{
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  row-gap: 10px;
+  max-width: 900px;
+  width: 80%;
+  margin: 0 auto;
+  position: absolute;
+  
 
 }
 .container2 .form2{
@@ -133,29 +149,31 @@ body{
 
 .container .form .pass{
   position: absolute;
-  top: 25%;
-  left: 56%;
-  width: 22px;
+  top: 46%;
+  left: 85%;
+  width: 26px;
+  transform: translateY(50%);
 }
 .container .form .inp{
-  width: 500px;
+  width: 400px;
   height: 50px;
   text-indent: 20px;
   outline: none;
   border: 1px solid gray;
   border-radius: 10px;
-  margin: 10px 20rem;
+  margin: 10px 25rem;
   background: transparent;
 
 }
-.container .form4 .inp{
-  width: 40%;
+
+.container4 .form4 .inp{
+  width: 80%;
   height: 50px;
   text-indent: 20px;
   outline: none;
   border: 1px solid gray;
   border-radius: 10px;
-  margin: 10px 20rem;
+  margin: 10px 5rem;
   background: transparent;
 
 }
@@ -208,7 +226,7 @@ body{
 
 .container form h1{
   text-align: center;
-  margin: 1rem;
+  margin: 2rem 35rem;
 }
 
 
@@ -218,61 +236,71 @@ body.dark .pass{
 body.dark .pass3{
   filter: brightness(0) invert(1);
 }
-.container .form4{
+.container4 .form4{
   display: flex;
   flex-direction: column;
   justify-content: center;
   row-gap: 10px;
   max-width: 900px;
   width: 80%;
-  margin: 0 auto;
-  position: absolute;
-  left: 120%;
+  height: 600px;
+  margin: 1rem 1rem;
+ 
+ 
 }
-.container .pass1{
-  width: 24px;
+.container4 .pass1{
+  width: 26px;
   position: absolute;
-  top: 50%;
-  transform: translateY(340%);
+  top: 46.5%;
+  left: 58.5%;
+ 
 }
 
-.container .form4 .form-content{
-  margin: 1rem 20rem;
+.container4 .form4 .form-content{
+  margin: -0.5rem 5rem;
+  width: 350px;
+  font-size: 18px;
+}
+.container4 .form4 .emailotp{
+  margin-left: 5rem;
+  margin-top: 10px;
 }
 
 body.dark .pass1{
   filter: brightness(0) invert(1);
 }
 
-.form h1{
-  text-align: center;
-  margin: 10px;
-}
+
 .container .form a{
   margin-left: 10px;
 }
 
-.container .form .form-content .forgot{
-  margin-left: 10rem;
-  margin-top: 5rem;
+.container .form .forgot{
+  margin-left: 24rem;
+  margin-top: -1rem;
  
+}
+.container .form .form-content{
+  width: 320px;
+  margin: 1rem 24rem;
+  /* border: 1px solid red; */
 }
 
 body.dark .inp{
   color: #ddd;
 }
 
-
+.container4 .form4 h1{
+  text-align: center;
+  margin-top: 1rem;
+  margin-left: 5rem;
+  font-size: 25px;
+}
 
 a {
   text-decoration: none;
 }
-.container .form .form-content p{
-  margin-left: 10rem;
-}
-.form-content{
-  margin: 0 10rem;
-}
+
  .error {
   font-size: large;
   width: 100%;
@@ -321,9 +349,9 @@ body.dark .delete-message h3{
   background-color: #007bff;
   color: #ddd;
   font-weight: 900;
-  margin: 0 auto;
+  margin: 1rem 34rem;
 }
-.container .form4 .btn{
+.container4 .form4 .btn{
   width: 6rem;
   padding: 0.6rem 1.5rem;
   border-radius: 1rem;
@@ -332,7 +360,7 @@ body.dark .delete-message h3{
   background-color: #007bff;
   color: #ddd;
   font-weight: 900;
-  margin: 0 auto;
+  margin: 1rem 13rem;
 }
 
 
@@ -761,476 +789,50 @@ input[type="text"]:focus {
 }
 
 /* Extra small devices (phones, 600px and down) */
-@media only screen and (max-width: 600px) {
-   body{
-    width: 460px;
+@media (min-width: 320px) and (max-width: 480px){
+   html,body{
+    width: 350px;
     height: 100%;
+    position: relative;
     
   }
-  
-  .form .pass{
-    left: 90%;
-    top: 47%;
 
-  }
-
-  .container2{
-  width: 100%;
-  height: 100%;
-  margin: 0 auto;
-}
-
-  .nav-bar{
-    width: 1200px;
-    display: block;
-    position: relative;
-    height: fit-content;
-  }
-  .nav-bar .btn-logout{
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(90%,60%);
-  }
-  .create-post-container{
-    width: 500px;
-    height: fit-content;
-   margin: 50px 5rem 5rem 5rem;
-  }
-  .container{
+    .container{
     width: 100%;
     height: 100%;
     margin: 0 auto;
     
+    
   }
-  .form{
+    .container4{
+    width: 100%;
+    height: 100%;
+    margin: 0 auto;
+    
+    
+  }
+
+   .container .form{
     display: flex;
     justify-content: center;
-    position: relative;
+   
+    
   }
   .container .form .inp{
-    width: 70%;
-    margin: 0.5rem auto;
+    width: 80%;
+    margin: 0.5rem 5rem;
    
   }
-  .container .form4 .inp{
-    width: 70%;
-    margin: 0.5rem auto;
+  .container4 .form4 .inp{
+    width: 80%;
+    margin: 0.5rem 5rem;
    
   }
+  
   .container .form .pass{
     position: absolute;
+    left: 96%;
     top: 45%;
-    left: 77%;
-  }
-  .container .form .btn{
-    margin: 1rem auto;
-  }
-  .container .form .form-content{
-    /* border: 1px solid red; */
-    width: fit-content;
-    margin: 1rem -7rem;
-  }
-  .container .form4 h1{
-    margin-top: 3.5rem;
-  }
-  .container .form4 .pass1{
-    top: 36%;
-    left: 77%;
-  }
-  .container .form4 .form-content{
-    margin: 1rem 3rem;
-    /* border: 1px solid red; */
-    width: fit-content;
-    padding: 1rem;
-  }
-  .nav-bar{
-    width: 560px;
-  }
-
- 
-   .container2 .form2 h2{
-  
-  text-align: center;
-}
-
-.container2 .form2 .inp{
-  width: 60%;
-  height: 50px;
-  text-indent: 20px;
-  outline: none;
-  border: 1px solid gray;
-  border-radius: 10px;
-  background: transparent;
-  margin: 0 auto;
-
-}
-.container2 .form2 h2{
-  text-align: center;
-  font-size: 20px;
-  margin: 38px 7px;
-}
-
-.container2 .form2 .link1{
-  margin: 1rem 1rem;
-}
-
-.container2 .form2 .btn3{
-  width: 6rem;
-  padding: 0.8rem 0.6rem;
-  border-radius: 0.5rem;
-  cursor: pointer;
-  font-size: 17px;
-  background-color: #007bff;
-  color: #ddd;
-  font-weight: 900;
-  margin: 0.5rem 10rem;
-
-}
-.container2 .form2 .btn4{
-  width: 6rem;
-  padding: 0.8rem 0.6rem;
-  border-radius: 0.5rem;
-  cursor: pointer;
-  font-size: 17px;
-  background-color: #007bff;
-  color: #ddd;
-  font-weight: 900;
-  margin: 0.5rem 10rem;
-
-}
-
-.container2 .form2 .link1{
-  margin: 0 6rem;
-}
-
- .container .form3 .inp{
-  width: 60%;
-  height: 50px;
-  text-indent: 20px;
-  outline: none;
-  border: 1px solid gray;
-  border-radius: 10px;
-  margin: 10px 30rem;
-  background: transparent;
-  margin: 0.8rem 7rem;
- }
-  .container .form3 .btn-2{
-  padding: 0.6rem 1.2rem;
-  border-radius: 1rem;
-  cursor: pointer;
-  font-size: 15px;
-  background-color: #007bff;
-  color: #ddd;
-  font-weight: 900;
-  width: 5rem;
-  height: 3rem;
-  margin-left: 13rem;
-
- }
-
- .container .form3 .btn-1{
-  padding: 0.6rem 1.2rem;
-  border-radius: 1rem;
-  cursor: pointer;
-  font-size: 15px;
-  background-color: #007bff;
-  color: #ddd;
-  font-weight: 900;
-  width: 5rem;
-  height: 3rem;
-  margin-left: 13rem;
-
- }
-
- .container .form3 h4{
- margin-top: 4rem;
- margin-bottom: 0.5rem;
- text-align: center;
- }
- .container .form3 .link{
-  /* text-decoration: none; */
-  display: block;
-  margin: 1rem 4rem;
- }
-
- .container .form3 .pass3{
-  width: 22px;
-  position: fixed;
-  top: 40%;
-  left: 71.8%;
- }
-
-    .hamburger {
-    display: flex;
-  }
-
-  .nav-links {
-    display: none;
-    flex-direction: column;
-    position: absolute;
-    top: 60px;
-    left: 0;
-    width: 100%;
-    background-color: #222;
-    z-index: 1000;
-    transition: all 0.3s ease;
-  }
-
-  .nav-links.open {
-    display: flex;
-  }
-
-  .nav-links li {
-    padding: 12px 20px;
-    border-bottom: 1px solid #444;
-  }
-}
-
-@media only screen and (max-width: 480px){
-  body{
-  width: 100%;
-  height: 480px;
-  background-color: #007bff;
-  
- 
-   
-  }
-
-  .container{
-    width: 100%;
-    height: 100%;
-  }
-  
- 
-
-  .container2{
-  width: 100%;
-  height: 100%;
-  margin: 0 auto;
-}
-
-  .nav-bar{
-    width: 1200px;
-    display: block;
-    position: relative;
-    height: fit-content;
-  }
-  .nav-bar .btn-logout{
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(90%,60%);
-  }
-  .create-post-container{
-    width: 500px;
-    height: fit-content;
-   margin: 50px 5rem 5rem 5rem;
-  }
-  
- 
-  .container .form .inp{
-    width: 70%;
-    margin: 0.5rem auto;
-   
-  }
-  .container .form4{
-    position: absolute;
-    margin: 0 auto;
-  }
-  .container .form4 .inp{
-    width: 70%;
-    margin: 0.5rem auto;
-   
-  }
-  .container .form .pass{
-    position: absolute;
-    top: 45%;
-    left: 77%;
-  }
-  .container .form .btn{
-    margin: 1rem auto;
-  }
-  .container .form .form-content{
-    /* border: 1px solid red; */
-    width: fit-content;
-    margin: 1rem -7rem;
-  }
-  .container .form4 h1{
-    margin-top: 3.5rem;
-  }
-  .container .form4 .pass1{
-    position: absolute;
-    top: 36%;
-    left: 77%;
-  }
-  .container .form4 .form-content{
-    margin: 1rem 3rem;
-    /* border: 1px solid red; */
-    width: fit-content;
-    padding: 1rem;
-  }
-  .nav-bar{
-    width: 560px;
-  }
-
- 
-   .container2 .form2 h2{
-  
-  text-align: center;
-}
-
-.container2 .form2 .inp{
-  width: 60%;
-  height: 50px;
-  text-indent: 20px;
-  outline: none;
-  border: 1px solid gray;
-  border-radius: 10px;
-  background: transparent;
-  margin: 0 auto;
-
-}
-.container2 .form2 h2{
-  text-align: center;
-  font-size: 20px;
-  margin: 38px 7px;
-}
-
-.container2 .form2 .link1{
-  margin: 1rem 1rem;
-}
-
-.container2 .form2 .btn3{
-  width: 6rem;
-  padding: 0.8rem 0.6rem;
-  border-radius: 0.5rem;
-  cursor: pointer;
-  font-size: 17px;
-  background-color: #007bff;
-  color: #ddd;
-  font-weight: 900;
-  margin: 0.5rem 10rem;
-
-}
-.container2 .form2 .btn4{
-  width: 6rem;
-  padding: 0.8rem 0.6rem;
-  border-radius: 0.5rem;
-  cursor: pointer;
-  font-size: 17px;
-  background-color: #007bff;
-  color: #ddd;
-  font-weight: 900;
-  margin: 0.5rem 10rem;
-
-}
-
-.container2 .form2 .link1{
-  margin: 0 6rem;
-}
-
- .container .form3 .inp{
-  width: 60%;
-  height: 50px;
-  text-indent: 20px;
-  outline: none;
-  border: 1px solid gray;
-  border-radius: 10px;
-  margin: 10px 30rem;
-  background: transparent;
-  margin: 0.8rem 7rem;
- }
-  .container .form3 .btn-2{
-  padding: 0.6rem 1.2rem;
-  border-radius: 1rem;
-  cursor: pointer;
-  font-size: 15px;
-  background-color: #007bff;
-  color: #ddd;
-  font-weight: 900;
-  width: 5rem;
-  height: 3rem;
-  margin-left: 13rem;
-
- }
-
- .container .form3 .btn-1{
-  padding: 0.6rem 1.2rem;
-  border-radius: 1rem;
-  cursor: pointer;
-  font-size: 15px;
-  background-color: #007bff;
-  color: #ddd;
-  font-weight: 900;
-  width: 5rem;
-  height: 3rem;
-  margin-left: 13rem;
-
- }
-
- .container .form3 h4{
- margin-top: 4rem;
- margin-bottom: 0.5rem;
- text-align: center;
- }
- .container .form3 .link{
-  /* text-decoration: none; */
-  display: block;
-  margin: 1rem 4rem;
- }
-
- .container .form3 .pass3{
-  width: 22px;
-  position: fixed;
-  top: 40%;
-  left: 71.8%;
- }
-
-    .hamburger {
-    display: flex;
-  }
-
-  .nav-links {
-    display: none;
-    flex-direction: column;
-    position: absolute;
-    top: 60px;
-    left: 0;
-    width: 100%;
-    background-color: #222;
-    z-index: 1000;
-    transition: all 0.3s ease;
-  }
-
-  .nav-links.open {
-    display: flex;
-  }
-
-  .nav-links li {
-    padding: 12px 20px;
-    border-bottom: 1px solid #444;
-  }
-}
-/* Small devices (portrait tablets and large phones, 600px and up) */
-@media only screen and (min-width: 600px) { 
-
-  body
-  {
-    width: 460px;
-    height: 100%;
-   
-  }
-  /* login page responsive  */
-  .container .form{
-    margin:  0 auto;
-  }
-
-
-  
-  .form .pass{
-    left: 90%;
-    top: 47%;
 
   }
 
@@ -1257,749 +859,55 @@ input[type="text"]:focus {
     height: fit-content;
    margin: 50px 5rem 5rem 5rem;
   }
-  .container{
-    width: 100%;
-    height: 100%;
-    margin: 0 auto;
-    
-  }
-  .form{
-    display: flex;
-    justify-content: center;
-    position: relative;
-  }
-  .container .form .inp{
-    width: 70%;
-    margin: 0.5rem auto;
-   
-  }
-  .container .form4 .inp{
-    width: 70%;
-    margin: 0.5rem auto;
-   
-  }
-  .container .form .pass{
-    position: absolute;
-    top: 45%;
-    left: 77%;
-  }
-  .container .form .btn{
-    margin: 1rem auto;
-  }
-  .container .form .form-content{
-    /* border: 1px solid red; */
-    width: fit-content;
-    margin: 1rem -7rem;
-  }
-  .container .form4 h1{
-    margin-top: 3.5rem;
-  }
-  .container .form4 .pass1{
-    top: 36%;
-    left: 77%;
-  }
-  .container .form4 .form-content{
-    margin: 1rem 3rem;
-    /* border: 1px solid red; */
-    width: fit-content;
-    padding: 1rem;
-  }
-  .nav-bar{
-    width: 560px;
-  }
 
- 
-   .container2 .form2 h2{
-  
-  text-align: center;
-}
-
-.container2 .form2 .inp{
-  width: 60%;
-  height: 50px;
-  text-indent: 20px;
-  outline: none;
-  border: 1px solid gray;
-  border-radius: 10px;
-  background: transparent;
-  margin: 0 auto;
-
-}
-.container2 .form2 h2{
-  text-align: center;
-  font-size: 20px;
-  margin: 38px 7px;
-}
-
-.container2 .form2 .link1{
-  margin: 1rem 1rem;
-}
-
-.container2 .form2 .btn3{
-  width: 6rem;
-  padding: 0.8rem 0.6rem;
-  border-radius: 0.5rem;
-  cursor: pointer;
-  font-size: 17px;
-  background-color: #007bff;
-  color: #ddd;
-  font-weight: 900;
-  margin: 0.5rem 10rem;
-
-}
-.container2 .form2 .btn4{
-  width: 6rem;
-  padding: 0.8rem 0.6rem;
-  border-radius: 0.5rem;
-  cursor: pointer;
-  font-size: 17px;
-  background-color: #007bff;
-  color: #ddd;
-  font-weight: 900;
-  margin: 0.5rem 10rem;
-
-}
-
-.container2 .form2 .link1{
-  margin: 0 6rem;
-}
-
- .container .form3 .inp{
-  width: 60%;
-  height: 50px;
-  text-indent: 20px;
-  outline: none;
-  border: 1px solid gray;
-  border-radius: 10px;
-  margin: 10px 30rem;
-  background: transparent;
-  margin: 0.8rem 7rem;
- }
-  .container .form3 .btn-2{
-  padding: 0.6rem 1.2rem;
-  border-radius: 1rem;
-  cursor: pointer;
-  font-size: 15px;
-  background-color: #007bff;
-  color: #ddd;
-  font-weight: 900;
-  width: 5rem;
-  height: 3rem;
-  margin-left: 13rem;
-
- }
-
- .container .form3 .btn-1{
-  padding: 0.6rem 1.2rem;
-  border-radius: 1rem;
-  cursor: pointer;
-  font-size: 15px;
-  background-color: #007bff;
-  color: #ddd;
-  font-weight: 900;
-  width: 5rem;
-  height: 3rem;
-  margin-left: 13rem;
-
- }
-
- .container .form3 h4{
- margin-top: 4rem;
- margin-bottom: 0.5rem;
- text-align: center;
- }
- .container .form3 .link{
-  /* text-decoration: none; */
-  display: block;
-  margin: 1rem 4rem;
- }
-
- .container .form3 .pass3{
-  width: 22px;
-  position: fixed;
-  top: 40%;
-  left: 71.8%;
- }
-
-    .hamburger {
-    display: flex;
-  }
-
-  .nav-links {
-    display: none;
-    flex-direction: column;
-    position: absolute;
-    top: 60px;
-    left: 0;
-    width: 100%;
-    background-color: #222;
-    z-index: 1000;
-    transition: all 0.3s ease;
-  }
-
-  .nav-links.open {
-    display: flex;
-  }
-
-  .nav-links li {
-    padding: 12px 20px;
-    border-bottom: 1px solid #444;
-  }
-}
-/* Medium devices (landscape tablets, 768px and up) */
-@media only screen and (min-width: 768px) {
-   body{
-    width: 460px;
-    height: 100%;
-   
-  }
-  
-  .form .pass{
-    left: 90%;
-    top: 47%;
-
-  }
-
-  .container2{
-  width: 100%;
-  height: 100%;
-  margin: 0 auto;
-}
-
-  .nav-bar{
-    width: 1200px;
-    display: block;
-    position: relative;
-    height: fit-content;
-  }
-  .nav-bar .btn-logout{
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(90%,60%);
-  }
-  .create-post-container{
-    width: 500px;
-    height: fit-content;
-   margin: 50px 5rem 5rem 5rem;
-  }
-  .container{
-    width: 100%;
-    height: 100%;
-    margin: 0 auto;
-    
-  }
-  .form{
-    display: flex;
-    justify-content: center;
-    /* position: relative; */
-  }
-  .container .form .inp{
-    width: 70%;
-    margin: 0.5rem auto;
-   
-  }
-  .container .form4 .inp{
-    width: 70%;
-    margin: 0.5rem auto;
-   
-  }
-  .container .form .pass{
-    position: absolute;
-    top: 45%;
-    left: 77%;
-  }
-  .container .form .btn{
-    margin: 1rem auto;
-  }
-  .container .form .form-content{
-    /* border: 1px solid red; */
-    width: fit-content;
-    margin: 1rem -7rem;
-  }
-  .container .form4 h1{
-    margin-top: 3.5rem;
-  }
-  .container .form4 .pass1{
-    top: 36%;
-    left: 77%;
-  }
-  .container .form4 .form-content{
-    margin: 1rem 3rem;
-    /* border: 1px solid red; */
-    width: fit-content;
-    padding: 1rem;
-  }
-  .nav-bar{
-    width: 560px;
-  }
-
- 
-   .container2 .form2 h2{
-  
-  text-align: center;
-}
-
-.container2 .form2 .inp{
-  width: 60%;
-  height: 50px;
-  text-indent: 20px;
-  outline: none;
-  border: 1px solid gray;
-  border-radius: 10px;
-  background: transparent;
-  margin: 0 auto;
-
-}
-.container2 .form2 h2{
-  text-align: center;
-  font-size: 20px;
-  margin: 38px 7px;
-}
-
-.container2 .form2 .link1{
-  margin: 1rem 1rem;
-}
-
-.container2 .form2 .btn3{
-  width: 6rem;
-  padding: 0.8rem 0.6rem;
-  border-radius: 0.5rem;
-  cursor: pointer;
-  font-size: 17px;
-  background-color: #007bff;
-  color: #ddd;
-  font-weight: 900;
-  margin: 0.5rem 10rem;
-
-}
-.container2 .form2 .btn4{
-  width: 6rem;
-  padding: 0.8rem 0.6rem;
-  border-radius: 0.5rem;
-  cursor: pointer;
-  font-size: 17px;
-  background-color: #007bff;
-  color: #ddd;
-  font-weight: 900;
-  margin: 0.5rem 10rem;
-
-}
-
-.container2 .form2 .link1{
-  margin: 0 6rem;
-}
-
- .container .form3 .inp{
-  width: 60%;
-  height: 50px;
-  text-indent: 20px;
-  outline: none;
-  border: 1px solid gray;
-  border-radius: 10px;
-  margin: 10px 30rem;
-  background: transparent;
-  margin: 0.8rem 7rem;
- }
-  .container .form3 .btn-2{
-  padding: 0.6rem 1.2rem;
-  border-radius: 1rem;
-  cursor: pointer;
-  font-size: 15px;
-  background-color: #007bff;
-  color: #ddd;
-  font-weight: 900;
-  width: 5rem;
-  height: 3rem;
-  margin-left: 13rem;
-
- }
-
- .container .form3 .btn-1{
-  padding: 0.6rem 1.2rem;
-  border-radius: 1rem;
-  cursor: pointer;
-  font-size: 15px;
-  background-color: #007bff;
-  color: #ddd;
-  font-weight: 900;
-  width: 5rem;
-  height: 3rem;
-  margin-left: 13rem;
-
- }
-
- .container .form3 h4{
- margin-top: 4rem;
- margin-bottom: 0.5rem;
- text-align: center;
- }
- .container .form3 .link{
-  /* text-decoration: none; */
-  display: block;
-  margin: 1rem 4rem;
- }
-
- .container .form3 .pass3{
-  width: 22px;
-  position: fixed;
-  top: 40%;
-  left: 71.8%;
- }
-
-    .hamburger {
-    display: flex;
-  }
-
-  .nav-links {
-    display: none;
-    flex-direction: column;
-    position: absolute;
-    top: 60px;
-    left: 0;
-    width: 100%;
-    background-color: #222;
-    z-index: 1000;
-    transition: all 0.3s ease;
-  }
-
-  .nav-links.open {
-    display: flex;
-  }
-
-  .nav-links li {
-    padding: 12px 20px;
-    border-bottom: 1px solid #444;
-  }
-}
-/* Large devices (laptops/desktops, 992px and up) */
-@media only screen and (min-width: 992px) {
-   body{
-    width: 460px;
-    height: 100%;
-   
-  }
-  
-  .form .pass{
-    left: 90%;
-    top: 47%;
-
-  }
-
-  .container2{
-  width: 100%;
-  height: 100%;
-  margin: 0 auto;
-}
-
-  .nav-bar{
-    width: 1200px;
-    display: block;
-    position: relative;
-    height: fit-content;
-  }
-  .nav-bar .btn-logout{
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(90%,60%);
-  }
-  .create-post-container{
-    width: 500px;
-    height: fit-content;
-   margin: 50px 5rem 5rem 5rem;
-  }
-  .container{
-    width: 100%;
-    height: 100%;
-    margin: 0 auto;
-    
-  }
-  .form{
-    display: flex;
-    justify-content: center;
-    position: relative;
-  }
-  .container .form .inp{
-    width: 70%;
-    margin: 0.5rem auto;
-   
-  }
-  .container .form4 .inp{
-    width: 70%;
-    margin: 0.5rem auto;
-   
-  }
-  .container .form .pass{
-    position: absolute;
-    top: 45%;
-    left: 77%;
-  }
-  .container .form .btn{
-    margin: 1rem auto;
-  }
-  .container .form .form-content{
-    /* border: 1px solid red; */
-    width: fit-content;
-    margin: 1rem -7rem;
-  }
-  .container .form4 h1{
-    margin-top: 3.5rem;
-  }
-  .container .form4 .pass1{
-    top: 36%;
-    left: 77%;
-  }
-  .container .form4 .form-content{
-    margin: 1rem 3rem;
-    /* border: 1px solid red; */
-    width: fit-content;
-    padding: 1rem;
-  }
-  .nav-bar{
-    width: 560px;
-  }
-
- 
-   .container2 .form2 h2{
-  
-  text-align: center;
-}
-
-.container2 .form2 .inp{
-  width: 60%;
-  height: 50px;
-  text-indent: 20px;
-  outline: none;
-  border: 1px solid gray;
-  border-radius: 10px;
-  background: transparent;
-  margin: 0 auto;
-
-}
-.container2 .form2 h2{
-  text-align: center;
-  font-size: 20px;
-  margin: 38px 7px;
-}
-
-.container2 .form2 .link1{
-  margin: 1rem 1rem;
-}
-
-.container2 .form2 .btn3{
-  width: 6rem;
-  padding: 0.8rem 0.6rem;
-  border-radius: 0.5rem;
-  cursor: pointer;
-  font-size: 17px;
-  background-color: #007bff;
-  color: #ddd;
-  font-weight: 900;
-  margin: 0.5rem 10rem;
-
-}
-.container2 .form2 .btn4{
-  width: 6rem;
-  padding: 0.8rem 0.6rem;
-  border-radius: 0.5rem;
-  cursor: pointer;
-  font-size: 17px;
-  background-color: #007bff;
-  color: #ddd;
-  font-weight: 900;
-  margin: 0.5rem 10rem;
-
-}
-
-.container2 .form2 .link1{
-  margin: 0 6rem;
-}
-
- .container .form3 .inp{
-  width: 60%;
-  height: 50px;
-  text-indent: 20px;
-  outline: none;
-  border: 1px solid gray;
-  border-radius: 10px;
-  margin: 10px 30rem;
-  background: transparent;
-  margin: 0.8rem 7rem;
- }
-  .container .form3 .btn-2{
-  padding: 0.6rem 1.2rem;
-  border-radius: 1rem;
-  cursor: pointer;
-  font-size: 15px;
-  background-color: #007bff;
-  color: #ddd;
-  font-weight: 900;
-  width: 5rem;
-  height: 3rem;
-  margin-left: 13rem;
-
- }
-
- .container .form3 .btn-1{
-  padding: 0.6rem 1.2rem;
-  border-radius: 1rem;
-  cursor: pointer;
-  font-size: 15px;
-  background-color: #007bff;
-  color: #ddd;
-  font-weight: 900;
-  width: 5rem;
-  height: 3rem;
-  margin-left: 13rem;
-
- }
-
- .container .form3 h4{
- margin-top: 4rem;
- margin-bottom: 0.5rem;
- text-align: center;
- }
- .container .form3 .link{
-  /* text-decoration: none; */
-  display: block;
-  margin: 1rem 4rem;
- }
-
- .container .form3 .pass3{
-  width: 22px;
-  position: fixed;
-  top: 40%;
-  left: 71.8%;
- }
-
-    .hamburger {
-    display: flex;
-  }
-
-  .nav-links {
-    display: none;
-    flex-direction: column;
-    position: absolute;
-    top: 60px;
-    left: 0;
-    width: 100%;
-    background-color: #222;
-    z-index: 1000;
-    transition: all 0.3s ease;
-  }
-
-  .nav-links.open {
-    display: flex;
-  }
-
-  .nav-links li {
-    padding: 12px 20px;
-    border-bottom: 1px solid #444;
-  }
-}
-/* Extra large devices (large laptops and desktops, 1200px and up) */
-@media only screen and (max-width: 1200px) {
-   body{
-    width: 460px;
-    height: 100%;
-    position: relative;
-   
-  }
-  /* login page responsive for desktop  */
-
-  .form .pass{
-    left: 90%;
-    top: 47%;
-
-  }
-
-  .container2{
-  width: 100%;
-  height: 100%;
-  margin: 0 auto;
-}
-
-  .nav-bar{
-    width: 1200px;
-    display: block;
-    position: relative;
-    height: fit-content;
-  }
-  .nav-bar .btn-logout{
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(90%,60%);
-  }
-  .create-post-container{
-    width: 500px;
-    height: fit-content;
-   margin: 50px 5rem 5rem 5rem;
-  }
-  .container{
-    width: 100%;
-    height: 100%;
-    display: flex;
-    justify-content: center;
-     position: relative;
-    
-  }
-  .container .form{
-    position: absolute;
-    left: 50%;
-    transform: translateX(50%);
-   
-   
-    
-  }
-  .container .form .inp{
-    width: 300px;
-    margin: 0.5rem auto;
-   
-  }
-  .container .form4 .inp{
-    width: 300px;
-    margin: 0.5rem auto;
-   
-  }
-  .container .form .pass{
-    position: absolute;
-    top: 45%;
-    left: 86%;
-  }
-  .container .form .btn{
-    margin: 1rem auto;
-  }
-  .container .form .form-content{
-    /* border: 1px solid red; */
-    width: fit-content;
-    margin: 1rem -7rem;
-  }
-  .container .form4{
-    position: absolute;
-    left: 20%;
-    transform: translateX(10%);
-  }
-  .container .form4 h1{
-    margin-top: 3.5rem;
-  }
-  .container .form4 .pass1{
-    position: absolute;
-    top: 38%;
-    left: 80%;
-  }
-  .container .form4 .form-content{
-    margin: 0 auto;
-    /* border: 1px solid red; */
-    width: 400px;
-    padding: 1rem;
-  }
-  .nav-bar{
-    width: 560px;
-  }
-  .container2 .form2 h2{
+  .container .form h1{
     text-align: center;
+    margin-top: 3rem;
+    margin-left: 10rem;
+  }
+ 
+
+  .container .form .btn{
+    margin: 1rem 9.5rem;
+  }
+  .container4 .form4 .btn{
+    margin: 1rem 9rem;
+  }
+  .container .form .form-content{
+    /* border: 1px solid red; */
+    width: 350px;
+    margin: 1rem 3rem;
+    padding: 1rem;
+  }
+  .container .form .forgot{
+    /* display: inline; */
+    margin-top: -1.8rem;
+    margin-left: 4rem;
+    
+  }
+
+  .container4 .form4 .pass1{
+    position: absolute;
+    width: 26px;
+    top: 41%;
+    left: 82%;
+  }
+  .container4 .form4 .form-content{
+    margin: 1rem 4rem;
+    /* border: 1px solid red; */
+    width: 320px;
+    padding: 1rem;
+  }
+  .container4 .form4 .emailotp{
+    margin-top: -2rem;
+    margin-left: 5rem;
+  }
+  .nav-bar{
+    width: 560px;
+  }
+
+.container2 .form2 h2{
+  text-align: center;
 }
 
 .container2 .form2 .inp{
@@ -2061,7 +969,7 @@ input[type="text"]:focus {
   border-radius: 10px;
   margin: 10px 30rem;
   background: transparent;
-  margin: 0.8rem 7rem;
+  margin: 0.8rem 5rem;
  }
   .container .form3 .btn-2{
   padding: 0.6rem 1.2rem;
@@ -2073,7 +981,7 @@ input[type="text"]:focus {
   font-weight: 900;
   width: 5rem;
   height: 3rem;
-  margin-left: 13rem;
+  margin-left: 10rem;
 
  }
 
@@ -2087,7 +995,7 @@ input[type="text"]:focus {
   font-weight: 900;
   width: 5rem;
   height: 3rem;
-  margin-left: 13rem;
+  margin-left: 10rem;
 
  }
 
@@ -2095,6 +1003,7 @@ input[type="text"]:focus {
  margin-top: 4rem;
  margin-bottom: 0.5rem;
  text-align: center;
+ margin-left: 4rem;
  }
  .container .form3 .link{
   /* text-decoration: none; */
@@ -2103,10 +1012,10 @@ input[type="text"]:focus {
  }
 
  .container .form3 .pass3{
-  width: 22px;
-  position: fixed;
-  top: 40%;
-  left: 71.8%;
+  width: 26px;
+  position: absolute;
+  top: 65%;
+  left: 74%;
  }
 
     .hamburger {
@@ -2134,7 +1043,4 @@ input[type="text"]:focus {
     border-bottom: 1px solid #444;
   }
 }
-
-
-
 

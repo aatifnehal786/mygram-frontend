@@ -124,7 +124,7 @@ export default function ForgotPassword() {
           value={otp}
         />
 
-        <div style={{ position: "relative" }}>
+        <div>
           <input
             className="inp"
             name="newPassword"
