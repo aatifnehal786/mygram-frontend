@@ -297,6 +297,25 @@ body.dark .inp{
   font-size: 25px;
 }
 
+.container .form .btn:hover{
+  background-color: green;
+}
+.container4 .form4 .btn:hover{
+  background-color: green;
+}
+.container2 .form2 .btn3:hover{
+  background-color: green;
+}
+.container2 .form2 .btn4:hover{
+  background-color: green;
+}
+.container .form3 .btn-2:hover{
+  background-color: green;
+}
+.container .form3 .btn-1:hover{
+  background-color: green;
+}
+
 a {
   text-decoration: none;
 }
@@ -367,7 +386,7 @@ body.dark .delete-message h3{
 
 /* NAVIGATION */
 .nav-bar {
-  background-color: blue;
+  background-color: #00ff9d;
   color: white;
   padding: 10px 20px;
   position: fixed;
@@ -397,12 +416,13 @@ body.dark .delete-message h3{
 }
 
 .nav-links a {
-  color: white;
+  color: black;
   text-decoration: none;
+  font-size: 20px;
 }
 
 .btn-logout {
-  background-color: crimson;
+  background-color: rgb(220, 110, 20);
   border: none;
   color: white;
   padding: 6px 12px;

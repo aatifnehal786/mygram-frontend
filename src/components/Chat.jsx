@@ -16,6 +16,9 @@ const Chat = () => {
   const [messageToForward, setMessageToForward] = useState(null);
   const socketRef = useRef(null);
   const [messages, setMessages] = useState([]);
+  const [view, setView] = useState('sidebar'); // 'sidebar' or 'chat'
+
+  
 
   const [loggedUser, setLoggedUser] = useState(
     JSON.parse(sessionStorage.getItem('token-auth'))
@@ -93,30 +96,50 @@ if (res.ok) {
   };
 
   return (
-    <div className="chat-layout">
-      <ChatSidebar className='chat-container'
-        onSelectUser={setSelectedUser}
-        selectedUserId={selectedUser?._id}
-        onSelectForwardUser={handleSelectForwardUser}
-        isForwarding={isForwarding}
-        loggedUser={loggedUser}
-        showFollowedUsersOnly={true}
-        setChatList={setChatList}
-      />
-     <ChatWindow
-  selectedUser={selectedUser}
-  chatList={chatList}
-  messages={messages} // ✅ Add this
-  setMessages={setMessages}
-  triggerForwardMode={(msg) => {
-    setIsForwarding(true);
-    setMessageToForward(msg);
-  }}
-  socket={socketRef.current}
-/>
+   <div className="chat-layout">
 
-      <ToastContainer position="bottom-right" autoClose={3000} />
-    </div>
+  {/* Toggle Button */}
+  {selectedUser && view === 'chat' && (
+    <button className="toggle-btn" onClick={() => setView('sidebar')}>
+      ← Back
+    </button>
+  )}
+
+  {/* Show Sidebar */}
+  {(view === 'sidebar' || !selectedUser) && (
+    <ChatSidebar
+      className='chat-container'
+      onSelectUser={(user) => {
+        setSelectedUser(user);
+        if (window.innerWidth < 768) setView('chat'); // auto switch on small screen
+      }}
+      selectedUserId={selectedUser?._id}
+      onSelectForwardUser={handleSelectForwardUser}
+      isForwarding={isForwarding}
+      loggedUser={loggedUser}
+      showFollowedUsersOnly={true}
+      setChatList={setChatList}
+    />
+  )}
+
+  {/* Show Chat Window */}
+  {selectedUser && view === 'chat' && (
+    <ChatWindow
+      selectedUser={selectedUser}
+      chatList={chatList}
+      messages={messages}
+      setMessages={setMessages}
+      triggerForwardMode={(msg) => {
+        setIsForwarding(true);
+        setMessageToForward(msg);
+      }}
+      socket={socketRef.current}
+    />
+  )}
+
+  <ToastContainer position="bottom-right" autoClose={3000} />
+</div>
+
   );
 };
 

@@ -1,6 +1,50 @@
 .chat{
   position: relative;
 }
+.chat-layout {
+  display: flex;
+  height: 100vh;
+}
+
+/* Default to row layout */
+.chat-container,
+.chat-window {
+  flex: 1;
+}
+
+/* Back button for small screens */
+.toggle-btn {
+  display: none;
+  background: #00ff77;
+  color: white;
+  border: none;
+  padding: 10px 14px;
+  font-size: 16px;
+  cursor: pointer;
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 999;
+  border-radius: 5px;
+}
+
+/* Responsive styles */
+@media (max-width: 767px) {
+  .chat-layout {
+    flex-direction: column;
+    position: relative;
+  }
+
+  .chat-container,
+  .chat-window {
+    width: 100%;
+  }
+
+  .toggle-btn {
+    display: block;
+  }
+}
+
 
 .chat-sidebar {
   width: 22.5%;
@@ -10,9 +54,7 @@
   flex-direction: column;
   padding: 10px;
   overflow-y: auto;
-  position: fixed;
-  top: 9.2%;
-  left: 12%;
+  
 }
 
 .chat-sidebar input {
@@ -114,8 +156,8 @@ body.dark .chat-container{
   border-top: 1px solid #ccc;
   position: fixed;
   top: 91%;
-  left: 34.2%;
-  width: 52%;
+  left: 5%;
+  width: 80%;
 }
 
 .chat-input {
@@ -340,48 +382,26 @@ body.dark .chat-header-info h2,p{
 
 /* Responsive adjustments */
 
-/* Extra small devices (phones, 600px and down) */
-@media only screen and (max-width: 600px) {
-  .chat-wrapper {
-    flex-direction: column;
-  }
-
-  .chat-sidebar {
-    width: 100%;
-    height: 500px;
-    display: block;
-  }
-
-  .chat-container {
-    width: 100%;
-    height: 100%;
-    /* display: none; */
-  }
-
-
-
-  .back-button {
-    display: block;
-    margin-bottom: 10px;
-    cursor: pointer;
-    font-weight: bold;
-    font-size: 16px;
-    color: #007bff;
-  }
-}
 @media (min-width:350px) and (max-width:498px){
+  .body{
+    position: relative;
+  }
   .chat-sidebar input{
-    width: 200px;
+    width: 150px;
   }
 
   .chat-container{
-    width: 100%;
+    width: 80%;
     height: 100%;
+    margin-left: -10rem;
+
   }
 
   .chat-sidebar {
-    width: 300px;
+    width: 100%;
     height: 100%;
+    position: absolute;
+    left: 0;
     /* display: block; */
   }
 
@@ -390,281 +410,12 @@ body.dark .chat-header-info h2,p{
   flex-direction: column;
   width: 400px;
   height: 100vh;
-  /* position: absolute; */
   overflow-y: scroll;
   }
 
+  
 
  
 
-  .back-button {
-    display: block;
-    margin-bottom: 10px;
-    cursor: pointer;
-    font-weight: bold;
-    font-size: 16px;
-    color: #007bff;
-  }
-}
-/* Small devices (portrait tablets and large phones, 600px and up) */
-@media only screen and (min-width: 600px) {.chat-wrapper {
-    flex-direction: column;
-  }
-
-  .chat-sidebar {
-    width: 100%;
-    height: 500px;
-    display: block;
-  }
-
-  .chat-container {
-    width: 100%;
-    height: 100%;
-    /* display: none; */
-  }
-
-
-
-  .back-button {
-    display: block;
-    margin-bottom: 10px;
-    cursor: pointer;
-    font-weight: bold;
-    font-size: 16px;
-    color: #007bff;
-  }
-}
-@media (min-width:350px) and (max-width:498px){
-  .chat-sidebar input{
-    width: 200px;
-  }
-
-  .chat-container{
-    width: 100%;
-    height: 100%;
-  }
-
-  .chat-sidebar {
-    width: 300px;
-    height: 100%;
-    /* display: block; */
-  }
-
-  .chat-container .chat-messages{
-  display: flex;
-  flex-direction: column;
-  width: 400px;
-  height: 100vh;
-  /* position: absolute; */
-  overflow-y: scroll;
-  }
-
-
  
-
-  .back-button {
-    display: block;
-    margin-bottom: 10px;
-    cursor: pointer;
-    font-weight: bold;
-    font-size: 16px;
-    color: #007bff;
-  }}
-/* Medium devices (landscape tablets, 768px and up) */
-@media only screen and (min-width: 768px) {.chat-wrapper {
-    flex-direction: column;
-  }
-
-  .chat-sidebar {
-    width: 100%;
-    height: 500px;
-    display: block;
-  }
-
-  .chat-container {
-    width: 100%;
-    height: 100%;
-    /* display: none; */
-  }
-
-
-
-  .back-button {
-    display: block;
-    margin-bottom: 10px;
-    cursor: pointer;
-    font-weight: bold;
-    font-size: 16px;
-    color: #007bff;
-  }
 }
-@media (min-width:350px) and (max-width:498px){
-  .chat-sidebar input{
-    width: 200px;
-  }
-
-  .chat-container{
-    width: 100%;
-    height: 100%;
-  }
-
-  .chat-sidebar {
-    width: 300px;
-    height: 100%;
-    /* display: block; */
-  }
-
-  .chat-container .chat-messages{
-  display: flex;
-  flex-direction: column;
-  width: 400px;
-  height: 100vh;
-  /* position: absolute; */
-  overflow-y: scroll;
-  }
-
-
- 
-
-  .back-button {
-    display: block;
-    margin-bottom: 10px;
-    cursor: pointer;
-    font-weight: bold;
-    font-size: 16px;
-    color: #007bff;
-  }}
-/* Large devices (laptops/desktops, 992px and up) */
-@media only screen and (min-width: 992px) {.chat-wrapper {
-    flex-direction: column;
-  }
-
-  .chat-sidebar {
-    width: 100%;
-    height: 500px;
-    display: block;
-  }
-
-  .chat-container {
-    width: 100%;
-    height: 100%;
-    /* display: none; */
-  }
-
-
-
-  .back-button {
-    display: block;
-    margin-bottom: 10px;
-    cursor: pointer;
-    font-weight: bold;
-    font-size: 16px;
-    color: #007bff;
-  }
-}
-@media (min-width:350px) and (max-width:498px){
-  .chat-sidebar input{
-    width: 200px;
-  }
-
-  .chat-container{
-    width: 100%;
-    height: 100%;
-  }
-
-  .chat-sidebar {
-    width: 300px;
-    height: 100%;
-    /* display: block; */
-  }
-
-  .chat-container .chat-messages{
-  display: flex;
-  flex-direction: column;
-  width: 400px;
-  height: 100vh;
-  /* position: absolute; */
-  overflow-y: scroll;
-  }
-
-
- 
-
-  .back-button {
-    display: block;
-    margin-bottom: 10px;
-    cursor: pointer;
-    font-weight: bold;
-    font-size: 16px;
-    color: #007bff;
-  }}
-/* Extra large devices (large laptops and desktops, 1200px and up) */
-@media only screen and (min-width: 1200px) {.chat-wrapper {
-    flex-direction: column;
-  }
-
-  .chat-sidebar {
-    width: 100%;
-    height: 500px;
-    display: block;
-  }
-
-  .chat-container {
-    width: 100%;
-    height: 100%;
-    /* display: none; */
-  }
-
-
-
-  .back-button {
-    display: block;
-    margin-bottom: 10px;
-    cursor: pointer;
-    font-weight: bold;
-    font-size: 16px;
-    color: #007bff;
-  }
-}
-@media (min-width:350px) and (max-width:498px){
-  .chat-sidebar input{
-    width: 200px;
-  }
-
-  .chat-container{
-    width: 100%;
-    height: 100%;
-  }
-
-  .chat-sidebar {
-    width: 300px;
-    height: 100%;
-    /* display: block; */
-  }
-
-  .chat-container .chat-messages{
-  display: flex;
-  flex-direction: column;
-  width: 400px;
-  height: 100vh;
-  /* position: absolute; */
-  overflow-y: scroll;
-  }
-
-
- 
-
-  .back-button {
-    display: block;
-    margin-bottom: 10px;
-    cursor: pointer;
-    font-weight: bold;
-    font-size: 16px;
-    color: #007bff;
-  }
-}
-
-/* Desktop view: hide back button */
-/* .back-button {
-  display: none;
-} */
