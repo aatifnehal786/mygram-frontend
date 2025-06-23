@@ -84,7 +84,7 @@ export default function EmailOtp() {
             <form className="form2">
                 <h2>Enter Email For Verification</h2>
                 <input
-                    className="inp"
+                    className="inp1"
                     type="email"
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="Enter Email"
@@ -96,7 +96,7 @@ export default function EmailOtp() {
                 {isLoading1 ? "Loading..." : "send otp"}
                 </button>
                 <input
-                    className="inp"
+                    className="inp1"
                     type="text"
                     onChange={(e) => setOtp(e.target.value)}
                     placeholder="Enter OTP"

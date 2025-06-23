@@ -179,10 +179,10 @@ body{
 }
 
 .container2 .form2 h2{
-  margin-top: 2rem;
+  margin-top: 4rem;
   text-align: center;
 }
-.container2 .form2 .inp{
+.container2 .form2 .inp1{
   width: 30%;
   height: 50px;
   text-indent: 20px;
@@ -205,8 +205,8 @@ body{
   border-radius: 1rem;
   cursor: pointer;
   font-size: 17px;
-  background-color: #007bff;
-  color: #ddd;
+  background-color: #00ff9d;
+  color: black;
   font-weight: 900;
   margin: 5px 25rem;
 
@@ -217,8 +217,8 @@ body{
   border-radius: 1rem;
   cursor: pointer;
   font-size: 17px;
-  background-color: #007bff;
-  color: #ddd;
+  background-color: #00ff9d;
+  color: black;
   font-weight: 900;
   margin: 5px 25rem;
 
@@ -346,8 +346,8 @@ body.dark .delete-message h3{
   border-radius: 1rem;
   cursor: pointer;
   font-size: 17px;
-  background-color: #007bff;
-  color: #ddd;
+   background-color: #00ff9d;
+  color: black;
   font-weight: 900;
   margin: 1rem 34rem;
 }
@@ -357,8 +357,8 @@ body.dark .delete-message h3{
   border-radius: 1rem;
   cursor: pointer;
   font-size: 17px;
-  background-color: #007bff;
-  color: #ddd;
+   background-color: #00ff9d;
+  color: black;
   font-weight: 900;
   margin: 1rem 13rem;
 }
@@ -706,16 +706,14 @@ input[type="text"]:focus {
   border-radius: 5px;
   font-weight: bold;
   cursor: pointer;
-  background-color: #007bff;
-  color: white;
+   background-color: #00ff9d;
+  color: black;
 }
 
 
 /* CSS FOR FORGOT PASSWORD  */
 
-.container .form3{
-  position: relative;
-}
+
 
 .container .form3 .inp{
   width: 30%;
@@ -732,7 +730,7 @@ input[type="text"]:focus {
 
 
 
-.container .form3 h4{
+.container .form3 h1{
   margin-top: 4rem;
   margin-bottom: 2rem;
   text-align: center;
@@ -744,8 +742,8 @@ input[type="text"]:focus {
   border-radius: 1rem;
   cursor: pointer;
   font-size: 15px;
-  background-color: #007bff;
-  color: #ddd;
+   background-color: #00ff9d;
+  color: black;
   font-weight: 900;
   width: 5rem;
   height: 3rem;
@@ -761,8 +759,8 @@ input[type="text"]:focus {
   border-radius: 1rem;
   cursor: pointer;
   font-size: 15px;
-  background-color: #007bff;
-  color: #ddd;
+   background-color: #00ff9d;
+  color: black;
   font-weight: 900;
   width: 5rem;
   height: 3rem;
@@ -782,8 +780,8 @@ input[type="text"]:focus {
 
 .container .form3 .pass3{
   width: 22px;
-  position: fixed;
-  top: 51.5%;
+  position: absolute;
+  top: 68%;
   left: 63.6%;
   
 }
@@ -791,7 +789,7 @@ input[type="text"]:focus {
 /* Extra small devices (phones, 600px and down) */
 @media (min-width: 320px) and (max-width: 480px){
    html,body{
-    width: 350px;
+    width: 390px;
     height: 100%;
     position: relative;
     
@@ -800,7 +798,7 @@ input[type="text"]:focus {
     .container{
     width: 100%;
     height: 100%;
-    margin: 0 auto;
+   
     
     
   }
@@ -910,7 +908,7 @@ input[type="text"]:focus {
   text-align: center;
 }
 
-.container2 .form2 .inp{
+.container2 .form2 .inp1{
   width: 60%;
   height: 50px;
   text-indent: 20px;
@@ -937,10 +935,10 @@ input[type="text"]:focus {
   border-radius: 0.5rem;
   cursor: pointer;
   font-size: 17px;
-  background-color: #007bff;
-  color: #ddd;
+  background-color: #00ff9d;
+  color: black;
   font-weight: 900;
-  margin: 0.5rem 10rem;
+  margin: 0.5rem 8rem;
 
 }
 .container2 .form2 .btn4{
@@ -949,10 +947,10 @@ input[type="text"]:focus {
   border-radius: 0.5rem;
   cursor: pointer;
   font-size: 17px;
-  background-color: #007bff;
-  color: #ddd;
+  background-color: #00ff9d;
+  color: black;
   font-weight: 900;
-  margin: 0.5rem 10rem;
+  margin: 0.5rem 8rem;
 
 }
 
@@ -976,8 +974,8 @@ input[type="text"]:focus {
   border-radius: 1rem;
   cursor: pointer;
   font-size: 15px;
-  background-color: #007bff;
-  color: #ddd;
+   background-color: #00ff9d;
+  color: black;
   font-weight: 900;
   width: 5rem;
   height: 3rem;
@@ -990,8 +988,8 @@ input[type="text"]:focus {
   border-radius: 1rem;
   cursor: pointer;
   font-size: 15px;
-  background-color: #007bff;
-  color: #ddd;
+   background-color: #00ff9d;
+  color: black;
   font-weight: 900;
   width: 5rem;
   height: 3rem;
@@ -999,11 +997,11 @@ input[type="text"]:focus {
 
  }
 
- .container .form3 h4{
+ .container .form3 h1{
  margin-top: 4rem;
  margin-bottom: 0.5rem;
  text-align: center;
- margin-left: 4rem;
+ margin-left: 1rem;
  }
  .container .form3 .link{
   /* text-decoration: none; */
@@ -1014,8 +1012,8 @@ input[type="text"]:focus {
  .container .form3 .pass3{
   width: 26px;
   position: absolute;
-  top: 65%;
-  left: 74%;
+  top: 48%;
+  left: 72%;
  }
 
     .hamburger {
@@ -1043,4 +1041,3 @@ input[type="text"]:focus {
     border-bottom: 1px solid #444;
   }
 }
-

@@ -92,7 +92,7 @@ export default function ForgotPassword() {
   return (
     <section className="container">
       <div className="form3">
-        <h4>Enter your Email to get OTP</h4>
+        <h1>Enter your Email to get OTP and Enter new Password</h1>
 
         <input
           onKeyDown={handleDynamicEnter}
