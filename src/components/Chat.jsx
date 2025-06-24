@@ -6,7 +6,7 @@ import io from 'socket.io-client';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import './chat.css';
-// Add this line to include the new styles
+import './chat-layout.css'; // Add this line to include the new styles
 
 const Chat = () => {
   const [selectedUser, setSelectedUser] = useState(
@@ -20,6 +20,7 @@ const Chat = () => {
   );
   const [incomingCall, setIncomingCall] = useState(null);
   const [callType, setCallType] = useState(null);
+  const [isCallActive, setIsCallActive] = useState(false);
 
   const socketRef = useRef(null);
   const peerRef = useRef(null);
@@ -123,6 +124,8 @@ const Chat = () => {
         type: isVideo ? 'video' : 'audio'
       });
     }
+
+    setIsCallActive(true);
   };
 
   const startCall = (isVideo) => {
@@ -138,6 +141,7 @@ const Chat = () => {
     await peerRef.current.setLocalDescription(answer);
     socketRef.current.emit('answer-call', { to: incomingCall.from, answer });
     setIncomingCall(null);
+    setIsCallActive(true);
   };
 
   const rejectCall = () => {
@@ -151,6 +155,7 @@ const Chat = () => {
       localStreamRef.current.getTracks().forEach(track => track.stop());
     }
     localStreamRef.current = null;
+    setIsCallActive(false);
     socketRef.current.emit('end-call', { to: selectedUser._id });
   };
 
@@ -195,7 +200,7 @@ const Chat = () => {
               socket={socketRef.current}
             />
 
-            {callType === 'video' && (
+            {callType === 'video' && isCallActive && (
               <div className="video-chat">
                 <video ref={localVideoRef} autoPlay muted className="video-local" />
                 <video ref={remoteVideoRef} autoPlay className="video-remote" />
