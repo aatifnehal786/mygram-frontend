@@ -73,6 +73,12 @@ const Chat = () => {
       peerRef.current?.addIceCandidate(new RTCIceCandidate(candidate));
     });
 
+    socketRef.current.on('call-rejected', () => {
+  endCall();
+  toast.info('Call was rejected.');
+});
+
+
     socketRef.current.on('call-ended', () => {
       endCall();
     });
