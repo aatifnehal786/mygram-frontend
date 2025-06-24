@@ -42,55 +42,59 @@ const Chat = () => {
   }, []);
 
   useEffect(() => {
-    if (!selectedUser || !loggedUser?.token) return;
+  if (!selectedUser || !loggedUser?.token) return;
 
-    fetch(`https://mygram-1-1nua.onrender.com/chat/${selectedUser._id}`, {
-      headers: { Authorization: `Bearer ${loggedUser.token}` },
-    })
-      .then(res => res.ok ? res.json() : [])
-      .then(data => setMessages(data || []))
-      .catch(err => console.error('Fetch chat error:', err));
+  fetch(`https://mygram-1-1nua.onrender.com/chat/${selectedUser._id}`, {
+    headers: { Authorization: `Bearer ${loggedUser.token}` },
+  })
+    .then(res => res.ok ? res.json() : [])
+    .then(data => setMessages(data || []))
+    .catch(err => console.error('Fetch chat error:', err));
 
-    socketRef.current.emit('join', loggedUser.userid);
+  socketRef.current.emit('join', loggedUser.userid);
 
-    socketRef.current.on('receiveMessage', (msg) => {
-      const isCurrentChat =
-        (msg.sender === loggedUser.userid && msg.receiver === selectedUser._id) ||
-        (msg.receiver === loggedUser.userid && msg.sender === selectedUser._id);
-      if (isCurrentChat) setMessages(prev => [...prev, msg]);
-    });
+  const socket = socketRef.current;
 
-    socketRef.current.on('incoming-call', async ({ from, offer, type }) => {
-      setIncomingCall({ from, offer, type });
-      setCallType(type);
-    });
+  socket.on('receiveMessage', (msg) => {
+    const isCurrentChat =
+      (msg.sender === loggedUser.userid && msg.receiver === selectedUser._id) ||
+      (msg.receiver === loggedUser.userid && msg.sender === selectedUser._id);
+    if (isCurrentChat) setMessages(prev => [...prev, msg]);
+  });
 
-    socketRef.current.on('call-answered', ({ answer }) => {
-      peerRef.current?.setRemoteDescription(new RTCSessionDescription(answer));
-    });
+  socket.on('incoming-call', ({ from, offer, type }) => {
+    setIncomingCall({ from, offer, type });
+    setCallType(type);
+  });
 
-    socketRef.current.on('ice-candidate', ({ candidate }) => {
-      peerRef.current?.addIceCandidate(new RTCIceCandidate(candidate));
-    });
+  socket.on('call-answered', ({ answer }) => {
+    peerRef.current?.setRemoteDescription(new RTCSessionDescription(answer));
+  });
 
-    socketRef.current.on('call-rejected', () => {
-  endCall();
-  toast.info('Call was rejected.');
-});
+  socket.on('call-rejected', () => {
+    endCall();
+    setIncomingCall(null);
+    toast.info('Call was rejected.');
+  });
 
+  socket.on('ice-candidate', ({ candidate }) => {
+    peerRef.current?.addIceCandidate(new RTCIceCandidate(candidate));
+  });
 
-    socketRef.current.on('call-ended', () => {
-      endCall();
-    });
+  socket.on('call-ended', () => {
+    endCall();
+  });
 
-    return () => {
-      socketRef.current.off('receiveMessage');
-      socketRef.current.off('incoming-call');
-      socketRef.current.off('call-answered');
-      socketRef.current.off('ice-candidate');
-      socketRef.current.off('call-ended');
-    };
-  }, [selectedUser]);
+  return () => {
+    socket.off('receiveMessage');
+    socket.off('incoming-call');
+    socket.off('call-answered');
+    socket.off('call-rejected'); // ✅ IMPORTANT
+    socket.off('ice-candidate');
+    socket.off('call-ended');
+  };
+}, [selectedUser, loggedUser?.token]); // ✅ ADD loggedUser as dependency
+
 
   const createPeer = async (isInitiator, remoteUserId, isVideo) => {
     peerRef.current = new RTCPeerConnection({
