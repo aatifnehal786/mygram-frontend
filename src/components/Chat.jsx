@@ -6,7 +6,7 @@ import io from 'socket.io-client';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import './chat.css';
- // Add this line to include the new styles
+
 
 const Chat = () => {
   const [selectedUser, setSelectedUser] = useState(
@@ -62,7 +62,7 @@ const Chat = () => {
     });
 
     socketRef.current.on('incoming-call', async ({ from, offer, type }) => {
-      setIncomingCall({ from, offer });
+      setIncomingCall({ from, offer, type });
       setCallType(type);
     });
 
@@ -137,6 +137,9 @@ const Chat = () => {
   const acceptCall = async () => {
     if (!incomingCall) return;
 
+    const { from, offer, type } = incomingCall;
+    const isVideo = type === 'video';
+
     peerRef.current = new RTCPeerConnection({
       iceServers: [{ urls: 'stun:stun.l.google.com:19302' }],
     });
@@ -144,7 +147,7 @@ const Chat = () => {
     peerRef.current.onicecandidate = (e) => {
       if (e.candidate) {
         socketRef.current.emit('ice-candidate', {
-          to: incomingCall.from,
+          to: from,
           candidate: e.candidate,
         });
       }
@@ -154,10 +157,10 @@ const Chat = () => {
       remoteVideoRef.current.srcObject = event.streams[0];
     };
 
-    await peerRef.current.setRemoteDescription(new RTCSessionDescription(incomingCall.offer));
+    await peerRef.current.setRemoteDescription(new RTCSessionDescription(offer));
 
     localStreamRef.current = await navigator.mediaDevices.getUserMedia({
-      video: callType === 'video',
+      video: isVideo,
       audio: true,
     });
 
@@ -169,9 +172,10 @@ const Chat = () => {
 
     const answer = await peerRef.current.createAnswer();
     await peerRef.current.setLocalDescription(answer);
-    socketRef.current.emit('answer-call', { to: incomingCall.from, answer });
+    socketRef.current.emit('answer-call', { to: from, answer });
 
     setIncomingCall(null);
+    setCallType(type);
     setIsCallActive(true);
   };
 
@@ -235,20 +239,20 @@ const Chat = () => {
               setMessages={setMessages}
               socket={socketRef.current}
             />
-{isCallActive && (
-  <div className="video-chat">
-    <video ref={localVideoRef} autoPlay muted className="video-local" />
-    <video ref={remoteVideoRef} autoPlay className="video-remote" />
-  </div>
-)}
 
+            {isCallActive && (
+              <div className="video-chat">
+                <video ref={localVideoRef} autoPlay muted className="video-local" />
+                <video ref={remoteVideoRef} autoPlay className="video-remote" />
+              </div>
+            )}
           </div>
         )}
       </div>
 
       {incomingCall && (
         <div className="incoming-call-popup">
-          <p>Incoming {callType} call...</p>
+          <p>Incoming {incomingCall.type} call...</p>
           <button onClick={acceptCall}>✅ Accept</button>
           <button onClick={rejectCall}>❌ Reject</button>
         </div>
