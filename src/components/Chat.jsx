@@ -68,8 +68,9 @@ const Chat = () => {
   });
 
   socket.on('call-answered', ({ answer }) => {
-    peerRef.current?.setRemoteDescription(new RTCSessionDescription(answer));
-  });
+  peerRef.current?.setRemoteDescription(new RTCSessionDescription(answer));
+});
+
 
   socket.on('call-rejected', () => {
     endCall();
