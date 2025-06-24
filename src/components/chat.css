@@ -120,24 +120,25 @@
   cursor: pointer;
   margin-right: 10px;
 }
-
 .video-chat {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 999;
   display: flex;
   gap: 10px;
+  background: black;
   padding: 10px;
-  background: #000;
-  position: absolute;
-  top: 10%;
-  left: 80%;
+  border-radius: 8px;
 }
-
 .video-local,
 .video-remote {
-  width: 50%;
-  height: 240px;
+  width: 200px;
+  height: 150px;
   object-fit: cover;
   background: #000;
 }
+
 
 .incoming-call-popup {
   position: fixed;

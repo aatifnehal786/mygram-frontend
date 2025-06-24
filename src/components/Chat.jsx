@@ -235,13 +235,13 @@ const Chat = () => {
               setMessages={setMessages}
               socket={socketRef.current}
             />
+{isCallActive && (
+  <div className="video-chat">
+    <video ref={localVideoRef} autoPlay muted className="video-local" />
+    <video ref={remoteVideoRef} autoPlay className="video-remote" />
+  </div>
+)}
 
-            {callType === 'video' && isCallActive && (
-              <div className="video-chat">
-                <video ref={localVideoRef} autoPlay muted className="video-local" />
-                <video ref={remoteVideoRef} autoPlay className="video-remote" />
-              </div>
-            )}
           </div>
         )}
       </div>
