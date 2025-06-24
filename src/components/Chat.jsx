@@ -134,15 +134,49 @@ const Chat = () => {
   };
 
   const acceptCall = async () => {
-    if (!incomingCall) return;
-    await createPeer(false, incomingCall.from, callType === 'video');
-    await peerRef.current.setRemoteDescription(new RTCSessionDescription(incomingCall.offer));
-    const answer = await peerRef.current.createAnswer();
-    await peerRef.current.setLocalDescription(answer);
-    socketRef.current.emit('answer-call', { to: incomingCall.from, answer });
-    setIncomingCall(null);
-    setIsCallActive(true);
+  if (!incomingCall) return;
+
+  // Create peer first
+  peerRef.current = new RTCPeerConnection({
+    iceServers: [{ urls: 'stun:stun.l.google.com:19302' }],
+  });
+
+  peerRef.current.onicecandidate = (e) => {
+    if (e.candidate) {
+      socketRef.current.emit('ice-candidate', {
+        to: incomingCall.from,
+        candidate: e.candidate,
+      });
+    }
   };
+
+  peerRef.current.ontrack = (event) => {
+    remoteVideoRef.current.srcObject = event.streams[0];
+  };
+
+  await peerRef.current.setRemoteDescription(
+    new RTCSessionDescription(incomingCall.offer)
+  );
+
+  localStreamRef.current = await navigator.mediaDevices.getUserMedia({
+    video: callType === 'video',
+    audio: true,
+  });
+
+  localStreamRef.current.getTracks().forEach((track) => {
+    peerRef.current.addTrack(track, localStreamRef.current);
+  });
+
+  localVideoRef.current.srcObject = localStreamRef.current;
+
+  const answer = await peerRef.current.createAnswer();
+  await peerRef.current.setLocalDescription(answer);
+
+  socketRef.current.emit('answer-call', { to: incomingCall.from, answer });
+
+  setIncomingCall(null);
+  setIsCallActive(true);
+};
 
   const rejectCall = () => {
     setIncomingCall(null);
