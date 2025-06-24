@@ -7,7 +7,6 @@ import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import './chat.css';
 
-
 const Chat = () => {
   const [selectedUser, setSelectedUser] = useState(
     JSON.parse(localStorage.getItem('selected-chat-user')) || null
@@ -67,11 +66,11 @@ const Chat = () => {
     });
 
     socketRef.current.on('call-answered', ({ answer }) => {
-      peerRef.current.setRemoteDescription(new RTCSessionDescription(answer));
+      peerRef.current?.setRemoteDescription(new RTCSessionDescription(answer));
     });
 
     socketRef.current.on('ice-candidate', ({ candidate }) => {
-      peerRef.current.addIceCandidate(new RTCIceCandidate(candidate));
+      peerRef.current?.addIceCandidate(new RTCIceCandidate(candidate));
     });
 
     socketRef.current.on('call-ended', () => {
@@ -140,36 +139,8 @@ const Chat = () => {
     const { from, offer, type } = incomingCall;
     const isVideo = type === 'video';
 
-    peerRef.current = new RTCPeerConnection({
-      iceServers: [{ urls: 'stun:stun.l.google.com:19302' }],
-    });
-
-    peerRef.current.onicecandidate = (e) => {
-      if (e.candidate) {
-        socketRef.current.emit('ice-candidate', {
-          to: from,
-          candidate: e.candidate,
-        });
-      }
-    };
-
-    peerRef.current.ontrack = (event) => {
-      remoteVideoRef.current.srcObject = event.streams[0];
-    };
-
+    await createPeer(false, from, isVideo);
     await peerRef.current.setRemoteDescription(new RTCSessionDescription(offer));
-
-    localStreamRef.current = await navigator.mediaDevices.getUserMedia({
-      video: isVideo,
-      audio: true,
-    });
-
-    localStreamRef.current.getTracks().forEach((track) => {
-      peerRef.current.addTrack(track, localStreamRef.current);
-    });
-
-    localVideoRef.current.srcObject = localStreamRef.current;
-
     const answer = await peerRef.current.createAnswer();
     await peerRef.current.setLocalDescription(answer);
     socketRef.current.emit('answer-call', { to: from, answer });
@@ -181,6 +152,7 @@ const Chat = () => {
 
   const rejectCall = () => {
     setIncomingCall(null);
+    socketRef.current.emit('reject-call', { to: incomingCall?.from });
   };
 
   const endCall = () => {
@@ -191,8 +163,8 @@ const Chat = () => {
       localStreamRef.current.getTracks().forEach(track => track.stop());
     }
     localStreamRef.current = null;
-    localVideoRef.current.srcObject = null;
-    remoteVideoRef.current.srcObject = null;
+    if (localVideoRef.current) localVideoRef.current.srcObject = null;
+    if (remoteVideoRef.current) remoteVideoRef.current.srcObject = null;
 
     setIsCallActive(false);
     setCallType(null);
@@ -228,7 +200,7 @@ const Chat = () => {
               <div className="chat-header-right">
                 <button className="call-btn" onClick={() => startCall(false)}>🎤</button>
                 <button className="call-btn" onClick={() => startCall(true)}>🎥</button>
-                <button className="call-btn" onClick={endCall}>❌</button>
+                {isCallActive && <button className="call-btn" onClick={endCall}>❌</button>}
               </div>
             </div>
 
@@ -253,8 +225,8 @@ const Chat = () => {
       {incomingCall && (
         <div className="incoming-call-popup">
           <p>Incoming {incomingCall.type} call...</p>
-          <button onClick={acceptCall}>✅ Accept</button>
-          <button onClick={rejectCall}>❌ Reject</button>
+          <button onClick={acceptCall} className="accept-btn">✅ Accept</button>
+          <button onClick={rejectCall} className="reject-btn">❌ Reject</button>
         </div>
       )}
 
