@@ -37,7 +37,7 @@ const Chat = () => {
 
   useEffect(() => {
     if (!socketRef.current) {
-      socketRef.current = io('https://mygram-1-1nua.onrender.com');
+      socketRef.current = io('http://localhost:8000');
     }
   }, []);
 
@@ -62,12 +62,16 @@ const Chat = () => {
     if (isCurrentChat) setMessages(prev => [...prev, msg]);
   });
 
+
+
+
   socket.on('incoming-call', ({ from, offer, type }) => {
+    console.log('📞 Incoming call received:', { from, type });
     setIncomingCall({ from, offer, type });
     setCallType(type);
   });
 
-  socket.on('call-answered', ({ answer }) => {
+  socket.on('answer-call', ({ answer }) => {
   peerRef.current?.setRemoteDescription(new RTCSessionDescription(answer));
 });
 
@@ -154,7 +158,7 @@ const Chat = () => {
     await peerRef.current.setRemoteDescription(new RTCSessionDescription(offer));
     const answer = await peerRef.current.createAnswer();
     await peerRef.current.setLocalDescription(answer);
-    socketRef.current.emit('answer-call', { to: from, answer });
+    socketRef.current.emit('call-answered', { to: from, answer });
 
     setIncomingCall(null);
     setCallType(type);
