@@ -14,48 +14,52 @@ const ChatWindow = ({ selectedUser, triggerForwardMode, socket, chatList, messag
   const messagesEndRef = useRef(null);
 
   useEffect(() => {
-    if (!selectedUser || !loggedUser?.token || !socket) return;
+  if (!socket || !selectedUser || !loggedUser?.token) return;
 
-    socket.emit('join', currentUserId);
+  socket.emit('join', currentUserId);
 
-    fetch(`https://mygram-1-1nua.onrender.com/chat/${selectedUser._id}`, {
-      headers: { Authorization: `Bearer ${loggedUser.token}` },
-    })
-      .then((res) => (res.ok ? res.json() : []))
-      .then((data) => setMessages(data || []))
-      .catch((err) => console.error('Fetch chat error:', err));
+  fetch(`https://mygram-1-1nua.onrender.com/chat/${selectedUser._id}`, {
+    headers: { Authorization: `Bearer ${loggedUser.token}` },
+  })
+    .then((res) => (res.ok ? res.json() : []))
+    .then((data) => setMessages(data || []))
+    .catch((err) => console.error('Fetch chat error:', err));
 
-    socket.on('receiveMessage', (msg) => {
-      const isCurrentChat =
-        (msg.sender === currentUserId && msg.receiver === selectedUser._id) ||
-        (msg.receiver === currentUserId && msg.sender === selectedUser._id);
+  const handleReceive = (msg) => {
+    const isCurrentChat =
+      (msg.sender === currentUserId && msg.receiver === selectedUser._id) ||
+      (msg.receiver === currentUserId && msg.sender === selectedUser._id);
 
-      if (isCurrentChat) {
-        setMessages((prev) => [...prev, msg]);
-      }
-    });
+    if (isCurrentChat) {
+      setMessages((prev) => [...prev, msg]);
+    }
+  };
 
-    return () => {
-      socket.off('receiveMessage');
-    };
-  }, [selectedUser, loggedUser, socket]);
+  socket.on('receiveMessage', handleReceive);
+
+  return () => {
+    socket.off('receiveMessage', handleReceive);
+  };
+}, [socket, selectedUser?._id, currentUserId, loggedUser?.token]);
+
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  const sendMessage = () => {
-    if (!input.trim()) return;
+const sendMessage = () => {
+  if (!input.trim()) return;
 
-    const msg = {
-      senderId: currentUserId,
-      receiverId: selectedUser._id,
-      message: input.trim(),
-    };
-
-    socket.emit('sendMessage', msg);
-    setInput('');
+  const msg = {
+    senderId: currentUserId,
+    receiverId: selectedUser._id,
+    message: input.trim(),
   };
+
+  socket.emit('sendMessage', msg); // Don't add to messages directly
+  setInput('');
+};
+
 
   const handleFileUpload = async (e) => {
     const file = e.target.files[0];
