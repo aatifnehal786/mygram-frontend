@@ -14,7 +14,7 @@ const ChatWindow = ({ selectedUser, triggerForwardMode, socket, chatList, messag
   const messagesEndRef = useRef(null);
 
   useEffect(() => {
-  if (!socket || !selectedUser || !loggedUser?.token) return;
+  if (!selectedUser || !loggedUser?.token || !socket) return;
 
   socket.emit('join', currentUserId);
 
@@ -24,23 +24,8 @@ const ChatWindow = ({ selectedUser, triggerForwardMode, socket, chatList, messag
     .then((res) => (res.ok ? res.json() : []))
     .then((data) => setMessages(data || []))
     .catch((err) => console.error('Fetch chat error:', err));
+}, [selectedUser, loggedUser?.token, socket]);
 
-  const handleReceive = (msg) => {
-    const isCurrentChat =
-      (msg.sender === currentUserId && msg.receiver === selectedUser._id) ||
-      (msg.receiver === currentUserId && msg.sender === selectedUser._id);
-
-    if (isCurrentChat) {
-      setMessages((prev) => [...prev, msg]);
-    }
-  };
-
-  socket.on('receiveMessage', handleReceive);
-
-  return () => {
-    socket.off('receiveMessage', handleReceive);
-  };
-}, [socket, selectedUser?._id, currentUserId, loggedUser?.token]);
 
 
   useEffect(() => {
