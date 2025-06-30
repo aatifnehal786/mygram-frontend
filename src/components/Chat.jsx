@@ -37,7 +37,7 @@ const Chat = () => {
 
   useEffect(() => {
     if (!socketRef.current) {
-      socketRef.current = io('http://localhost:8000');
+      socketRef.current = io('https://mygram-1-1nua.onrender.com');
     }
   }, []);
 
