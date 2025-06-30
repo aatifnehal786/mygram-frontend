@@ -133,7 +133,7 @@ const ChatWindow = ({ selectedUser, triggerForwardMode, socket, chatList, messag
                 key={msg._id || idx}
                 className={`message-bubble ${isOwnMessage ? 'own' : 'other'}`}
               >
-                {msg.message && <p>{msg.message}</p>}
+                 <p>{msg.message}</p>
                 {msg.fileType?.includes('image') && <img src={msg.fileUrl} className="chat-img" />}
                 {msg.fileType?.includes('video') && <video src={msg.fileUrl} controls className="chat-video" />}
                 {msg.fileType?.includes('audio') && <audio src={msg.fileUrl} controls className="chat-audio" />}
