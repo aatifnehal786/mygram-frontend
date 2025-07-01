@@ -71,9 +71,11 @@ const Chat = () => {
     setCallType(type);
   });
 
-  socket.on('answer-call', ({ answer }) => {
+socket.on('call-answered', ({ answer }) => {
+  console.log('✅ Call answered received:', answer);
   peerRef.current?.setRemoteDescription(new RTCSessionDescription(answer));
 });
+
 
 
   socket.on('call-rejected', () => {
