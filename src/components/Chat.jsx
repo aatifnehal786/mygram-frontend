@@ -8,34 +8,38 @@ import 'react-toastify/dist/ReactToastify.css';
 import './chat.css';
 
 const Chat = () => {
-  const [selectedUser, setSelectedUser] = useState(
-    JSON.parse(localStorage.getItem('selected-chat-user')) || null
-  );
+  const [selectedUser, setSelectedUser] = useState(JSON.parse(localStorage.getItem('selected-chat-user')) || null);
   const [chatList, setChatList] = useState([]);
   const [messages, setMessages] = useState([]);
   const [view, setView] = useState(window.innerWidth < 768 ? 'sidebar' : 'full');
-  const [loggedUser] = useState(JSON.parse(sessionStorage.getItem('token-auth')));
+  const [loggedUser, setLoggedUser] = useState(JSON.parse(sessionStorage.getItem('token-auth')));
   const [incomingCall, setIncomingCall] = useState(null);
   const [callType, setCallType] = useState(null);
   const [isCallActive, setIsCallActive] = useState(false);
+  const [callDuration, setCallDuration] = useState('00:00');
+
+  const iceCandidateQueueRef = useRef([]);
+  const intervalRef = useRef(null);
+  const callStartTime = useRef(null);
 
   const socketRef = useRef(null);
   const peerRef = useRef(null);
   const localVideoRef = useRef(null);
   const remoteVideoRef = useRef(null);
   const localStreamRef = useRef(null);
-  const iceCandidateQueueRef = useRef([]);
 
   useEffect(() => {
-    if (!socketRef.current) {
-      socketRef.current = io('https://mygram-1-1nua.onrender.com');
-    }
-
     const handleResize = () => {
       if (window.innerWidth >= 768) setView('full');
     };
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  useEffect(() => {
+    if (!socketRef.current) {
+      socketRef.current = io('https://mygram-1-1nua.onrender.com');
+    }
   }, []);
 
   useEffect(() => {
@@ -48,8 +52,9 @@ const Chat = () => {
       .then(data => setMessages(data || []))
       .catch(err => console.error('Fetch chat error:', err));
 
+    socketRef.current.emit('join', loggedUser.userid);
+
     const socket = socketRef.current;
-    socket.emit('join', loggedUser.userid);
 
     socket.on('receiveMessage', (msg) => {
       const isCurrentChat =
@@ -96,6 +101,28 @@ const Chat = () => {
     };
   }, [selectedUser, loggedUser?.token]);
 
+  useEffect(() => {
+    if (isCallActive) {
+      if (localStreamRef.current && localVideoRef.current) {
+        localVideoRef.current.srcObject = localStreamRef.current;
+      }
+      if (remoteVideoRef.current && peerRef.current?._remoteStream) {
+        remoteVideoRef.current.srcObject = peerRef.current._remoteStream;
+      }
+
+      callStartTime.current = Date.now();
+      intervalRef.current = setInterval(() => {
+        const diff = Math.floor((Date.now() - callStartTime.current) / 1000);
+        const minutes = String(Math.floor(diff / 60)).padStart(2, '0');
+        const seconds = String(diff % 60).padStart(2, '0');
+        setCallDuration(`${minutes}:${seconds}`);
+      }, 1000);
+    } else {
+      clearInterval(intervalRef.current);
+      setCallDuration('00:00');
+    }
+  }, [isCallActive]);
+
   const createPeer = async (isInitiator, remoteUserId, isVideo) => {
     peerRef.current = new RTCPeerConnection({
       iceServers: [{ urls: 'stun:stun.l.google.com:19302' }],
@@ -110,39 +137,36 @@ const Chat = () => {
       }
     };
 
+    peerRef.current._remoteStream = new MediaStream();
     peerRef.current.ontrack = (event) => {
+      peerRef.current._remoteStream.addTrack(event.track);
       if (remoteVideoRef.current) {
-        remoteVideoRef.current.srcObject = event.streams[0];
+        remoteVideoRef.current.srcObject = peerRef.current._remoteStream;
       }
     };
 
-    try {
-      localStreamRef.current = await navigator.mediaDevices.getUserMedia({
-        video: isVideo,
-        audio: true,
+    localStreamRef.current = await navigator.mediaDevices.getUserMedia({
+      video: isVideo,
+      audio: true,
+    });
+
+    localStreamRef.current.getTracks().forEach((track) => {
+      peerRef.current.addTrack(track, localStreamRef.current);
+    });
+
+    if (localVideoRef.current) {
+      localVideoRef.current.srcObject = localStreamRef.current;
+    }
+
+    if (isInitiator) {
+      const offer = await peerRef.current.createOffer();
+      await peerRef.current.setLocalDescription(offer);
+      socketRef.current.emit('call-user', {
+        from: loggedUser.userid,
+        to: selectedUser._id,
+        offer,
+        type: isVideo ? 'video' : 'audio',
       });
-
-      localStreamRef.current.getTracks().forEach((track) => {
-        peerRef.current.addTrack(track, localStreamRef.current);
-      });
-
-      if (localVideoRef.current) {
-        localVideoRef.current.srcObject = localStreamRef.current;
-      }
-
-      if (isInitiator) {
-        const offer = await peerRef.current.createOffer();
-        await peerRef.current.setLocalDescription(offer);
-        socketRef.current.emit('call-user', {
-          from: loggedUser.userid,
-          to: selectedUser._id,
-          offer,
-          type: isVideo ? 'video' : 'audio',
-        });
-      }
-    } catch (err) {
-      console.error("Error accessing media devices:", err);
-      toast.error("Permission denied or device error");
     }
   };
 
@@ -176,8 +200,8 @@ const Chat = () => {
   };
 
   const rejectCall = () => {
-    socketRef.current.emit('reject-call', { to: incomingCall?.from });
     setIncomingCall(null);
+    socketRef.current.emit('reject-call', { to: incomingCall?.from });
   };
 
   const endCall = () => {
@@ -242,6 +266,7 @@ const Chat = () => {
               <div className="video-chat">
                 <video ref={localVideoRef} autoPlay muted className="video-local" />
                 <video ref={remoteVideoRef} autoPlay className="video-remote" />
+                <div className="call-timer">{callDuration}</div>
               </div>
             )}
           </div>
