@@ -14,28 +14,36 @@ const Chat = () => {
   const [chatList, setChatList] = useState([]);
   const [messages, setMessages] = useState([]);
   const [view, setView] = useState(window.innerWidth < 768 ? 'sidebar' : 'full');
-  const [loggedUser] = useState(JSON.parse(sessionStorage.getItem('token-auth')));
+  const [loggedUser, setLoggedUser] = useState(
+    JSON.parse(sessionStorage.getItem('token-auth'))
+  );
   const [incomingCall, setIncomingCall] = useState(null);
   const [callType, setCallType] = useState(null);
   const [isCallActive, setIsCallActive] = useState(false);
+  const [callStartTime, setCallStartTime] = useState(null);
+  const [callDuration, setCallDuration] = useState('00:00');
 
+  const intervalRef = useRef(null);
+  const ringtoneRef = useRef(null);
+  const iceCandidateQueueRef = useRef([]);
   const socketRef = useRef(null);
   const peerRef = useRef(null);
   const localVideoRef = useRef(null);
   const remoteVideoRef = useRef(null);
   const localStreamRef = useRef(null);
-  const iceCandidateQueueRef = useRef([]);
 
   useEffect(() => {
-    if (!socketRef.current) {
-      socketRef.current = io('https://mygram-1-1nua.onrender.com');
-    }
-
     const handleResize = () => {
       if (window.innerWidth >= 768) setView('full');
     };
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  useEffect(() => {
+    if (!socketRef.current) {
+      socketRef.current = io('https://mygram-1-1nua.onrender.com');
+    }
   }, []);
 
   useEffect(() => {
@@ -48,8 +56,9 @@ const Chat = () => {
       .then(data => setMessages(data || []))
       .catch(err => console.error('Fetch chat error:', err));
 
+    socketRef.current.emit('join', loggedUser.userid);
+
     const socket = socketRef.current;
-    socket.emit('join', loggedUser.userid);
 
     socket.on('receiveMessage', (msg) => {
       const isCurrentChat =
@@ -61,10 +70,13 @@ const Chat = () => {
     socket.on('incoming-call', ({ from, offer, type }) => {
       setIncomingCall({ from, offer, type });
       setCallType(type);
+      ringtoneRef.current?.play();
     });
 
     socket.on('call-answered', ({ answer }) => {
-      peerRef.current?.setRemoteDescription(new RTCSessionDescription(answer));
+      if (peerRef.current) {
+        peerRef.current.setRemoteDescription(new RTCSessionDescription(answer));
+      }
     });
 
     socket.on('call-rejected', () => {
@@ -96,6 +108,28 @@ const Chat = () => {
     };
   }, [selectedUser, loggedUser?.token]);
 
+  useEffect(() => {
+    if (isCallActive) {
+      if (localVideoRef.current && localStreamRef.current) {
+        localVideoRef.current.srcObject = localStreamRef.current;
+      }
+      if (remoteVideoRef.current && peerRef.current?._remoteStream) {
+        remoteVideoRef.current.srcObject = peerRef.current._remoteStream;
+      }
+
+      setCallStartTime(Date.now());
+      intervalRef.current = setInterval(() => {
+        const diff = Math.floor((Date.now() - callStartTime) / 1000);
+        const minutes = String(Math.floor(diff / 60)).padStart(2, '0');
+        const seconds = String(diff % 60).padStart(2, '0');
+        setCallDuration(`${minutes}:${seconds}`);
+      }, 1000);
+    } else {
+      clearInterval(intervalRef.current);
+      setCallDuration('00:00');
+    }
+  }, [isCallActive]);
+
   const createPeer = async (isInitiator, remoteUserId, isVideo) => {
     peerRef.current = new RTCPeerConnection({
       iceServers: [{ urls: 'stun:stun.l.google.com:19302' }],
@@ -111,38 +145,31 @@ const Chat = () => {
     };
 
     peerRef.current.ontrack = (event) => {
+      const remoteStream = event.streams[0];
+      peerRef.current._remoteStream = remoteStream;
       if (remoteVideoRef.current) {
-        remoteVideoRef.current.srcObject = event.streams[0];
+        remoteVideoRef.current.srcObject = remoteStream;
       }
     };
 
-    try {
-      localStreamRef.current = await navigator.mediaDevices.getUserMedia({
-        video: isVideo,
-        audio: true,
+    localStreamRef.current = await navigator.mediaDevices.getUserMedia({
+      video: isVideo,
+      audio: true,
+    });
+
+    localStreamRef.current.getTracks().forEach((track) => {
+      peerRef.current.addTrack(track, localStreamRef.current);
+    });
+
+    if (isInitiator) {
+      const offer = await peerRef.current.createOffer();
+      await peerRef.current.setLocalDescription(offer);
+      socketRef.current.emit('call-user', {
+        from: loggedUser.userid,
+        to: selectedUser._id,
+        offer,
+        type: isVideo ? 'video' : 'audio',
       });
-
-      localStreamRef.current.getTracks().forEach((track) => {
-        peerRef.current.addTrack(track, localStreamRef.current);
-      });
-
-      if (localVideoRef.current) {
-        localVideoRef.current.srcObject = localStreamRef.current;
-      }
-
-      if (isInitiator) {
-        const offer = await peerRef.current.createOffer();
-        await peerRef.current.setLocalDescription(offer);
-        socketRef.current.emit('call-user', {
-          from: loggedUser.userid,
-          to: selectedUser._id,
-          offer,
-          type: isVideo ? 'video' : 'audio',
-        });
-      }
-    } catch (err) {
-      console.error("Error accessing media devices:", err);
-      toast.error("Permission denied or device error");
     }
   };
 
@@ -154,6 +181,9 @@ const Chat = () => {
 
   const acceptCall = async () => {
     if (!incomingCall) return;
+
+    ringtoneRef.current?.pause();
+    ringtoneRef.current.currentTime = 0;
 
     const { from, offer, type } = incomingCall;
     const isVideo = type === 'video';
@@ -176,11 +206,14 @@ const Chat = () => {
   };
 
   const rejectCall = () => {
-    socketRef.current.emit('reject-call', { to: incomingCall?.from });
+    ringtoneRef.current?.pause();
+    ringtoneRef.current.currentTime = 0;
     setIncomingCall(null);
+    socketRef.current.emit('reject-call', { to: incomingCall?.from });
   };
 
   const endCall = () => {
+    clearInterval(intervalRef.current);
     if (peerRef.current) peerRef.current.close();
     peerRef.current = null;
 
@@ -194,11 +227,13 @@ const Chat = () => {
 
     setIsCallActive(false);
     setCallType(null);
+    setCallDuration('00:00');
     socketRef.current.emit('end-call', { to: selectedUser._id });
   };
 
   return (
     <div className="chat-layout">
+      <audio ref={ringtoneRef} src="/ringtone.mp3" loop />
       <div className="chat-grid">
         {(view === 'sidebar' || view === 'full') && (
           <ChatSidebar
@@ -226,7 +261,12 @@ const Chat = () => {
               <div className="chat-header-right">
                 <button className="call-btn" onClick={() => startCall(false)}>🎤</button>
                 <button className="call-btn" onClick={() => startCall(true)}>🎥</button>
-                {isCallActive && <button className="call-btn" onClick={endCall}>❌</button>}
+                {isCallActive && (
+                  <>
+                    <span className="call-timer">{callDuration}</span>
+                    <button className="call-btn" onClick={endCall}>❌</button>
+                  </>
+                )}
               </div>
             </div>
 
