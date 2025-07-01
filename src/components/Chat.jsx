@@ -1,4 +1,4 @@
-// 📁 Chat.js
+// 📁 Chat.jsx
 import React, { useState, useEffect, useRef } from 'react';
 import ChatSidebar from './ChatSideBar';
 import ChatWindow from './ChatWindow';
@@ -20,8 +20,8 @@ const Chat = () => {
   const [incomingCall, setIncomingCall] = useState(null);
   const [callType, setCallType] = useState(null);
   const [isCallActive, setIsCallActive] = useState(false);
-  const iceCandidateQueueRef = useRef([]);
 
+  const iceCandidateQueueRef = useRef([]);
   const socketRef = useRef(null);
   const peerRef = useRef(null);
   const localVideoRef = useRef(null);
@@ -43,93 +43,74 @@ const Chat = () => {
   }, []);
 
   useEffect(() => {
-  if (!selectedUser || !loggedUser?.token) return;
+    if (!selectedUser || !loggedUser?.token) return;
 
-  fetch(`https://mygram-1-1nua.onrender.com/chat/${selectedUser._id}`, {
-    headers: { Authorization: `Bearer ${loggedUser.token}` },
-  })
-    .then(res => res.ok ? res.json() : [])
-    .then(data => setMessages(data || []))
-    .catch(err => console.error('Fetch chat error:', err));
+    fetch(`https://mygram-1-1nua.onrender.com/chat/${selectedUser._id}`, {
+      headers: { Authorization: `Bearer ${loggedUser.token}` },
+    })
+      .then(res => res.ok ? res.json() : [])
+      .then(data => setMessages(data || []))
+      .catch(err => console.error('Fetch chat error:', err));
 
-  socketRef.current.emit('join', loggedUser.userid);
+    socketRef.current.emit('join', loggedUser.userid);
 
-  const socket = socketRef.current;
+    const socket = socketRef.current;
 
-  socket.on('receiveMessage', (msg) => {
-    const isCurrentChat =
-      (msg.sender === loggedUser.userid && msg.receiver === selectedUser._id) ||
-      (msg.receiver === loggedUser.userid && msg.sender === selectedUser._id);
-    if (isCurrentChat) setMessages(prev => [...prev, msg]);
-  });
-
-
-
-
-  socket.on('incoming-call', ({ from, offer, type }) => {
-    console.log('📞 Incoming call received:', { from, type });
-    setIncomingCall({ from, offer, type });
-    setCallType(type);
-  });
-
-socket.on('call-answered', ({ answer }) => {
-  console.log('✅ Call answered received:', answer);
-  peerRef.current?.setRemoteDescription(new RTCSessionDescription(answer));
-});
-
-
-
-  socket.on('call-rejected', () => {
-    endCall();
-    setIncomingCall(null);
-    toast.info('Call was rejected.');
-  });
-
- socket.on('ice-candidate', ({ candidate }) => {
-  console.log("Received ICE candidate:", candidate);
-  const peer = peerRef.current;
-
-  if (peer && peer.remoteDescription && peer.remoteDescription.type) {
-    peer.addIceCandidate(new RTCIceCandidate(candidate))
-      .then(() => console.log("✅ ICE candidate added"))
-      .catch(err => console.error("❌ Failed to add ICE candidate:", err));
-  } else {
-    console.log("⏳ Remote description not set yet. Queuing ICE candidate.");
-    iceCandidateQueueRef.current.push(candidate);
-  }
-});
-
-
-  socket.on('call-ended', () => {
-    endCall();
-  });
-
-  return () => {
-    socket.off('receiveMessage');
-    socket.off('incoming-call');
-    socket.off('call-answered');
-    socket.off('call-rejected'); // ✅ IMPORTANT
-    socket.off('ice-candidate');
-    socket.off('call-ended');
-  };
-}, [selectedUser, loggedUser?.token]); // ✅ ADD loggedUser as dependency
-
-
-useEffect(() => {
-  if (isCallActive && localVideoRef.current && localStreamRef.current) {
-    localVideoRef.current.srcObject = localStreamRef.current;
-  }
-
-  if (isCallActive && remoteVideoRef.current && peerRef.current) {
-    const remoteStream = new MediaStream();
-    peerRef.current.getReceivers().forEach(receiver => {
-      if (receiver.track) remoteStream.addTrack(receiver.track);
+    socket.on('receiveMessage', (msg) => {
+      const isCurrentChat =
+        (msg.sender === loggedUser.userid && msg.receiver === selectedUser._id) ||
+        (msg.receiver === loggedUser.userid && msg.sender === selectedUser._id);
+      if (isCurrentChat) setMessages(prev => [...prev, msg]);
     });
-    remoteVideoRef.current.srcObject = remoteStream;
-  }
-}, [isCallActive]);
 
+    socket.on('incoming-call', ({ from, offer, type }) => {
+      setIncomingCall({ from, offer, type });
+      setCallType(type);
+    });
 
+    socket.on('call-answered', ({ answer }) => {
+      peerRef.current?.setRemoteDescription(new RTCSessionDescription(answer));
+    });
+
+    socket.on('call-rejected', () => {
+      endCall();
+      setIncomingCall(null);
+      toast.info('Call was rejected.');
+    });
+
+    socket.on('ice-candidate', ({ candidate }) => {
+      const peer = peerRef.current;
+      if (peer && peer.remoteDescription?.type) {
+        peer.addIceCandidate(new RTCIceCandidate(candidate)).catch(console.error);
+      } else {
+        iceCandidateQueueRef.current.push(candidate);
+      }
+    });
+
+    socket.on('call-ended', () => {
+      endCall();
+    });
+
+    return () => {
+      socket.off('receiveMessage');
+      socket.off('incoming-call');
+      socket.off('call-answered');
+      socket.off('call-rejected');
+      socket.off('ice-candidate');
+      socket.off('call-ended');
+    };
+  }, [selectedUser, loggedUser?.token]);
+
+  useEffect(() => {
+    if (isCallActive) {
+      if (localStreamRef.current && localVideoRef.current) {
+        localVideoRef.current.srcObject = localStreamRef.current;
+      }
+      if (peerRef.current?._remoteStream && remoteVideoRef.current) {
+        remoteVideoRef.current.srcObject = peerRef.current._remoteStream;
+      }
+    }
+  }, [isCallActive]);
 
   const createPeer = async (isInitiator, remoteUserId, isVideo) => {
     peerRef.current = new RTCPeerConnection({
@@ -146,7 +127,11 @@ useEffect(() => {
     };
 
     peerRef.current.ontrack = (event) => {
-      remoteVideoRef.current.srcObject = event.streams[0];
+      const remoteStream = event.streams[0];
+      peerRef.current._remoteStream = remoteStream;
+      if (remoteVideoRef.current) {
+        remoteVideoRef.current.srcObject = remoteStream;
+      }
     };
 
     localStreamRef.current = await navigator.mediaDevices.getUserMedia({
@@ -158,8 +143,6 @@ useEffect(() => {
       peerRef.current.addTrack(track, localStreamRef.current);
     });
 
-    // localVideoRef.current.srcObject = localStreamRef.current;
-
     if (isInitiator) {
       const offer = await peerRef.current.createOffer();
       await peerRef.current.setLocalDescription(offer);
@@ -167,7 +150,7 @@ useEffect(() => {
         from: loggedUser.userid,
         to: selectedUser._id,
         offer,
-        type: isVideo ? 'video' : 'audio'
+        type: isVideo ? 'video' : 'audio',
       });
     }
   };
@@ -186,13 +169,11 @@ useEffect(() => {
 
     await createPeer(false, from, isVideo);
     await peerRef.current.setRemoteDescription(new RTCSessionDescription(offer));
-    // ✅ Add any queued candidates now
-iceCandidateQueueRef.current.forEach(candidate => {
-  peerRef.current.addIceCandidate(new RTCIceCandidate(candidate))
-    .then(() => console.log("✅ Queued ICE candidate added"))
-    .catch(err => console.error("❌ Error adding queued ICE candidate:", err));
-});
-iceCandidateQueueRef.current = []; // Clear queue
+
+    iceCandidateQueueRef.current.forEach(candidate => {
+      peerRef.current.addIceCandidate(new RTCIceCandidate(candidate)).catch(console.error);
+    });
+    iceCandidateQueueRef.current = [];
 
     const answer = await peerRef.current.createAnswer();
     await peerRef.current.setLocalDescription(answer);
@@ -216,6 +197,7 @@ iceCandidateQueueRef.current = []; // Clear queue
       localStreamRef.current.getTracks().forEach(track => track.stop());
     }
     localStreamRef.current = null;
+
     if (localVideoRef.current) localVideoRef.current.srcObject = null;
     if (remoteVideoRef.current) remoteVideoRef.current.srcObject = null;
 
