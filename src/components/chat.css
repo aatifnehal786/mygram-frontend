@@ -123,10 +123,10 @@
 .video-chat {
   position: absolute;
   bottom: 20px;
-  right: 20px;
+  right: 40px;
   z-index: 999;
   display: flex;
-  gap: 10px;
+  row-gap: 20px;
   background: black;
   padding: 10px;
   border-radius: 8px;
@@ -136,7 +136,7 @@
   width: 200px;
   height: 150px;
   object-fit: cover;
-  background: #000;
+  background: #ddd;
 }
 
 
