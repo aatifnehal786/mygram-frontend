@@ -127,13 +127,23 @@ const Chat = () => {
   }, [isCallActive]);
 
   const createPeer = async (isInitiator, remoteUserId, isVideo) => {
-  // Create new peer connection
+  // 🔁 Clean up any existing peer connection
+  if (peerRef.current) {
+    try {
+      peerRef.current.close();
+    } catch (err) {
+      console.warn('Error closing previous peer connection:', err);
+    }
+    peerRef.current = null;
+  }
+
+  // ✅ Create a new peer connection
   const peer = new RTCPeerConnection({
     iceServers: [{ urls: 'stun:stun.l.google.com:19302' }],
   });
   peerRef.current = peer;
 
-  // Setup remote stream container early
+  // Setup remote stream container
   const remoteStream = new MediaStream();
   peer._remoteStream = remoteStream;
 
@@ -153,23 +163,22 @@ const Chat = () => {
     }
   };
 
-  // Get local media stream
+  // 📷 Get local media
   localStreamRef.current = await navigator.mediaDevices.getUserMedia({
     video: isVideo,
     audio: true,
   });
 
-  // Set local video view
   if (localVideoRef.current) {
     localVideoRef.current.srcObject = localStreamRef.current;
   }
 
-  // Add tracks to peer connection (must come after peer is set)
   localStreamRef.current.getTracks().forEach((track) => {
-    peer.addTrack(track, localStreamRef.current);
+    if (peer.signalingState !== 'closed') {
+      peer.addTrack(track, localStreamRef.current);
+    }
   });
 
-  // If caller, create and send offer
   if (isInitiator) {
     const offer = await peer.createOffer();
     await peer.setLocalDescription(offer);
@@ -181,6 +190,7 @@ const Chat = () => {
     });
   }
 };
+
 
 
   const startCall = (isVideo) => {
