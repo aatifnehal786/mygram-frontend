@@ -103,6 +103,22 @@ socket.on('call-answered', ({ answer }) => {
 }, [selectedUser, loggedUser?.token]); // ✅ ADD loggedUser as dependency
 
 
+useEffect(() => {
+  if (isCallActive && localVideoRef.current && localStreamRef.current) {
+    localVideoRef.current.srcObject = localStreamRef.current;
+  }
+
+  if (isCallActive && remoteVideoRef.current && peerRef.current) {
+    const remoteStream = new MediaStream();
+    peerRef.current.getReceivers().forEach(receiver => {
+      if (receiver.track) remoteStream.addTrack(receiver.track);
+    });
+    remoteVideoRef.current.srcObject = remoteStream;
+  }
+}, [isCallActive]);
+
+
+
   const createPeer = async (isInitiator, remoteUserId, isVideo) => {
     peerRef.current = new RTCPeerConnection({
       iceServers: [{ urls: 'stun:stun.l.google.com:19302' }],
@@ -130,7 +146,7 @@ socket.on('call-answered', ({ answer }) => {
       peerRef.current.addTrack(track, localStreamRef.current);
     });
 
-    localVideoRef.current.srcObject = localStreamRef.current;
+    // localVideoRef.current.srcObject = localStreamRef.current;
 
     if (isInitiator) {
       const offer = await peerRef.current.createOffer();
