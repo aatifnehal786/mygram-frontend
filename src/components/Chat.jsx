@@ -1,4 +1,3 @@
-// 📁 Chat.jsx
 import React, { useState, useEffect, useRef } from 'react';
 import ChatSidebar from './ChatSideBar';
 import ChatWindow from './ChatWindow';
@@ -22,14 +21,14 @@ const Chat = () => {
   const [isCallActive, setIsCallActive] = useState(false);
   const [callDuration, setCallDuration] = useState('00:00');
 
-  const iceCandidateQueueRef = useRef([]);
   const socketRef = useRef(null);
   const peerRef = useRef(null);
   const localVideoRef = useRef(null);
   const remoteVideoRef = useRef(null);
   const localStreamRef = useRef(null);
   const intervalRef = useRef(null);
-  const callStartTimeRef = useRef(null);
+  const callStartTime = useRef(null);
+  const iceCandidateQueueRef = useRef([]);
 
   useEffect(() => {
     const handleResize = () => {
@@ -55,9 +54,8 @@ const Chat = () => {
       .then(data => setMessages(data || []))
       .catch(err => console.error('Fetch chat error:', err));
 
-    socketRef.current.emit('join', loggedUser.userid);
-
     const socket = socketRef.current;
+    socket.emit('join', loggedUser.userid);
 
     socket.on('receiveMessage', (msg) => {
       const isCurrentChat =
@@ -106,16 +104,16 @@ const Chat = () => {
 
   useEffect(() => {
     if (isCallActive) {
-      if (localVideoRef.current && localStreamRef.current) {
+      if (localStreamRef.current && localVideoRef.current) {
         localVideoRef.current.srcObject = localStreamRef.current;
       }
-      if (remoteVideoRef.current && peerRef.current?._remoteStream) {
+      if (peerRef.current?._remoteStream && remoteVideoRef.current) {
         remoteVideoRef.current.srcObject = peerRef.current._remoteStream;
       }
 
-      callStartTimeRef.current = Date.now();
+      callStartTime.current = Date.now();
       intervalRef.current = setInterval(() => {
-        const diff = Math.floor((Date.now() - callStartTimeRef.current) / 1000);
+        const diff = Math.floor((Date.now() - callStartTime.current) / 1000);
         const minutes = String(Math.floor(diff / 60)).padStart(2, '0');
         const seconds = String(diff % 60).padStart(2, '0');
         setCallDuration(`${minutes}:${seconds}`);
@@ -127,71 +125,59 @@ const Chat = () => {
   }, [isCallActive]);
 
   const createPeer = async (isInitiator, remoteUserId, isVideo) => {
-  // 🔁 Clean up any existing peer connection
-  if (peerRef.current) {
-    try {
-      peerRef.current.close();
-    } catch (err) {
-      console.warn('Error closing previous peer connection:', err);
-    }
-    peerRef.current = null;
-  }
-
-  // ✅ Create a new peer connection
-  const peer = new RTCPeerConnection({
-    iceServers: [{ urls: 'stun:stun.l.google.com:19302' }],
-  });
-  peerRef.current = peer;
-
-  // Setup remote stream container
-  const remoteStream = new MediaStream();
-  peer._remoteStream = remoteStream;
-
-  peer.onicecandidate = (e) => {
-    if (e.candidate) {
-      socketRef.current.emit('ice-candidate', {
-        to: remoteUserId,
-        candidate: e.candidate,
-      });
-    }
-  };
-
-  peer.ontrack = (event) => {
-    remoteStream.addTrack(event.track);
-    if (remoteVideoRef.current) {
-      remoteVideoRef.current.srcObject = remoteStream;
-    }
-  };
-
-  // 📷 Get local media
-  localStreamRef.current = await navigator.mediaDevices.getUserMedia({
-    video: isVideo,
-    audio: true,
-  });
-
-  if (localVideoRef.current) {
-    localVideoRef.current.srcObject = localStreamRef.current;
-  }
-
-  localStreamRef.current.getTracks().forEach((track) => {
-    if (peer.signalingState !== 'closed') {
-      peer.addTrack(track, localStreamRef.current);
-    }
-  });
-
-  if (isInitiator) {
-    const offer = await peer.createOffer();
-    await peer.setLocalDescription(offer);
-    socketRef.current.emit('call-user', {
-      from: loggedUser.userid,
-      to: remoteUserId,
-      offer,
-      type: isVideo ? 'video' : 'audio',
+    peerRef.current = new RTCPeerConnection({
+      iceServers: [{ urls: 'stun:stun.l.google.com:19302' }],
     });
-  }
-};
 
+    peerRef.current._remoteStream = new MediaStream();
 
+    peerRef.current.onicecandidate = (e) => {
+      if (e.candidate) {
+        socketRef.current.emit('ice-candidate', {
+          to: remoteUserId,
+          candidate: e.candidate,
+        });
+      }
+    };
+
+    peerRef.current.ontrack = (event) => {
+      event.streams[0].getTracks().forEach((track) => {
+        peerRef.current._remoteStream.addTrack(track);
+      });
+      if (remoteVideoRef.current) {
+        remoteVideoRef.current.srcObject = peerRef.current._remoteStream;
+      }
+    };
+
+    try {
+      localStreamRef.current = await navigator.mediaDevices.getUserMedia({
+        video: isVideo,
+        audio: true,
+      });
+
+      localStreamRef.current.getTracks().forEach((track) => {
+        peerRef.current.addTrack(track, localStreamRef.current);
+      });
+
+      if (localVideoRef.current) {
+        localVideoRef.current.srcObject = localStreamRef.current;
+      }
+
+      if (isInitiator) {
+        const offer = await peerRef.current.createOffer();
+        await peerRef.current.setLocalDescription(offer);
+        socketRef.current.emit('call-user', {
+          from: loggedUser.userid,
+          to: selectedUser._id,
+          offer,
+          type: isVideo ? 'video' : 'audio',
+        });
+      }
+    } catch (err) {
+      console.error('Error accessing media devices:', err);
+      toast.error('Media device access denied');
+    }
+  };
 
   const startCall = (isVideo) => {
     createPeer(true, selectedUser._id, isVideo);
@@ -289,7 +275,7 @@ const Chat = () => {
               <div className="video-chat">
                 <video ref={localVideoRef} autoPlay muted className="video-local" />
                 <video ref={remoteVideoRef} autoPlay className="video-remote" />
-                <div className="call-timer">{callDuration}</div>
+                <p className="call-timer">⏱️ {callDuration}</p>
               </div>
             )}
           </div>
