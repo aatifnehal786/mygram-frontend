@@ -20,6 +20,7 @@ const Chat = () => {
   const [incomingCall, setIncomingCall] = useState(null);
   const [callType, setCallType] = useState(null);
   const [isCallActive, setIsCallActive] = useState(false);
+  const iceCandidateQueueRef = useRef([]);
 
   const socketRef = useRef(null);
   const peerRef = useRef(null);
@@ -84,9 +85,20 @@ socket.on('call-answered', ({ answer }) => {
     toast.info('Call was rejected.');
   });
 
-  socket.on('ice-candidate', ({ candidate }) => {
-    peerRef.current?.addIceCandidate(new RTCIceCandidate(candidate));
-  });
+ socket.on('ice-candidate', ({ candidate }) => {
+  console.log("Received ICE candidate:", candidate);
+  const peer = peerRef.current;
+
+  if (peer && peer.remoteDescription && peer.remoteDescription.type) {
+    peer.addIceCandidate(new RTCIceCandidate(candidate))
+      .then(() => console.log("✅ ICE candidate added"))
+      .catch(err => console.error("❌ Failed to add ICE candidate:", err));
+  } else {
+    console.log("⏳ Remote description not set yet. Queuing ICE candidate.");
+    iceCandidateQueueRef.current.push(candidate);
+  }
+});
+
 
   socket.on('call-ended', () => {
     endCall();
@@ -174,6 +186,14 @@ useEffect(() => {
 
     await createPeer(false, from, isVideo);
     await peerRef.current.setRemoteDescription(new RTCSessionDescription(offer));
+    // ✅ Add any queued candidates now
+iceCandidateQueueRef.current.forEach(candidate => {
+  peerRef.current.addIceCandidate(new RTCIceCandidate(candidate))
+    .then(() => console.log("✅ Queued ICE candidate added"))
+    .catch(err => console.error("❌ Error adding queued ICE candidate:", err));
+});
+iceCandidateQueueRef.current = []; // Clear queue
+
     const answer = await peerRef.current.createAnswer();
     await peerRef.current.setLocalDescription(answer);
     socketRef.current.emit('call-answered', { to: from, answer });
