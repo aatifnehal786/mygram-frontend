@@ -102,20 +102,31 @@ socket.on('call-answered', ({ answer }) => {
   };
 }, [selectedUser, loggedUser?.token]); // ✅ ADD loggedUser as dependency
 
+let remoteStream = null;
+
+peerRef.current.ontrack = (event) => {
+  console.log("🎥 ontrack event received");
+  remoteStream = event.streams[0];
+  if (remoteVideoRef.current) {
+    remoteVideoRef.current.srcObject = remoteStream;
+  } else {
+    // Store it temporarily if the element doesn't exist yet
+    peerRef.current._remoteStream = remoteStream;
+  }
+};
 
 useEffect(() => {
-  if (isCallActive && localVideoRef.current && localStreamRef.current) {
-    localVideoRef.current.srcObject = localStreamRef.current;
-  }
+  if (isCallActive) {
+    if (localStreamRef.current && localVideoRef.current) {
+      localVideoRef.current.srcObject = localStreamRef.current;
+    }
 
-  if (isCallActive && remoteVideoRef.current && peerRef.current) {
-    const remoteStream = new MediaStream();
-    peerRef.current.getReceivers().forEach(receiver => {
-      if (receiver.track) remoteStream.addTrack(receiver.track);
-    });
-    remoteVideoRef.current.srcObject = remoteStream;
+    if (peerRef.current && remoteVideoRef.current && peerRef.current._remoteStream) {
+      remoteVideoRef.current.srcObject = peerRef.current._remoteStream;
+    }
   }
 }, [isCallActive]);
+
 
 
 
