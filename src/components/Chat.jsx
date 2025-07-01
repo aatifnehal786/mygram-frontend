@@ -8,24 +8,20 @@ import 'react-toastify/dist/ReactToastify.css';
 import './chat.css';
 
 const Chat = () => {
-  const [selectedUser, setSelectedUser] = useState(
-    JSON.parse(localStorage.getItem('selected-chat-user')) || null
-  );
+  const [selectedUser, setSelectedUser] = useState(JSON.parse(localStorage.getItem('selected-chat-user')) || null);
   const [chatList, setChatList] = useState([]);
   const [messages, setMessages] = useState([]);
   const [view, setView] = useState(window.innerWidth < 768 ? 'sidebar' : 'full');
-  const [loggedUser, setLoggedUser] = useState(
-    JSON.parse(sessionStorage.getItem('token-auth'))
-  );
+  const [loggedUser, setLoggedUser] = useState(JSON.parse(sessionStorage.getItem('token-auth')));
   const [incomingCall, setIncomingCall] = useState(null);
   const [callType, setCallType] = useState(null);
   const [isCallActive, setIsCallActive] = useState(false);
-  const [callStartTime, setCallStartTime] = useState(null);
   const [callDuration, setCallDuration] = useState('00:00');
 
-  const intervalRef = useRef(null);
-  const ringtoneRef = useRef(null);
   const iceCandidateQueueRef = useRef([]);
+  const intervalRef = useRef(null);
+  const callStartTime = useRef(null);
+
   const socketRef = useRef(null);
   const peerRef = useRef(null);
   const localVideoRef = useRef(null);
@@ -70,13 +66,10 @@ const Chat = () => {
     socket.on('incoming-call', ({ from, offer, type }) => {
       setIncomingCall({ from, offer, type });
       setCallType(type);
-      ringtoneRef.current?.play();
     });
 
     socket.on('call-answered', ({ answer }) => {
-      if (peerRef.current) {
-        peerRef.current.setRemoteDescription(new RTCSessionDescription(answer));
-      }
+      peerRef.current?.setRemoteDescription(new RTCSessionDescription(answer));
     });
 
     socket.on('call-rejected', () => {
@@ -107,69 +100,55 @@ const Chat = () => {
       socket.off('call-ended');
     };
   }, [selectedUser, loggedUser?.token]);
-useEffect(() => {
-  if (isCallActive) {
-    if (localVideoRef.current && localStreamRef.current) {
-      localVideoRef.current.srcObject = localStreamRef.current;
+
+  useEffect(() => {
+    if (isCallActive) {
+      if (localStreamRef.current && localVideoRef.current) {
+        localVideoRef.current.srcObject = localStreamRef.current;
+      }
+      if (remoteVideoRef.current && peerRef.current?._remoteStream) {
+        remoteVideoRef.current.srcObject = peerRef.current._remoteStream;
+      }
+
+      callStartTime.current = Date.now();
+      intervalRef.current = setInterval(() => {
+        const diff = Math.floor((Date.now() - callStartTime.current) / 1000);
+        const minutes = String(Math.floor(diff / 60)).padStart(2, '0');
+        const seconds = String(diff % 60).padStart(2, '0');
+        setCallDuration(`${minutes}:${seconds}`);
+      }, 1000);
+    } else {
+      clearInterval(intervalRef.current);
+      setCallDuration('00:00');
     }
-    if (remoteVideoRef.current && peerRef.current?._remoteStream) {
-      remoteVideoRef.current.srcObject = peerRef.current._remoteStream;
-    }
-
-    const startTime = Date.now(); // ✅ Local variable ensures correct value
-    setCallStartTime(startTime);
-
-    intervalRef.current = setInterval(() => {
-      const diff = Math.floor((Date.now() - startTime) / 1000);
-      const minutes = String(Math.floor(diff / 60)).padStart(2, '0');
-      const seconds = String(diff % 60).padStart(2, '0');
-      setCallDuration(`${minutes}:${seconds}`);
-    }, 1000);
-  } else {
-    clearInterval(intervalRef.current);
-    setCallDuration('00:00');
-  }
-
-  return () => clearInterval(intervalRef.current); // ✅ cleanup
-}, [isCallActive]);
-
+  }, [isCallActive]);
 
   const createPeer = async (isInitiator, remoteUserId, isVideo) => {
-  console.log(`[createPeer] isInitiator: ${isInitiator}, isVideo: ${isVideo}`);
-  
-  peerRef.current = new RTCPeerConnection({
-    iceServers: [{ urls: 'stun:stun.l.google.com:19302' }],
-  });
+    peerRef.current = new RTCPeerConnection({
+      iceServers: [{ urls: 'stun:stun.l.google.com:19302' }],
+    });
 
-  peerRef.current.onicecandidate = (e) => {
-    if (e.candidate) {
-      socketRef.current.emit('ice-candidate', {
-        to: remoteUserId,
-        candidate: e.candidate,
-      });
-    }
-  };
+    peerRef.current.onicecandidate = (e) => {
+      if (e.candidate) {
+        socketRef.current.emit('ice-candidate', {
+          to: remoteUserId,
+          candidate: e.candidate,
+        });
+      }
+    };
 
-  peerRef.current.ontrack = (event) => {
-    console.log("📹 ontrack fired. Remote stream received.");
-    const remoteStream = event.streams[0];
-    peerRef.current._remoteStream = remoteStream;
+    peerRef.current._remoteStream = new MediaStream();
+    peerRef.current.ontrack = (event) => {
+      peerRef.current._remoteStream.addTrack(event.track);
+      if (remoteVideoRef.current) {
+        remoteVideoRef.current.srcObject = peerRef.current._remoteStream;
+      }
+    };
 
-    if (remoteVideoRef.current) {
-      remoteVideoRef.current.srcObject = remoteStream;
-      console.log("✅ remoteVideoRef.srcObject set");
-    } else {
-      console.warn("⚠️ remoteVideoRef is null!");
-    }
-  };
-
-  try {
     localStreamRef.current = await navigator.mediaDevices.getUserMedia({
       video: isVideo,
       audio: true,
     });
-
-    console.log("🎥 Got local stream", localStreamRef.current);
 
     localStreamRef.current.getTracks().forEach((track) => {
       peerRef.current.addTrack(track, localStreamRef.current);
@@ -177,9 +156,6 @@ useEffect(() => {
 
     if (localVideoRef.current) {
       localVideoRef.current.srcObject = localStreamRef.current;
-      console.log("✅ localVideoRef.srcObject set");
-    } else {
-      console.warn("⚠️ localVideoRef is null!");
     }
 
     if (isInitiator) {
@@ -192,13 +168,7 @@ useEffect(() => {
         type: isVideo ? 'video' : 'audio',
       });
     }
-
-  } catch (err) {
-    console.error("❌ Error accessing media devices:", err);
-    toast.error("Failed to access camera or microphone");
-  }
-};
-
+  };
 
   const startCall = (isVideo) => {
     createPeer(true, selectedUser._id, isVideo);
@@ -208,9 +178,6 @@ useEffect(() => {
 
   const acceptCall = async () => {
     if (!incomingCall) return;
-
-    ringtoneRef.current?.pause();
-    ringtoneRef.current.currentTime = 0;
 
     const { from, offer, type } = incomingCall;
     const isVideo = type === 'video';
@@ -233,14 +200,11 @@ useEffect(() => {
   };
 
   const rejectCall = () => {
-    ringtoneRef.current?.pause();
-    ringtoneRef.current.currentTime = 0;
     setIncomingCall(null);
     socketRef.current.emit('reject-call', { to: incomingCall?.from });
   };
 
   const endCall = () => {
-    clearInterval(intervalRef.current);
     if (peerRef.current) peerRef.current.close();
     peerRef.current = null;
 
@@ -254,13 +218,11 @@ useEffect(() => {
 
     setIsCallActive(false);
     setCallType(null);
-    setCallDuration('00:00');
     socketRef.current.emit('end-call', { to: selectedUser._id });
   };
 
   return (
     <div className="chat-layout">
-      <audio ref={ringtoneRef} src="/ringtone.mp3" loop />
       <div className="chat-grid">
         {(view === 'sidebar' || view === 'full') && (
           <ChatSidebar
@@ -288,12 +250,7 @@ useEffect(() => {
               <div className="chat-header-right">
                 <button className="call-btn" onClick={() => startCall(false)}>🎤</button>
                 <button className="call-btn" onClick={() => startCall(true)}>🎥</button>
-                {isCallActive && (
-                  <>
-                    <span className="call-timer">{callDuration}</span>
-                    <button className="call-btn" onClick={endCall}>❌</button>
-                  </>
-                )}
+                {isCallActive && <button className="call-btn" onClick={endCall}>❌</button>}
               </div>
             </div>
 
@@ -309,6 +266,7 @@ useEffect(() => {
               <div className="video-chat">
                 <video ref={localVideoRef} autoPlay muted className="video-local" />
                 <video ref={remoteVideoRef} autoPlay className="video-remote" />
+                <div className="call-timer">{callDuration}</div>
               </div>
             )}
           </div>
