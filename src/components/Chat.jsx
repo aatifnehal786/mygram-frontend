@@ -107,59 +107,80 @@ const Chat = () => {
       socket.off('call-ended');
     };
   }, [selectedUser, loggedUser?.token]);
-
-  useEffect(() => {
-    if (isCallActive) {
-      if (localVideoRef.current && localStreamRef.current) {
-        localVideoRef.current.srcObject = localStreamRef.current;
-      }
-      if (remoteVideoRef.current && peerRef.current?._remoteStream) {
-        remoteVideoRef.current.srcObject = peerRef.current._remoteStream;
-      }
-
-      setCallStartTime(Date.now());
-      intervalRef.current = setInterval(() => {
-        const diff = Math.floor((Date.now() - callStartTime) / 1000);
-        const minutes = String(Math.floor(diff / 60)).padStart(2, '0');
-        const seconds = String(diff % 60).padStart(2, '0');
-        setCallDuration(`${minutes}:${seconds}`);
-      }, 1000);
-    } else {
-      clearInterval(intervalRef.current);
-      setCallDuration('00:00');
+useEffect(() => {
+  if (isCallActive) {
+    if (localVideoRef.current && localStreamRef.current) {
+      localVideoRef.current.srcObject = localStreamRef.current;
     }
-  }, [isCallActive]);
+    if (remoteVideoRef.current && peerRef.current?._remoteStream) {
+      remoteVideoRef.current.srcObject = peerRef.current._remoteStream;
+    }
+
+    const startTime = Date.now(); // ✅ Local variable ensures correct value
+    setCallStartTime(startTime);
+
+    intervalRef.current = setInterval(() => {
+      const diff = Math.floor((Date.now() - startTime) / 1000);
+      const minutes = String(Math.floor(diff / 60)).padStart(2, '0');
+      const seconds = String(diff % 60).padStart(2, '0');
+      setCallDuration(`${minutes}:${seconds}`);
+    }, 1000);
+  } else {
+    clearInterval(intervalRef.current);
+    setCallDuration('00:00');
+  }
+
+  return () => clearInterval(intervalRef.current); // ✅ cleanup
+}, [isCallActive]);
+
 
   const createPeer = async (isInitiator, remoteUserId, isVideo) => {
-    peerRef.current = new RTCPeerConnection({
-      iceServers: [{ urls: 'stun:stun.l.google.com:19302' }],
-    });
+  console.log(`[createPeer] isInitiator: ${isInitiator}, isVideo: ${isVideo}`);
+  
+  peerRef.current = new RTCPeerConnection({
+    iceServers: [{ urls: 'stun:stun.l.google.com:19302' }],
+  });
 
-    peerRef.current.onicecandidate = (e) => {
-      if (e.candidate) {
-        socketRef.current.emit('ice-candidate', {
-          to: remoteUserId,
-          candidate: e.candidate,
-        });
-      }
-    };
+  peerRef.current.onicecandidate = (e) => {
+    if (e.candidate) {
+      socketRef.current.emit('ice-candidate', {
+        to: remoteUserId,
+        candidate: e.candidate,
+      });
+    }
+  };
 
-    peerRef.current.ontrack = (event) => {
-      const remoteStream = event.streams[0];
-      peerRef.current._remoteStream = remoteStream;
-      if (remoteVideoRef.current) {
-        remoteVideoRef.current.srcObject = remoteStream;
-      }
-    };
+  peerRef.current.ontrack = (event) => {
+    console.log("📹 ontrack fired. Remote stream received.");
+    const remoteStream = event.streams[0];
+    peerRef.current._remoteStream = remoteStream;
 
+    if (remoteVideoRef.current) {
+      remoteVideoRef.current.srcObject = remoteStream;
+      console.log("✅ remoteVideoRef.srcObject set");
+    } else {
+      console.warn("⚠️ remoteVideoRef is null!");
+    }
+  };
+
+  try {
     localStreamRef.current = await navigator.mediaDevices.getUserMedia({
       video: isVideo,
       audio: true,
     });
 
+    console.log("🎥 Got local stream", localStreamRef.current);
+
     localStreamRef.current.getTracks().forEach((track) => {
       peerRef.current.addTrack(track, localStreamRef.current);
     });
+
+    if (localVideoRef.current) {
+      localVideoRef.current.srcObject = localStreamRef.current;
+      console.log("✅ localVideoRef.srcObject set");
+    } else {
+      console.warn("⚠️ localVideoRef is null!");
+    }
 
     if (isInitiator) {
       const offer = await peerRef.current.createOffer();
@@ -171,7 +192,13 @@ const Chat = () => {
         type: isVideo ? 'video' : 'audio',
       });
     }
-  };
+
+  } catch (err) {
+    console.error("❌ Error accessing media devices:", err);
+    toast.error("Failed to access camera or microphone");
+  }
+};
+
 
   const startCall = (isVideo) => {
     createPeer(true, selectedUser._id, isVideo);
