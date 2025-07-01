@@ -120,6 +120,12 @@
   cursor: pointer;
   margin-right: 10px;
 }
+.video-chat {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  position: fixed;
+}
 .video-local,
 .video-remote {
   width: 200px;
@@ -129,12 +135,7 @@
   border: 1px solid #ccc;
   margin: 5px;
 }
-.video-chat {
-  display: flex;
-  gap: 10px;
-  align-items: center;
-  position: absolute;
-}
+
 .call-timer {
   font-size: 16px;
   font-weight: bold;
