@@ -249,13 +249,23 @@ const Chat = () => {
           <div className="chat-main">
             <div className="chat-header">
               <div className="chat-header-left">
-                {window.innerWidth < 768 && (
-                  <button className="toggle-btn" onClick={() => setView('sidebar')}>
-                    ← Back
-                  </button>
-                )}
-                <h3>{selectedUser.username}</h3>
-              </div>
+  {window.innerWidth < 768 && (
+    <button className="toggle-btn" onClick={() => setView('sidebar')}>
+      ← Back
+    </button>
+  )}
+  <div>
+    <h3>{selectedUser.username}</h3>
+    {selectedUser.isOnline ? (
+      <p className="status online">🟢 Online</p>
+    ) : (
+      <p className="status offline">
+        🕒 Last seen {new Date(selectedUser.lastSeen).toLocaleString()}
+      </p>
+    )}
+  </div>
+</div>
+
               <div className="chat-header-right">
                 <button className="call-btn" onClick={() => startCall(false)}>🎤</button>
                 <button className="call-btn" onClick={() => startCall(true)}>🎥</button>

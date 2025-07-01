@@ -9,6 +9,21 @@
   flex: 1;
 }
 
+.status {
+  font-size: 12px;
+  margin: 2px 0;
+  color: gray;
+}
+
+.status.online {
+  color: green;
+}
+
+.status.offline {
+  color: darkred;
+}
+
+
 /* Back button for small screens */
 .toggle-btn2 {
   display: block;
