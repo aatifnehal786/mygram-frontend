@@ -1,10 +1,7 @@
 .chat{
   position: relative;
 }
-.chat-layout {
-  display: flex;
-  height: 100vh;
-}
+
 
 /* Default to row layout */
 .chat-container,
@@ -30,17 +27,7 @@
 
 /* 📁 chat-layout.css */
 
-.chat-layout {
-  display: flex;
-  flex-direction: column;
-  height: 100vh;
-}
 
-.chat-grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  height: 100%;
-}
 
 @media (min-width: 768px) {
   .chat-grid {
@@ -57,16 +44,87 @@
   border-bottom: 1px solid #ddd;
 }
 
+/* 📁 chat.css */
+
+.chat-layout {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.chat-grid {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+.chat-main {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  position: relative;
+}
+
 .chat-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 10px 16px;
-  background-color: #f5f5f5;
-  border-bottom: 1px solid #ddd;
-  position: relative;
-  z-index: 1;
+  padding: 10px;
+  background-color: #f0f2f5;
+  border-bottom: 1px solid #ccc;
 }
+
+
+
+.video-chat {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: #000;
+  flex: 1;
+}
+
+
+
+.call-timer {
+  position: absolute;
+  top: 10px;
+  right: 15px;
+  background: rgba(0, 0, 0, 0.7);
+  padding: 6px 10px;
+  border-radius: 6px;
+  color: white;
+  font-size: 14px;
+  z-index: 3;
+}
+
+.incoming-call-popup {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: white;
+  border: 1px solid #ccc;
+  padding: 15px 20px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  z-index: 999;
+}
+
+.accept-btn,
+.reject-btn {
+  padding: 6px 12px;
+  font-size: 14px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+
 
 .chat-header-left {
   display: flex;
