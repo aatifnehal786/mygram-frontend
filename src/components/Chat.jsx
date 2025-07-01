@@ -14,32 +14,28 @@ const Chat = () => {
   const [chatList, setChatList] = useState([]);
   const [messages, setMessages] = useState([]);
   const [view, setView] = useState(window.innerWidth < 768 ? 'sidebar' : 'full');
-  const [loggedUser, setLoggedUser] = useState(
-    JSON.parse(sessionStorage.getItem('token-auth'))
-  );
+  const [loggedUser] = useState(JSON.parse(sessionStorage.getItem('token-auth')));
   const [incomingCall, setIncomingCall] = useState(null);
   const [callType, setCallType] = useState(null);
   const [isCallActive, setIsCallActive] = useState(false);
 
-  const iceCandidateQueueRef = useRef([]);
   const socketRef = useRef(null);
   const peerRef = useRef(null);
   const localVideoRef = useRef(null);
   const remoteVideoRef = useRef(null);
   const localStreamRef = useRef(null);
-
-  useEffect(() => {
-    const handleResize = () => {
-      if (window.innerWidth >= 768) setView('full');
-    };
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
+  const iceCandidateQueueRef = useRef([]);
 
   useEffect(() => {
     if (!socketRef.current) {
       socketRef.current = io('https://mygram-1-1nua.onrender.com');
     }
+
+    const handleResize = () => {
+      if (window.innerWidth >= 768) setView('full');
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
   }, []);
 
   useEffect(() => {
@@ -52,9 +48,8 @@ const Chat = () => {
       .then(data => setMessages(data || []))
       .catch(err => console.error('Fetch chat error:', err));
 
-    socketRef.current.emit('join', loggedUser.userid);
-
     const socket = socketRef.current;
+    socket.emit('join', loggedUser.userid);
 
     socket.on('receiveMessage', (msg) => {
       const isCurrentChat =
@@ -101,17 +96,6 @@ const Chat = () => {
     };
   }, [selectedUser, loggedUser?.token]);
 
-  useEffect(() => {
-    if (isCallActive) {
-      if (localStreamRef.current && localVideoRef.current) {
-        localVideoRef.current.srcObject = localStreamRef.current;
-      }
-      if (peerRef.current?._remoteStream && remoteVideoRef.current) {
-        remoteVideoRef.current.srcObject = peerRef.current._remoteStream;
-      }
-    }
-  }, [isCallActive]);
-
   const createPeer = async (isInitiator, remoteUserId, isVideo) => {
     peerRef.current = new RTCPeerConnection({
       iceServers: [{ urls: 'stun:stun.l.google.com:19302' }],
@@ -127,31 +111,38 @@ const Chat = () => {
     };
 
     peerRef.current.ontrack = (event) => {
-      const remoteStream = event.streams[0];
-      peerRef.current._remoteStream = remoteStream;
       if (remoteVideoRef.current) {
-        remoteVideoRef.current.srcObject = remoteStream;
+        remoteVideoRef.current.srcObject = event.streams[0];
       }
     };
 
-    localStreamRef.current = await navigator.mediaDevices.getUserMedia({
-      video: isVideo,
-      audio: true,
-    });
-
-    localStreamRef.current.getTracks().forEach((track) => {
-      peerRef.current.addTrack(track, localStreamRef.current);
-    });
-
-    if (isInitiator) {
-      const offer = await peerRef.current.createOffer();
-      await peerRef.current.setLocalDescription(offer);
-      socketRef.current.emit('call-user', {
-        from: loggedUser.userid,
-        to: selectedUser._id,
-        offer,
-        type: isVideo ? 'video' : 'audio',
+    try {
+      localStreamRef.current = await navigator.mediaDevices.getUserMedia({
+        video: isVideo,
+        audio: true,
       });
+
+      localStreamRef.current.getTracks().forEach((track) => {
+        peerRef.current.addTrack(track, localStreamRef.current);
+      });
+
+      if (localVideoRef.current) {
+        localVideoRef.current.srcObject = localStreamRef.current;
+      }
+
+      if (isInitiator) {
+        const offer = await peerRef.current.createOffer();
+        await peerRef.current.setLocalDescription(offer);
+        socketRef.current.emit('call-user', {
+          from: loggedUser.userid,
+          to: selectedUser._id,
+          offer,
+          type: isVideo ? 'video' : 'audio',
+        });
+      }
+    } catch (err) {
+      console.error("Error accessing media devices:", err);
+      toast.error("Permission denied or device error");
     }
   };
 
@@ -185,8 +176,8 @@ const Chat = () => {
   };
 
   const rejectCall = () => {
-    setIncomingCall(null);
     socketRef.current.emit('reject-call', { to: incomingCall?.from });
+    setIncomingCall(null);
   };
 
   const endCall = () => {
