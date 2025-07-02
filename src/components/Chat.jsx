@@ -30,6 +30,7 @@ const Chat = () => {
   const callStartTime = useRef(null);
   const iceCandidateQueueRef = useRef([]);
 
+  // Handle window resize for mobile/desktop view
   useEffect(() => {
     const handleResize = () => {
       if (window.innerWidth >= 768) setView('full');
@@ -38,12 +39,14 @@ const Chat = () => {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
+  // Initialize socket connection
   useEffect(() => {
     if (!socketRef.current) {
       socketRef.current = io('https://mygram-1-1nua.onrender.com');
     }
   }, []);
 
+  // Set up socket listeners and fetch chat messages
   useEffect(() => {
     if (!selectedUser || !loggedUser?.token) return;
 
@@ -102,15 +105,13 @@ const Chat = () => {
     };
   }, [selectedUser, loggedUser?.token]);
 
+  // Handle call timer and video stream attachment
   useEffect(() => {
     if (isCallActive) {
       if (localStreamRef.current && localVideoRef.current) {
         localVideoRef.current.srcObject = localStreamRef.current;
       }
-      if (peerRef.current?._remoteStream && remoteVideoRef.current) {
-        remoteVideoRef.current.srcObject = peerRef.current._remoteStream;
-      }
-
+      // Timer
       callStartTime.current = Date.now();
       intervalRef.current = setInterval(() => {
         const diff = Math.floor((Date.now() - callStartTime.current) / 1000);
@@ -124,13 +125,13 @@ const Chat = () => {
     }
   }, [isCallActive]);
 
+  // Create WebRTC peer connection
   const createPeer = async (isInitiator, remoteUserId, isVideo) => {
     peerRef.current = new RTCPeerConnection({
       iceServers: [{ urls: 'stun:stun.l.google.com:19302' }],
     });
 
-    peerRef.current._remoteStream = new MediaStream();
-
+    // Handle ICE candidates
     peerRef.current.onicecandidate = (e) => {
       if (e.candidate) {
         socketRef.current.emit('ice-candidate', {
@@ -140,12 +141,11 @@ const Chat = () => {
       }
     };
 
+    // Handle remote stream
     peerRef.current.ontrack = (event) => {
-      event.streams[0].getTracks().forEach((track) => {
-        peerRef.current._remoteStream.addTrack(track);
-      });
+      // Directly use the stream provided by ontrack
       if (remoteVideoRef.current) {
-        remoteVideoRef.current.srcObject = peerRef.current._remoteStream;
+        remoteVideoRef.current.srcObject = event.streams[0];
       }
     };
 
@@ -179,12 +179,14 @@ const Chat = () => {
     }
   };
 
+  // Start a call
   const startCall = (isVideo) => {
     createPeer(true, selectedUser._id, isVideo);
     setCallType(isVideo ? 'video' : 'audio');
     setIsCallActive(true);
   };
 
+  // Accept an incoming call
   const acceptCall = async () => {
     if (!incomingCall) return;
 
@@ -194,6 +196,7 @@ const Chat = () => {
     await createPeer(false, from, isVideo);
     await peerRef.current.setRemoteDescription(new RTCSessionDescription(offer));
 
+    // Add any queued ICE candidates
     iceCandidateQueueRef.current.forEach(candidate => {
       peerRef.current.addIceCandidate(new RTCIceCandidate(candidate)).catch(console.error);
     });
@@ -208,11 +211,13 @@ const Chat = () => {
     setIsCallActive(true);
   };
 
+  // Reject an incoming call
   const rejectCall = () => {
     setIncomingCall(null);
     socketRef.current.emit('reject-call', { to: incomingCall?.from });
   };
 
+  // End the call
   const endCall = () => {
     if (peerRef.current) peerRef.current.close();
     peerRef.current = null;
@@ -249,22 +254,22 @@ const Chat = () => {
           <div className="chat-main">
             <div className="chat-header">
               <div className="chat-header-left">
-  {window.innerWidth < 768 && (
-    <button className="toggle-btn" onClick={() => setView('sidebar')}>
-      ← Back
-    </button>
-  )}
-  <div>
-    <h3>{selectedUser.username}</h3>
-    {selectedUser.isOnline ? (
-      <p className="status online">🟢 Online</p>
-    ) : (
-      <p className="status offline">
-        🕒 Last seen {new Date(selectedUser.lastSeen).toLocaleString()}
-      </p>
-    )}
-  </div>
-</div>
+                {window.innerWidth < 768 && (
+                  <button className="toggle-btn" onClick={() => setView('sidebar')}>
+                    ← Back
+                  </button>
+                )}
+                <div>
+                  <h3>{selectedUser.username}</h3>
+                  {selectedUser.isOnline ? (
+                    <p className="status online">🟢 Online</p>
+                  ) : (
+                    <p className="status offline">
+                      🕒 Last seen {new Date(selectedUser.lastSeen).toLocaleString()}
+                    </p>
+                  )}
+                </div>
+              </div>
 
               <div className="chat-header-right">
                 <button className="call-btn" onClick={() => startCall(false)}>🎤</button>
@@ -283,8 +288,21 @@ const Chat = () => {
 
             {isCallActive && (
               <div className="video-chat">
-                <video ref={localVideoRef} autoPlay muted className="video-local" />
-                <video ref={remoteVideoRef} autoPlay className="video-remote" />
+                <video
+                  ref={localVideoRef}
+                  autoPlay
+                  muted
+                  playsInline
+                  className="video-local"
+                  style={{ width: 160, height: 120, background: '#222', borderRadius: 8 }}
+                />
+                <video
+                  ref={remoteVideoRef}
+                  autoPlay
+                  playsInline
+                  className="video-remote"
+                  style={{ width: 400, height: 300, background: '#000', borderRadius: 8 }}
+                />
                 <p className="call-timer">⏱️ {callDuration}</p>
               </div>
             )}

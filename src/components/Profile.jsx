@@ -186,6 +186,7 @@ export default function Profile() {
               borderRadius: "50%",
               objectFit: "cover",
               border: "2px solid #ccc",
+              marginTop: '15px',
             }}
           />
           {isOwnProfile && (
