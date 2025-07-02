@@ -128,8 +128,9 @@ const Chat = () => {
   // Create WebRTC peer connection
   const createPeer = async (isInitiator, remoteUserId, isVideo) => {
     peerRef.current = new RTCPeerConnection({
-      iceServers: [{ urls: 'stun:stun.l.google.com:19302' }],
-    });
+    iceServers: [
+    { urls: 'stun:stun.l.google.com:19302' },
+    { urls: 'turn:your.turn.server:3478', username: 'user', credential: 'pass' }]})
 
     // Handle ICE candidates
     peerRef.current.onicecandidate = (e) => {
