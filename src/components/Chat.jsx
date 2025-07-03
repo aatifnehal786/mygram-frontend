@@ -276,6 +276,8 @@ const startCall = async (isVideo) => {
 
     socketRef.current.emit('end-call', { to: selectedUser._id });
   };
+console.log("🎥 local stream tracks:", localStreamRef.current?.getTracks());
+console.log("📺 remote stream tracks:", remoteStreamRef.current?.getTracks());
 
   console.log("remoteVideoRef.current.srcObject:", remoteVideoRef.current?.srcObject);
   console.log(
