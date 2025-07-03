@@ -349,14 +349,11 @@ console.log("📺 remote stream tracks:", remoteStreamRef.current?.getTracks());
 
                 />
                 <video
-                  ref={(ref) => {
-                    remoteVideoRef.current = ref;
-                    console.log("📺 remoteVideoRef mounted:", ref);
-                  }}
-                  autoPlay
-                  playsInline
-                  className="video-remote"
-                />
+                    autoPlay
+                    controls
+                    style={{ width: 300, height: 200, border: '2px solid red' }}
+                    srcObject={remoteVideoRef.current?.srcObject}/>
+
 
                 <p className="call-timer">⏱️ {callDuration}</p>
               </div>

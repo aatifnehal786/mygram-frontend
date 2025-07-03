@@ -627,6 +627,7 @@ body.dark .chat-header-info h2,p{
   position: absolute;
   bottom: 20px;
   right: 100px;
+  left: 100px;
   z-index: 999;
   display: flex;
   row-gap: 20px;
