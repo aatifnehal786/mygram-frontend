@@ -17,7 +17,7 @@ const Chat = () => {
     JSON.parse(sessionStorage.getItem('token-auth'))
   );
   const [incomingCall, setIncomingCall] = useState(null);
-  const [callType, setCallType] = useState(null);
+  
   const [isCallActive, setIsCallActive] = useState(false);
   const [callDuration, setCallDuration] = useState('00:00');
 
@@ -67,9 +67,10 @@ const Chat = () => {
       if (isCurrentChat) setMessages(prev => [...prev, msg]);
     });
 
-    socket.on('incoming-call', ({ from, offer, type }) => {
-      setIncomingCall({ from, offer, type });
-      setCallType(type);
+    socket.on('incoming-call', ({ from, offer }) => {
+     setIncomingCall({ from, offer }); // no `type` needed
+
+      
     });
 
     socket.on('call-answered', ({ answer }) => {
@@ -151,10 +152,11 @@ const Chat = () => {
     };
 
     try {
-      localStreamRef.current = await navigator.mediaDevices.getUserMedia({
-        video: isVideo,
-        audio: true,
-      });
+     localStreamRef.current = await navigator.mediaDevices.getUserMedia({
+  video: true,
+  audio: false,
+});
+
 
       localStreamRef.current.getTracks().forEach((track) => {
         peerRef.current.addTrack(track, localStreamRef.current);
@@ -167,12 +169,13 @@ const Chat = () => {
       if (isInitiator) {
         const offer = await peerRef.current.createOffer();
         await peerRef.current.setLocalDescription(offer);
-        socketRef.current.emit('call-user', {
-          from: loggedUser.userid,
-          to: selectedUser._id,
-          offer,
-          type: isVideo ? 'video' : 'audio',
-        });
+       socketRef.current.emit('call-user', {
+        from: loggedUser.userid,
+        to: selectedUser._id,
+        offer,
+        type: 'video',
+});
+
       }
     } catch (err) {
       console.error('Error accessing media devices:', err);
@@ -183,7 +186,7 @@ const Chat = () => {
   // Start a call
   const startCall = (isVideo) => {
     createPeer(true, selectedUser._id, isVideo);
-    setCallType(isVideo ? 'video' : 'audio');
+    
     setIsCallActive(true);
   };
 
@@ -208,7 +211,7 @@ const Chat = () => {
     socketRef.current.emit('call-answered', { to: from, answer });
 
     setIncomingCall(null);
-    setCallType(type);
+    
     setIsCallActive(true);
   };
 
@@ -232,7 +235,7 @@ const Chat = () => {
     if (remoteVideoRef.current) remoteVideoRef.current.srcObject = null;
 
     setIsCallActive(false);
-    setCallType(null);
+
     socketRef.current.emit('end-call', { to: selectedUser._id });
   };
 
@@ -273,7 +276,7 @@ const Chat = () => {
               </div>
 
               <div className="chat-header-right">
-                <button className="call-btn" onClick={() => startCall(false)}>🎤</button>
+                
                 <button className="call-btn" onClick={() => startCall(true)}>🎥</button>
                 {isCallActive && <button className="call-btn" onClick={endCall}>❌</button>}
               </div>
@@ -295,14 +298,14 @@ const Chat = () => {
                   muted
                   playsInline
                   className="video-local"
-                  style={{ width: 160, height: 120, background: '#222', borderRadius: 8 }}
+                  
                 />
                 <video
                   ref={remoteVideoRef}
                   autoPlay
                   playsInline
                   className="video-remote"
-                  style={{ width: 400, height: 300, background: '#000', borderRadius: 8 }}
+                  
                 />
                 <p className="call-timer">⏱️ {callDuration}</p>
               </div>
