@@ -154,7 +154,7 @@ const Chat = () => {
     try {
      localStreamRef.current = await navigator.mediaDevices.getUserMedia({
   video: true,
-  audio: false,
+  audio: true,
 });
 
 
