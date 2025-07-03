@@ -172,16 +172,24 @@ const Chat = () => {
   };
 
   // 🎥 Handle incoming media tracks
-  peerRef.current.ontrack = (event) => {
-    console.log('✅ Remote track:', event.track.kind);
+peerRef.current.ontrack = (event) => {
+  console.log('✅ Remote track received:', event.track.kind);
 
-    remoteStreamRef.current.addTrack(event.track);
+  remoteStreamRef.current.addTrack(event.track);
 
+  const tryAttachRemoteStream = () => {
     if (remoteVideoRef.current) {
       remoteVideoRef.current.srcObject = remoteStreamRef.current;
-      console.log("📺 Remote video stream attached");
+      console.log("📺 Attached remote stream");
+    } else {
+      // Try again after 100ms
+      setTimeout(tryAttachRemoteStream, 100);
     }
   };
+
+  tryAttachRemoteStream(); // Attempt now or retry if needed
+};
+
 
   try {
     // 🎙️ Get local media
@@ -341,28 +349,25 @@ console.log("📺 remote stream tracks:", remoteStreamRef.current?.getTracks());
               socket={socketRef.current}
             />
 
-            {isCallActive && (
-              <div className="video-chat">
-                <video
-                  ref={localVideoRef}
-                  autoPlay
-                  muted
-                  playsInline
-                  className="video-local"
+          {isCallActive && (
+  <div className="video-chat">
+    <video
+      ref={localVideoRef}
+      autoPlay
+      muted
+      playsInline
+      className="video-local"
+    />
+    <video
+      ref={remoteVideoRef}
+      autoPlay
+      playsInline
+      className="video-remote"
+    />
+    <p className="call-timer">⏱️ {callDuration}</p>
+  </div>
+)}
 
-                />
-                <video
-                ref={remoteVideoRef}
-                autoPlay
-                playsInline
-                className="video-remote"
-                />
-
-
-
-                <p className="call-timer">⏱️ {callDuration}</p>
-              </div>
-            )}
           </div>
         )}
       </div>
