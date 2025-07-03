@@ -47,7 +47,7 @@ const Chat = () => {
   }, []);
 
 
-  const isVideo = !type || type === 'video'; // fallback to true
+
 
 
   // Set up socket listeners and fetch chat messages
@@ -212,31 +212,31 @@ console.log("🎥 Got local stream:", localStreamRef.current);
 
   // Accept an incoming call
   const acceptCall = async () => {
-    if (!incomingCall) return;
+  if (!incomingCall) return;
 
-    const { from, offer, type } = incomingCall;
-    const isVideo = type === 'video';
+  const { from, offer, type } = incomingCall || {}; // ✅ fallback
+  const isVideo = type === 'video' || !type; // ✅ fallback to video by default
 
-    await createPeer(false, from, isVideo);
-    
-    await peerRef.current.setRemoteDescription(new RTCSessionDescription(offer));
-    console.log("📥 Remote description set with offer");
+  console.log("📞 Accepting call from:", from, "| Type:", type);
 
+  await createPeer(false, from, isVideo);
 
-    // Add any queued ICE candidates
-    iceCandidateQueueRef.current.forEach(candidate => {
-      peerRef.current.addIceCandidate(new RTCIceCandidate(candidate)).catch(console.error);
-    });
-    iceCandidateQueueRef.current = [];
+  await peerRef.current.setRemoteDescription(new RTCSessionDescription(offer));
+  console.log("📥 Remote description set with offer");
 
-    const answer = await peerRef.current.createAnswer();
-    await peerRef.current.setLocalDescription(answer);
-    socketRef.current.emit('call-answered', { to: from, answer });
+  iceCandidateQueueRef.current.forEach(candidate => {
+    peerRef.current.addIceCandidate(new RTCIceCandidate(candidate)).catch(console.error);
+  });
+  iceCandidateQueueRef.current = [];
 
-    setIncomingCall(null);
-    
-    setIsCallActive(true);
-  };
+  const answer = await peerRef.current.createAnswer();
+  await peerRef.current.setLocalDescription(answer);
+  socketRef.current.emit('call-answered', { to: from, answer });
+
+  setIncomingCall(null);
+  setIsCallActive(true);
+};
+
 
   // Reject an incoming call
   const rejectCall = () => {
