@@ -261,6 +261,9 @@ console.log("🎥 Got local stream:", localStreamRef.current);
     socketRef.current.emit('end-call', { to: selectedUser._id });
   };
 
+  console.log("remoteVideoRef.current.srcObject:", remoteVideoRef.current?.srcObject);
+
+
   return (
     <div className="chat-layout">
       <div className="chat-grid">
