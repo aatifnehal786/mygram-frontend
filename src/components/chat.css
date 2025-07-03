@@ -621,6 +621,44 @@ body.dark .chat-header-info h2,p{
   overflow-y: scroll;
   }
 
+
+  .video-chat {
+  position: absolute;
+  bottom: 20px;
+  right: 40px;
+  z-index: 999;
+  display: flex;
+  row-gap: 20px;
+  background: black;
+  padding: 10px;
+  border-radius: 8px;
+}
+.video-local,
+.video-remote {
+  width: 10px;
+  height: 100%;
+  object-fit: cover;
+  background: #110e0e;
+}
+
+
+.incoming-call-popup {
+  position: fixed;
+  top: 40%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: white;
+  padding: 1.5rem 2rem;
+  border-radius: 10px;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+  z-index: 10000;
+}
+
+.accept-btn, .reject-btn {
+  margin: 10px;
+  padding: 10px 20px;
+  font-size: 16px;
+}
   
 
  
