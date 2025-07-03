@@ -157,15 +157,15 @@ const Chat = () => {
   };
 
   // Aggregate remote tracks into one MediaStream
-  const remoteStream = new MediaStream();
+const remoteStream = new MediaStream();
 peerRef.current.ontrack = (event) => {
-  console.log('🎥 Received remote track:', event.track);
+  console.log("✅ Received remote track:", event.track.kind);
   remoteStream.addTrack(event.track);
   if (remoteVideoRef.current) {
     remoteVideoRef.current.srcObject = remoteStream;
-    console.log('✅ remoteVideoRef.srcObject set');
   }
 };
+
 
   try {
     localStreamRef.current = await navigator.mediaDevices.getUserMedia({
