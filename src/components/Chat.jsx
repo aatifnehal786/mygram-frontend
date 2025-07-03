@@ -46,6 +46,10 @@ const Chat = () => {
     }
   }, []);
 
+
+  const isVideo = !type || type === 'video'; // fallback to true
+
+
   // Set up socket listeners and fetch chat messages
   useEffect(() => {
     if (!selectedUser || !loggedUser?.token) return;
@@ -67,11 +71,9 @@ const Chat = () => {
       if (isCurrentChat) setMessages(prev => [...prev, msg]);
     });
 
-    socket.on('incoming-call', ({ from, offer }) => {
-     setIncomingCall({ from, offer }); // no `type` needed
-
-      
-    });
+    socket.on('incoming-call', ({ from, offer, type }) => {
+  setIncomingCall({ from, offer, type }); // ✅ Include type
+});
 
     socket.on('call-answered', ({ answer }) => {
   console.log('📥 Received answer');
@@ -168,10 +170,12 @@ peerRef.current.ontrack = (event) => {
 
 
   try {
-    localStreamRef.current = await navigator.mediaDevices.getUserMedia({
-      video: true,
-      audio: true,
-    });
+  localStreamRef.current = await navigator.mediaDevices.getUserMedia({
+  video: isVideo,
+  audio: true,
+});
+console.log("🎥 Got local stream:", localStreamRef.current);
+
     console.log("Local stream:", localStreamRef.current);
 
     localStreamRef.current.getTracks().forEach((track) => {
