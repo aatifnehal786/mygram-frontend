@@ -291,6 +291,11 @@ const Chat = () => {
   };
 
   console.log("remoteVideoRef.current.srcObject:", remoteVideoRef.current?.srcObject);
+  console.log(
+  "Remote stream tracks:",
+  remoteStreamRef.current.getTracks().map(t => `${t.kind} - enabled: ${t.enabled}`)
+);
+
 
 
   return (
