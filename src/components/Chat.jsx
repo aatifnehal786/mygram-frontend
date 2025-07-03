@@ -29,6 +29,8 @@ const Chat = () => {
   const intervalRef = useRef(null);
   const callStartTime = useRef(null);
   const iceCandidateQueueRef = useRef([]);
+  const remoteStreamRef = useRef(new MediaStream());
+
 
   // Handle window resize for mobile/desktop view
   useEffect(() => {
@@ -159,14 +161,25 @@ const Chat = () => {
   };
 
   // Aggregate remote tracks into one MediaStream
-const remoteStream = new MediaStream();
 peerRef.current.ontrack = (event) => {
   console.log("✅ Received remote track:", event.track.kind);
-  remoteStream.addTrack(event.track);
+
+  remoteStreamRef.current.addTrack(event.track);
+
   if (remoteVideoRef.current) {
-    remoteVideoRef.current.srcObject = remoteStream;
+    remoteVideoRef.current.srcObject = remoteStreamRef.current;
+  } else {
+    console.warn("⚠️ remoteVideoRef is null during ontrack");
+    // Try setting it later if needed
+    setTimeout(() => {
+      if (remoteVideoRef.current) {
+        remoteVideoRef.current.srcObject = remoteStreamRef.current;
+        console.log("✅ Attached remote stream after delay");
+      }
+    }, 500);
   }
 };
+
 
 
   try {
@@ -208,6 +221,9 @@ console.log("🎥 Got local stream:", localStreamRef.current);
     createPeer(true, selectedUser._id, isVideo);
     
     setIsCallActive(true);
+    console.log("🎥 remoteVideoRef.current:", remoteVideoRef.current);
+console.log("📺 remoteVideoRef.current.srcObject:", remoteVideoRef.current?.srcObject);
+
   };
 
   // Accept an incoming call
@@ -231,6 +247,10 @@ console.log("🎥 Got local stream:", localStreamRef.current);
   const answer = await peerRef.current.createAnswer();
   await peerRef.current.setLocalDescription(answer);
   socketRef.current.emit('call-answered', { to: from, answer });
+
+  console.log("🎥 remoteVideoRef.current:", remoteVideoRef.current);
+console.log("📺 remoteVideoRef.current.srcObject:", remoteVideoRef.current?.srcObject);
+
 
   setIncomingCall(null);
   setIsCallActive(true);
