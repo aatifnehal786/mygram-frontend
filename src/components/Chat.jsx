@@ -126,10 +126,12 @@ const Chat = () => {
       }
 
       // Attach remote stream if available
-      if (remoteStreamRef.current && remoteVideoRef.current) {
-        remoteVideoRef.current.srcObject = remoteStreamRef.current;
-        console.log("✅ Attached remote stream inside useEffect");
-      }
+   setTimeout(() => {
+  if (remoteVideoRef.current && remoteStreamRef.current) {
+    remoteVideoRef.current.srcObject = remoteStreamRef.current;
+  }
+}, 300);
+
 
       // Start call timer
       callStartTime.current = Date.now();
@@ -147,9 +149,10 @@ const Chat = () => {
 
 
   // Create WebRTC peer connection
-  const createPeer = async (isInitiator, remoteUserId, isVideo) => {
-  remoteStreamRef.current = new MediaStream(); // 💡 Always reset before each call
+ const createPeer = async (isInitiator, remoteUserId, isVideo) => {
+  console.log(`🔧 createPeer called | isInitiator: ${isInitiator}`);
 
+  // 1. Initialize peer
   peerRef.current = new RTCPeerConnection({
     iceServers: [
       { urls: 'stun:stun.l.google.com:19302' },
@@ -161,60 +164,64 @@ const Chat = () => {
     ],
   });
 
-  // 🧊 Handle ICE candidates
+  // 2. ICE Candidate handling
   peerRef.current.onicecandidate = (e) => {
     if (e.candidate) {
-      socketRef.current.emit('ice-candidate', {
+      console.log("📡 Sending ICE candidate");
+      socketRef.current.emit("ice-candidate", {
         to: remoteUserId,
         candidate: e.candidate,
       });
     }
   };
 
-  // 🎥 Handle incoming media tracks
-peerRef.current.ontrack = (event) => {
-  console.log('✅ Remote track received:', event.track.kind);
+  // 3. Remote track event → append to remote stream
+  remoteStreamRef.current = new MediaStream();
 
-  const remoteStream = remoteStreamRef.current;
-  remoteStream.addTrack(event.track);
+  peerRef.current.ontrack = (event) => {
+    console.log("✅ ontrack:", event.track.kind);
+    remoteStreamRef.current.addTrack(event.track);
 
-  if (remoteVideoRef.current) {
-    remoteVideoRef.current.srcObject = remoteStream;
-    console.log('🎬 Attached remote stream with tracks:', remoteStream.getTracks());
-  }
-};
-
-
+    // Always reassign srcObject
+    if (remoteVideoRef.current) {
+      remoteVideoRef.current.srcObject = remoteStreamRef.current;
+      console.log("📺 remoteVideoRef updated with stream:", remoteStreamRef.current.getTracks());
+    }
+  };
 
   try {
-    // 🎙️ Get local media
+    // 4. Get local media
     localStreamRef.current = await navigator.mediaDevices.getUserMedia({
       video: isVideo,
       audio: true,
     });
 
-    localStreamRef.current.getTracks().forEach(track => {
+    console.log("🎥 Local stream tracks:", localStreamRef.current.getTracks());
+
+    // 5. Add local tracks to peer
+    localStreamRef.current.getTracks().forEach((track) => {
       peerRef.current.addTrack(track, localStreamRef.current);
     });
 
+    // 6. Assign local video element
     if (localVideoRef.current) {
       localVideoRef.current.srcObject = localStreamRef.current;
     }
 
-    // 🎯 Initiator creates offer
+    // 7. If caller, create and send offer
     if (isInitiator) {
       const offer = await peerRef.current.createOffer();
       await peerRef.current.setLocalDescription(offer);
-      socketRef.current.emit('call-user', {
+      socketRef.current.emit("call-user", {
         from: loggedUser.userid,
         to: selectedUser._id,
         offer,
-        type: 'video',
+        type: "video",
       });
     }
   } catch (err) {
-    console.error('Error accessing media devices:', err);
-    toast.error('Media access denied');
+    console.error("❌ Error accessing media:", err);
+    toast.error("Media device access denied");
   }
 };
 
@@ -232,32 +239,27 @@ const startCall = (isVideo) => {
   if (!incomingCall) return;
 
   const { from, offer, type } = incomingCall;
-  const isVideo = type === 'video' || !type;
+  const isVideo = type === "video" || !type;
 
-  console.log("📞 Accepting", type, "call from", from);
+  console.log("📞 Accepting call with type:", type);
 
   await createPeer(false, from, isVideo);
-
-  // 🔁 Set remote offer
   await peerRef.current.setRemoteDescription(new RTCSessionDescription(offer));
-console.log("✅ Remote description set");
+  console.log("📥 Remote description set");
 
-  // ❄️ Add queued ICE candidates
-  iceCandidateQueueRef.current.forEach(candidate => {
+  // Add any queued ICE candidates
+  iceCandidateQueueRef.current.forEach((candidate) => {
     peerRef.current.addIceCandidate(new RTCIceCandidate(candidate)).catch(console.error);
   });
   iceCandidateQueueRef.current = [];
 
-  // 📡 Send answer back
   const answer = await peerRef.current.createAnswer();
   await peerRef.current.setLocalDescription(answer);
-  socketRef.current.emit('call-answered', { to: from, answer });
+  socketRef.current.emit("call-answered", { to: from, answer });
 
   setIncomingCall(null);
   setIsCallActive(true);
 };
-
-
 
 
   // Reject an incoming call
