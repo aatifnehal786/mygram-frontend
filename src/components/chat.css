@@ -635,8 +635,8 @@ body.dark .chat-header-info h2,p{
 }
 .video-local,
 .video-remote {
-  width: 10px;
-  height: 100%;
+  width: 100px;
+  height: 250px;
   object-fit: cover;
   background: #110e0e;
 }
