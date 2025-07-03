@@ -214,16 +214,15 @@ console.log("🎥 Got local stream:", localStreamRef.current);
   const acceptCall = async () => {
   if (!incomingCall) return;
 
-  const { from, offer, type } = incomingCall || {}; // ✅ fallback
-  const isVideo = type === 'video' || !type; // ✅ fallback to video by default
+  const { from, offer, type } = incomingCall;
+  const isVideo = type === 'video' || !type; // ✅ fallback
 
-  console.log("📞 Accepting call from:", from, "| Type:", type);
+  console.log("📞 Accepting call with type:", type);
 
-  await createPeer(false, from, isVideo);
-
+  await createPeer(false, from, isVideo); // ✅ Important: pass isVideo flag
   await peerRef.current.setRemoteDescription(new RTCSessionDescription(offer));
-  console.log("📥 Remote description set with offer");
-
+  
+  // Add any queued ICE candidates
   iceCandidateQueueRef.current.forEach(candidate => {
     peerRef.current.addIceCandidate(new RTCIceCandidate(candidate)).catch(console.error);
   });
