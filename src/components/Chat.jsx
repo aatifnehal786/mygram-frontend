@@ -146,124 +146,111 @@ const Chat = () => {
 
   // Create WebRTC peer connection
   const createPeer = async (isInitiator, remoteUserId, isVideo) => {
-    peerRef.current = new RTCPeerConnection({
-      iceServers: [
-        { urls: 'stun:stun.l.google.com:19302' },
-        {
-          urls: 'turn:openrelay.metered.ca:80',
-          username: 'openrelayproject',
-          credential: 'openrelayproject',
-        }
-      ]
+  peerRef.current = new RTCPeerConnection({
+    iceServers: [
+      { urls: 'stun:stun.l.google.com:19302' },
+      {
+        urls: 'turn:openrelay.metered.ca:80',
+        username: 'openrelayproject',
+        credential: 'openrelayproject',
+      },
+    ],
+  });
 
-    });
-
-    // Handle ICE candidates
-    peerRef.current.onicecandidate = (e) => {
-      if (e.candidate) {
-        console.log('📡 Sending ICE candidate');
-        socketRef.current.emit('ice-candidate', {
-          to: remoteUserId,
-          candidate: e.candidate,
-        });
-      }
-    };
-
-    // Aggregate remote tracks into one MediaStream
-    peerRef.current.ontrack = (event) => {
-      console.log("✅ Received remote track:", event.track.kind);
-
-      remoteStreamRef.current.addTrack(event.track);
-
-      if (remoteVideoRef.current) {
-        remoteVideoRef.current.srcObject = remoteStreamRef.current;
-      } else {
-        console.warn("⚠️ remoteVideoRef is null during ontrack");
-        // Try setting it later if needed
-        setTimeout(() => {
-          if (remoteVideoRef.current) {
-            remoteVideoRef.current.srcObject = remoteStreamRef.current;
-            console.log("✅ Attached remote stream after delay");
-          }
-        }, 500);
-      }
-    };
-
-
-
-    try {
-      localStreamRef.current = await navigator.mediaDevices.getUserMedia({
-        video: isVideo,
-        audio: true,
+  // ICE candidate exchange
+  peerRef.current.onicecandidate = (e) => {
+    if (e.candidate) {
+      socketRef.current.emit('ice-candidate', {
+        to: remoteUserId,
+        candidate: e.candidate,
       });
-      console.log("🎥 Got local stream:", localStreamRef.current);
-
-      console.log("Local stream:", localStreamRef.current);
-
-      localStreamRef.current.getTracks().forEach((track) => {
-        peerRef.current.addTrack(track, localStreamRef.current);
-      });
-
-      if (localVideoRef.current) {
-        localVideoRef.current.srcObject = localStreamRef.current;
-      }
-
-      if (isInitiator) {
-        const offer = await peerRef.current.createOffer();
-        await peerRef.current.setLocalDescription(offer);
-        socketRef.current.emit('call-user', {
-          from: loggedUser.userid,
-          to: selectedUser._id,
-          offer,
-          type: 'video',
-        });
-      }
-    } catch (err) {
-      console.error('Error accessing media devices:', err);
-      toast.error('Media device access denied');
     }
   };
 
+  // Remote media stream
+  peerRef.current.ontrack = (event) => {
+    console.log('✅ Remote track received:', event.track.kind);
+
+    // Only add once
+    if (!remoteStreamRef.current) {
+      remoteStreamRef.current = new MediaStream();
+    }
+
+    remoteStreamRef.current.addTrack(event.track);
+
+    if (remoteVideoRef.current) {
+      remoteVideoRef.current.srcObject = remoteStreamRef.current;
+    }
+  };
+
+  try {
+    // Get media devices
+    localStreamRef.current = await navigator.mediaDevices.getUserMedia({
+      video: isVideo,
+      audio: true,
+    });
+
+    // Add local tracks to connection
+    localStreamRef.current.getTracks().forEach((track) => {
+      peerRef.current.addTrack(track, localStreamRef.current);
+    });
+
+    // Set local stream in video element
+    if (localVideoRef.current) {
+      localVideoRef.current.srcObject = localStreamRef.current;
+    }
+
+    // Caller creates offer
+    if (isInitiator) {
+      const offer = await peerRef.current.createOffer();
+      await peerRef.current.setLocalDescription(offer);
+      socketRef.current.emit('call-user', {
+        from: loggedUser.userid,
+        to: selectedUser._id,
+        offer,
+        type: 'video',
+      });
+    }
+  } catch (err) {
+    console.error('Media error:', err);
+    toast.error('Media access denied');
+  }
+};
 
   // Start a call
-  const startCall = (isVideo) => {
-    createPeer(true, selectedUser._id, isVideo);
+const startCall = async (isVideo) => {
+  await createPeer(true, selectedUser._id, isVideo);
+  setIsCallActive(true);
+};
 
-    setIsCallActive(true);
-    console.log("🎥 remoteVideoRef.current:", remoteVideoRef.current);
-    console.log("📺 remoteVideoRef.current.srcObject:", remoteVideoRef.current?.srcObject);
-
-  };
 
   // Accept an incoming call
   const acceptCall = async () => {
-    if (!incomingCall) return;
+  if (!incomingCall) return;
 
-    const { from, offer, type } = incomingCall;
-    const isVideo = type === 'video' || !type; // ✅ fallback
+  const { from, offer, type } = incomingCall;
+  const isVideo = type === 'video' || !type;
 
-    console.log("📞 Accepting call with type:", type);
+  // Create peer and add local tracks
+  await createPeer(false, from, isVideo);
 
-    await createPeer(false, from, isVideo); // ✅ Important: pass isVideo flag
-    await peerRef.current.setRemoteDescription(new RTCSessionDescription(offer));
+  // Set remote offer from caller
+  await peerRef.current.setRemoteDescription(new RTCSessionDescription(offer));
 
-    // Add any queued ICE candidates
-    iceCandidateQueueRef.current.forEach(candidate => {
-      peerRef.current.addIceCandidate(new RTCIceCandidate(candidate)).catch(console.error);
-    });
-    iceCandidateQueueRef.current = [];
+  // Add any queued ICE candidates
+  iceCandidateQueueRef.current.forEach((candidate) => {
+    peerRef.current.addIceCandidate(new RTCIceCandidate(candidate)).catch(console.error);
+  });
+  iceCandidateQueueRef.current = [];
 
-    const answer = await peerRef.current.createAnswer();
-    await peerRef.current.setLocalDescription(answer);
-    socketRef.current.emit('call-answered', { to: from, answer });
+  // Create and send answer
+  const answer = await peerRef.current.createAnswer();
+  await peerRef.current.setLocalDescription(answer);
+  socketRef.current.emit('call-answered', { to: from, answer });
 
-    console.log("🎥 remoteVideoRef.current:", remoteVideoRef.current);
-    console.log("📺 remoteVideoRef.current.srcObject:", remoteVideoRef.current?.srcObject);
-
-
-    setIncomingCall(null);
-    setIsCallActive(true);
-  };
+  setIncomingCall(null);
+  setIsCallActive(true);
+};
 
 
   // Reject an incoming call
