@@ -74,8 +74,10 @@ const Chat = () => {
     });
 
     socket.on('call-answered', ({ answer }) => {
-      peerRef.current?.setRemoteDescription(new RTCSessionDescription(answer));
-    });
+  console.log('📥 Received answer');
+  peerRef.current?.setRemoteDescription(new RTCSessionDescription(answer));
+});
+
 
     socket.on('call-rejected', () => {
       endCall();
@@ -83,14 +85,17 @@ const Chat = () => {
       toast.info('Call was rejected.');
     });
 
-    socket.on('ice-candidate', ({ candidate }) => {
-      const peer = peerRef.current;
-      if (peer && peer.remoteDescription?.type) {
-        peer.addIceCandidate(new RTCIceCandidate(candidate)).catch(console.error);
-      } else {
-        iceCandidateQueueRef.current.push(candidate);
-      }
-    });
+ socket.on('ice-candidate', ({ candidate }) => {
+  const peer = peerRef.current;
+  if (peer && peer.remoteDescription?.type) {
+    peer.addIceCandidate(new RTCIceCandidate(candidate)).catch(console.error);
+    console.log('📡 ICE candidate added');
+  } else {
+    console.log('🕗 Queuing ICE candidate');
+    iceCandidateQueueRef.current.push(candidate);
+  }
+});
+
 
     socket.on('call-ended', () => {
       endCall();
@@ -129,16 +134,21 @@ const Chat = () => {
   // Create WebRTC peer connection
   const createPeer = async (isInitiator, remoteUserId, isVideo) => {
   peerRef.current = new RTCPeerConnection({
-    iceServers: [
-      { urls: 'stun:stun.l.google.com:19302' },
-      // Remove or replace this with a valid TURN server
-      // { urls: 'turn:your.turn.server:3478', username: 'user', credential: 'pass' }
-    ]
+  iceServers: [
+  { urls: 'stun:stun.l.google.com:19302' },
+  {
+    urls: 'turn:openrelay.metered.ca:80',
+    username: 'openrelayproject',
+    credential: 'openrelayproject',
+  }
+]
+
   });
 
   // Handle ICE candidates
   peerRef.current.onicecandidate = (e) => {
     if (e.candidate) {
+       console.log('📡 Sending ICE candidate');
       socketRef.current.emit('ice-candidate', {
         to: remoteUserId,
         candidate: e.candidate,
@@ -148,12 +158,14 @@ const Chat = () => {
 
   // Aggregate remote tracks into one MediaStream
   const remoteStream = new MediaStream();
-  peerRef.current.ontrack = (event) => {
-    remoteStream.addTrack(event.track);
-    if (remoteVideoRef.current) {
-      remoteVideoRef.current.srcObject = remoteStream;
-    }
-  };
+peerRef.current.ontrack = (event) => {
+  console.log('🎥 Received remote track:', event.track);
+  remoteStream.addTrack(event.track);
+  if (remoteVideoRef.current) {
+    remoteVideoRef.current.srcObject = remoteStream;
+    console.log('✅ remoteVideoRef.srcObject set');
+  }
+};
 
   try {
     localStreamRef.current = await navigator.mediaDevices.getUserMedia({
@@ -202,7 +214,10 @@ const Chat = () => {
     const isVideo = type === 'video';
 
     await createPeer(false, from, isVideo);
+    
     await peerRef.current.setRemoteDescription(new RTCSessionDescription(offer));
+    console.log("📥 Remote description set with offer");
+
 
     // Add any queued ICE candidates
     iceCandidateQueueRef.current.forEach(candidate => {
