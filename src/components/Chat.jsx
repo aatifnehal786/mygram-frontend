@@ -175,20 +175,15 @@ const Chat = () => {
 peerRef.current.ontrack = (event) => {
   console.log('✅ Remote track received:', event.track.kind);
 
-  remoteStreamRef.current.addTrack(event.track);
+  const remoteStream = remoteStreamRef.current;
+  remoteStream.addTrack(event.track);
 
-  const tryAttachRemoteStream = () => {
-    if (remoteVideoRef.current) {
-      remoteVideoRef.current.srcObject = remoteStreamRef.current;
-      console.log("📺 Attached remote stream");
-    } else {
-      // Try again after 100ms
-      setTimeout(tryAttachRemoteStream, 100);
-    }
-  };
-
-  tryAttachRemoteStream(); // Attempt now or retry if needed
+  if (remoteVideoRef.current) {
+    remoteVideoRef.current.srcObject = remoteStream;
+    console.log('🎬 Attached remote stream with tracks:', remoteStream.getTracks());
+  }
 };
+
 
 
   try {
@@ -245,6 +240,7 @@ const startCall = (isVideo) => {
 
   // 🔁 Set remote offer
   await peerRef.current.setRemoteDescription(new RTCSessionDescription(offer));
+console.log("✅ Remote description set");
 
   // ❄️ Add queued ICE candidates
   iceCandidateQueueRef.current.forEach(candidate => {
