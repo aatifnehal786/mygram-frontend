@@ -128,60 +128,64 @@ const Chat = () => {
 
   // Create WebRTC peer connection
   const createPeer = async (isInitiator, remoteUserId, isVideo) => {
-    peerRef.current = new RTCPeerConnection({
+  peerRef.current = new RTCPeerConnection({
     iceServers: [
-    { urls: 'stun:stun.l.google.com:19302' },
-    { urls: 'turn:your.turn.server:3478', username: 'user', credential: 'pass' }]})
+      { urls: 'stun:stun.l.google.com:19302' },
+      // Remove or replace this with a valid TURN server
+      // { urls: 'turn:your.turn.server:3478', username: 'user', credential: 'pass' }
+    ]
+  });
 
-    // Handle ICE candidates
-    peerRef.current.onicecandidate = (e) => {
-      if (e.candidate) {
-        socketRef.current.emit('ice-candidate', {
-          to: remoteUserId,
-          candidate: e.candidate,
-        });
-      }
-    };
-
-    // Handle remote stream
-    peerRef.current.ontrack = (event) => {
-      // Directly use the stream provided by ontrack
-      if (remoteVideoRef.current) {
-        remoteVideoRef.current.srcObject = event.streams[0];
-      }
-    };
-
-    try {
-     localStreamRef.current = await navigator.mediaDevices.getUserMedia({
-  video: true,
-  audio: true,
-});
-
-
-      localStreamRef.current.getTracks().forEach((track) => {
-        peerRef.current.addTrack(track, localStreamRef.current);
+  // Handle ICE candidates
+  peerRef.current.onicecandidate = (e) => {
+    if (e.candidate) {
+      socketRef.current.emit('ice-candidate', {
+        to: remoteUserId,
+        candidate: e.candidate,
       });
+    }
+  };
 
-      if (localVideoRef.current) {
-        localVideoRef.current.srcObject = localStreamRef.current;
-      }
+  // Aggregate remote tracks into one MediaStream
+  const remoteStream = new MediaStream();
+  peerRef.current.ontrack = (event) => {
+    remoteStream.addTrack(event.track);
+    if (remoteVideoRef.current) {
+      remoteVideoRef.current.srcObject = remoteStream;
+    }
+  };
 
-      if (isInitiator) {
-        const offer = await peerRef.current.createOffer();
-        await peerRef.current.setLocalDescription(offer);
-       socketRef.current.emit('call-user', {
+  try {
+    localStreamRef.current = await navigator.mediaDevices.getUserMedia({
+      video: true,
+      audio: true,
+    });
+    console.log("Local stream:", localStreamRef.current);
+
+    localStreamRef.current.getTracks().forEach((track) => {
+      peerRef.current.addTrack(track, localStreamRef.current);
+    });
+
+    if (localVideoRef.current) {
+      localVideoRef.current.srcObject = localStreamRef.current;
+    }
+
+    if (isInitiator) {
+      const offer = await peerRef.current.createOffer();
+      await peerRef.current.setLocalDescription(offer);
+      socketRef.current.emit('call-user', {
         from: loggedUser.userid,
         to: selectedUser._id,
         offer,
         type: 'video',
-});
-
-      }
-    } catch (err) {
-      console.error('Error accessing media devices:', err);
-      toast.error('Media device access denied');
+      });
     }
-  };
+  } catch (err) {
+    console.error('Error accessing media devices:', err);
+    toast.error('Media device access denied');
+  }
+};
+
 
   // Start a call
   const startCall = (isVideo) => {
