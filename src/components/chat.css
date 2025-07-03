@@ -626,7 +626,7 @@ body.dark .chat-header-info h2,p{
   .video-chat {
   position: absolute;
   bottom: 20px;
-  right: 40px;
+  right: 100px;
   z-index: 999;
   display: flex;
   row-gap: 20px;
