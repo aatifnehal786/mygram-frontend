@@ -116,24 +116,33 @@ const Chat = () => {
   }, [selectedUser, loggedUser?.token]);
 
   // Handle call timer and video stream attachment
-  useEffect(() => {
-    if (isCallActive) {
-      if (localStreamRef.current && localVideoRef.current) {
-        localVideoRef.current.srcObject = localStreamRef.current;
-      }
-      // Timer
-      callStartTime.current = Date.now();
-      intervalRef.current = setInterval(() => {
-        const diff = Math.floor((Date.now() - callStartTime.current) / 1000);
-        const minutes = String(Math.floor(diff / 60)).padStart(2, '0');
-        const seconds = String(diff % 60).padStart(2, '0');
-        setCallDuration(`${minutes}:${seconds}`);
-      }, 1000);
-    } else {
-      clearInterval(intervalRef.current);
-      setCallDuration('00:00');
+useEffect(() => {
+  if (isCallActive) {
+    // Attach local stream
+    if (localStreamRef.current && localVideoRef.current) {
+      localVideoRef.current.srcObject = localStreamRef.current;
     }
-  }, [isCallActive]);
+
+    // Attach remote stream if available
+    if (remoteStreamRef.current && remoteVideoRef.current) {
+      remoteVideoRef.current.srcObject = remoteStreamRef.current;
+      console.log("✅ Attached remote stream inside useEffect");
+    }
+
+    // Start call timer
+    callStartTime.current = Date.now();
+    intervalRef.current = setInterval(() => {
+      const diff = Math.floor((Date.now() - callStartTime.current) / 1000);
+      const minutes = String(Math.floor(diff / 60)).padStart(2, '0');
+      const seconds = String(diff % 60).padStart(2, '0');
+      setCallDuration(`${minutes}:${seconds}`);
+    }, 1000);
+  } else {
+    clearInterval(intervalRef.current);
+    setCallDuration('00:00');
+  }
+}, [isCallActive]);
+
 
   // Create WebRTC peer connection
   const createPeer = async (isInitiator, remoteUserId, isVideo) => {
