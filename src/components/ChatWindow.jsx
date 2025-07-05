@@ -122,6 +122,9 @@ const sendMessage = () => {
                 key={msg._id || idx}
                 className={`message-bubble ${isOwnMessage ? 'own' : 'other'}`}
               >
+                <button className="message-options-btn" 
+               onClick={() => setOpenDropdownId(openDropdownId === msg._id ? null : msg._id)}>⋮
+                </button>
                  <p>{msg.message}</p>
                 {msg.fileType?.includes('image') && <img src={msg.fileUrl} className="chat-img" />}
                 {msg.fileType?.includes('video') && <video src={msg.fileUrl} controls className="chat-video" />}
@@ -134,9 +137,7 @@ const sendMessage = () => {
                   {msg.createdAt ? new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ''}
                 </small>
 
-               <button className="message-options-btn" 
-               onClick={() => setOpenDropdownId(openDropdownId === msg._id ? null : msg._id)}>⋮
-                </button>
+               
 
                 {isDropdownOpen && (
                   <div className="option-menu">
