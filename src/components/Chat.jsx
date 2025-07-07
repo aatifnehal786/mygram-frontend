@@ -75,8 +75,8 @@ const Chat = () => {
       if (isCurrentChat) setMessages(prev => [...prev, msg]);
     });
 
-    socket.on('incoming-call', ({ from, offer, type }) => {
-      setIncomingCall({ from, offer, type }); // ✅ Include type
+    socket.on('incoming-call', ({ from, offer }) => {
+      setIncomingCall({ from, offer }); // ✅ Include type
     });
 
     socket.on('call-answered', ({ answer }) => {
