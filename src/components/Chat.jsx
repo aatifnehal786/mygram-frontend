@@ -149,7 +149,7 @@ const Chat = () => {
 
 
   // Create WebRTC peer connection
- const createPeer = async (isInitiator, remoteUserId, isVideo) => {
+ const createPeer = async (isInitiator, remoteUserId) => {
   console.log(`🔧 createPeer called | isInitiator: ${isInitiator}`);
 
   // 1. Initialize peer
