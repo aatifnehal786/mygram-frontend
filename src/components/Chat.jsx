@@ -215,8 +215,7 @@ const Chat = () => {
       socketRef.current.emit("call-user", {
         from: loggedUser.userid,
         to: selectedUser._id,
-        offer,
-        type: "video",
+        offer
       });
     }
   } catch (err) {
@@ -227,8 +226,8 @@ const Chat = () => {
 
 
   // Start a call
-const startCall = (isVideo) => {
-  createPeer(true, selectedUser._id, isVideo);
+const startCall = () => {
+  createPeer(true, selectedUser._id);
   setIsCallActive(true);
 };
 
