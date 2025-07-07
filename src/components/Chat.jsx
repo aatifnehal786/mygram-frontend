@@ -247,6 +247,10 @@ const Chat = () => {
     socketRef.current.emit('end-call', { to: selectedUser._id });
   };
 
+  console.log("🎥 Local stream tracks:", localStreamRef.current?.getTracks());
+console.log("📺 Remote stream tracks:", remoteStreamRef.current?.getTracks());
+
+
   return (
     <div className="chat-layout">
       <div className="chat-grid">
