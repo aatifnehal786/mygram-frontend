@@ -1,3 +1,4 @@
+// ✅ No changes here
 import React, { useState, useEffect, useRef } from 'react';
 import ChatSidebar from './ChatSideBar';
 import ChatWindow from './ChatWindow';
@@ -31,10 +32,8 @@ const Chat = () => {
   const intervalRef = useRef(null);
   const callStartTime = useRef(null);
   const iceCandidateQueueRef = useRef([]);
- 
 
-
-  // Handle window resize for mobile/desktop view
+  // ✅ Resize handler
   useEffect(() => {
     const handleResize = () => {
       if (window.innerWidth >= 768) setView('full');
@@ -43,18 +42,14 @@ const Chat = () => {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  // Initialize socket connection
+  // ✅ Initialize socket
   useEffect(() => {
     if (!socketRef.current) {
       socketRef.current = io('https://mygram-1-1nua.onrender.com');
     }
   }, []);
 
-
-
-
-
-  // Set up socket listeners and fetch chat messages
+  // ✅ Listeners
   useEffect(() => {
     if (!selectedUser || !loggedUser?.token) return;
 
@@ -75,15 +70,14 @@ const Chat = () => {
       if (isCurrentChat) setMessages(prev => [...prev, msg]);
     });
 
-    socket.on('incoming-call', ({ from, offer }) => {
-      setIncomingCall({ from, offer }); // ✅ Include type
+    // ✅ Handle call with type
+    socket.on('incoming-call', ({ from, offer, type }) => {
+      setIncomingCall({ from, offer, type });
     });
 
     socket.on('call-answered', ({ answer }) => {
-      console.log('📥 Received answer');
       peerRef.current?.setRemoteDescription(new RTCSessionDescription(answer));
     });
-
 
     socket.on('call-rejected', () => {
       endCall();
@@ -91,17 +85,14 @@ const Chat = () => {
       toast.info('Call was rejected.');
     });
 
-  socket.on('ice-candidate', ({ candidate }) => {
-  const peer = peerRef.current;
-  if (peer && peer.remoteDescription?.type) {
-    peer.addIceCandidate(new RTCIceCandidate(candidate)).catch(console.error);
-    console.log("📡 ICE candidate added");
-  } else {
-    iceCandidateQueueRef.current.push(candidate);
-    console.log("⏳ ICE candidate queued");
-  }
-});
-
+    socket.on('ice-candidate', ({ candidate }) => {
+      const peer = peerRef.current;
+      if (peer && peer.remoteDescription?.type) {
+        peer.addIceCandidate(new RTCIceCandidate(candidate)).catch(console.error);
+      } else {
+        iceCandidateQueueRef.current.push(candidate);
+      }
+    });
 
     socket.on('call-ended', () => {
       endCall();
@@ -117,23 +108,19 @@ const Chat = () => {
     };
   }, [selectedUser, loggedUser?.token]);
 
-  // Handle call timer and video stream attachment
+  // ✅ Timer and stream sync
   useEffect(() => {
     if (isCallActive) {
-      // Attach local stream
       if (localStreamRef.current && localVideoRef.current) {
         localVideoRef.current.srcObject = localStreamRef.current;
       }
 
-      // Attach remote stream if available
-   setTimeout(() => {
-  if (remoteVideoRef.current && remoteStreamRef.current) {
-    remoteVideoRef.current.srcObject = remoteStreamRef.current;
-  }
-}, 300);
+      setTimeout(() => {
+        if (remoteVideoRef.current && remoteStreamRef.current) {
+          remoteVideoRef.current.srcObject = remoteStreamRef.current;
+        }
+      }, 300);
 
-
-      // Start call timer
       callStartTime.current = Date.now();
       intervalRef.current = setInterval(() => {
         const diff = Math.floor((Date.now() - callStartTime.current) / 1000);
@@ -147,127 +134,103 @@ const Chat = () => {
     }
   }, [isCallActive]);
 
+  // ✅ WebRTC peer setup
+  const createPeer = async (isInitiator, remoteUserId, isVideo) => {
+    peerRef.current = new RTCPeerConnection({
+      iceServers: [
+        { urls: 'stun:stun.l.google.com:19302' },
+        {
+          urls: 'turn:openrelay.metered.ca:80',
+          username: 'openrelayproject',
+          credential: 'openrelayproject',
+        },
+      ],
+    });
 
-  // Create WebRTC peer connection
- const createPeer = async (isInitiator, remoteUserId) => {
-  console.log(`🔧 createPeer called | isInitiator: ${isInitiator}`);
+    peerRef.current.onicecandidate = (e) => {
+      if (e.candidate) {
+        socketRef.current.emit("ice-candidate", {
+          to: remoteUserId,
+          candidate: e.candidate,
+        });
+      }
+    };
 
-  // 1. Initialize peer
-  peerRef.current = new RTCPeerConnection({
-    iceServers: [
-      { urls: 'stun:stun.l.google.com:19302' },
-      {
-        urls: 'turn:openrelay.metered.ca:80',
-        username: 'openrelayproject',
-        credential: 'openrelayproject',
-      },
-    ],
-  });
+    remoteStreamRef.current = new MediaStream();
 
-  // 2. ICE Candidate handling
-  peerRef.current.onicecandidate = (e) => {
-    if (e.candidate) {
-      console.log("📡 Sending ICE candidate");
-      socketRef.current.emit("ice-candidate", {
-        to: remoteUserId,
-        candidate: e.candidate,
+    peerRef.current.ontrack = (event) => {
+      remoteStreamRef.current.addTrack(event.track);
+      if (remoteVideoRef.current) {
+        remoteVideoRef.current.srcObject = remoteStreamRef.current;
+      }
+    };
+
+    try {
+      localStreamRef.current = await navigator.mediaDevices.getUserMedia({
+        video: isVideo,
+        audio: true,
       });
+
+      localStreamRef.current.getTracks().forEach((track) => {
+        peerRef.current.addTrack(track, localStreamRef.current);
+      });
+
+      if (localVideoRef.current) {
+        localVideoRef.current.srcObject = localStreamRef.current;
+      }
+
+      if (isInitiator) {
+        const offer = await peerRef.current.createOffer();
+        await peerRef.current.setLocalDescription(offer);
+        socketRef.current.emit("call-user", {
+          from: loggedUser.userid,
+          to: selectedUser._id,
+          offer,
+          type: isVideo ? "video" : "audio",
+        });
+      }
+    } catch (err) {
+      console.error("❌ Error accessing media:", err);
+      toast.error("Media device access denied");
     }
   };
 
-  // 3. Remote track event → append to remote stream
-  remoteStreamRef.current = new MediaStream();
-
-  peerRef.current.ontrack = (event) => {
-    console.log("✅ ontrack:", event.track.kind);
-    remoteStreamRef.current.addTrack(event.track);
-
-    // Always reassign srcObject
-    if (remoteVideoRef.current) {
-      remoteVideoRef.current.srcObject = remoteStreamRef.current;
-      console.log("📺 remoteVideoRef updated with stream:", remoteStreamRef.current.getTracks());
-    }
+  // ✅ Start Call
+  const startCall = (isVideo = true) => {
+    createPeer(true, selectedUser._id, isVideo);
+    setIsCallActive(true);
   };
 
-  try {
-    // 4. Get local media
-    localStreamRef.current = await navigator.mediaDevices.getUserMedia({
-      video: true,
-      audio: true,
-    });
-
-    console.log("🎥 Local stream tracks:", localStreamRef.current.getTracks());
-
-    // 5. Add local tracks to peer
-    localStreamRef.current.getTracks().forEach((track) => {
-      peerRef.current.addTrack(track, localStreamRef.current);
-    });
-
-    // 6. Assign local video element
-    if (localVideoRef.current) {
-      localVideoRef.current.srcObject = localStreamRef.current;
-    }
-
-    // 7. If caller, create and send offer
-    if (isInitiator) {
-      const offer = await peerRef.current.createOffer();
-      await peerRef.current.setLocalDescription(offer);
-      socketRef.current.emit("call-user", {
-        from: loggedUser.userid,
-        to: selectedUser._id,
-        offer
-      });
-    }
-  } catch (err) {
-    console.error("❌ Error accessing media:", err);
-    toast.error("Media device access denied");
-  }
-};
-
-
-  // Start a call
-const startCall = () => {
-  createPeer(true, selectedUser._id);
-  setIsCallActive(true);
-};
-
-
-
-  // Accept an incoming call
+  // ✅ Accept call
   const acceptCall = async () => {
-  if (!incomingCall) return;
+    if (!incomingCall) return;
 
-  const { from, offer } = incomingCall;
-  
+    const { from, offer, type } = incomingCall;
+    const isVideo = type === "video";
 
-  console.log("📞 Accepting call with type:", type);
+    await createPeer(false, from, isVideo);
+    await peerRef.current.setRemoteDescription(new RTCSessionDescription(offer));
 
-  await createPeer(false, from);
-  await peerRef.current.setRemoteDescription(new RTCSessionDescription(offer));
-  console.log("📥 Remote description set");
+    iceCandidateQueueRef.current.forEach((candidate) => {
+      peerRef.current.addIceCandidate(new RTCIceCandidate(candidate)).catch(console.error);
+    });
+    iceCandidateQueueRef.current = [];
 
-  // Add any queued ICE candidates
-  iceCandidateQueueRef.current.forEach((candidate) => {
-    peerRef.current.addIceCandidate(new RTCIceCandidate(candidate)).catch(console.error);
-  });
-  iceCandidateQueueRef.current = [];
+    const answer = await peerRef.current.createAnswer();
+    await peerRef.current.setLocalDescription(answer);
+    socketRef.current.emit("call-answered", { to: from, answer });
 
-  const answer = await peerRef.current.createAnswer();
-  await peerRef.current.setLocalDescription(answer);
-  socketRef.current.emit("call-answered", { to: from, answer });
+    setIncomingCall(null);
+    setIsCallActive(true);
+  };
 
-  setIncomingCall(null);
-  setIsCallActive(true);
-};
-
-
-  // Reject an incoming call
+  // ✅ Reject Call
   const rejectCall = () => {
     setIncomingCall(null);
     socketRef.current.emit('reject-call', { to: incomingCall?.from });
   };
 
-  // End the call
+  // ✅ End call
   const endCall = () => {
     if (peerRef.current) peerRef.current.close();
     peerRef.current = null;
@@ -281,19 +244,8 @@ const startCall = () => {
     if (remoteVideoRef.current) remoteVideoRef.current.srcObject = null;
 
     setIsCallActive(false);
-
     socketRef.current.emit('end-call', { to: selectedUser._id });
   };
-console.log("🎥 local stream tracks:", localStreamRef.current?.getTracks());
-console.log("📺 remote stream tracks:", remoteStreamRef.current?.getTracks());
-
-  console.log("remoteVideoRef.current.srcObject:", remoteVideoRef.current?.srcObject);
-  console.log(
-  "Remote stream tracks:",
-  remoteStreamRef.current.getTracks().map(t => `${t.kind} - enabled: ${t.enabled}`)
-);
-
-
 
   return (
     <div className="chat-layout">
@@ -332,7 +284,6 @@ console.log("📺 remote stream tracks:", remoteStreamRef.current?.getTracks());
               </div>
 
               <div className="chat-header-right">
-
                 <button className="call-btn" onClick={() => startCall(true)}>🎥</button>
                 {isCallActive && <button className="call-btn" onClick={endCall}>❌</button>}
               </div>
@@ -346,25 +297,24 @@ console.log("📺 remote stream tracks:", remoteStreamRef.current?.getTracks());
               socket={socketRef.current}
             />
 
-          {isCallActive && (
-  <div className="video-chat">
-    <video
-      ref={localVideoRef}
-      autoPlay
-      muted
-      playsInline
-      className="video-local"
-    />
-    <video
-      ref={remoteVideoRef}
-      autoPlay
-      playsInline
-      className="video-remote"
-    />
-    <p className="call-timer">⏱️ {callDuration}</p>
-  </div>
-)}
-
+            {isCallActive && (
+              <div className="video-chat">
+                <video
+                  ref={localVideoRef}
+                  autoPlay
+                  muted
+                  playsInline
+                  className="video-local"
+                />
+                <video
+                  ref={remoteVideoRef}
+                  autoPlay
+                  playsInline
+                  className="video-remote"
+                />
+                <p className="call-timer">⏱️ {callDuration}</p>
+              </div>
+            )}
           </div>
         )}
       </div>
