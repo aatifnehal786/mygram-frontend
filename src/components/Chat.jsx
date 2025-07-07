@@ -192,7 +192,7 @@ const Chat = () => {
   try {
     // 4. Get local media
     localStreamRef.current = await navigator.mediaDevices.getUserMedia({
-      video: isVideo,
+      video: true,
       audio: true,
     });
 
@@ -238,12 +238,12 @@ const startCall = (isVideo) => {
   const acceptCall = async () => {
   if (!incomingCall) return;
 
-  const { from, offer, type } = incomingCall;
-  const isVideo = type === "video" || !type;
+  const { from, offer } = incomingCall;
+  
 
   console.log("📞 Accepting call with type:", type);
 
-  await createPeer(false, from, isVideo);
+  await createPeer(false, from);
   await peerRef.current.setRemoteDescription(new RTCSessionDescription(offer));
   console.log("📥 Remote description set");
 
