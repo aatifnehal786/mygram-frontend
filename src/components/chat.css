@@ -676,7 +676,7 @@ body.dark .chat-header-info h2,p{
   display: flex;
   /* row-gap: 20px; */
   flex-direction: column;
-  background: black;
+  /* background: black; */
   padding: 10px;
   border-radius: 8px;
 }
@@ -684,7 +684,7 @@ body.dark .chat-header-info h2,p{
  {
   width: 300px;
   height: 200px;
-  background: #000;
+  /* background: #000; */
   opacity: 1;
   object-fit: cover;
   border-radius: 6px;
@@ -694,7 +694,7 @@ body.dark .chat-header-info h2,p{
 .video-remote{
    width: 300px;
   height: 200px;
-  background: #000;
+  /* background: #000; */
   opacity: 1;
   object-fit: cover;
   border-radius: 6px;
