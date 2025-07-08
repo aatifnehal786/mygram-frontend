@@ -51,7 +51,9 @@ const ChatWindow = ({ selectedUser, triggerForwardMode, socket, messages, setMes
 
   return (
     <div className="chat">
-      <div className="chat-header3">
+      
+      <div className="chat-container">
+        <div className="chat-header3">
         <div className="chat-header-left">
     <img
       src={selectedUser.profilePic}
@@ -73,7 +75,6 @@ const ChatWindow = ({ selectedUser, triggerForwardMode, socket, messages, setMes
     </div>
   </div>
       </div>
-      <div className="chat-container">
         <div className="chat-messages">
           {sortedMessages.map((msg, idx) => {
             const isOwnMessage = msg.sender === currentUserId;
