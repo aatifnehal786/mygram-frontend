@@ -487,8 +487,8 @@ body.dark .chat-header-info h2,p{
   box-shadow: 0 4px 8px rgba(0,0,0,0.1);
   z-index: 100;
   margin-top: 4px;
-  top: 0;
-  left: 0;
+  top: 5%;
+  left: 5%;
 }
 
 .option-menu ul {
