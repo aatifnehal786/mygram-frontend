@@ -238,6 +238,41 @@ const Chat = () => {
   }
 };
 
+const endCall = () => {
+  // ✅ 1. Close the peer connection
+  if (peerRef.current) {
+    peerRef.current.ontrack = null;
+    peerRef.current.onicecandidate = null;
+    peerRef.current.close();
+    peerRef.current = null;
+  }
+
+  // ✅ 2. Stop local media stream
+  if (localStreamRef.current) {
+    localStreamRef.current.getTracks().forEach((track) => {
+      track.stop();
+    });
+    localStreamRef.current = null;
+  }
+
+  // ✅ 3. Clear video elements
+  if (localVideoRef.current) {
+    localVideoRef.current.srcObject = null;
+  }
+  if (remoteVideoRef.current) {
+    remoteVideoRef.current.srcObject = null;
+  }
+
+  // ✅ 4. Notify the other peer
+  if (socketRef.current && selectedUser?._id) {
+    socketRef.current.emit('end-call', { to: selectedUser._id });
+  }
+
+  // ✅ 5. Update UI state
+  setIsCallActive(false);
+};
+
+
 
   return (
     <div className="chat-layout">
