@@ -252,13 +252,13 @@
   z-index: 10000;
 }
 
-.accept-btn, .reject-btn {
+.video-chat .accept-btn, .reject-btn {
   margin: 10px;
   padding: 10px 20px;
   font-size: 16px;
 }
 
-.end-call-btn {
+.video-chat .end-call-btn {
   background-color: red;
   color: white;
   border: none;
