@@ -51,7 +51,8 @@ const ChatWindow = ({ selectedUser, triggerForwardMode, socket, messages, setMes
 
   return (
     <div className="chat">
-      <div className="chat-header-left">
+      <div className="chat-header3">
+        <div className="chat-header-left">
     <img
       src={selectedUser.profilePic}
       alt={selectedUser.username}
@@ -71,6 +72,7 @@ const ChatWindow = ({ selectedUser, triggerForwardMode, socket, messages, setMes
       </p>
     </div>
   </div>
+      </div>
       <div className="chat-container">
         <div className="chat-messages">
           {sortedMessages.map((msg, idx) => {
