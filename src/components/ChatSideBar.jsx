@@ -19,8 +19,6 @@ const ChatSidebar = ({ onSelectUser, selectedUserId, onSelectForwardUser, isForw
       .catch(err => console.error('Error fetching followed users:', err));
   }, [loggedUser]);
 
-  console.log(followedUsers)
-
   const handleSearch = async (q) => {
     setSearchQuery(q);
     if (!q.trim()) return setResults([]);
