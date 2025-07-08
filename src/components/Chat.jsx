@@ -127,97 +127,117 @@ const Chat = () => {
     }
   };
 
-  const startCall = async () => {
-    peerRef.current = new RTCPeerConnection({
-      iceServers: [{ urls: 'stun:stun.l.google.com:19302' }],
+ const startCall = async () => {
+  peerRef.current = new RTCPeerConnection({
+    iceServers: [{ urls: 'stun:stun.l.google.com:19302' }],
+  });
+
+  peerRef.current.onicecandidate = (e) => {
+    if (e.candidate) {
+      socketRef.current.emit('ice-candidate', {
+        to: selectedUser._id,
+        candidate: e.candidate,
+      });
+    }
+  };
+
+  peerRef.current.ontrack = (event) => {
+    const remoteStream = event.streams[0];
+    // Delay assignment to ensure video element is rendered
+    setTimeout(() => {
+      if (remoteVideoRef.current) {
+        remoteVideoRef.current.srcObject = remoteStream;
+      }
+    }, 0);
+  };
+
+  try {
+    localStreamRef.current = await navigator.mediaDevices.getUserMedia({
+      video: true,
+      audio: true,
     });
 
-    peerRef.current.onicecandidate = (e) => {
-      if (e.candidate) {
-        socketRef.current.emit('ice-candidate', {
-          to: selectedUser._id,
-          candidate: e.candidate,
-        });
-      }
-    };
-
-   peerRef.current.ontrack = (event) => {
-  if (remoteVideoRef.current) {
-    remoteVideoRef.current.srcObject = event.streams[0];
-  }
-};
-
-
-    localStreamRef.current = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
     localStreamRef.current.getTracks().forEach((track) => {
       peerRef.current.addTrack(track, localStreamRef.current);
     });
-    if (localVideoRef.current) {
-  localVideoRef.current.srcObject = localStreamRef.current;
-}
 
+    // Delay assignment if ref not ready
+    setTimeout(() => {
+      if (localVideoRef.current) {
+        localVideoRef.current.srcObject = localStreamRef.current;
+      }
+    }, 0);
 
     const offer = await peerRef.current.createOffer();
     await peerRef.current.setLocalDescription(offer);
+
     socketRef.current.emit('call-user', {
       from: loggedUser.userid,
       to: selectedUser._id,
       offer,
     });
+
     setIsCallActive(true);
-  };
+  } catch (err) {
+    console.error("Failed to start call:", err);
+  }
+};
+
 
   const acceptCall = async () => {
-    const { from, offer } = incomingCall;
-    peerRef.current = new RTCPeerConnection({
-      iceServers: [{ urls: 'stun:stun.l.google.com:19302' }],
+  const { from, offer } = incomingCall;
+
+  peerRef.current = new RTCPeerConnection({
+    iceServers: [{ urls: 'stun:stun.l.google.com:19302' }],
+  });
+
+  peerRef.current.onicecandidate = (e) => {
+    if (e.candidate) {
+      socketRef.current.emit('ice-candidate', {
+        to: from,
+        candidate: e.candidate,
+      });
+    }
+  };
+
+  peerRef.current.ontrack = (event) => {
+    const remoteStream = event.streams[0];
+    setTimeout(() => {
+      if (remoteVideoRef.current) {
+        remoteVideoRef.current.srcObject = remoteStream;
+      }
+    }, 0);
+  };
+
+  try {
+    localStreamRef.current = await navigator.mediaDevices.getUserMedia({
+      video: true,
+      audio: true,
     });
 
-    peerRef.current.onicecandidate = (e) => {
-      if (e.candidate) {
-        socketRef.current.emit('ice-candidate', {
-          to: from,
-          candidate: e.candidate,
-        });
-      }
-    };
-
-    peerRef.current.ontrack = (event) => {
-      remoteVideoRef.current.srcObject = event.streams[0];
-    };
-
-    localStreamRef.current = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
     localStreamRef.current.getTracks().forEach((track) => {
       peerRef.current.addTrack(track, localStreamRef.current);
     });
-    if (localVideoRef.current) {
-  localVideoRef.current.srcObject = localStreamRef.current;
-}
 
+    setTimeout(() => {
+      if (localVideoRef.current) {
+        localVideoRef.current.srcObject = localStreamRef.current;
+      }
+    }, 0);
 
     await peerRef.current.setRemoteDescription(new RTCSessionDescription(offer));
     const answer = await peerRef.current.createAnswer();
     await peerRef.current.setLocalDescription(answer);
+
     socketRef.current.emit('answer-call', { to: from, answer });
 
     setIncomingCall(null);
     setIsCallActive(true);
-  };
+  } catch (err) {
+    console.error("Failed to accept call:", err);
+  }
+};
 
-  const endCall = () => {
-    if (peerRef.current) peerRef.current.close();
-    peerRef.current = null;
-
-    if (localStreamRef.current) {
-      localStreamRef.current.getTracks().forEach(track => track.stop());
-    }
-    localStreamRef.current = null;
-    if (localVideoRef.current) localVideoRef.current.srcObject = null;
-    if (remoteVideoRef.current) remoteVideoRef.current.srcObject = null;
-
-    setIsCallActive(false);
-    socketRef.current.emit('end-call', { to: selectedUser._id });
-  };
 
   return (
     <div className="chat-layout">
