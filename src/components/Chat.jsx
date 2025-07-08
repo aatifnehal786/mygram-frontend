@@ -185,9 +185,12 @@ const Chat = () => {
 
     peerRef.current = new RTCPeerConnection({
       iceServers: [
-        { urls: 'stun:stun.l.google.com:19302' },
-        { urls: 'turn:your.turn.server:3478', username: 'user', credential: 'pass' }
-      ]
+  { urls: 'stun:stun.l.google.com:19302' },
+  {
+      urls: "stun:global.stun.twilio.com:3478"
+    }
+]
+
     });
 
     peerRef.current.onicecandidate = (e) => {
