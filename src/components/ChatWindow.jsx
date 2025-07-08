@@ -2,13 +2,13 @@ import React, { useEffect, useRef, useState, useContext } from 'react';
 import { UserContext } from '../contexts/UserContext';
 import './chat.css';
 
-const ChatWindow = ({ selectedUser, triggerForwardMode, socket, messages, setMessages }) => {
+const ChatWindow = ({ selectedUser, triggerForwardMode, socket, messages, setMessages,isDropdownOpen }) => {
   const { loggedUser } = useContext(UserContext);
   const currentUserId = loggedUser?.userid;
   const [input, setInput] = useState('');
   const [openDropdownId, setOpenDropdownId] = useState(null);
   const messagesEndRef = useRef(null);
-  const [isDropdownOpen,setIsDropDownOpen]  = useState(false)
+  
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -80,8 +80,8 @@ const ChatWindow = ({ selectedUser, triggerForwardMode, socket, messages, setMes
         <div className="chat-messages">
           {sortedMessages.map((msg, idx) => {
             const isOwnMessage = msg.sender === currentUserId;
-            setIsDropDownOpen(true)
-            setTimeout((setIsDropDownOpen(false),4000))
+            
+            
             
           
 
