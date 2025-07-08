@@ -90,7 +90,30 @@
   border-bottom: 1px solid #ccc;
 }
 
+.chat-header-left {
+  display: flex;
+  align-items: center;
+}
 
+.chat-header-profile-pic {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-right: 10px;
+}
+
+.chat-header-user-info h3 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.chat-header-user-info p {
+  margin: 0;
+  font-size: 12px;
+  color: gray;
+}
 
 
 

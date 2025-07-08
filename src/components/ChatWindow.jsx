@@ -51,6 +51,26 @@ const ChatWindow = ({ selectedUser, triggerForwardMode, socket, messages, setMes
 
   return (
     <div className="chat">
+      <div className="chat-header-left">
+    <img
+      src={selectedUser.profilePic}
+      alt={selectedUser.username}
+      className="chat-header-profile-pic"
+    />
+    <div className="chat-header-user-info">
+      <h3>{selectedUser.username}</h3>
+      <p className="user-status">
+        {selectedUser.isOnline
+          ? 'Online'
+          : selectedUser.lastSeen
+          ? `Last seen ${new Date(selectedUser.lastSeen).toLocaleTimeString([], {
+              hour: '2-digit',
+              minute: '2-digit',
+            })}`
+          : 'Offline'}
+      </p>
+    </div>
+  </div>
       <div className="chat-container">
         <div className="chat-messages">
           {sortedMessages.map((msg, idx) => {
