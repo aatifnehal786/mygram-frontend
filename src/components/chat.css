@@ -89,7 +89,7 @@
   background-color: #f0f2f5;
   border-bottom: 1px solid #ccc;
 }
-.chat-header3 {
+.chat .chat-header3 {
   display: flex;
   align-items: center;
   padding: 10px 16px;
