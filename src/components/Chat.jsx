@@ -247,7 +247,7 @@ const Chat = () => {
               <div className="video-chat">
                 <video ref={localVideoRef} autoPlay muted className="video-local" />
                 <video ref={remoteVideoRef} autoPlay className="video-remote" />
-                <button onClick={endCall}>End Call</button>
+                <button className='end-call-btn' onClick={endCall}>End Call</button>
               </div>
             )}
           </div>
@@ -257,8 +257,8 @@ const Chat = () => {
       {incomingCall && (
         <div className="incoming-call-popup">
           <p>Incoming Video Call...</p>
-          <button onClick={acceptCall}>Accept</button>
-          <button onClick={() => setIncomingCall(null)}>Reject</button>
+          <button className='accept-btn' onClick={acceptCall}>Accept</button>
+          <button className='reject-btn' onClick={() => setIncomingCall(null)}>Reject</button>
         </div>
       )}
 

@@ -258,6 +258,21 @@
   font-size: 16px;
 }
 
+.end-call-btn {
+  background-color: red;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  font-weight: bold;
+  border-radius: 8px;
+  cursor: pointer;
+  margin-top: 10px;
+  transition: background-color 0.3s ease;
+}
+
+.end-call-btn:hover {
+  background-color: darkred;
+}
 
 
 
