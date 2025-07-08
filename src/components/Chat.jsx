@@ -187,11 +187,13 @@ const Chat = () => {
   const acceptCall = async () => {
   const { from, offer } = incomingCall;
 
-  peerRef.current = new RTCPeerConnection({
-    iceServers: [{
-                'url': 'stun:stun.l.google.com:19302'
-            }],
-  });
+peerRef.current = new RTCPeerConnection({
+  iceServers: [
+    { urls: 'stun:stun.l.google.com:19302' },
+    { urls: 'turn:your.turn.server:3478', username: 'user', credential: 'pass' }
+  ]
+});
+
 
   peerRef.current.onicecandidate = (e) => {
     if (e.candidate) {
