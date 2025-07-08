@@ -310,7 +310,7 @@ const endCall = () => {
             {isCallActive && (
               <div className="video-chat">
                 <video ref={localVideoRef} autoPlay muted className="video-local" />
-                <video ref={remoteVideoRef} autoPlay className="video-remote" />
+                <video ref={remoteVideoRef} playsInline autoPlay className="video-remote" />
                 <button className='end-call-btn' onClick={endCall}>End Call</button>
               </div>
             )}
