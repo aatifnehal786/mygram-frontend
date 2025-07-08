@@ -1,4 +1,3 @@
-// 📁 Chat.js
 import React, { useState, useEffect, useRef } from 'react';
 import ChatSidebar from './ChatSideBar';
 import ChatWindow from './ChatWindow';
@@ -9,24 +8,17 @@ import './chat.css';
 import './chat-layout.css';
 
 const Chat = () => {
-  const [selectedUser, setSelectedUser] = useState(
-    JSON.parse(localStorage.getItem('selected-chat-user')) || null
-  );
-  const [chatList, setChatList] = useState([]);
+  const [selectedUser, setSelectedUser] = useState(null);
   const [messages, setMessages] = useState([]);
   const [view, setView] = useState(window.innerWidth < 768 ? 'sidebar' : 'full');
   const [loggedUser, setLoggedUser] = useState(
     JSON.parse(sessionStorage.getItem('token-auth'))
   );
-  const [incomingCall, setIncomingCall] = useState(null);
-  const [callType, setCallType] = useState(null);
-  const [isCallActive, setIsCallActive] = useState(false);
+
+  const [messageToForward, setMessageToForward] = useState(null);
+  const [isForwardMode, setIsForwardMode] = useState(false);
 
   const socketRef = useRef(null);
-  const peerRef = useRef(null);
-  const localVideoRef = useRef(null);
-  const remoteVideoRef = useRef(null);
-  const localStreamRef = useRef(null);
 
   useEffect(() => {
     const handleResize = () => {
@@ -55,121 +47,60 @@ const Chat = () => {
     socketRef.current.emit('join', loggedUser.userid);
 
     socketRef.current.on('receiveMessage', (msg) => {
-      const isCurrentChat =
+      const isChatWithSelectedUser =
         (msg.sender === loggedUser.userid && msg.receiver === selectedUser._id) ||
         (msg.receiver === loggedUser.userid && msg.sender === selectedUser._id);
-      if (isCurrentChat) setMessages(prev => [...prev, msg]);
-    });
-
-    socketRef.current.on('incoming-call', async ({ from, offer, type }) => {
-      setIncomingCall({ from, offer, type });
-      setCallType(type);
-    });
-
-    socketRef.current.on('call-answered', ({ answer }) => {
-      peerRef.current?.setRemoteDescription(new RTCSessionDescription(answer));
-    });
-
-    socketRef.current.on('ice-candidate', ({ candidate }) => {
-      peerRef.current?.addIceCandidate(new RTCIceCandidate(candidate));
-    });
-
-    socketRef.current.on('call-ended', () => {
-      endCall();
+      if (isChatWithSelectedUser) {
+        setMessages(prev => [...prev, msg]);
+      }
     });
 
     return () => {
       socketRef.current.off('receiveMessage');
-      socketRef.current.off('incoming-call');
-      socketRef.current.off('call-answered');
-      socketRef.current.off('ice-candidate');
-      socketRef.current.off('call-ended');
     };
   }, [selectedUser]);
 
-  const createPeer = async (isInitiator, remoteUserId, isVideo) => {
-    peerRef.current = new RTCPeerConnection({
-      iceServers: [{ urls: 'stun:stun.l.google.com:19302' }],
-    });
+  const triggerForwardMode = (msg) => {
+    setMessageToForward(msg);
+    setIsForwardMode(true);
+    toast.info("Select a follower to forward this message");
+  };
 
-    peerRef.current.onicecandidate = (e) => {
-      if (e.candidate) {
-        socketRef.current.emit('ice-candidate', {
-          to: remoteUserId,
-          candidate: e.candidate,
-        });
-      }
-    };
+  const forwardMessageToUser = async (targetUser) => {
+    if (!messageToForward || !loggedUser) return;
 
-    peerRef.current.ontrack = (event) => {
-      remoteVideoRef.current.srcObject = event.streams[0];
-    };
-
-    localStreamRef.current = await navigator.mediaDevices.getUserMedia({
-      video: isVideo,
-      audio: true,
-    });
-
-    localStreamRef.current.getTracks().forEach((track) => {
-      peerRef.current.addTrack(track, localStreamRef.current);
-    });
-
-    localVideoRef.current.srcObject = localStreamRef.current;
-
-    if (isInitiator) {
-      const offer = await peerRef.current.createOffer();
-      await peerRef.current.setLocalDescription(offer);
-      socketRef.current.emit('call-user', {
-        from: loggedUser.userid,
-        to: selectedUser._id,
-        offer,
-        type: isVideo ? 'video' : 'audio'
+    try {
+      const res = await fetch("https://mygram-1-1nua.onrender.com/chat/forward", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${loggedUser.token}`,
+        },
+        body: JSON.stringify({
+          senderId: loggedUser.userid,
+          receiverId: targetUser._id,
+          message: messageToForward.message,
+          fileUrl: messageToForward.fileUrl,
+          fileType: messageToForward.fileType,
+          isForwarded: true,
+        }),
       });
+
+      const newMessage = await res.json();
+
+      if (res.ok) {
+        socketRef.current.emit("sendMessage", newMessage);
+        toast.success("Message forwarded!");
+      } else {
+        toast.error("Forward failed");
+      }
+    } catch (err) {
+      console.error("Forward error:", err);
+      toast.error("Error forwarding message");
     }
-  };
 
-  const startCall = (isVideo) => {
-    createPeer(true, selectedUser._id, isVideo);
-    setCallType(isVideo ? 'video' : 'audio');
-    setIsCallActive(true);
-  };
-
-  const acceptCall = async () => {
-    if (!incomingCall) return;
-
-    const { from, offer, type } = incomingCall;
-    const isVideo = type === 'video';
-
-    await createPeer(false, from, isVideo);
-    await peerRef.current.setRemoteDescription(new RTCSessionDescription(offer));
-    const answer = await peerRef.current.createAnswer();
-    await peerRef.current.setLocalDescription(answer);
-    socketRef.current.emit('answer-call', { to: from, answer });
-
-    setIncomingCall(null);
-    setCallType(type);
-    setIsCallActive(true);
-  };
-
-  const rejectCall = () => {
-    setIncomingCall(null);
-    socketRef.current.emit('reject-call', { to: incomingCall?.from });
-  };
-
-  const endCall = () => {
-    if (peerRef.current) peerRef.current.close();
-    peerRef.current = null;
-
-    if (localStreamRef.current) {
-      localStreamRef.current.getTracks().forEach(track => track.stop());
-    }
-    localStreamRef.current = null;
-    if (localVideoRef.current) localVideoRef.current.srcObject = null;
-    if (remoteVideoRef.current) remoteVideoRef.current.srcObject = null;
-
-    setIsCallActive(false);
-    setCallType(null);
-    socketRef.current.emit('end-call', { to: selectedUser._id });
+    setIsForwardMode(false);
+    setMessageToForward(null);
   };
 
   return (
@@ -182,8 +113,8 @@ const Chat = () => {
               if (window.innerWidth < 768) setView('chat');
             }}
             selectedUserId={selectedUser?._id}
-            loggedUser={loggedUser}
-            setChatList={setChatList}
+            isForwarding={isForwardMode}
+            onSelectForwardUser={forwardMessageToUser}
           />
         )}
 
@@ -198,36 +129,26 @@ const Chat = () => {
                 )}
                 <h3>{selectedUser.username}</h3>
               </div>
-              <div className="chat-header-right">
-                <button className="call-btn" onClick={() => startCall(false)}>🎤</button>
-                <button className="call-btn" onClick={() => startCall(true)}>🎥</button>
-                {isCallActive && <button className="call-btn" onClick={endCall}>❌</button>}
-              </div>
             </div>
 
             <ChatWindow
               selectedUser={selectedUser}
-              chatList={chatList}
               messages={messages}
               setMessages={setMessages}
               socket={socketRef.current}
+              triggerForwardMode={triggerForwardMode}
             />
-
-            {isCallActive && (
-              <div className="video-chat">
-                <video ref={localVideoRef} autoPlay muted className="video-local" />
-                <video ref={remoteVideoRef} autoPlay className="video-remote" />
-              </div>
-            )}
           </div>
         )}
       </div>
 
-      {incomingCall && (
-        <div className="incoming-call-popup">
-          <p>Incoming {incomingCall.type} call...</p>
-          <button onClick={acceptCall} className="accept-btn">✅ Accept</button>
-          <button onClick={rejectCall} className="reject-btn">❌ Reject</button>
+      {isForwardMode && (
+        <div className="forward-banner">
+          <p>Forwarding: {messageToForward?.message || '[Media]'}</p>
+          <button onClick={() => {
+            setIsForwardMode(false);
+            setMessageToForward(null);
+          }}>Cancel</button>
         </div>
       )}
 
