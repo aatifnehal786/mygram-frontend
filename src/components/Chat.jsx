@@ -188,7 +188,9 @@ const Chat = () => {
   const { from, offer } = incomingCall;
 
   peerRef.current = new RTCPeerConnection({
-    iceServers: [{ urls: 'stun:stun.l.google.com:19302' }],
+    iceServers: [{
+                'url': 'stun:stun.l.google.com:19302'
+            }],
   });
 
   peerRef.current.onicecandidate = (e) => {
