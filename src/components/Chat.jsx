@@ -14,7 +14,7 @@ const Chat = () => {
   const [loggedUser, setLoggedUser] = useState(
     JSON.parse(sessionStorage.getItem('token-auth'))
   );
-const [isDropdownOpen,setIsDropDownOpen]  = useState(false)
+
   const [messageToForward, setMessageToForward] = useState(null);
   const [isForwardMode, setIsForwardMode] = useState(false);
 
@@ -63,7 +63,6 @@ const [isDropdownOpen,setIsDropDownOpen]  = useState(false)
   const triggerForwardMode = (msg) => {
     setMessageToForward(msg);
     setIsForwardMode(true);
-    setIsDropDownOpen(true)
     toast.info("Select a follower to forward this message");
   };
 
@@ -92,7 +91,6 @@ const [isDropdownOpen,setIsDropDownOpen]  = useState(false)
       if (res.ok) {
         socketRef.current.emit("sendMessage", newMessage);
         setMessages(prev => [...prev, newMessage]);
-        setIsDropDownOpen(false)
         toast.success("Message forwarded!");
       } else {
         toast.error("Forward failed");
@@ -140,8 +138,6 @@ const [isDropdownOpen,setIsDropDownOpen]  = useState(false)
               setMessages={setMessages}
               socket={socketRef.current}
               triggerForwardMode={triggerForwardMode}
-              isDropdownOpen={isDropdownOpen}
-              setIsDropDownOpen={setIsDropDownOpen}
             />
           </div>
         )}

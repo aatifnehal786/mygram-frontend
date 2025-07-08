@@ -2,13 +2,12 @@ import React, { useEffect, useRef, useState, useContext } from 'react';
 import { UserContext } from '../contexts/UserContext';
 import './chat.css';
 
-const ChatWindow = ({ selectedUser, triggerForwardMode, socket, messages, setMessages,isDropdownOpen=true }) => {
+const ChatWindow = ({ selectedUser, triggerForwardMode, socket, messages, setMessages }) => {
   const { loggedUser } = useContext(UserContext);
   const currentUserId = loggedUser?.userid;
   const [input, setInput] = useState('');
   const [openDropdownId, setOpenDropdownId] = useState(null);
   const messagesEndRef = useRef(null);
-  
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -80,10 +79,10 @@ const ChatWindow = ({ selectedUser, triggerForwardMode, socket, messages, setMes
         <div className="chat-messages">
           {sortedMessages.map((msg, idx) => {
             const isOwnMessage = msg.sender === currentUserId;
-            
-            
-            
-          
+            const isDropdownOpen = openDropdownId === msg._id;
+            setTimeout((isDropdownOpen=null)=>{
+
+            },5000)
 
             return (
               <div key={msg._id || idx} className={`message-bubble ${isOwnMessage ? 'own' : 'other'}`}>
