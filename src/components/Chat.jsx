@@ -66,42 +66,40 @@ const Chat = () => {
     toast.info("Select a follower to forward this message");
   };
 
-  const forwardMessageToUser = async (targetUser) => {
-    if (!messageToForward || !loggedUser) return;
+  const forwardMessageToUser = async (msg, receiverId) => {
+  try {
+    const res = await fetch("https://mygram-1-1nua.onrender.com/chat/forward", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        senderId: loggedUser.userid,
+        receiverId,
+        message: msg.message || '',
+        fileUrl: msg.fileUrl || null,
+        fileType: msg.fileType || null,
+        isForwarded: true
+      })
+    });
 
-    try {
-      const res = await fetch("https://mygram-1-1nua.onrender.com/chat/forward", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${loggedUser.token}`,
-        },
-        body: JSON.stringify({
-          senderId: loggedUser.userid,
-          receiverId: targetUser._id,
-          message: messageToForward.message,
-          fileUrl: messageToForward.fileUrl,
-          fileType: messageToForward.fileType,
-          isForwarded: true,
-        }),
-      });
+    const newMsg = await res.json();
 
-      const newMessage = await res.json();
-
-      if (res.ok) {
-        socketRef.current.emit("sendMessage", newMessage);
-        toast.success("Message forwarded!");
-      } else {
-        toast.error("Forward failed");
-      }
-    } catch (err) {
-      console.error("Forward error:", err);
-      toast.error("Error forwarding message");
+    // 🔥 Send to receiver via socket for real-time update
+    if (socketRef.current) {
+      socketRef.current.emit("sendMessage", newMsg);
     }
 
-    setIsForwardMode(false);
-    setMessageToForward(null);
-  };
+    // ✅ Also update your own UI if needed
+    if (selectedUser._id === receiverId) {
+      setMessages(prev => [...prev, newMsg]);
+    }
+
+  } catch (err) {
+    console.error("Forward failed:", err);
+  }
+};
+
 
   return (
     <div className="chat-layout">

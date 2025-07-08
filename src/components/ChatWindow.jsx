@@ -48,7 +48,7 @@ const ChatWindow = ({ selectedUser, triggerForwardMode, socket, messages, setMes
   };
 
   const sortedMessages = [...messages].sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
-  setMessages(sortedMessages)
+
 
   return (
     <div className="chat">
