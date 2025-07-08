@@ -141,15 +141,21 @@ const Chat = () => {
       }
     };
 
-    peerRef.current.ontrack = (event) => {
-      remoteVideoRef.current.srcObject = event.streams[0];
-    };
+   peerRef.current.ontrack = (event) => {
+  if (remoteVideoRef.current) {
+    remoteVideoRef.current.srcObject = event.streams[0];
+  }
+};
+
 
     localStreamRef.current = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
     localStreamRef.current.getTracks().forEach((track) => {
       peerRef.current.addTrack(track, localStreamRef.current);
     });
-    localVideoRef.current.srcObject = localStreamRef.current;
+    if (localVideoRef.current) {
+  localVideoRef.current.srcObject = localStreamRef.current;
+}
+
 
     const offer = await peerRef.current.createOffer();
     await peerRef.current.setLocalDescription(offer);
@@ -184,7 +190,10 @@ const Chat = () => {
     localStreamRef.current.getTracks().forEach((track) => {
       peerRef.current.addTrack(track, localStreamRef.current);
     });
-    localVideoRef.current.srcObject = localStreamRef.current;
+    if (localVideoRef.current) {
+  localVideoRef.current.srcObject = localStreamRef.current;
+}
+
 
     await peerRef.current.setRemoteDescription(new RTCSessionDescription(offer));
     const answer = await peerRef.current.createAnswer();

@@ -242,15 +242,17 @@
 
 .incoming-call-popup {
   position: fixed;
-  top: 40%;
+  top: 20%;
   left: 50%;
-  transform: translate(-50%, -50%);
+  transform: translateX(-50%);
   background: white;
-  padding: 1.5rem 2rem;
-  border-radius: 10px;
-  box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
-  z-index: 10000;
+  padding: 1rem 2rem;
+  border-radius: 12px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.3);
+  z-index: 1000;
+  text-align: center;
 }
+
 
 .video-chat .accept-btn, .reject-btn {
   margin: 10px;
