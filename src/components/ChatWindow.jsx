@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState, useContext } from 'react';
 import { UserContext } from '../contexts/UserContext';
 import './chat.css';
 
-const ChatWindow = ({ selectedUser, triggerForwardMode, socket, messages, setMessages,isDropdownOpen }) => {
+const ChatWindow = ({ selectedUser, triggerForwardMode, socket, messages, setMessages,isDropdownOpen=true }) => {
   const { loggedUser } = useContext(UserContext);
   const currentUserId = loggedUser?.userid;
   const [input, setInput] = useState('');
