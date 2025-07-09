@@ -356,6 +356,12 @@ const startCall = async () => {
                 <video ref={localVideoRef} playsInline muted autoPlay  className="video-local" />
                 <video ref={remoteVideoRef} playsInline autoPlay className="video-remote" />
                 <button onClick={() => {
+  remoteVideoRef.current?.play().catch(err => console.log("Play failed:", err));
+}}>
+  Unmute & Play Remote Video
+</button>
+
+                <button onClick={() => {
   const video = remoteVideoRef.current;
   video.muted = false;
   video.play().catch(err => console.log("Play error:", err));
