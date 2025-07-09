@@ -140,16 +140,6 @@ const iceServers = [
     credential: 'e+07ljTKbf32vhzVc/TuQaO6P9tXvZ/6TnF8h3cO9Zc=',
     urls: 'turn:global.turn.twilio.com:3478?transport=udp',
     username: '50a4b0d90bf473c4ac710c8791bb3a81113473b7760e0c8cb2642fa9e2deec90'
-  },
-  {
-    credential: 'e+07ljTKbf32vhzVc/TuQaO6P9tXvZ/6TnF8h3cO9Zc=',
-    urls: 'turn:global.turn.twilio.com:3478?transport=tcp',
-    username: '50a4b0d90bf473c4ac710c8791bb3a81113473b7760e0c8cb2642fa9e2deec90'
-  },
-  {
-    credential: 'e+07ljTKbf32vhzVc/TuQaO6P9tXvZ/6TnF8h3cO9Zc=',
-    urls: 'turn:global.turn.twilio.com:443?transport=tcp',
-    username: '50a4b0d90bf473c4ac710c8791bb3a81113473b7760e0c8cb2642fa9e2deec90'
   }
 ]
 
@@ -210,16 +200,6 @@ peerRef.current = new RTCPeerConnection({ iceServers });
   {
     credential: 'e+07ljTKbf32vhzVc/TuQaO6P9tXvZ/6TnF8h3cO9Zc=',
     urls: 'turn:global.turn.twilio.com:3478?transport=udp',
-    username: '50a4b0d90bf473c4ac710c8791bb3a81113473b7760e0c8cb2642fa9e2deec90'
-  },
-  {
-    credential: 'e+07ljTKbf32vhzVc/TuQaO6P9tXvZ/6TnF8h3cO9Zc=',
-    urls: 'turn:global.turn.twilio.com:3478?transport=tcp',
-    username: '50a4b0d90bf473c4ac710c8791bb3a81113473b7760e0c8cb2642fa9e2deec90'
-  },
-  {
-    credential: 'e+07ljTKbf32vhzVc/TuQaO6P9tXvZ/6TnF8h3cO9Zc=',
-    urls: 'turn:global.turn.twilio.com:443?transport=tcp',
     username: '50a4b0d90bf473c4ac710c8791bb3a81113473b7760e0c8cb2642fa9e2deec90'
   }
 ]
