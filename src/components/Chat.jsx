@@ -132,7 +132,7 @@ const Chat = () => {
   };
 
   const startCall = async () => {
-   const iceServers = [
+ const iceServers = [
   {
     urls: "stun:global.stun.twilio.com:3478"
   },
@@ -152,6 +152,7 @@ const Chat = () => {
     credential: "tE2DajzSJwnsSbc123"
   }
 ];
+
 
 
 peerRef.current = new RTCPeerConnection({ iceServers });
@@ -203,8 +204,7 @@ peerRef.current = new RTCPeerConnection({ iceServers });
 
   const acceptCall = async () => {
     const { from, offer } = incomingCall;
-
-     const iceServers = [
+const iceServers = [
   {
     urls: "stun:global.stun.twilio.com:3478"
   },
@@ -224,6 +224,7 @@ peerRef.current = new RTCPeerConnection({ iceServers });
     credential: "tE2DajzSJwnsSbc123"
   }
 ];
+
 
 
 
