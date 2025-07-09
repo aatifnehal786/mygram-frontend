@@ -177,7 +177,7 @@ const startCall = async () => {
 
     // ⏳ Wait 1 tick to ensure video DOM elements are mounted
     await new Promise(resolve => setTimeout(resolve, 0));
-    
+
     localStreamRef.current = await navigator.mediaDevices.getUserMedia({
       video: true,
       audio: true,
@@ -240,6 +240,7 @@ const startCall = async () => {
   };
 
   peerRef.current.ontrack = (event) => {
+    console.log('📥 Remote track received:', event.track.kind);
     const remoteStream = event.streams[0];
     if (remoteVideoRef.current) {
       remoteVideoRef.current.srcObject = remoteStream;
@@ -302,6 +303,11 @@ const startCall = async () => {
     setIsCallActive(false);
   };
 
+  peerRef.current.oniceconnectionstatechange = () => {
+  console.log('ICE state:', peerRef.current.iceConnectionState);
+};
+
+
 
 
   return (
@@ -341,6 +347,14 @@ const startCall = async () => {
               <div className="video-chat">
                 <video ref={localVideoRef} playsInline muted autoPlay  className="video-local" />
                 <video ref={remoteVideoRef} playsInline autoPlay className="video-remote" />
+                <button onClick={() => {
+  const video = remoteVideoRef.current;
+  video.muted = false;
+  video.play().catch(err => console.log("Play error:", err));
+}}>
+  Unmute Remote Audio
+</button>
+
                 <button className='end-call-btn' onClick={endCall}>End Call</button>
               </div>
             )}
