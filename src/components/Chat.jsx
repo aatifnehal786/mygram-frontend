@@ -303,9 +303,7 @@ const startCall = async () => {
     setIsCallActive(false);
   };
 
-  peerRef.current.oniceconnectionstatechange = () => {
-  console.log('ICE state:', peerRef.current.iceConnectionState);
-};
+
 
 
 
