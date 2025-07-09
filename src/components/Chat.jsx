@@ -131,125 +131,146 @@ const Chat = () => {
     }
   };
 
-  const startCall = async () => {
-const iceServers = [
-  {
-    urls: 'stun:global.stun.twilio.com:3478'
-  },
-  {
-    credential: 'e+07ljTKbf32vhzVc/TuQaO6P9tXvZ/6TnF8h3cO9Zc=',
-    urls: 'turn:global.turn.twilio.com:3478?transport=udp',
-    username: '50a4b0d90bf473c4ac710c8791bb3a81113473b7760e0c8cb2642fa9e2deec90'
-  }
-]
+const startCall = async () => {
+  const iceServers = [
+    {
+      urls: 'stun:global.stun.twilio.com:3478'
+    },
+    {
+      urls: 'turn:global.turn.twilio.com:3478?transport=udp',
+      username: '50a4b0d90bf473c4ac710c8791bb3a81113473b7760e0c8cb2642fa9e2deec90',
+      credential: 'e+07ljTKbf32vhzVc/TuQaO6P9tXvZ/6TnF8h3cO9Zc='
+    },
+    {
+      urls: 'turn:global.turn.twilio.com:443?transport=tcp', // 🔥 Fallback for mobile firewalls
+      username: '50a4b0d90bf473c4ac710c8791bb3a81113473b7760e0c8cb2642fa9e2deec90',
+      credential: 'e+07ljTKbf32vhzVc/TuQaO6P9tXvZ/6TnF8h3cO9Zc='
+    }
+  ];
 
-peerRef.current = new RTCPeerConnection({ iceServers });
+  peerRef.current = new RTCPeerConnection({ iceServers });
 
-
-    peerRef.current.onicecandidate = (e) => {
-      if (e.candidate) {
-        socketRef.current.emit('ice-candidate', {
-          to: selectedUser._id,
-          candidate: e.candidate,
-        });
-      }
-    };
-
-    peerRef.current.ontrack = (event) => {
-      const remoteStream = event.streams[0];
-      if (remoteVideoRef.current) {
-        remoteVideoRef.current.srcObject = remoteStream;
-        remoteVideoRef.current.onloadedmetadata = () => {
-          remoteVideoRef.current.play();
-        };
-      }
-    };
-
-    try {
-      localStreamRef.current = await navigator.mediaDevices.getUserMedia({
-        video: true,
-        audio: true,
-      });
-
-      localStreamRef.current.getTracks().forEach((track) => {
-        peerRef.current.addTrack(track, localStreamRef.current);
-      });
-
-      const offer = await peerRef.current.createOffer();
-      await peerRef.current.setLocalDescription(offer);
-
-      socketRef.current.emit('call-user', {
-        from: loggedUser.userid,
+  peerRef.current.onicecandidate = (e) => {
+    if (e.candidate) {
+      socketRef.current.emit('ice-candidate', {
         to: selectedUser._id,
-        offer,
+        candidate: e.candidate,
       });
-
-      setIsCallActive(true);
-    } catch (err) {
-      console.error("Failed to start call:", err);
     }
   };
 
-  const acceptCall = async () => {
-    const { from, offer } = incomingCall;
- 
-    const iceServers = [
-  {
-    urls: 'stun:global.stun.twilio.com:3478'
-  },
-  {
-    credential: 'e+07ljTKbf32vhzVc/TuQaO6P9tXvZ/6TnF8h3cO9Zc=',
-    urls: 'turn:global.turn.twilio.com:3478?transport=udp',
-    username: '50a4b0d90bf473c4ac710c8791bb3a81113473b7760e0c8cb2642fa9e2deec90'
+  peerRef.current.ontrack = (event) => {
+    const remoteStream = event.streams[0];
+    if (remoteVideoRef.current) {
+      remoteVideoRef.current.srcObject = remoteStream;
+      remoteVideoRef.current.onloadedmetadata = () => {
+        remoteVideoRef.current.play();
+      };
+    }
+  };
+
+  try {
+    localStreamRef.current = await navigator.mediaDevices.getUserMedia({
+      video: true,
+      audio: true,
+    });
+
+    // ✅ Show local video
+    localVideoRef.current.srcObject = localStreamRef.current;
+    localVideoRef.current.onloadedmetadata = () => {
+      localVideoRef.current.play();
+    };
+
+    localStreamRef.current.getTracks().forEach((track) => {
+      peerRef.current.addTrack(track, localStreamRef.current);
+    });
+
+    const offer = await peerRef.current.createOffer();
+    await peerRef.current.setLocalDescription(offer);
+
+    socketRef.current.emit('call-user', {
+      from: loggedUser.userid,
+      to: selectedUser._id,
+      offer,
+    });
+
+    setIsCallActive(true);
+  } catch (err) {
+    console.error("Failed to start call:", err);
   }
-]
+};
 
 
-peerRef.current = new RTCPeerConnection({ iceServers });
+ const acceptCall = async () => {
+  const { from, offer } = incomingCall;
 
+  const iceServers = [
+    {
+      urls: 'stun:global.stun.twilio.com:3478'
+    },
+    {
+      credential: 'e+07ljTKbf32vhzVc/TuQaO6P9tXvZ/6TnF8h3cO9Zc=',
+      urls: 'turn:global.turn.twilio.com:3478?transport=udp',
+      username: '50a4b0d90bf473c4ac710c8791bb3a81113473b7760e0c8cb2642fa9e2deec90'
+    },
+    {
+      credential: 'e+07ljTKbf32vhzVc/TuQaO6P9tXvZ/6TnF8h3cO9Zc=',
+      urls: 'turn:global.turn.twilio.com:443?transport=tcp', // 🔥 Add this
+      username: '50a4b0d90bf473c4ac710c8791bb3a81113473b7760e0c8cb2642fa9e2deec90'
+    }
+  ];
 
-    peerRef.current.onicecandidate = (e) => {
-      if (e.candidate) {
-        socketRef.current.emit('ice-candidate', {
-          to: from,
-          candidate: e.candidate,
-        });
-      }
-    };
+  peerRef.current = new RTCPeerConnection({ iceServers });
 
-    peerRef.current.ontrack = (event) => {
-      console.log("📥 ontrack event:", event.streams[0]);
-      const remoteStream = event.streams[0];
-      if (remoteVideoRef.current) {
-        remoteVideoRef.current.srcObject = remoteStream;
-        remoteVideoRef.current.onloadedmetadata = () => {
-          remoteVideoRef.current.play();
-        };
-      }
-    };
-
-    try {
-      localStreamRef.current = await navigator.mediaDevices.getUserMedia({
-        video: true,
-        audio: true,
+  peerRef.current.onicecandidate = (e) => {
+    if (e.candidate) {
+      socketRef.current.emit('ice-candidate', {
+        to: from,
+        candidate: e.candidate,
       });
-
-      localStreamRef.current.getTracks().forEach((track) => {
-        peerRef.current.addTrack(track, localStreamRef.current);
-      });
-
-      await peerRef.current.setRemoteDescription(new RTCSessionDescription(offer));
-      const answer = await peerRef.current.createAnswer();
-      await peerRef.current.setLocalDescription(answer);
-
-      socketRef.current.emit('answer-call', { to: from, answer });
-
-      setIncomingCall(null);
-      setIsCallActive(true);
-    } catch (err) {
-      console.error("Failed to accept call:", err);
     }
   };
+
+  peerRef.current.ontrack = (event) => {
+    const remoteStream = event.streams[0];
+    if (remoteVideoRef.current) {
+      remoteVideoRef.current.srcObject = remoteStream;
+      remoteVideoRef.current.onloadedmetadata = () => {
+        remoteVideoRef.current.play();
+      };
+    }
+  };
+
+  try {
+    localStreamRef.current = await navigator.mediaDevices.getUserMedia({
+      video: true,
+      audio: true,
+    });
+
+    // 🔥 Set local stream for self-view
+    localVideoRef.current.srcObject = localStreamRef.current;
+    localVideoRef.current.onloadedmetadata = () => {
+      localVideoRef.current.play();
+    };
+
+    // Add tracks to peer connection
+    localStreamRef.current.getTracks().forEach((track) => {
+      peerRef.current.addTrack(track, localStreamRef.current);
+    });
+
+    await peerRef.current.setRemoteDescription(new RTCSessionDescription(offer));
+    const answer = await peerRef.current.createAnswer();
+    await peerRef.current.setLocalDescription(answer);
+
+    socketRef.current.emit('answer-call', { to: from, answer });
+
+    setIncomingCall(null);
+    setIsCallActive(true);
+  } catch (err) {
+    console.error("Failed to accept call:", err);
+  }
+};
+
 
   const endCall = () => {
     peerRef.current?.close();
