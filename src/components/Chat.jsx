@@ -148,9 +148,7 @@ const startCall = async () => {
     }
   ];
 
-  setIsCallActive(true); // 🔥 Mounts <video> elements
 
-await new Promise(resolve => setTimeout(resolve, 0)); // 
 
   peerRef.current = new RTCPeerConnection({ iceServers });
 
@@ -174,6 +172,12 @@ await new Promise(resolve => setTimeout(resolve, 0)); //
   };
 
   try {
+
+      setIsCallActive(true);
+
+    // ⏳ Wait 1 tick to ensure video DOM elements are mounted
+    await new Promise(resolve => setTimeout(resolve, 0));
+    
     localStreamRef.current = await navigator.mediaDevices.getUserMedia({
       video: true,
       audio: true,
@@ -246,6 +250,11 @@ await new Promise(resolve => setTimeout(resolve, 0)); //
   };
 
   try {
+
+      setIsCallActive(true);
+
+    // ⏳ Wait 1 tick to ensure video DOM elements are mounted
+    await new Promise(resolve => setTimeout(resolve, 0));
     localStreamRef.current = await navigator.mediaDevices.getUserMedia({
       video: true,
       audio: true,
