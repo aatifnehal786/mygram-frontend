@@ -148,6 +148,10 @@ const startCall = async () => {
     }
   ];
 
+  setIsCallActive(true); // 🔥 Mounts <video> elements
+
+await new Promise(resolve => setTimeout(resolve, 0)); // 
+
   peerRef.current = new RTCPeerConnection({ iceServers });
 
   peerRef.current.onicecandidate = (e) => {
@@ -194,7 +198,7 @@ const startCall = async () => {
       offer,
     });
 
-    setIsCallActive(true);
+    
   } catch (err) {
     console.error("Failed to start call:", err);
   }
