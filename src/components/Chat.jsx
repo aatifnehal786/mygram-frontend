@@ -152,6 +152,11 @@ const startCall = async () => {
 
   peerRef.current = new RTCPeerConnection({ iceServers });
 
+  peerRef.current.oniceconnectionstatechange = () => {
+  console.log("📡 ICE Connection State:", peerRef.current.iceConnectionState);
+};
+
+
   peerRef.current.onicecandidate = (e) => {
     if (e.candidate) {
       socketRef.current.emit('ice-candidate', {
@@ -229,6 +234,11 @@ const startCall = async () => {
   ];
 
   peerRef.current = new RTCPeerConnection({ iceServers });
+
+  peerRef.current.oniceconnectionstatechange = () => {
+  console.log("📡 ICE Connection State:", peerRef.current.iceConnectionState);
+};
+
 
   peerRef.current.onicecandidate = (e) => {
     if (e.candidate) {
