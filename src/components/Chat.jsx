@@ -290,9 +290,7 @@ peerRef.current = new RTCPeerConnection({ iceServers });
     setIsCallActive(false);
   };
 
-  peerRef.current.oniceconnectionstatechange = () => {
-  console.log("📡 ICE connection state:", peerRef.current.iceConnectionState);
-};
+
 
   return (
     <div className="chat-layout">
