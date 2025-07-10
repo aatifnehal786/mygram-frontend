@@ -393,24 +393,13 @@ const tryPlayRemoteVideo = () => {
               triggerForwardMode={triggerForwardMode}
             />
 
-         {isCallActive && (
-  <div className="video-chat">
-    <video
-      ref={localVideoRef}
-      playsInline
-      muted
-      autoPlay
-      className="video-local"
-    />
-    <video
-      ref={remoteVideoRef}
-      playsInline
-      autoPlay
-      className="video-remote"
-    />
-  </div>
-)}
-
+            {isCallActive && (
+              <div className="video-chat">
+                <video ref={localVideoRef} playsInline muted autoPlay  className="video-local" />
+                <video ref={remoteVideoRef} playsInline autoPlay className="video-remote" />
+                <button className='end-call-btn' onClick={endCall}>End Call</button>
+              </div>
+            )}
           </div>
         )}
       </div>
