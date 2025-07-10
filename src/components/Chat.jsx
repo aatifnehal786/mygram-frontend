@@ -177,9 +177,7 @@ const iceServers =  [
     const remoteStream = event.streams[0];
     if (remoteVideoRef.current) {
       remoteVideoRef.current.srcObject = remoteStream;
-      remoteVideoRef.current.onloadedmetadata = () => {
-        remoteVideoRef.current.play();
-      };
+     
     }
   };
 
