@@ -222,7 +222,7 @@ const iceServers =  [
  const acceptCall = async () => {
   const { from, offer } = incomingCall;
 
-  setIsCallActive(true);
+ 
 
   const iceServers =  [
   {
@@ -275,7 +275,7 @@ const iceServers =  [
   };
 
   try {
-
+    setIsCallActive(true);
       // important so UI updates
     // 🎤🎥 Get local stream
     localStreamRef.current = await navigator.mediaDevices.getUserMedia({
