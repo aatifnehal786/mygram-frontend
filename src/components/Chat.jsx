@@ -222,7 +222,7 @@ const iceServers =  [
  const acceptCall = async () => {
   const { from, offer } = incomingCall;
 
-const iceServers =  [
+  const iceServers =  [
   {
     
     urls: 'stun:global.stun.twilio.com:3478'
@@ -247,13 +247,11 @@ const iceServers =  [
   }
 ]
 
+
+
   peerRef.current = new RTCPeerConnection({ iceServers });
 
-  peerRef.current.oniceconnectionstatechange = () => {
-  console.log("📡 ICE Connection State:", peerRef.current.iceConnectionState);
-};
-
-
+  // ICE candidate handler
   peerRef.current.onicecandidate = (e) => {
     if (e.candidate) {
       socketRef.current.emit('ice-candidate', {
@@ -263,51 +261,52 @@ const iceServers =  [
     }
   };
 
+  // 📥 Handle remote tracks
   peerRef.current.ontrack = (event) => {
-    console.log('📥 Remote track received:', event.track.kind);
     const remoteStream = event.streams[0];
     if (remoteVideoRef.current) {
       remoteVideoRef.current.srcObject = remoteStream;
-      remoteVideoRef.current.onloadedmetadata = () => {
-        remoteVideoRef.current.play();
-      };
+
+      // 🚫 Don't auto-play here on mobile
+      console.log("📥 Remote stream set — ready to play on user gesture");
     }
   };
 
   try {
-
-      setIsCallActive(true);
-
-    // ⏳ Wait 1 tick to ensure video DOM elements are mounted
-   
+    // 🎤🎥 Get local stream
     localStreamRef.current = await navigator.mediaDevices.getUserMedia({
       video: true,
       audio: true,
     });
 
-    // 🔥 Set local stream for self-view
-    localVideoRef.current.srcObject = localStreamRef.current;
-    localVideoRef.current.onloadedmetadata = () => {
-      localVideoRef.current.play();
-    };
+    // 🎬 Show local stream
+    if (localVideoRef.current) {
+      localVideoRef.current.srcObject = localStreamRef.current;
+      localVideoRef.current.play().catch(console.warn); // optional
+    }
 
-    // Add tracks to peer connection
+    // Add tracks to peer
     localStreamRef.current.getTracks().forEach((track) => {
       peerRef.current.addTrack(track, localStreamRef.current);
     });
 
+    // Set remote offer
     await peerRef.current.setRemoteDescription(new RTCSessionDescription(offer));
+
+    // Create and send answer
     const answer = await peerRef.current.createAnswer();
     await peerRef.current.setLocalDescription(answer);
 
     socketRef.current.emit('answer-call', { to: from, answer });
 
     setIncomingCall(null);
-    setIsCallActive(true);
+    setIsCallActive(true); // important so UI updates
+
   } catch (err) {
-    console.error("Failed to accept call:", err);
+    console.error("❌ Failed to accept call:", err);
   }
 };
+
 
 
   const endCall = () => {
