@@ -132,7 +132,7 @@ const Chat = () => {
   };
 
 const startCall = async () => {
- const iceServers =  [
+const iceServers =  [
   {
     
     urls: 'stun:global.stun.twilio.com:3478'
@@ -224,7 +224,7 @@ const startCall = async () => {
  const acceptCall = async () => {
   const { from, offer } = incomingCall;
 
- const iceServers =  [
+const iceServers =  [
   {
     
     urls: 'stun:global.stun.twilio.com:3478'
