@@ -222,6 +222,8 @@ const iceServers =  [
  const acceptCall = async () => {
   const { from, offer } = incomingCall;
 
+  setIsCallActive(true);
+
   const iceServers =  [
   {
     
@@ -273,6 +275,8 @@ const iceServers =  [
   };
 
   try {
+
+      // important so UI updates
     // 🎤🎥 Get local stream
     localStreamRef.current = await navigator.mediaDevices.getUserMedia({
       video: true,
@@ -300,7 +304,7 @@ const iceServers =  [
     socketRef.current.emit('answer-call', { to: from, answer });
 
     setIncomingCall(null);
-    setIsCallActive(true); // important so UI updates
+   
 
   } catch (err) {
     console.error("❌ Failed to accept call:", err);
