@@ -188,7 +188,7 @@ const iceServers =  [
       setIsCallActive(true);
 
     // ⏳ Wait 1 tick to ensure video DOM elements are mounted
-    await new Promise(resolve => setTimeout(resolve, 0));
+    
 
     localStreamRef.current = await navigator.mediaDevices.getUserMedia({
       video: true,
@@ -281,7 +281,7 @@ const iceServers =  [
       setIsCallActive(true);
 
     // ⏳ Wait 1 tick to ensure video DOM elements are mounted
-    await new Promise(resolve => setTimeout(resolve, 0));
+   
     localStreamRef.current = await navigator.mediaDevices.getUserMedia({
       video: true,
       audio: true,
@@ -371,20 +371,6 @@ const iceServers =  [
               <div className="video-chat">
                 <video ref={localVideoRef} playsInline muted autoPlay  className="video-local" />
                 <video ref={remoteVideoRef} playsInline autoPlay className="video-remote" />
-                <button onClick={() => {
-  remoteVideoRef.current?.play().catch(err => console.log("Play failed:", err));
-}}>
-  Unmute & Play Remote Video
-</button>
-
-                <button onClick={() => {
-  const video = remoteVideoRef.current;
-  video.muted = false;
-  video.play().catch(err => console.log("Play error:", err));
-}}>
-  Unmute Remote Audio
-</button>
-
                 <button className='end-call-btn' onClick={endCall}>End Call</button>
               </div>
             )}
