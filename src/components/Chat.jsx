@@ -379,12 +379,37 @@ const iceServers =  [
       </div>
 
       {incomingCall && (
-        <div className="incoming-call-popup">
-          <p>Incoming Video Call...</p>
-          <button className='accept-btn' onClick={acceptCall}>Accept</button>
-          <button className='reject-btn' onClick={() => setIncomingCall(null)}>Reject</button>
-        </div>
-      )}
+  <div className="incoming-call-popup">
+    <p>Incoming Video Call...</p>
+    <button
+      className="accept-btn"
+      onClick={async () => {
+        await acceptCall(); // Step 1: Accept call and assign stream
+
+        // Step 2: Manually unmute and play after stream is assigned
+        setTimeout(() => {
+          const video = remoteVideoRef.current;
+          if (video && video.srcObject) {
+            video.muted = false;
+            video
+              .play()
+              .then(() => console.log("✅ Remote video playing"))
+              .catch((err) => console.error("❌ Play failed:", err));
+          } else {
+            console.warn("⚠️ remoteVideoRef not ready");
+          }
+        }, 500); // small delay to ensure stream is ready
+      }}
+    >
+      Accept
+    </button>
+
+    <button className="reject-btn" onClick={() => setIncomingCall(null)}>
+      Reject
+    </button>
+  </div>
+)}
+
 
       <ToastContainer position="bottom-right" autoClose={3000} />
     </div>
