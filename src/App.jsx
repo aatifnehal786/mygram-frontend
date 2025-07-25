@@ -14,7 +14,7 @@ import ForgotPassword from './components/ForgotPassword';
 import Otp from './components/Otp';
 import EmailOtp from './components/EmailOtp';
 import Layout from './components/Layout'; // 👈 import the layout
-import ToggleTheme from './components/ToggleTheme';
+
 import ChatSidebar from './components/ChatSideBar';
 
 
@@ -96,7 +96,6 @@ const router = createBrowserRouter([
 
   return (
     <UserContext.Provider value={{ loggedUser, setLoggedUser }}>
-        <ToggleTheme /> {/* 👈 Renders on all routes */}
       <RouterProvider router={router} />
     </UserContext.Provider>
   );

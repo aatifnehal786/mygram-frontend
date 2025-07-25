@@ -1,10 +1,13 @@
 import { useContext, useState, useEffect } from "react";
-import { ThemeContext } from "./ThemeProvider";
+
 import { UserContext } from "../contexts/UserContext";
 import { useNavigate, Link } from "react-router-dom";
+import { FaBars } from "react-icons/fa";
+import { RxCross1 } from "react-icons/rx";
+import './chat.css'
 
 export default function Header() {
-  const { toggleTheme, theme } = useContext(ThemeContext);
+
   const loggedData = useContext(UserContext);
   const [targetUserId, setTargetUserId] = useState("");
   const [menuOpen, setMenuOpen] = useState(false);
@@ -38,34 +41,36 @@ export default function Header() {
     navigate('/login', { replace: true });
   }
 
-  return (
-    <nav className="nav-bar">
-      <div className="nav-header">
-       
-        <div className="hamburger" onClick={() => setMenuOpen(!menuOpen)}>
-          <span className="bar"></span>
-          <span className="bar"></span>
-          <span className="bar"></span>
-        </div>
-      </div>
+  const toggleMenu = ()=>{
+    setMenuOpen((prev)=>!prev)
+  }
 
-      <ul className={`nav-links ${menuOpen ? "open" : ""}`}>
-        <li><Link to='/home' onClick={() => setMenuOpen(false)}>Home</Link></li>
-        <li><Link to='/profile' onClick={() => setMenuOpen(false)}>Profile</Link></li>
-        <li><Link to='/createpost' onClick={() => setMenuOpen(false)}>Create Post</Link></li>
-        <li><Link to={`/chat/${targetUserId}`} onClick={() => setMenuOpen(false)}>Chat</Link></li>
+  const removeMenu = ()=>{
+    setTimeout(()=>{
+     setMenuOpen(false)
+   },100)
+  }
+
+  return (
+   <header>
+    
+
+     <nav className="header">
+    
+      <ul className={menuOpen ? "nav-links active" : "nav-links"}>
+        <li><Link onClick={removeMenu} to='/home'>Home</Link></li>
+        <li><Link onClick={removeMenu} to='/profile'>Profile</Link></li>
+        <li><Link onClick={removeMenu} to='/createpost' >Create Post</Link></li>
+        <li><Link onClick={removeMenu} to={`/chat/${targetUserId}`}>Chat</Link></li>
         <li>
-          <div className="theme-toggle-container">
-            <label className="switch">
-              <input type="checkbox" checked={theme === "dark"} onChange={toggleTheme} />
-              <span className="slider"></span>
-            </label>
-          </div>
-        </li>
-        <li>
-          <button className="btn btn-logout" onClick={logOut}>Log Out</button>
-        </li>
+         </li>
       </ul>
+       <button className="btn btn-logout" onClick={logOut}>Log Out</button>
     </nav>
+   
+    <div className="icon" onClick={toggleMenu}>
+          {menuOpen ? <RxCross1 /> : <FaBars />}
+        </div>
+   </header>
   );
 }

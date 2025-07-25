@@ -2,6 +2,7 @@ import { useParams } from "react-router-dom";
 import { useContext, useEffect, useState, useRef } from "react";
 import { UserContext } from "../contexts/UserContext";
 import ImagePostWithMusic from "./ImagePostWithMusic";
+import './Profile.css'
 export default function Profile() {
   const { id } = useParams();
   const { loggedUser } = useContext(UserContext);
@@ -175,7 +176,7 @@ export default function Profile() {
   return (
     <div className="profile-page">
       <div className="profile-header">
-        <div className="profile-photo2" style={{ position: "relative" }}>
+        <div className="profile-photo2">
           <img
             src={stats.profilePic}
             alt="Profile"
@@ -186,7 +187,7 @@ export default function Profile() {
               borderRadius: "50%",
               objectFit: "cover",
               border: "2px solid #ccc",
-              marginTop: '15px',
+              marginTop: '2rem',
             }}
           />
           {isOwnProfile && (
@@ -194,20 +195,21 @@ export default function Profile() {
               <button
                 onClick={() => fileInputRef.current.click()}
                 style={{
-                  position: "absolute",
-                  bottom: 10,
-                  right: 10,
-                  backgroundColor: "#000",
-                  color: "#fff",
+                 
+                 
+                  top:"24%",
+                  left:"35%",
+                  backgroundColor: "#fff",
+                  color: "#222",
                   borderRadius: "50%",
-                  width: 30,
-                  height: 30,
+                  width: "5rem",
+                  height: "4rem",
                   border: "none",
                   cursor: "pointer",
                 }}
                 title="Edit Profile Picture"
               >
-                ✎
+                Edit Profile Pic
               </button>
               <input
                 type="file"

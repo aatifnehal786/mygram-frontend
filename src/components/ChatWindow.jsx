@@ -8,10 +8,27 @@ const ChatWindow = ({ selectedUser, triggerForwardMode, socket, messages, setMes
   const [input, setInput] = useState('');
   const [openDropdownId, setOpenDropdownId] = useState(null);
   const messagesEndRef = useRef(null);
+  const dropdownRef = useRef(null);
+
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
+
+  useEffect(() => {
+  const handleClickOutside = (event) => {
+    if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+      setOpenDropdownId(null);
+    }
+  };
+
+  document.addEventListener('mousedown', handleClickOutside);
+
+  return () => {
+    document.removeEventListener('mousedown', handleClickOutside);
+  };
+}, []);
+
 
   const sendMessage = () => {
     if (!input.trim()) return;
@@ -53,14 +70,9 @@ const ChatWindow = ({ selectedUser, triggerForwardMode, socket, messages, setMes
   return (
     <div className="chat">
       
-      <div className="chat-container">
-        <div className="chat-header3">
+        <div className="chat-header">
         <div className="chat-header-left">
-    <img
-      src={selectedUser.profilePic}
-      alt={selectedUser.username}
-      className="chat-header-profile-pic"
-    />
+   
     <div className="chat-header-user-info">
       <h3>{selectedUser.username}</h3>
       <p className="user-status">
@@ -80,9 +92,7 @@ const ChatWindow = ({ selectedUser, triggerForwardMode, socket, messages, setMes
           {sortedMessages.map((msg, idx) => {
             const isOwnMessage = msg.sender === currentUserId;
             const isDropdownOpen = openDropdownId === msg._id;
-            setTimeout((isDropdownOpen=null)=>{
-
-            },5000)
+           
 
             return (
               <div key={msg._id || idx} className={`message-bubble ${isOwnMessage ? 'own' : 'other'}`}>
@@ -103,7 +113,7 @@ const ChatWindow = ({ selectedUser, triggerForwardMode, socket, messages, setMes
                 </small>
 
                 {isDropdownOpen && (
-                  <div className="option-menu">
+                  <div className="option-menu" ref={dropdownRef}>
                     <ul>
                       <li><button onClick={() => triggerForwardMode(msg)}>Forward</button></li>
                       <li>
@@ -119,7 +129,7 @@ const ChatWindow = ({ selectedUser, triggerForwardMode, socket, messages, setMes
           })}
           <div ref={messagesEndRef} />
         </div>
-      </div>
+      
 
       <div className="chat-input-area">
         <input

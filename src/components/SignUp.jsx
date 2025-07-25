@@ -79,14 +79,17 @@ export default function SignUp(){
 
 
     return (
-<section className="container4">
-<form className="form4">
+<section className="container">
+<form className="form">
 <h1>SignUp to Create Account</h1>
 
 <input className="inp" type="text" onChange={handleInput} placeholder="Enter Username" required name="username" value={userDetails.username} />
 <input className="inp" type="email" onChange={handleInput} placeholder="Enter Email" required name="email" value={userDetails.email} />
+<div className="pass1">
 <input className="inp" type={isPassword ? "text" : "password"} onChange={handleInput} placeholder="Enter Password" maxLength={16} required name="password" value={userDetails.password} />
-<img className="pass1" onClick={showHide} src={isPassword ? show : hide} alt="" />
+
+    <img onClick={showHide} src={isPassword ? show : hide} alt="" />
+</div>
 <input className="inp" type="text" onChange={handleInput} placeholder="Enter Mobile" minLength={12} required name="mobile" value={userDetails.mobile} />
 <button onClick={handleSubmit} className="btn" disabled={isLoading}>{isLoading ? "Loading..." : "Join"}</button>
 

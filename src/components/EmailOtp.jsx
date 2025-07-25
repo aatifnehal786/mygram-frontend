@@ -80,11 +80,11 @@ export default function EmailOtp() {
     };
 
     return (
-        <section className="container2">
-            <form className="form2">
+        <section className="container">
+            <form className="form">
                 <h2>Enter Email For Verification</h2>
                 <input
-                    className="inp1"
+                    className="inp"
                     type="email"
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="Enter Email"
@@ -92,11 +92,11 @@ export default function EmailOtp() {
                     name="email"
                     value={email}
                 />
-                 <button type="submit" className="btn3" disabled={isLoading1} onClick={sendOtp}>
+                 <button type="submit" className="btn" disabled={isLoading1} onClick={sendOtp}>
                 {isLoading1 ? "Loading..." : "send otp"}
                 </button>
                 <input
-                    className="inp1"
+                    className="inp"
                     type="text"
                     onChange={(e) => setOtp(e.target.value)}
                     placeholder="Enter OTP"
@@ -104,7 +104,7 @@ export default function EmailOtp() {
                     value={otp}
                 />
                
-                <button type="submit" className="btn4" disabled={isLoading2} onClick={verifyOtp}>
+                <button type="submit" className="btn" disabled={isLoading2} onClick={verifyOtp}>
                 {isLoading2 ? "Loading..." : "verify otp"}
                 </button>
                 {message.text && <div><p className={message.type}>{message.text}</p></div>}

@@ -4,6 +4,7 @@ import { UserContext } from "../contexts/UserContext";
 import hide from '../assets/hide.png'
 import show from '../assets/show.png'
 
+
 export default function Login() {
     const loggedData = useContext(UserContext);
     const [user, setUser] = useState({ loginId: "", password: "" });
@@ -52,6 +53,11 @@ export default function Login() {
                     loggedData.setLoggedUser(data);
                     navigate('/home', { replace: true });
                 }
+                setTimeout(()=>{
+                    setMessage({type:"",text:""})
+                   
+                setUser( { loginId: "", password: "" })
+                },4000)
             })
             .catch((err) => {
                 console.error(err);
@@ -65,7 +71,7 @@ export default function Login() {
 
     return (
         <section className="container">
-            <form className="form" onSubmit={handleSubmit}>
+            <form className="form" onSubmit={handleSubmit} autoComplete="off">
                 <h1>Login</h1>
                 <input
                     className="inp"
@@ -76,7 +82,7 @@ export default function Login() {
                     onChange={handleInput}
                     value={user.loginId}
                 />
-                
+                 <div className="pass2">
                 <input
                     className="inp"
                     type={isPassword ? "text" : "password"}
@@ -87,11 +93,14 @@ export default function Login() {
                     name="password"
                     value={user.password}
                 />
-                <img className="pass" onClick={showHide} src={isPassword ? show : hide} alt="" />
+             
+                  <img onClick={showHide} src={isPassword ? show : hide} alt="" />
+              </div>
+                
                 <button type="submit" className="btn" disabled={isLoading}>
                     {isLoading ? "Loading..." : "Join"}
                 </button>
-                <div className="form-content">
+                <div className="form-content1">
                     <p>Don't Have Account?<Link to='/register'>Register Now</Link></p>
                     
                 </div>

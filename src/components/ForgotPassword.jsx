@@ -38,12 +38,13 @@ export default function ForgotPassword() {
         },
       });
       const data = await res.json();
-      setIsLoading(false);
+      
       setMessage({ type: "success", text: data.message });
       setTimeout(() => {
         setMessage({ type: "", text: "" });
-        setEmail("");
-      }, 5000);
+        
+        setIsLoading(false);
+      }, 4000);
     } catch (error) {
       setMessage({ type: "error", text: "Failed to send OTP" });
     }
@@ -90,15 +91,15 @@ export default function ForgotPassword() {
   };
 
   return (
-    <section className="container">
-      <div className="form3">
-        <h1>Enter your Email to get OTP and Enter new Password</h1>
+    <section className="container2">
+      <div className="form">
+        <h2>Enter your Email to get OTP and Enter new Password</h2>
 
         <input
           onKeyDown={handleDynamicEnter}
           onChange={(e) => setEmail(e.target.value)}
           placeholder="Enter Your Email"
-          className="inp"
+          className="inp1"
           type="email"
           value={email}
           name="email"
@@ -115,7 +116,7 @@ export default function ForgotPassword() {
         </button>
 
         <input
-          className="inp"
+          className="inp1"
           name="otp"
           onChange={(e) => setOtp(e.target.value)}
           onKeyDown={handleDynamicEnter}
@@ -123,10 +124,9 @@ export default function ForgotPassword() {
           placeholder="Enter OTP"
           value={otp}
         />
-
-        <div>
-          <input
-            className="inp"
+         <div className="pass3">
+           <input
+            className="inp1"
             name="newPassword"
             type={isPassword ? "text" : "password"}
             placeholder="Enter your new password"
@@ -134,19 +134,20 @@ export default function ForgotPassword() {
             onChange={(e) => setNewPassword(e.target.value)}
             onKeyDown={handleDynamicEnter}
           />
-          <img
-            className="pass3"
+        
+           <img
+           
             onClick={showHide}
             src={isPassword ? show : hide}
             alt="Toggle"
            
           />
-        </div>
+         </div>
 
         <button
           ref={buttonRef2}
           type="submit"
-          className="btn-1"
+          className="btn-3"
           onClick={handleResetPassword}
           disabled={isLoading2}
         >
