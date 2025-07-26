@@ -14,7 +14,7 @@
   padding: 1rem;
   background: #ffffff;
   border-bottom: 1px solid #e0e0e0;
-  margin-top: 2rem;
+  
 }
 
 .chat-header-left {
@@ -40,12 +40,12 @@
   padding: 1rem;
   overflow-y: auto;
   background-color: #eef1f5;
-  z-index: -1;
+ 
 }
 
 /* Message bubble */
 .message-bubble {
-  z-index: 1;
+  /* z-index: 0; */
   position: relative;
   max-width: 40%;
   margin-bottom: 1rem;
@@ -54,17 +54,20 @@
   word-wrap: break-word;
   background: #ffffff;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+  height: 40%;
   z-index: 1;
 }
 
 .message-bubble.own {
   margin-left: auto;
   background-color: #dcf8c6;
+  z-index: 1;
 }
 
 .message-bubble.other {
   margin-right: auto;
   background-color: #ffffff;
+  z-index: 1;
 }
 
 /* Timestamp */
@@ -86,6 +89,7 @@
   font-size: 1rem;
   cursor: pointer;
   color: #999;
+  z-index: 55;
 }
 
 .option-menu {
@@ -97,9 +101,11 @@
   border-radius: 0.5rem;
   z-index: 10;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  
 }
 
 .option-menu ul {
+  z-index: 55555;
   list-style: none;
   margin: 0;
   padding: 0.5rem 0;
@@ -292,9 +298,65 @@
 .chat-messages,
 .chat-container,
 .chat-header-user-info {
-  /* position: relative; Not absolute/fixed! */
+
   z-index: 1;          /* Lower than nav-links */
-  overflow-y: auto;    /* if scrolling needed */
+      /* if scrolling needed */
+}
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+}
+
+.modal-content {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 8px;
+  text-align: center;
+}
+
+.confirm-btn {
+  background-color: #e74c3c;
+  color: white;
+  padding: 0.5rem 1rem;
+  margin-right: 1rem;
+  border: none;
+  cursor: pointer;
+}
+
+.cancel-btn {
+  background-color: #ccc;
+  color: black;
+  padding: 0.5rem 1rem;
+  border: none;
+  cursor: pointer;
+}
+
+.toast {
+  position: fixed;
+  bottom: 2rem;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #333;
+  color: #fff;
+  padding: 0.75rem 1.5rem;
+  border-radius: 5px;
+  z-index: 3000;
+  font-size: 1rem;
+  animation: fadeinout 3s ease;
+}
+
+@keyframes fadeinout {
+  0%, 100% { opacity: 0; }
+  10%, 90% { opacity: 1; }
 }
 
 
@@ -305,7 +367,10 @@
 
     .chat-container {
     flex-direction: column;
-    margin-top: 2rem;
+    margin-top: -5rem;
+    width: 95vw;
+    margin-left: 15px;
+    margin-right: 15px;
   }
   .chat-sidebar {
     width: 100%;

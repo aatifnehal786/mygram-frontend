@@ -9,6 +9,19 @@ const ChatWindow = ({ selectedUser, triggerForwardMode, socket, messages, setMes
   const [openDropdownId, setOpenDropdownId] = useState(null);
   const messagesEndRef = useRef(null);
   const dropdownRef = useRef(null);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+const [messageToDelete, setMessageToDelete] = useState(null);
+const [toastMessage, setToastMessage] = useState('');
+
+
+useEffect(() => {
+  if (toastMessage) {
+    const timer = setTimeout(() => setToastMessage(''), 3000);
+    return () => clearTimeout(timer);
+  }
+}, [toastMessage]);
+
+
 
 
   useEffect(() => {
@@ -28,6 +41,9 @@ const ChatWindow = ({ selectedUser, triggerForwardMode, socket, messages, setMes
     document.removeEventListener('mousedown', handleClickOutside);
   };
 }, []);
+
+
+
 
 
   const sendMessage = () => {
@@ -63,6 +79,37 @@ const ChatWindow = ({ selectedUser, triggerForwardMode, socket, messages, setMes
       fileType,
     });
   };
+const deleteMessage = () => {
+  if (!messageToDelete) return;
+
+  fetch("https://mygram-1-1nua.onrender.com/delete-chat", {
+    method: 'DELETE',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${loggedUser?.token}`,
+    },
+    body: JSON.stringify({ messageIds: [messageToDelete] }),
+  })
+    .then(res => res.json())
+    .then(data => {
+      setMessages(prev => prev.filter(msg => msg._id !== messageToDelete));
+      setToastMessage("Message deleted successfully.");
+    })
+    .catch(err => {
+      console.error("Delete failed:", err);
+      setToastMessage("Failed to delete message.");
+    })
+    .finally(() => {
+      setShowConfirmModal(false);
+      setMessageToDelete(null);
+    });
+};
+
+
+const confirmDelete = (msgId) => {
+  setMessageToDelete(msgId);
+  setShowConfirmModal(true);
+};
 
   const sortedMessages = [...messages].sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
 
@@ -112,18 +159,41 @@ const ChatWindow = ({ selectedUser, triggerForwardMode, socket, messages, setMes
                   {msg.createdAt ? new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ''}
                 </small>
 
-                {isDropdownOpen && (
-                  <div className="option-menu" ref={dropdownRef}>
-                    <ul>
-                      <li><button onClick={() => triggerForwardMode(msg)}>Forward</button></li>
-                      <li>
-                        <a href={msg.fileUrl} download target="_blank" rel="noopener noreferrer">
-                          Download
-                        </a>
-                      </li>
-                    </ul>
-                  </div>
-                )}
+              {isDropdownOpen && (
+  <div className="option-menu" ref={dropdownRef}>
+    <ul>
+      <li><button onClick={() => triggerForwardMode(msg)}>Forward</button></li>
+      <li>
+  <button onClick={() => confirmDelete(msg._id)}>Delete</button>
+</li>
+
+      {msg.fileType?.includes('image') ||
+      msg.fileType?.includes('video') ||
+      msg.fileType?.includes('audio') ||
+      msg.fileType?.includes('application') ? (
+        <li>
+          <a href={msg.fileUrl} download target="_blank" rel="noopener noreferrer">
+            Download
+          </a>
+        </li>
+      ) : null}
+    </ul>
+  </div>
+)}
+{showConfirmModal && (
+  <div className="modal-overlay">
+    <div className="modal-content">
+      <p>Are you sure you want to delete this message?</p>
+      <button className="confirm-btn" onClick={deleteMessage}>Yes, Delete</button>
+      <button className="cancel-btn" onClick={() => setShowConfirmModal(false)}>Cancel</button>
+    </div>
+  </div>
+)}
+{toastMessage && (
+  <div className="toast">{toastMessage}</div>
+)}
+
+
               </div>
             );
           })}

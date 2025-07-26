@@ -414,7 +414,9 @@ input{
   width: 100%;
   padding: 15px;
 }
-
+header{
+  position: relative;
+}
 
 /* Extra small devices (phones, 600px and down) */
 @media (min-width: 320px) and (max-width: 550px){
@@ -438,6 +440,9 @@ input{
    
     
     
+  }
+  header{
+    width: 100vw;
   }
   header .icon{
     display: block;
