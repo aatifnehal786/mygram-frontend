@@ -151,9 +151,24 @@ const confirmDelete = (msgId) => {
                 {msg.fileType?.includes('image') && <img src={msg.fileUrl} className="chat-img" />}
                 {msg.fileType?.includes('video') && <video src={msg.fileUrl} controls className="chat-video" />}
                 {msg.fileType?.includes('audio') && <audio src={msg.fileUrl} controls className="chat-audio" />}
-                {msg.fileType?.includes('application') && (
-                  <a href={msg.fileUrl} target="_blank" rel="noopener noreferrer">📄 File</a>
-                )}
+                {msg.fileType === 'application/pdf' && (
+  <iframe
+    src={msg.fileUrl}
+    width="150"
+    height="100"
+    title="PDF Document"
+  >
+    <p>Your browser doesn't support iframes. 
+       <a href={msg.fileUrl} target="_blank" rel="noopener noreferrer">Open PDF</a>
+    </p>
+  </iframe>
+)}
+
+
+
+
+                
+  
 
                 <small className="timestamp">
                   {msg.createdAt ? new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ''}
@@ -172,7 +187,7 @@ const confirmDelete = (msgId) => {
       msg.fileType?.includes('audio') ||
       msg.fileType?.includes('application') ? (
         <li>
-          <a href={msg.fileUrl} download target="_blank" rel="noopener noreferrer">
+          <a href={msg.fileUrl} download target='/blank' >
             Download
           </a>
         </li>

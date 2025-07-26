@@ -39,7 +39,9 @@
   flex: 1;
   padding: 1rem;
   overflow-y: auto;
-  background-color: #eef1f5;
+  background-image: url("../assets/whatsapp.png");
+  width: 80vw;
+  
  
 }
 
@@ -54,7 +56,7 @@
   word-wrap: break-word;
   background: #ffffff;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
-  height: 40%;
+  height: 50%;
   z-index: 1;
 }
 
@@ -178,10 +180,11 @@
 .chat-img,
 .chat-video {
   margin-top: 0.5rem;
-  max-width: 40%;
-  height: 40%;
+  width: 40%;
+  height: 95%;
   border-radius: 0.5rem;
 }
+
 
 .chat-audio {
   margin-top: 0.5rem;

@@ -9,7 +9,9 @@
 
 
 
-
+body{
+  background-color: gray;
+}
 
 
 
@@ -36,7 +38,7 @@
   height: 550px;
   border-radius: 15px;
   margin: 2rem auto;
-  background-color: #4b02ba;
+  background-color: gray;
   position: relative;
   box-shadow: 10px 10px 50px 18px #121212;
   position: relative;
@@ -54,7 +56,7 @@
   height: 550px;
   border-radius: 15px;
   margin: 2rem auto;
-  background-color: #4b02ba;
+  background-color: gray;
   box-shadow: 10px 10px 50px 18px #121212;
   position: relative;
   
@@ -116,7 +118,11 @@
   border-radius: 5px;
   margin: 15px auto;
   background: transparent;
+  color: #121212;
 
+}
+.container .form .inp::placeholder{
+  color: #121212;
 }
 .container2 .form .inp1{
   width: 300px;
@@ -128,6 +134,10 @@
   margin: 15px auto;
   background: transparent;
 
+}
+
+.container2 .form .inp1::placeholder{
+  color: #121212;
 }
 
 
@@ -165,35 +175,35 @@
   font-size: 1rem;
 }
 .container .form .form-content p{
-  color: #00ff9d;
+  color: #121212;
 }
 .container .form .form-content1 p{
-  color: #00ff9d;
+  color: #121212;
 }
 .container .form .form-content a{
-  color: #00ff9d;
+  color: #121212;
 }
 .container .form .form-content1 a{
- color: #00ff9d;
+ color: #121212;
 }
 .container .form .emailotp{
   margin: 0 15px;
   font-size: 1.2rem;
 }
 .container .form .emailotp a{
-  color: #00ff9d;
+  color: #121212;
 }
 .container .form .forgot{
   margin-left: 16px;
-  color: #00ff9d;
+  color: #121212;
 }
 
 .container2 .form .link{
-  color: #00ff9d;
+  color: #121212;
   margin: 1rem;
 }
 .container .form .link1{
-  color: #00ff9d;
+  color: #121212;
   margin: 1rem;
 }
 
