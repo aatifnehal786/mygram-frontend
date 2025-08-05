@@ -152,17 +152,12 @@ const confirmDelete = (msgId) => {
                 {msg.fileType?.includes('video') && <video src={msg.fileUrl} controls className="chat-video" />}
                 {msg.fileType?.includes('audio') && <audio src={msg.fileUrl} controls className="chat-audio" />}
                 {msg.fileType === 'application/pdf' && (
-  <iframe
-    src={msg.fileUrl}
-    width="150"
-    height="100"
-    title="PDF Document"
-  >
-    <p>Your browser doesn't support iframes. 
-       <a href={msg.fileUrl} target="_blank" rel="noopener noreferrer">Open PDF</a>
-    </p>
-  </iframe>
+  <object data={msg.fileUrl} type="application/pdf" width="100%" height="500px">
+    
+  </object>
 )}
+
+
 
 
 
