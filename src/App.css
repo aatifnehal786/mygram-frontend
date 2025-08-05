@@ -250,6 +250,37 @@ a {
 }
 
 
+.strength {
+  margin-top: 10px;
+  font-weight: bold;
+  animation: fadeIn 0.4s ease-in-out;
+  transition: color 0.3s ease;
+}
+
+.weak {
+  color: red;
+}
+
+.medium {
+  color: orange;
+}
+
+.strong {
+  color: green;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+
 
 .delete-message{
   width: 100%;

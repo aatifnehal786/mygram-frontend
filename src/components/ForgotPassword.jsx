@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Link } from "react-router-dom";
 import hide from '../assets/hide.png';
 import show from '../assets/show.png';
@@ -11,6 +11,8 @@ export default function ForgotPassword() {
   const [isLoading, setIsLoading] = useState(false);
   const [isLoading2, setIsLoading2] = useState(false);
   const [isPassword, setIsPassword] = useState(false);
+  const [strength, setStrength] = useState("");
+  const [typingTimeout, setTypingTimeout] = useState(null);
 
   const buttonRef1 = useRef();
   const buttonRef2 = useRef();
@@ -25,6 +27,44 @@ export default function ForgotPassword() {
     }
   }
 };
+
+useEffect(() => {
+    const val = newPassword;
+    const weakRegex = /.{1,5}/;
+    const mediumRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.{6,})/;
+    const strongRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).{8,}$/;
+
+    if (strongRegex.test(val)) setStrength("strong");
+    else if (mediumRegex.test(val)) setStrength("medium");
+    else if (weakRegex.test(val)) setStrength("weak");
+    else setStrength("");
+
+     if (typingTimeout) clearTimeout(typingTimeout);
+
+  // Set timeout to clear strength after 2 seconds of inactivity
+  const timeout = setTimeout(() => {
+    setStrength("");
+  }, 3000);
+
+  setTypingTimeout(timeout);
+
+  // Cleanup on component unmount
+  return () => clearTimeout(timeout);
+  }, [newPassword]);
+
+  const getStrengthText = () => {
+    switch (strength) {
+      case "weak":
+        return "Weak Password";
+      case "medium":
+        return "Medium Password";
+      case "strong":
+        return "Strong Password";
+      default:
+        return "";
+    }
+  };
+
 
 
   const Forgotpassword = async () => {
@@ -142,6 +182,7 @@ export default function ForgotPassword() {
             alt="Toggle"
            
           />
+           <div className={`strength ${strength}`}>{getStrengthText()}</div>
          </div>
 
         <button

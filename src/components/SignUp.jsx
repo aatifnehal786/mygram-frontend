@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import hide from '../assets/hide.png'
 import show from '../assets/show.png'
@@ -19,6 +19,8 @@ export default function SignUp(){
 
     const [isLoading, setIsLoading] = useState(false);
       const [isPassword,setIsPassword] = useState(false)
+      const [strength, setStrength] = useState("");
+  const [typingTimeout, setTypingTimeout] = useState(null);
 
     const handleInput = (e)=>{
         e.preventDefault();
@@ -29,6 +31,43 @@ export default function SignUp(){
 
 
     }
+
+    useEffect(() => {
+    const val = userDetails.password;
+    const weakRegex = /.{1,5}/;
+    const mediumRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.{6,})/;
+    const strongRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).{8,}$/;
+
+    if (strongRegex.test(val)) setStrength("strong");
+    else if (mediumRegex.test(val)) setStrength("medium");
+    else if (weakRegex.test(val)) setStrength("weak");
+    else setStrength("");
+
+     if (typingTimeout) clearTimeout(typingTimeout);
+
+  // Set timeout to clear strength after 2 seconds of inactivity
+  const timeout = setTimeout(() => {
+    setStrength("");
+  }, 3000);
+
+  setTypingTimeout(timeout);
+
+  // Cleanup on component unmount
+  return () => clearTimeout(timeout);
+  }, [userDetails.password]);
+
+  const getStrengthText = () => {
+    switch (strength) {
+      case "weak":
+        return "Weak Password";
+      case "medium":
+        return "Medium Password";
+      case "strong":
+        return "Strong Password";
+      default:
+        return "";
+    }
+  };
 
     
     const showHide = ()=>{
@@ -89,6 +128,7 @@ export default function SignUp(){
 <input className="inp" type={isPassword ? "text" : "password"} onChange={handleInput} placeholder="Enter Password" maxLength={16} required name="password" value={userDetails.password} />
 
     <img onClick={showHide} src={isPassword ? show : hide} alt="" />
+     <div className={`strength ${strength}`}>{getStrengthText()}</div>
 </div>
 <input className="inp" type="text" onChange={handleInput} placeholder="Enter Mobile" minLength={12} required name="mobile" value={userDetails.mobile} />
 <button onClick={handleSubmit} className="btn" disabled={isLoading}>{isLoading ? "Loading..." : "Join"}</button>
