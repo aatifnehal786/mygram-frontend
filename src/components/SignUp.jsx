@@ -75,6 +75,7 @@ export default function SignUp(){
     }
 
     const handleSubmit = (e)=>{
+        setIsLoading(true)
         e.preventDefault();
        
         fetch("https://mygram-1-1nua.onrender.com/signup",{
@@ -85,17 +86,11 @@ export default function SignUp(){
             }
         })
         .then((res)=>{
-            
-            setIsLoading(true);
-              
-                return res.json();
+        return res.json();
         })
         .then((data)=>{
-           
-
-            setMessage({type:"success",text:data.message})
-
-            setTimeout(()=>{
+           setMessage({type:"success",text:data.message})
+           setTimeout(()=>{
                 setMessage({type:"",text:""})
                 setIsLoading(false);
                 setUserDetails({
