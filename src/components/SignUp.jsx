@@ -100,7 +100,7 @@ export default function SignUp(){
                     mobile:""
 
                 })
-            },5000)
+            },10000)
 
         })
         .catch((err)=>{

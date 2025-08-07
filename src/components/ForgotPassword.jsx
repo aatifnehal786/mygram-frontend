@@ -84,7 +84,7 @@ useEffect(() => {
         setMessage({ type: "", text: "" });
         
         setIsLoading(false);
-      }, 4000);
+      }, 10000);
     } catch (error) {
       setMessage({ type: "error", text: "Failed to send OTP" });
     }
@@ -118,7 +118,7 @@ useEffect(() => {
           setEmail("");
           setNewPassword("");
           setOtp("");
-        }, 3000);
+        }, 8000);
       }
     } catch (err) {
       console.error("Error:", err);

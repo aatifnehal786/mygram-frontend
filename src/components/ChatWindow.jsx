@@ -9,6 +9,7 @@ const ChatWindow = ({ selectedUser, triggerForwardMode, socket, messages, setMes
   const [openDropdownId, setOpenDropdownId] = useState(null);
   const messagesEndRef = useRef(null);
   const dropdownRef = useRef(null);
+  const chatBtn = useRef(null)
   const [showConfirmModal, setShowConfirmModal] = useState(false);
 const [messageToDelete, setMessageToDelete] = useState(null);
 const [toastMessage, setToastMessage] = useState('');
@@ -112,7 +113,14 @@ const confirmDelete = (msgId) => {
 };
 
   const sortedMessages = [...messages].sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+const handleDynamicEnter = (e)=>{
+  if(e.key==="Enter"){
+    if(document.activeElement.name==="message"){
+      chatBtn.current.click()
+    }
+  }
 
+}
 
   return (
     <div className="chat">
@@ -148,11 +156,20 @@ const confirmDelete = (msgId) => {
                 </button>
 
                 <p>{msg.message}</p>
-                {msg.fileType?.includes('image') && <img src={msg.fileUrl} className="chat-img" />}
-                {msg.fileType?.includes('video') && <video src={msg.fileUrl} controls className="chat-video" />}
-                {msg.fileType?.includes('audio') && <audio src={msg.fileUrl} controls className="chat-audio" />}
-                {msg.fileType === 'application/pdf' && (
-  <object data={msg.fileUrl} type="application/pdf" width="100%" height="500px">
+{msg.fileType?.includes('image') && (
+  <img src={msg.fileUrl} alt="chat-img" className="chat-img" />
+)}
+
+{msg.fileType?.includes('video') && (
+  <video src={msg.fileUrl} controls className="chat-video" />
+)}
+
+{msg.fileType?.includes('audio') && (
+  <audio src={msg.fileUrl} controls className="chat-audio" />
+)}
+
+{msg.fileType === 'application/pdf' && (
+  <object data={msg.fileUrl} type="application/pdf" width="200" height="250">
     
   </object>
 )}
@@ -162,12 +179,14 @@ const confirmDelete = (msgId) => {
 
 
 
+
+
                 
   
 
-                <small className="timestamp">
-                  {msg.createdAt ? new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ''}
-                </small>
+                <b className="timestamp">
+                  { new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                </b>
 
               {isDropdownOpen && (
   <div className="option-menu" ref={dropdownRef}>
@@ -218,12 +237,14 @@ const confirmDelete = (msgId) => {
           onChange={(e) => setInput(e.target.value)}
           placeholder="Type a message..."
           className="chat-input"
+          name='message'
+          onKeyDown={handleDynamicEnter}
         />
         <label className="chat-file-label">
           📎
           <input type="file" style={{ display: 'none' }} onChange={handleFileUpload} />
         </label>
-        <button className="chat-send-btn" onClick={sendMessage}>Send</button>
+        <button ref={chatBtn} className="chat-send-btn" onClick={sendMessage}>Send</button>
       </div>
     </div>
   );

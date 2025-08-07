@@ -27,7 +27,7 @@ export default function Otp() {
                     setIsLoading(false)
                     setIsLoading2(false)
                     setMessage({type:"",text:""})
-                },5000)
+                },10000)
             })
             .catch((err) => {
                 console.log(err);
@@ -67,7 +67,7 @@ export default function Otp() {
                     setMessage({ type: "success", text: "OTP verified successfully" });
                     setTimeout(()=>{
                         setMessage({type:"",text:""})
-                    },5000)
+                    },10000)
                 } else {
                     setMessage({ type: "error", text: data.error });
                 }

@@ -57,7 +57,7 @@ export default function Login() {
                     setMessage({type:"",text:""})
                    
                 setUser( { loginId: "", password: "" })
-                },4000)
+                },10000)
             })
             .catch((err) => {
                 console.error(err);
@@ -71,7 +71,7 @@ export default function Login() {
 
     return (
         <section className="container">
-            <form className="form" onSubmit={handleSubmit} autoComplete="off">
+            <form className="form" onSubmit={handleSubmit}>
                 <h1>Login</h1>
                 <input
                     className="inp"

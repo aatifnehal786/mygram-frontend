@@ -32,29 +32,35 @@ const Chat = () => {
     }
   }, []);
 
-  useEffect(() => {
-    if (!selectedUser || !loggedUser?.token) return;
+useEffect(() => {
+  if (!selectedUser || !loggedUser?.token) return;
 
-    fetch(`https://mygram-1-1nua.onrender.com/chat/${selectedUser._id}`, {
-      headers: { Authorization: `Bearer ${loggedUser.token}` },
-    })
-      .then(res => res.ok ? res.json() : [])
-      .then(data => setMessages(data || []))
-      .catch(err => console.error('Fetch chat error:', err));
+  fetch(`https://mygram-1-1nua.onrender.com/chat/${selectedUser._id}`, {
+    headers: { Authorization: `Bearer ${loggedUser.token}` },
+  })
+    .then(res => res.ok ? res.json() : [])
+    .then(data => setMessages(data || []))
+    .catch(err => console.error('Fetch chat error:', err));
 
-    socketRef.current.emit('join', loggedUser.userid);
+  socketRef.current.emit('join', loggedUser.userid);
 
-    socketRef.current.on('receiveMessage', (msg) => {
-      const isCurrentChat =
-        (msg.sender === loggedUser.userid && msg.receiver === selectedUser._id) ||
-        (msg.receiver === loggedUser.userid && msg.sender === selectedUser._id);
-      if (isCurrentChat) setMessages(prev => [...prev, msg]);
-    });
+  const handleReceiveMessage = (msg) => {
+    const isCurrentChat =
+      (msg.sender === loggedUser.userid && msg.receiver === selectedUser._id) ||
+      (msg.receiver === loggedUser.userid && msg.sender === selectedUser._id);
+    if (isCurrentChat) {
+      setMessages(prev => [...prev, msg]);
+    }
+  };
 
-   
+  socketRef.current.on('receiveMessage', handleReceiveMessage);
 
-    
-  }, [selectedUser]);
+  // ✅ Cleanup listener on component unmount or when selectedUser changes
+  return () => {
+    socketRef.current.off('receiveMessage', handleReceiveMessage);
+  };
+}, [selectedUser]);
+
 
 
 
@@ -64,8 +70,15 @@ const Chat = () => {
     
   };
 
-  const forwardMessageToUser = async (msg, receiverId) => {
-    try {
+ const forwardMessageToUsers = async (msg, receiverIds) => {
+  const receivers = Array.isArray(receiverIds) ? receiverIds : [receiverIds];
+
+  setIsForwarding(true);
+
+  try {
+    for (const receiverId of receivers) {
+      if (receiverId === loggedUser.userid) continue;
+
       const res = await fetch("https://mygram-1-1nua.onrender.com/chat/forward", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -75,9 +88,15 @@ const Chat = () => {
           message: msg.message || '',
           fileUrl: msg.fileUrl || null,
           fileType: msg.fileType || null,
-          isForwarded: true
-        })
+          isForwarded: true,
+        }),
       });
+
+      if (!res.ok) {
+        const err = await res.json();
+        console.error(`Forward to ${receiverId} failed:`, err);
+        continue;
+      }
 
       const newMsg = await res.json();
       socketRef.current?.emit("sendMessage", newMsg);
@@ -85,13 +104,16 @@ const Chat = () => {
       if (selectedUser?._id === receiverId) {
         setMessages(prev => [...prev, newMsg]);
       }
-
-      setIsForwarding(false);
-     
-    } catch (err) {
-      console.error("Forward failed:", err);
     }
-  };
+
+    alert("Message forwarded successfully.");
+  } catch (err) {
+    console.error("Forward failed:", err);
+    alert("Forwarding failed.");
+  } finally {
+    setIsForwarding(false);
+  }
+};
 
 
 
@@ -100,18 +122,26 @@ const Chat = () => {
 
   return (
     <div className="chat-container">
+     
       
-          <ChatSidebar
-            onSelectUser={(user) => {
-              if (!isForwarding) {
-                setSelectedUser(user);
-                
-              }
-            }}
-            selectedUserId={selectedUser?._id}
-            isForwarding={isForwarding}
-            onSelectForwardUser={(user) => forwardMessageToUser(messageToForward, user._id)}
-          />
+         <ChatSidebar
+  onSelectUser={(user) => {
+    if (!isForwarding) {
+      setSelectedUser(user);
+    }
+  }}
+  selectedUserId={selectedUser?._id}
+  isForwarding={isForwarding}
+  onSelectForwardUser={(userIds) => {
+    if (userIds.length === 0) {
+      setIsForwarding(false);
+      setMessageToForward(null);
+    } else {
+      forwardMessageToUsers(messageToForward, userIds);
+    }
+  }}
+/>
+
       
 
         {  selectedUser && (
