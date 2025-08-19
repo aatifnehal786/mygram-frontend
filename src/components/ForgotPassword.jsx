@@ -68,6 +68,13 @@ useEffect(() => {
 
 
   const Forgotpassword = async () => {
+    if(!email){
+      setMessage({type:"error",text:"Email is required"})
+      setTimeout(()=>{
+        setMessage({type:"",text:""})
+      },3000)
+      return
+    }
     try {
       setIsLoading(true);
       const res = await fetch("https://mygram-1-1nua.onrender.com/forgot-password", {
@@ -82,6 +89,9 @@ useEffect(() => {
       setMessage({ type: "success", text: data.message });
       setTimeout(() => {
         setMessage({ type: "", text: "" });
+        setEmail("")
+        setNewPassword("")
+        setOtp("")
         
         setIsLoading(false);
       }, 10000);
@@ -93,6 +103,9 @@ useEffect(() => {
   const handleResetPassword = async () => {
     if (!newPassword) {
       setMessage({ type: "error", text: "Password cannot be empty." });
+      setTimeout(()=>{
+        setMessage({type:"",text:""})
+      },3000)
       return;
     }
 

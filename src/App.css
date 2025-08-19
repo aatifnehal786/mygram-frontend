@@ -10,7 +10,8 @@
 
 
 body{
-  background-color: gray;
+  background-color: black;
+  font-family: Arial, Helvetica, sans-serif;
 }
 
 
@@ -21,6 +22,15 @@ body{
   width: 1200px;
   height: 90%;
   margin: 0 auto;
+  position: relative;
+}
+.container .heading{
+  position: absolute;
+  top: 30%;
+  color: #00ff9d;
+  width: 300px;
+  letter-spacing: 1px;
+  font-family: Arial, Helvetica, sans-serif;
 }
 .container2 {
   width: 1200px;
@@ -38,9 +48,9 @@ body{
   height: 550px;
   border-radius: 15px;
   margin: 2rem auto;
-  background-color: gray;
+  background-color: rgb(6, 60, 37);
   position: relative;
-  box-shadow: 10px 10px 50px 18px #121212;
+  box-shadow: 10px 10px 50px 18px #08044c;
   position: relative;
   
   
@@ -56,8 +66,8 @@ body{
   height: 550px;
   border-radius: 15px;
   margin: 2rem auto;
-  background-color: gray;
-  box-shadow: 10px 10px 50px 18px #121212;
+  background-color: rgb(6, 60, 37);
+  box-shadow: 10px 10px 50px 18px #08044c;
   position: relative;
   
 
@@ -145,6 +155,7 @@ body{
 .container form h1{
   text-align: center;
   margin: 1rem 1rem;
+  font-family: Arial, Helvetica, sans-serif;
 }
 .container form h2{
   text-align: center;
@@ -329,13 +340,15 @@ a {
 
 
 /* NAVIGATION */
-header {
-  background-color: #00ff9d;
+.header {
+  background-color: rgba(26, 24, 24, 0.79);
   color: white;
   padding: 10px 20px;
   position: fixed;
   width: 100%;
   height: 50px;
+  overflow: hidden;
+  z-index: 1000000000;
  
 }
 
@@ -360,7 +373,7 @@ header {
 }
 
 .nav-links a {
-  color: black;
+  color: green;
   text-decoration: none;
   font-size: 20px;
 }
@@ -399,13 +412,14 @@ header .icon{
 
 .home .users{
   width: 400px;
-  height: 200px;
+  height: auto;
   display: flex;
   flex-direction: row;
   justify-content: space-between;
-  margin: 1rem auto;
+  margin: 4rem auto;
+  flex-wrap: wrap;
  
-  padding: 1rem;
+  /* padding: 1rem; */
 }
 
 .users img{
@@ -415,11 +429,12 @@ header .icon{
   font-size: 1.6rem;
   /* text-align: center; */
    margin-left: -9rem;
+   color: #00ff9d;
 
 }
 
-.follow-btn{
-  padding: 0.5rem 1rem;
+.home .users .follow-btn{
+  padding: 18px;
   margin-top: 1rem;
   margin-left: -9rem;
   border: none;
@@ -429,6 +444,11 @@ header .icon{
    background-color: #00ff9d;
   color: black;
 }
+.home p{
+  color: white;
+  /* margin-top: 2rem; */
+}
+
 
 
 /* CSS FOR FORGOT PASSWORD  */
@@ -455,9 +475,7 @@ input{
   width: 100%;
   padding: 15px;
 }
-header{
-  position: relative;
-}
+
 
 /* Extra small devices (phones, 600px and down) */
 @media (min-width: 320px) and (max-width: 550px){

@@ -8,6 +8,13 @@ export default function EmailOtp() {
     const [isLoading2, setIsLoading2] = useState(false);
 
     const sendOtp = (e) => {
+        if(!email){
+            setMessage({type:"error",text:"Email is required"})
+            setTimeout(()=>{
+                setMessage({type:"",text:""})
+            },3000)
+            return
+        }
         setIsLoading1(true)
         e.preventDefault();
         fetch("https://mygram-1-1nua.onrender.com/send-email-otp", {
@@ -37,6 +44,13 @@ export default function EmailOtp() {
     };
 
     const verifyOtp = (e) => {
+            if(!email || !otp){
+            setMessage({type:"error",text:"Email and otp is required"})
+            setTimeout(()=>{
+                setMessage({type:"",text:""})
+            },3000)
+            return
+        }
          setIsLoading2(true);
         e.preventDefault();
         fetch("https://mygram-1-1nua.onrender.com/verify-email-otp", {

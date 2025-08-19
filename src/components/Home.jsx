@@ -90,22 +90,11 @@ export default function Home() {
 
   return (
     <section className="home">
-      <h1>Welcome to the Home Page</h1>
-      {showVerifyMessage && (
-        <p>
-          Please verify mobile number{" "}
-          <Link
-            to="/otp"
-            onClick={() => setShowVerifyMessage(false)}
-          >
-            verify mobile
-          </Link>
-        </p>
-      )}
+     
  <div className="users">
   {Array.isArray(users) && users.map((user) =>
     user._id !== loggedUser._id ? (
-      <div key={user._id}>
+      <div className="user" key={user._id}>
         <img
           className="profile-photo-img"
           src={user.profilePic}

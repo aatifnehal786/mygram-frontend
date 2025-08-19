@@ -71,6 +71,7 @@ export default function Login() {
 
     return (
         <section className="container">
+           <h1 className="heading">Welcome to myGram, signup or login to start exploring</h1>
             <form className="form" onSubmit={handleSubmit}>
                 <h1>Login</h1>
                 <input

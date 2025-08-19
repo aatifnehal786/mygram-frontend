@@ -1,8 +1,9 @@
 /* Base container */
 .chat-container {
   position: relative;
-  height: 92.5vh;
+  height: 80vh;
   width: 80vw;
+  /* margin-top: 2rem; */
 
 }
 .chat {
@@ -13,7 +14,7 @@
   background-color: #f7f9fc;
   border: 5px solid #292626e7;
   position: absolute;
-  top: 0;
+  top: 10%;
   left: 26.5%;
   /* margin-left: -20px; */
  
@@ -30,7 +31,7 @@
   height: 100%;
   /* transform: translateX(-30%); */
   position: absolute;
- top: 0;
+ top: 10%;
  left: -14%;
   
 }

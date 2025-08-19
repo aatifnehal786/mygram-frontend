@@ -2,12 +2,14 @@
 
 /* PROFILE */
 .profile-container {
-  max-width: 600px;
+  max-width: 800px;
+  width: 100%;
   margin:  5rem auto;
   padding: 2rem;
   border-radius: 10px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.1);
   text-align: center;
+  /* background-color: #007bff; */
 }
 
 .stats p {
@@ -34,12 +36,13 @@
 }
 
 .profile-page {
-  max-width: 500px;
+  max-width: 800px;
   height: fit-content;
   margin: 0 auto;
   padding: 20px;
   font-family: Arial, sans-serif;
-  background-color: #f9f9f9;
+  background-color: blue;
+  overflow-y: hidden;
 }
 
 .profile-info {
