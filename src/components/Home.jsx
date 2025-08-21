@@ -100,10 +100,12 @@ export default function Home() {
           src={user.profilePic}
           alt={user.username}
         />
-        <h5>{user.username}</h5>
+        <div className="user-content">
+          <h5>{user.username}</h5>
         <button className="follow-btn" onClick={() => handleFollowToggle(user._id)}>
           {followStatus[user._id] ? "Unfollow" : "Follow"}
         </button>
+        </div>
       </div>
     ) : null
   )}
