@@ -124,22 +124,22 @@ body{
   height: 50px;
   text-indent: 5px;
   outline: none;
-  border: 1px solid rgb(0, 0, 0);
+  border: 1px solid rgb(20, 157, 68);
   border-radius: 5px;
   margin: 15px auto;
   background: transparent;
-  color: #121212;
+  color: white;
 
 }
 .container .form .inp::placeholder{
-  color: #121212;
+  color: white;
 }
 .container2 .form .inp1{
   width: 300px;
   height: 50px;
   text-indent: 5px;
   outline: none;
-  border: 1px solid rgb(0, 0, 0);
+  border: 1px solid rgb(20, 157, 68);
   border-radius: 5px;
   margin: 15px auto;
   background: transparent;
@@ -147,7 +147,7 @@ body{
 }
 
 .container2 .form .inp1::placeholder{
-  color: #121212;
+  color: white;
 }
 
 
@@ -174,47 +174,51 @@ body{
 }
 
 .container .form .form-content{
-  width: 250px;
+  width: 300px;
   height: fit-content;
   padding: 0 15px;
   font-size: 1rem;
 }
 .container .form .form-content1{
-  width: 270px;
+  width: 300px;
   height: fit-content;
   padding: 0 15px;
   font-size: 1rem;
 }
 .container .form .form-content p{
-  color: #121212;
+    color: rgb(13, 142, 235);
+    font-size: 1.2rem;
 }
 .container .form .form-content1 p{
-  color: #121212;
+    color: rgb(13, 142, 235);
+    font-size: 1.2rem;
 }
 .container .form .form-content a{
-  color: #121212;
+    color: rgb(13, 142, 235);
+    font-size: 1.2rem;
 }
 .container .form .form-content1 a{
- color: #121212;
+  color: rgb(13, 142, 235);
+  font-size: 1.2rem;
 }
 .container .form .emailotp{
   margin: 0 15px;
   font-size: 1.2rem;
 }
 .container .form .emailotp a{
-  color: #121212;
+  color: rgb(13, 142, 235);
 }
 .container .form .forgot{
   margin-left: 16px;
-  color: #121212;
+  color: rgb(13, 142, 235);
 }
 
 .container2 .form .link{
-  color: #121212;
+  color: rgb(13, 142, 235);
   margin: 1rem;
 }
 .container .form .link1{
-  color: #121212;
+  color: rgb(13, 142, 235);
   margin: 1rem;
 }
 
