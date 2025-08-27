@@ -61,6 +61,7 @@ export default function Header() {
         <li><Link onClick={removeMenu} to='/home'>Home</Link></li>
         <li><Link onClick={removeMenu} to='/profile'>Profile</Link></li>
         <li><Link onClick={removeMenu} to='/createpost' >Create Post</Link></li>
+        <li><Link onClick={removeMenu} to='/setchatpin' >Create Chat Pin</Link></li>
         <li><Link onClick={removeMenu} to={`/chat/${targetUserId}`}>Chat</Link></li>
         <li>
          </li>
