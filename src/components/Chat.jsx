@@ -7,7 +7,7 @@ import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import './chat.css';
 
-const Chat = () => {
+const Chat = ({onLock}) => {
   const [selectedUser, setSelectedUser] = useState(
     JSON.parse(localStorage.getItem('selected-chat-user')) || null
   );
@@ -61,8 +61,12 @@ useEffect(() => {
   };
 }, [selectedUser]);
 
+ const handleLock = () => {
+    onLock(); // Lock the chats
+    localStorage.setItem("chatUnlocked", "false");
+  };
 
-
+ 
 
   const triggerForwardMode = (msg) => {
     setIsForwarding(true);
@@ -142,6 +146,7 @@ useEffect(() => {
   }}
 />
 
+
       
 
         {  selectedUser && (
@@ -161,7 +166,11 @@ useEffect(() => {
         )}
       
 
-  
+   <div className="lock-btn">
+    <button onClick={handleLock}>
+        🔒 Lock Chats
+      </button>
+   </div>
 
 
       <ToastContainer position="bottom-right" autoClose={3000} />

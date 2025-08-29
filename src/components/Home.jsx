@@ -89,7 +89,7 @@ export default function Home() {
 
 
   return (
-    <section className="home">
+    <div className="home">
      
  <div className="users">
   {Array.isArray(users) && users.map((user) =>
@@ -111,6 +111,6 @@ export default function Home() {
   )}
 </div>
 
-    </section>
+    </div>
   );
 }

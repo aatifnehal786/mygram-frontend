@@ -1,44 +1,51 @@
-import React, { useState } from "react";
-import "./Chat.css";
+import React, { useState, useContext } from "react";
+import { UserContext } from "../contexts/UserContext";
 
-function ChatLock({ userId, onUnlock }) {
+function ChatLock({ onUnlock, onRemovePin }) {
+  const { loggedUser } = useContext(UserContext);
   const [pin, setPin] = useState("");
   const [message, setMessage] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const handleVerify = async () => {
     try {
-      const res = await fetch("http://localhost:8000/verify-chat-pin", {
+      setLoading(true);
+      const res = await fetch("https://mygram-1-1nua.onrender.com/verify-chat-pin", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId, pin }),
+        body: JSON.stringify({ userId: loggedUser.userid, pin }),
       });
 
       const data = await res.json();
-      setMessage(data.msg);
-
       if (res.ok) {
-        onUnlock(); // 🔓 unlock chat
+        onUnlock(); // ✅ unlock chat
+      } else {
+        setMessage(data.message || "Invalid PIN");
       }
-    } catch (err) {
-      setMessage("Server error. Try again.");
+    } catch {
+      setMessage("Error verifying PIN");
+    } finally {
+      setLoading(false);
     }
   };
 
+  
+
   return (
-    <div className="chat-lock-container">
-      <h2>Enter Chat PIN</h2>
+    <div className="set-chat-pin-container">
       <input
         type="password"
-        maxLength="4"
         value={pin}
         onChange={(e) => setPin(e.target.value)}
-        placeholder="Enter 4-digit PIN"
-        className="chat-lock-input"
+        placeholder="Enter PIN"
       />
-      <button onClick={handleVerify} className="chat-lock-button">
-        Unlock
-      </button>
-      {message && <p className="chat-lock-message">{message}</p>}
+      <div className="button-group">
+        <button onClick={handleVerify} disabled={loading}>
+          {loading ? "Verifying..." : "Unlock"}
+        </button>
+        
+      </div>
+      {message && <p>{message}</p>}
     </div>
   );
 }

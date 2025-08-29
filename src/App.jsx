@@ -59,10 +59,7 @@ const router = createBrowserRouter([
   path: '/chat/:targetUserId',
   element: <Private Component={ChatWrapper} />,
 },
-{
-  path: '/setChatPin',
-  element: <Private Component={SetChatPin} />,
-},
+
 
 {
   path: '/chatsidebar',

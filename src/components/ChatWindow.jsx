@@ -168,22 +168,6 @@ const handleDynamicEnter = (e)=>{
   <audio src={msg.fileUrl} controls className="chat-audio" />
 )}
 
-{msg.fileType === 'application/pdf' && (
-  <object data={msg.fileUrl} type="application/pdf" width="200" height="250">
-    
-  </object>
-)}
-
-
-
-
-
-
-
-
-                
-  
-
                 <b className="timestamp">
                   { new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                 </b>
