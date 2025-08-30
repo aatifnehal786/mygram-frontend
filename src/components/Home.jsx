@@ -57,7 +57,7 @@ export default function Home() {
     }
   }, []);
 
-  console.log(userId);
+  
 
   const handleFollowToggle = async (targetUserId) => {
   const isFollowing = followStatus[targetUserId];
