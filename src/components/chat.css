@@ -1,31 +1,25 @@
 /* Base container */
 .chat-container {
-  width: 100vw;
-  height: 100vh;
+  width: 85vw;
+  height: 95vh;
   display: flex;
-  justify-content: center;
-  position: absolute;
-  left: -15px;
+  justify-content: flex-start;
+ 
+ 
   /* margin-top: 2rem; */
 
 }
-.chat-container .btn{
-  position: absolute;
-  top: 90%;
-  left: 10%;
-  margin-right: -2rem;
-}
+
 .chat {
   display: flex;
   flex-direction: column;
   height: 80%;
-  width: 70%;
+  width: 50%;
   background-color: #f7f9fc;
-  margin-top: 4rem;
-  margin-left: 6.5rem;
-  /* border: 5px solid #292626e7; */
+  margin-top: 5rem;
+  margin-left: 7px;
+   border-radius: 30px;
   
-  /* margin-left: -20px; */
  
 }
 .chat-sidebar {
@@ -36,8 +30,9 @@
   /* border: 5px solid #292626e7; */
   display: flex;
   flex-direction: column;
-  margin-right: -6rem;
-  margin-top: 4rem;
+  margin-top: 5rem;
+ 
+  border-radius: 20px;
   
  
   /* transform: translateX(-30%); */
@@ -91,7 +86,7 @@
 .message-bubble {
   /* z-index: 0; */
   position: relative;
-  max-width: 250px;
+  max-width: 300px;
   margin-bottom: 1.5rem;
   display: flex;
   flex-direction: column;
@@ -100,13 +95,11 @@
   word-wrap: break-word;
   background: #ffffff;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
-  width: 80%;
-  height: 200px;
+  width: 100%;
+  height: 300px;
   z-index: 1;
 }
-.message-bubble p{
-  position: absolute;
-}
+
 
 .message-bubble.own {
   margin-left: auto;
@@ -126,11 +119,7 @@
   
   font-size: 1rem;
   color: #999;
-  /* margin-top: 0.8rem; */
-  margin-top: 0.5rem;
-  margin-bottom: 0.5rem;
-  text-align: right;
-  padding: 10px;
+  text-align: end;
  
 }
 
@@ -511,7 +500,8 @@
 .chat-actions{
   display: flex;
   justify-content: flex-start;
-  margin-top: 6rem;
+  margin-top: 5rem;
+  flex-direction: column;
 
 }
 

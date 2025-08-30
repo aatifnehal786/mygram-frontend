@@ -185,7 +185,7 @@ const handleDynamicEnter = (e)=>{
       msg.fileType?.includes('audio') ||
       msg.fileType?.includes('application') ? (
         <li>
-          <a href={msg.fileUrl} download target='/blank' >
+          <a href={msg.fileUrl} download="" target='/blank' >
             Download
           </a>
         </li>
