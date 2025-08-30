@@ -1,7 +1,7 @@
 import { useState, useContext, useEffect } from "react";
 import { UserContext } from "../contexts/UserContext";
 
-export default function SetChatPin({ onSetPin, onRemovePin, isLocked }) {
+export default function SetChatPin({canRemovePin, onRemovePin}) {
   const { loggedUser } = useContext(UserContext);
   const [pin, setPin] = useState("");
   const [message, setMessage] = useState("");
@@ -66,7 +66,7 @@ export default function SetChatPin({ onSetPin, onRemovePin, isLocked }) {
         setMessage(`✅ ${data.msg}`);
         setPin("");
         setHasPin(true); // ✅ now PIN exists
-        if (onSetPin) onSetPin(); // tell parent ChatPage
+       
       }
     } catch (err) {
       setMessage("❌ Something went wrong. Please try again.");
@@ -75,7 +75,7 @@ export default function SetChatPin({ onSetPin, onRemovePin, isLocked }) {
     }
   };
 
-  const handleRemovePin = async () => {
+const handleRemovePin = async () => {
     try {
       setLoading(true);
       const res = await fetch("https://mygram-1-1nua.onrender.com/remove-chat-pin", {
@@ -84,16 +84,15 @@ export default function SetChatPin({ onSetPin, onRemovePin, isLocked }) {
         body: JSON.stringify({ userId: loggedUser.userid }),
       });
       const data = await res.json();
+
       if (res.ok) {
-        setMessage("Chat lock removed successfully.");
-        localStorage.removeItem("chatUnlocked");
-        localStorage.removeItem("chatIsLocked");
+        setMessage("✅ " + data.message);
         if (onRemovePin) onRemovePin(); // notify parent
       } else {
-        setMessage(data.message);
+        setMessage("❌ " + data.message);
       }
     } catch {
-      setMessage("Error removing chat lock.");
+      setMessage("❌ Error removing chat lock");
     } finally {
       setLoading(false);
     }
@@ -104,13 +103,11 @@ export default function SetChatPin({ onSetPin, onRemovePin, isLocked }) {
       <h2>Chat PIN Settings</h2>
 
       {hasPin ? (
-        <div>
-          <p className="pin-message">✅ You already set your chat PIN.</p>
-          <button onClick={handleRemovePin} disabled={isLocked || loading}>
-            {loading ? "Removing..." : "Remove Chat Lock"}
-          </button>
-          {isLocked && <p>🔒 You must unlock chats first before removing the lock.</p>}
-        </div>
+        
+         
+          
+         
+      ""
       ) : (
         <form onSubmit={handleSubmit} className="set-chat-pin-form">
           <input

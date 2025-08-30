@@ -1,7 +1,7 @@
 import React, { useState, useContext } from "react";
 import { UserContext } from "../contexts/UserContext";
 
-function ChatLock({ onUnlock, onRemovePin }) {
+function ChatLock({ onUnlock }) {
   const { loggedUser } = useContext(UserContext);
   const [pin, setPin] = useState("");
   const [message, setMessage] = useState("");
@@ -15,10 +15,10 @@ function ChatLock({ onUnlock, onRemovePin }) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ userId: loggedUser.userid, pin }),
       });
-
       const data = await res.json();
+
       if (res.ok) {
-        onUnlock(); // ✅ unlock chat
+        onUnlock(); // unlock chat
       } else {
         setMessage(data.message || "Invalid PIN");
       }
@@ -29,22 +29,17 @@ function ChatLock({ onUnlock, onRemovePin }) {
     }
   };
 
-  
-
   return (
     <div className="set-chat-pin-container">
-      <input
+      <input className="pin-input"
         type="password"
         value={pin}
         onChange={(e) => setPin(e.target.value)}
         placeholder="Enter PIN"
       />
-      <div className="button-group">
-        <button onClick={handleVerify} disabled={loading}>
-          {loading ? "Verifying..." : "Unlock"}
-        </button>
-        
-      </div>
+      <button onClick={handleVerify} disabled={loading}>
+        {loading ? "Verifying..." : "Unlock"}
+      </button>
       {message && <p>{message}</p>}
     </div>
   );

@@ -459,8 +459,15 @@
 .set-chat-pin-container{
   width: 500px;
   height: 300px;
-  margin: 6rem auto;
+  margin: 6rem 2rem;
   color: white;
+}
+.chat-lock{
+  width: 500px;
+  height: 300px;
+  margin: 6rem 2rem;
+  color: white;
+
 }
 .set-chat-pin-container h2{
   text-align: center;
@@ -472,12 +479,9 @@
   color: #34c759;
   font-size: 1.8rem;
 }
-.set-chat-pin-form{
-  width: 80%;
-  height: 60%;
-  border: 1px solid red;
-  margin: 0 auto;
-  padding: 2rem;
+.set-pin-btn{
+  margin-right: -2rem;
+  z-index: 150000000;
 }
 
 .pin-input{
@@ -497,6 +501,28 @@
 
 .lock-btn{
   margin-top: 8rem;
+}
+.chat-actions{
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 6rem;
+
+}
+.chat-actions button{
+  width: 6rem;
+  height: 3rem;
+  border-radius: 15px;
+  background-color: #2d89ef;
+  margin: 1rem 2rem;
+
+}
+.set-chat-pin-container button{
+  width: 6rem;
+  height: 3rem;
+  border-radius: 15px;
+  background-color: #2d89ef;
+  margin: 1rem 2rem;
+
 }
 
 /* === Responsive Design === */

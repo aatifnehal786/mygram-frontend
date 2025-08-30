@@ -7,12 +7,14 @@ import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import './chat.css';
 
-const Chat = ({onLock}) => {
+const Chat = ({onLock, onRemovePin, canRemovePin}) => {
   const [selectedUser, setSelectedUser] = useState(
     JSON.parse(localStorage.getItem('selected-chat-user')) || null
   );
   const [chatList, setChatList] = useState([]);
   const [messages, setMessages] = useState([]);
+  const [message, setMessage] = useState("");
+  const [loading, setLoading] = useState(false);
  
   const [loggedUser, setLoggedUser] = useState(
     JSON.parse(sessionStorage.getItem('token-auth'))
@@ -119,7 +121,28 @@ useEffect(() => {
   }
 };
 
+const handleRemovePinClick = async () => {
+    try {
+      setLoading(true);
+      const res = await fetch("https://mygram-1-1nua.onrender.com/remove-chat-pin", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId: loggedUser.userid }),
+      });
 
+      const data = await res.json();
+      if (res.ok) {
+        setMessage("✅ Chat lock removed successfully");
+        if (onRemovePin) onRemovePin();
+      } else {
+        setMessage("❌ " + data.message);
+      }
+    } catch {
+      setMessage("❌ Error removing chat lock");
+    } finally {
+      setLoading(false);
+    }
+  };
 
 
 
@@ -166,11 +189,14 @@ useEffect(() => {
         )}
       
 
-   <div className="lock-btn">
-    <button onClick={handleLock}>
-        🔒 Lock Chats
-      </button>
-   </div>
+   <div className="chat-actions">
+        <button onClick={onLock}>🔒 Lock Chats</button>
+        <button onClick={handleRemovePinClick} disabled={!canRemovePin || loading}>
+          {loading ? "Removing..." : "❌ Remove Chat Lock"}
+        </button>
+      </div>
+
+      {message && <p>{message}</p>}
 
 
       <ToastContainer position="bottom-right" autoClose={3000} />
