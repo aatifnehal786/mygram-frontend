@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from "react";
-import ChatLock from "./ChatLock";
+import ChatLock from "./chatLock";
 import Chat from "./Chat";
 import SetChatPin from "./setChatPin";
 import { UserContext } from "../contexts/UserContext";
