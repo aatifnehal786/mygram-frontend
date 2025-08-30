@@ -21,7 +21,7 @@ function ChatLock({ onUnlock }) {
       const res = await fetch("https://mygram-1-1nua.onrender.com/verify-chat-pin", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId: loggedUser.userid, pin }),
+        body: JSON.stringify({ userId: loggedUser.userid,  pin: pin.toString() }),
       });
       const data = await res.json();
 

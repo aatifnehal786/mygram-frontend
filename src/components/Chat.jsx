@@ -198,7 +198,7 @@ const handleRemovePinClick = async () => {
         {/* Remove Chat Lock Button */}
         {canRemovePin && (
           <button
-            onClick={onRemovePin}
+            onClick={handleRemovePinClick}
             
           >
             ❌ Remove Chat Lock
