@@ -1,43 +1,76 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import ChatLock from "./ChatLock";
 import Chat from "./Chat";
 import SetChatPin from "./setChatPin";
+import { UserContext } from "../contexts/UserContext";
 
-function ChatWrapper({ userId }) {
-  const [unlocked, setUnlocked] = useState(false);  // true if chat unlocked
-  const [hasPin, setHasPin] = useState(true);      // true if PIN exists
+export default function ChatWrapper({ userId }) {
+  const { loggedUser } = useContext(UserContext);
+  const [unlocked, setUnlocked] = useState(false);
+  const [hasPin, setHasPin] = useState(false);
 
-  // Unlock chat
+  // On mount, read unlocked state from localStorage
+  useEffect(() => {
+    const storedUnlocked = localStorage.getItem("chatUnlocked");
+    if (storedUnlocked === "true") setUnlocked(true);
+  }, []);
+
+  // Persist unlocked state in localStorage
+  useEffect(() => {
+    localStorage.setItem("chatUnlocked", unlocked ? "true" : "false");
+  }, [unlocked]);
+
+  // Check if user already has a PIN
+  useEffect(() => {
+    const checkPin = async () => {
+      try {
+        const res = await fetch("https://mygram-1-1nua.onrender.com/check-chat-pin", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${loggedUser?.token}`,
+          },
+          body: JSON.stringify({ userId: loggedUser?.userid }),
+        });
+        const data = await res.json();
+        setHasPin(res.ok && data.hasPin);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+    if (loggedUser?.userid) checkPin();
+  }, [loggedUser]);
+
   const handleUnlock = () => setUnlocked(true);
-
-  // Lock chat
   const handleLock = () => setUnlocked(false);
 
-  // Remove chat PIN
-  const handleRemovePin = () => {
-    setHasPin(false);      // remove PIN
-    setUnlocked(false);    // auto lock after removing PIN
+  const handleRemovePin = async () => {
+    try {
+      const res = await fetch("https://mygram-1-1nua.onrender.com/remove-chat-pin", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId: loggedUser.userid }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setHasPin(false);
+        setUnlocked(false); // auto-lock after removing PIN
+        localStorage.setItem("chatUnlocked", "false");
+      }
+    } catch (err) {
+      console.error(err);
+    }
   };
 
-  // Set new PIN
-  const handleSetPin = () => {
-    setHasPin(true);
-  };
+  if (!hasPin) return <SetChatPin onSetPin={() => setHasPin(true)} />;
 
-  // PRIORITY RENDER: no PIN -> set PIN -> else unlocked/chatlock
-  if (!hasPin) {
-    return <SetChatPin onSetPin={handleSetPin} />;
-  } else if (unlocked) {
-    return (
-      <Chat
-        onLock={handleLock}
-        onRemovePin={handleRemovePin}
-        canRemovePin={hasPin}
-      />
-    );
-  } else {
-    return <ChatLock onUnlock={handleUnlock} />;
-  }
+  return !unlocked ? (
+    <ChatLock onUnlock={handleUnlock} />
+  ) : (
+    <Chat
+      onLock={handleLock}
+      canRemovePin={unlocked && hasPin}
+      onRemovePin={handleRemovePin}
+    />
+  );
 }
-
-export default ChatWrapper;

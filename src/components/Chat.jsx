@@ -7,7 +7,7 @@ import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import './chat.css';
 
-const Chat = ({onLock, onRemovePin, canRemovePin}) => {
+const Chat = ({onLock, canRemovePin, onRemovePin }) => {
   const [selectedUser, setSelectedUser] = useState(
     JSON.parse(localStorage.getItem('selected-chat-user')) || null
   );
@@ -189,12 +189,24 @@ const handleRemovePinClick = async () => {
         )}
       
 
-   <div className="chat-actions">
-        <button onClick={onLock}>🔒 Lock Chats</button>
-        <button onClick={handleRemovePinClick} disabled={!canRemovePin || loading}>
-          {loading ? "Removing..." : "❌ Remove Chat Lock"}
+  <div className="chat-actions">
+        {/* Lock Chat Button */}
+        <button onClick={onLock} style={{ padding: "5px 10px" }}>
+          🔒 Lock Chats
         </button>
+
+        {/* Remove Chat Lock Button */}
+        {canRemovePin && (
+          <button
+            onClick={onRemovePin}
+            
+          >
+            ❌ Remove Chat Lock
+          </button>
+        )}
       </div>
+
+     
 
       {message && <p>{message}</p>}
 
