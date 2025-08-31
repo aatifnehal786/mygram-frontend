@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState, useContext } from 'react';
 import { UserContext } from '../contexts/UserContext';
 import './chat.css';
 
-const ChatWindow = ({ selectedUser, triggerForwardMode, socket, messages, setMessages }) => {
+const ChatWindow = ({ selectedUser, triggerForwardMode, socket, messages, setMessages, onBack }) => {
   const { loggedUser } = useContext(UserContext);
   const currentUserId = loggedUser?.userid;
   const [input, setInput] = useState('');
@@ -126,23 +126,26 @@ const handleDynamicEnter = (e)=>{
     <div className="chat">
       
         <div className="chat-header">
-        <div className="chat-header-left">
-   
+  <div className="chat-header-left">
+    {/* Back button only for mobile */}
+    <button className="back-btn" onClick={onBack}>←</button>
+
     <div className="chat-header-user-info">
       <h3>{selectedUser.username}</h3>
       <p className="user-status">
         {selectedUser.isOnline
-          ? 'Online'
+          ? "Online"
           : selectedUser.lastSeen
           ? `Last seen ${new Date(selectedUser.lastSeen).toLocaleTimeString([], {
-              hour: '2-digit',
-              minute: '2-digit',
+              hour: "2-digit",
+              minute: "2-digit",
             })}`
-          : 'Offline'}
+          : "Offline"}
       </p>
     </div>
   </div>
-      </div>
+</div>
+
         <div className="chat-messages">
           {sortedMessages.map((msg, idx) => {
             const isOwnMessage = msg.sender === currentUserId;

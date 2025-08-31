@@ -149,72 +149,60 @@ const handleRemovePinClick = async () => {
 
   return (
     <div className="chat-container">
-     
-      
-         <ChatSidebar
-  onSelectUser={(user) => {
-    if (!isForwarding) {
-      setSelectedUser(user);
-    }
-  }}
-  selectedUserId={selectedUser?._id}
-  isForwarding={isForwarding}
-  onSelectForwardUser={(userIds) => {
-    if (userIds.length === 0) {
-      setIsForwarding(false);
-      setMessageToForward(null);
-    } else {
-      forwardMessageToUsers(messageToForward, userIds);
-    }
-  }}
-/>
+  {/* Sidebar */}
+  <div className={`sidebar ${selectedUser ? "hide-mobile" : ""}`}>
+    <ChatSidebar
+      onSelectUser={(user) => {
+        if (!isForwarding) {
+          setSelectedUser(user);
+        }
+      }}
+      selectedUserId={selectedUser?._id}
+      isForwarding={isForwarding}
+      onSelectForwardUser={(userIds) => {
+        if (userIds.length === 0) {
+          setIsForwarding(false);
+          setMessageToForward(null);
+        } else {
+          forwardMessageToUsers(messageToForward, userIds);
+        }
+      }}
+    />
+  </div>
 
+  {/* Chat Window */}
+  <div className={`chat-window ${!selectedUser ? "hide-mobile" : ""}`}>
+    {selectedUser && (
+      <ChatWindow
+        selectedUser={selectedUser}
+        chatList={chatList}
+        messages={messages}
+        setMessages={setMessages}
+        socket={socketRef.current}
+        triggerForwardMode={triggerForwardMode}
+        onBack={() => setSelectedUser(null)} // 👈 important for mobile back button
+      />
+    )}
+  </div>
 
-      
-
-        {  selectedUser && (
-        
-          
-            <ChatWindow
-              selectedUser={selectedUser}
-              chatList={chatList}
-              messages={messages}
-              setMessages={setMessages}
-              socket={socketRef.current}
-              triggerForwardMode={triggerForwardMode}
-            />
-
-           
-        
-        )}
-      
-
+  {/* Chat Actions (keep global, always visible) */}
   <div className="chat-actions">
-        {/* Lock Chat Button */}
-        <button onClick={onLock} style={{ padding: "5px 10px" }}>
-          🔒 Lock Chats
-        </button>
+    <button onClick={onLock} style={{ padding: "5px 10px" }}>
+      🔒 Lock Chats
+    </button>
 
-        {/* Remove Chat Lock Button */}
-        {canRemovePin && (
-          <button
-            onClick={handleRemovePinClick}
-            
-          >
-            ❌ Remove Chat Lock
-          </button>
-        )}
-      </div>
+    {canRemovePin && (
+      <button onClick={handleRemovePinClick}>
+        ❌ Remove Chat Lock
+      </button>
+    )}
+  </div>
 
-     
+  {message && <p>{message}</p>}
 
-      {message && <p>{message}</p>}
+  <ToastContainer position="bottom-right" autoClose={3000} />
+</div>
 
-
-      <ToastContainer position="bottom-right" autoClose={3000} />
-     
-       
-    </div>
   );
 };
 
