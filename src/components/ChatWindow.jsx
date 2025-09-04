@@ -171,6 +171,15 @@ const handleDynamicEnter = (e)=>{
   <audio src={msg.fileUrl} controls className="chat-audio" />
 )}
 
+{msg.fileType?.includes('pdf') && (
+  <a href={msg.fileUrl} target="_blank" rel="noopener noreferrer" className="chat-doc-link">
+    View PDF
+  </a>
+)}
+
+
+
+
                 <b className="timestamp">
                   { new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                 </b>
