@@ -37,6 +37,7 @@ export default function Header() {
 
   function logOut() {
     localStorage.removeItem('token-auth');
+    sessionStorage.removeItem("token-auth")
     localStorage.removeItem('chatUnlocked')
     loggedData.setLoggedUser(null);
     navigate('/login', { replace: true });

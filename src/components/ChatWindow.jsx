@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState, useContext } from 'react';
 import { UserContext } from '../contexts/UserContext';
 import './chat.css';
 
+
 const ChatWindow = ({ selectedUser, triggerForwardMode, socket, messages, setMessages, onBack }) => {
   const { loggedUser } = useContext(UserContext);
   const currentUserId = loggedUser?.userid;
@@ -112,6 +113,33 @@ const confirmDelete = (msgId) => {
   setShowConfirmModal(true);
 };
 
+// Utility function to detect and render links
+const renderMessageWithLinks = (text) => {
+  if (!text) return null;
+
+  // Regex to detect URLs
+  const urlRegex = /(https?:\/\/[^\s]+)/g;
+
+  // Split text by URLs and map
+  return text.split(urlRegex).map((part, index) => {
+    if (part.match(urlRegex)) {
+      return (
+        <a
+          key={index}
+          href={part}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="chat-link"
+        >
+          {part}
+        </a>
+      );
+    }
+    return part;
+  });
+};
+
+
   const sortedMessages = [...messages].sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
 const handleDynamicEnter = (e)=>{
   if(e.key==="Enter"){
@@ -158,7 +186,7 @@ const handleDynamicEnter = (e)=>{
                   onClick={() => setOpenDropdownId(openDropdownId === msg._id ? null : msg._id)}>⋮
                 </button>
 
-                <p>{msg.message}</p>
+               <p>{renderMessageWithLinks(msg.message)}</p>
 {msg.fileType?.includes('image') && (
   <img src={msg.fileUrl} alt="chat-img" className="chat-img" />
 )}

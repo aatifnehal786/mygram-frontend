@@ -1,23 +1,15 @@
-import { useContext } from "react"
-import { Navigate } from "react-router-dom"
-import { UserContext } from "../contexts/UserContext"
+// components/Private.jsx
+import { useContext } from "react";
+import { Navigate } from "react-router-dom";
+import { UserContext } from "../contexts/UserContext";
 
-export default function Private(props){
+export default function Private({ children }) {
+  const { loggedUser } = useContext(UserContext);
 
-    const loggedData = useContext(UserContext)
+  if (!loggedUser) {
+    // not logged in → redirect to login
+    return <Navigate to="/login" replace />;
+  }
 
-
-    return (
-
-        loggedData.loggedUser!==null?
-        <props.Component/>
-        :
-        <Navigate to="/login"/>
-
-
-        
-
-
-
-    )
+  return children; // render private component
 }

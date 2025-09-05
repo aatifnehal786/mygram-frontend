@@ -244,6 +244,13 @@
  
 }
 
+.chat-link {
+  color: #007bff;
+  text-decoration: underline;
+  word-break: break-word;
+}
+
+
 
 .chat-audio {
  
