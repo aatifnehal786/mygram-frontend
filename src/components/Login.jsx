@@ -53,7 +53,7 @@ export default function Login() {
     e.preventDefault();
     setIsLoading(true);
 
-    fetch("https://mygram-1-1nua.onrender.com/verify-otp", {
+    fetch("https://mygram-1-1nua.onrender.com/verify-device-otp", {
       method: "POST",
       body: JSON.stringify({ loginId: user.loginId, otp }),
       headers: { "Content-Type": "application/json" },
