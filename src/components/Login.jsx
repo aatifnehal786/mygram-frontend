@@ -25,7 +25,7 @@ export default function Login() {
     e.preventDefault();
     setIsLoading(true);
 
-    fetch("http://localhost:8000/login", {
+    fetch("https://mygram-1-1nua.onrender.com/login", {
       method: "POST",
       body: JSON.stringify({ ...user, deviceId }), // 👈 include deviceId
       headers: { "Content-Type": "application/json" },
