@@ -1,6 +1,5 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useState, useContext, useEffect } from "react";
-import { v4 as uuidv4 } from "uuid";   // generate unique deviceId
 import { UserContext } from "../contexts/UserContext";
 import hide from "../assets/hide.png";
 import show from "../assets/show.png";
@@ -16,14 +15,7 @@ export default function Login() {
   const navigate = useNavigate();
 
   // ✅ Generate deviceId and persist in localStorage
-  useEffect(() => {
-    let storedId = localStorage.getItem("deviceId");
-    if (!storedId) {
-      storedId = uuidv4();
-      localStorage.setItem("deviceId", storedId);
-    }
-    setDeviceId(storedId);
-  }, []);
+
 
   const handleInput = (e) => {
     setUser((prev) => ({ ...prev, [e.target.name]: e.target.value }));
@@ -33,34 +25,31 @@ export default function Login() {
     e.preventDefault();
     setIsLoading(true);
 
-    fetch("https://mygram-1-1nua.onrender.com/login", {
+    fetch("http://localhost:8000/login", {
       method: "POST",
-      body: JSON.stringify({ ...user, deviceId }), // include deviceId
+      body: JSON.stringify({ ...user, deviceId }), // 👈 include deviceId
       headers: { "Content-Type": "application/json" },
     })
-      .then((res) => res.json().then((data) => ({ status: res.status, data })))
-      .then(({ status, data }) => {
-        setIsLoading(false);
+      .then((res) => res.json())
+      .then((data)=>{
+       setIsLoading(false)
 
-        if (status === 200 && data.token) {
-          // ✅ login success
-          localStorage.setItem("token-auth", JSON.stringify(data));
-          sessionStorage.setItem("token-auth", JSON.stringify(data));
-          loggedData.setLoggedUser(data);
-          navigate("/home", { replace: true });
-        } else if (status === 403) {
-          // 🚨 approval required
-          setMessage({
-            type: "info",
-            text: "📧 Approval required — check your email to confirm this device.",
-          });
-        } else {
-          setMessage({ type: "error", text: data.message || "Login failed" });
-        }
-      })
+                setMessage({ type: "success", text: data.message });
+
+
+               if (data.token) {
+    loggedData.setLoggedUser(data);
+
+   
+        localStorage.setItem("token-auth", JSON.stringify(data));
+        navigate("/home");
+    
+
+      }})
+     
       .catch(() => {
         setIsLoading(false);
-        setMessage({ type: "error", text: "⚠️ An error occurred. Please try again." });
+        setMessage({ type: "error", text: "An error occurred" });
       });
   };
 
@@ -90,18 +79,18 @@ export default function Login() {
             name="password"
             value={user.password}
           />
-          <img onClick={showHide} src={isPassword ? show : hide} alt="toggle visibility" />
+          <img onClick={showHide} src={isPassword ? show : hide} alt="" />
         </div>
         <button type="submit" className="btn" disabled={isLoading}>
           {isLoading ? "Loading..." : "Login"}
         </button>
         <div className="form-content">
           <p>
-            Don&apos;t Have an Account? <Link to="/register">Create now</Link>
+            Don't Have an Account ? <Link to="/register">create now</Link>
           </p>
           <Link to="/forgot-password">Forgot Password</Link>
         </div>
-        {message.text && <p className={message.type}>{message.text}</p>}
+        <p className={message.type}>{message.text}</p>
       </form>
     </section>
   );

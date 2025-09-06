@@ -18,7 +18,7 @@ import ChatWrapper from './components/chatWrapper';
 import ChatSidebar from './components/ChatSideBar';
 import SetChatPin from './components/setChatPin';
 import PublicRoute from './components/PublicRoute';
-import ApproveLogin from './components/ApproveLogin';
+
 
 
 
@@ -59,14 +59,7 @@ const router = createBrowserRouter(
       ),
     },
     
-    {
-      path: "/approve-login",
-      element: (
-        <PublicRoute>
-          <ApproveLogin />
-        </PublicRoute>
-      ),
-    },
+
     {
       element: <Layout />, // Wrap private routes with Header
       children: [
