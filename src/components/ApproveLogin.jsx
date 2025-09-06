@@ -9,18 +9,22 @@ export default function ApproveLogin() {
 
   useEffect(() => {
     const token = searchParams.get("token");
+
     if (!token) {
-      setMessage("Invalid approval link");
+      setMessage("❌ Invalid or missing approval token.");
       return;
     }
 
-    fetch(`https://mygram-1-1nua.onrender.com/approve-login?token=${token}`)
-      .then((res) => res.text())
-      .then((data) => {
-        setMessage(data);
-        setTimeout(() => navigate("/login"), 2000); // redirect back to login
-      })
-      .catch(() => setMessage("Error approving login"));
+   fetch(`https://mygram-1-1nua.onrender.com/approve-device?token=${token}`)
+  .then((res) => res.json())
+  .then((data) => {
+    setMessage(data.message);
+    if (data.success) {
+      setTimeout(() => navigate("/login"), 2500);
+    }
+  })
+  .catch(() => setMessage("⚠️ Something went wrong. Please try again."));
+
   }, [navigate, searchParams]);
 
   return (

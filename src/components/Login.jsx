@@ -1,6 +1,6 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useState, useContext, useEffect } from "react";
-import { v4 as uuidv4 } from "uuid";   // 👈 import uuid
+import { v4 as uuidv4 } from "uuid";   // generate unique deviceId
 import { UserContext } from "../contexts/UserContext";
 import hide from "../assets/hide.png";
 import show from "../assets/show.png";
@@ -33,9 +33,9 @@ export default function Login() {
     e.preventDefault();
     setIsLoading(true);
 
-    fetch("https://mygram-1-1nua.onrender.com/login", {
+    fetch(`${process.env.REACT_APP_API_URL}/login`, {
       method: "POST",
-      body: JSON.stringify({ ...user, deviceId }), // 👈 include deviceId
+      body: JSON.stringify({ ...user, deviceId }), // include deviceId
       headers: { "Content-Type": "application/json" },
     })
       .then((res) => res.json().then((data) => ({ status: res.status, data })))
@@ -43,20 +43,24 @@ export default function Login() {
         setIsLoading(false);
 
         if (status === 200 && data.token) {
+          // ✅ login success
           localStorage.setItem("token-auth", JSON.stringify(data));
           sessionStorage.setItem("token-auth", JSON.stringify(data));
           loggedData.setLoggedUser(data);
           navigate("/home", { replace: true });
         } else if (status === 403) {
-          // 🚨 Approval required
-          setMessage({ type: "info", text: "Approval required. Check your email." });
+          // 🚨 approval required
+          setMessage({
+            type: "info",
+            text: "📧 Approval required — check your email to confirm this device.",
+          });
         } else {
-          setMessage({ type: "error", text: data.message });
+          setMessage({ type: "error", text: data.message || "Login failed" });
         }
       })
       .catch(() => {
         setIsLoading(false);
-        setMessage({ type: "error", text: "An error occurred" });
+        setMessage({ type: "error", text: "⚠️ An error occurred. Please try again." });
       });
   };
 
@@ -86,18 +90,18 @@ export default function Login() {
             name="password"
             value={user.password}
           />
-          <img onClick={showHide} src={isPassword ? show : hide} alt="" />
+          <img onClick={showHide} src={isPassword ? show : hide} alt="toggle visibility" />
         </div>
         <button type="submit" className="btn" disabled={isLoading}>
           {isLoading ? "Loading..." : "Login"}
         </button>
         <div className="form-content">
           <p>
-            Don't Have an Account ? <Link to="/register">create now</Link>
+            Don&apos;t Have an Account? <Link to="/register">Create now</Link>
           </p>
           <Link to="/forgot-password">Forgot Password</Link>
         </div>
-        <p className={message.type}>{message.text}</p>
+        {message.text && <p className={message.type}>{message.text}</p>}
       </form>
     </section>
   );
