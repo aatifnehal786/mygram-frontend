@@ -19,7 +19,7 @@ import ChatSidebar from './components/ChatSideBar';
 import SetChatPin from './components/setChatPin';
 import PublicRoute from './components/PublicRoute';
 import ApproveLogin from './components/ApproveLogin';
-import DeviceApproval from './components/DeviceApproval';
+
 
 
 
