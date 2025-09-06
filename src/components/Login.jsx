@@ -33,7 +33,7 @@ export default function Login() {
     e.preventDefault();
     setIsLoading(true);
 
-    fetch("https://mygram-1-1nua.onrender.com/login", {
+    fetch(`${process.env.REACT_APP_API_URL}/login`, {
       method: "POST",
       body: JSON.stringify({ ...user, deviceId }), // include deviceId
       headers: { "Content-Type": "application/json" },
