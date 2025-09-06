@@ -168,16 +168,17 @@ body{
 
 
 
-
+/* 
 .container .form a{
   margin-left: 10px;
-}
+} */
 
 .container .form .form-content{
   width: 300px;
   height: fit-content;
   padding: 0 15px;
   font-size: 1rem;
+  
 }
 .container .form .form-content1{
   width: 300px;

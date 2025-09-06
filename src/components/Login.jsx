@@ -108,6 +108,10 @@ export default function Login() {
           <button type="submit" className="btn" disabled={isLoading}>
             {isLoading ? "Loading..." : "Login"}
           </button>
+           <div className="form-content">
+            <p>Don't Have an Account ? <Link to='/register'>create now</Link></p>
+            <Link to='/forgot-password'>Forgot Password</Link>
+          </div>
           <p className={message.type}>{message.text}</p>
         </form>
       ) : (
@@ -125,8 +129,10 @@ export default function Login() {
           <button type="submit" className="btn" disabled={isLoading}>
             {isLoading ? "Verifying..." : "Verify OTP"}
           </button>
+         
           <p className={message.type}>{message.text}</p>
         </form>
+        
       )}
     </section>
   );
