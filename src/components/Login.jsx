@@ -116,6 +116,7 @@ export default function Login() {
         </form>
       ) : (
         <form className="form" onSubmit={handleOtpVerify}>
+          <h1>You have looged in other system, Please verify To login</h1>
           <h1>Enter OTP</h1>
           <input
             className="inp"
