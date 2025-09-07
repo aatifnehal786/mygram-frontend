@@ -83,7 +83,7 @@ const handleSubmit = async (e) => {
       const data = await res.json();
       setIsLoading(false);
 
-      if (res.status === 200 && data.token) {
+      if (data.token) {
         loggedData.setLoggedUser(data);
         localStorage.setItem("token-auth", JSON.stringify(data));
         navigate("/home");
