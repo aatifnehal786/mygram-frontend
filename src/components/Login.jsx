@@ -73,7 +73,7 @@ const handleSubmit = async (e) => {
   const handleVerifyOtp = async () => {
     setIsLoading(true);
     try {
-      const res = await fetch("http://localhost:8000/verify-device-otp", {
+      const res = await fetch("https://mygram-1-1nua.onrender.com/verify-device-otp", {
   method: "POST",
   headers: { "Content-Type": "application/json" },
   body: JSON.stringify({ email, otp, deviceId }),
