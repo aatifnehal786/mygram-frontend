@@ -134,7 +134,7 @@ const handleSubmit = async (e) => {
         <p className={message.type}>{message.text}</p>
           </form>
         ) : (
-          <form>
+          <form className="form3">
             <input
               className="inp"
               type="text"

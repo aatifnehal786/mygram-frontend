@@ -56,7 +56,7 @@ body{
   
 
 }
-.container .form2{
+ .form3{
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -72,6 +72,19 @@ body{
   position: relative;
   
   
+
+}
+.form3 .inp{
+   width: 300px;
+  height: 50px;
+  text-indent: 5px;
+  outline: none;
+  border: 1px solid rgb(20, 157, 68);
+  border-radius: 5px;
+  margin: 15px auto;
+  background: transparent;
+  color: white;
+
 
 }
 .container2 .form{
@@ -323,7 +336,17 @@ a {
 
 
 
-
+.form3 .btn{
+   width: 6rem;
+  padding: 0.4rem 1.5rem;
+  border-radius: 1rem;
+  cursor: pointer;
+  font-size: 17px;
+   background-color: #00ff9d;
+  color: black;
+  font-weight: 900;
+  margin: 0 auto;
+}
 
 .container .form .btn{
   width: 6rem;
