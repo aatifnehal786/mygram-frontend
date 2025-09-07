@@ -32,38 +32,39 @@ export default function Login() {
     setUser((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setIsLoading(true);
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  setIsLoading(true);
 
-    try {
-      const res = await fetch("https://mygram-1-1nua.onrender.com/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...user, deviceId }),
-      });
+  try {
+    const res = await fetch("https://mygram-1-1nua.onrender.com/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ...user, deviceId }),
+    });
 
-      const data = await res.json();
-      setIsLoading(false);
+    const data = await res.json();
+    setIsLoading(false);
 
-      if (res.status === 200 && data.token) {
-        // ✅ Normal login success
-        loggedData.setLoggedUser(data);
-        localStorage.setItem("token-auth", JSON.stringify(data));
-        navigate("/home");
-      } else if (data.otpRequired) {
-        // ⚠️ OTP verification required
-        setOtpRequired(true);
-        setEmail(data.email);
-        setMessage({ type: "info", text: "OTP sent to your email. Please verify." });
-      } else {
-        setMessage({ type: "error", text: data.message || "Login failed" });
-      }
-    } catch (err) {
-      setIsLoading(false);
-      setMessage({ type: "error", text: "An error occurred" });
+    if (res.status === 200 && data.token) {
+      // ✅ Normal login
+      loggedData.setLoggedUser(data);
+      localStorage.setItem("token-auth", JSON.stringify(data));
+      navigate("/home");
+    } else if (data.otpRequired) {
+      // ⚠️ Show OTP form
+      setOtpRequired(true);
+      setEmail(data.email);
+      setMessage({ type: "info", text: "OTP sent to your email. Please verify." });
+    } else {
+      setMessage({ type: "error", text: data.message || "Login failed" });
     }
-  };
+  } catch (err) {
+    setIsLoading(false);
+    setMessage({ type: "error", text: "An error occurred" });
+  }
+};
+
 
   const handleVerifyOtp = async () => {
     setIsLoading(true);
@@ -126,7 +127,7 @@ export default function Login() {
             </button>
           </>
         ) : (
-          <div className="form2">
+          <>
             <input
               className="inp"
               type="text"
@@ -143,7 +144,7 @@ export default function Login() {
             >
               {isLoading ? "Verifying..." : "Verify OTP"}
             </button>
-          </div>
+          </>
         )}
 
         <div className="form-content">
