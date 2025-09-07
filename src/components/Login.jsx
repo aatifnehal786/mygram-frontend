@@ -126,7 +126,7 @@ export default function Login() {
             </button>
           </>
         ) : (
-          <>
+          <div className="form2">
             <input
               className="inp"
               type="text"
@@ -143,7 +143,7 @@ export default function Login() {
             >
               {isLoading ? "Verifying..." : "Verify OTP"}
             </button>
-          </>
+          </div>
         )}
 
         <div className="form-content">

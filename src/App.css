@@ -56,6 +56,24 @@ body{
   
 
 }
+.container .form2{
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  row-gap: 10px;
+  max-width: 900px;
+  width: 35%;
+  height: 550px;
+  border-radius: 15px;
+  margin: 2rem auto;
+  background-color: rgb(6, 60, 37);
+  position: relative;
+  box-shadow: 10px 10px 50px 18px #08044c;
+  position: relative;
+  
+  
+
+}
 .container2 .form{
   display: flex;
   flex-direction: column;
