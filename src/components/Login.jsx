@@ -51,7 +51,7 @@ const handleSubmit = async (e) => {
       loggedData.setLoggedUser(data);
       localStorage.setItem("token-auth", JSON.stringify(data));
       navigate("/home");
-    } else if (data.otpRequired) {
+    } else if (!otpRequired) {
       // ⚠️ Show OTP form
       setOtpRequired(true);
       setEmail(data.email);
@@ -69,7 +69,7 @@ const handleSubmit = async (e) => {
   const handleVerifyOtp = async () => {
     setIsLoading(true);
     try {
-      const res = await fetch("https://mygram-1-1nua.onrender.com/verify-otp", {
+      const res = await fetch("https://mygram-1-1nua.onrender.com/verify-device-otp", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, otp, deviceId }),
@@ -95,11 +95,11 @@ const handleSubmit = async (e) => {
 
   return (
     <section className="container">
-      <form className="form" onSubmit={handleSubmit}>
-        <h1>Login</h1>
+      
 
         {!otpRequired ? (
-          <>
+          <form className="form" onSubmit={handleSubmit}>
+        <h1>Login</h1>
             <input
               className="inp"
               type="text"
@@ -125,9 +125,16 @@ const handleSubmit = async (e) => {
             <button type="submit" className="btn" disabled={isLoading}>
               {isLoading ? "Loading..." : "Login"}
             </button>
-          </>
+            <div className="form-content">
+          <p>
+            Don't Have an Account ? <Link to="/register">create now</Link>
+          </p>
+          <Link to="/forgot-password">Forgot Password</Link>
+        </div>
+        <p className={message.type}>{message.text}</p>
+          </form>
         ) : (
-          <>
+          <form>
             <input
               className="inp"
               type="text"
@@ -144,17 +151,11 @@ const handleSubmit = async (e) => {
             >
               {isLoading ? "Verifying..." : "Verify OTP"}
             </button>
-          </>
+          </form>
         )}
 
-        <div className="form-content">
-          <p>
-            Don't Have an Account ? <Link to="/register">create now</Link>
-          </p>
-          <Link to="/forgot-password">Forgot Password</Link>
-        </div>
-        <p className={message.type}>{message.text}</p>
-      </form>
+        
+      
     </section>
   );
 }
