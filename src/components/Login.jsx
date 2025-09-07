@@ -44,21 +44,25 @@ const handleSubmit = async (e) => {
     });
 
     const data = await res.json();
+    console.log("Login response:", data);
+
     setIsLoading(false);
 
     if (res.status === 200 && data.token) {
-      // ✅ Normal login
-      loggedData.setLoggedUser(data);
-      localStorage.setItem("token-auth", JSON.stringify(data));
-      navigate("/home");
-    } else if (!otpRequired) {
-      // ⚠️ Show OTP form
-      setOtpRequired(true);
-      setEmail(data.email);
-      setMessage({ type: "info", text: "OTP sent to your email. Please verify." });
-    } else {
-      setMessage({ type: "error", text: data.message || "Login failed" });
-    }
+  // ✅ Normal login
+  loggedData.setLoggedUser(data);
+  localStorage.setItem("token-auth", JSON.stringify(data));
+  navigate("/home");
+ 
+} else if (data.requiresOtp) {
+  // ⚠️ OTP flow
+  setOtpRequired(true);
+  setEmail(data.email); // 👈 Store email for OTP verification
+  setMessage({ type: "info", text: "OTP sent to your email. Please verify." });
+} else {
+  setMessage({ type: "error", text: data.message || "Login failed" });
+}
+
   } catch (err) {
     setIsLoading(false);
     setMessage({ type: "error", text: "An error occurred" });
@@ -69,11 +73,12 @@ const handleSubmit = async (e) => {
   const handleVerifyOtp = async () => {
     setIsLoading(true);
     try {
-      const res = await fetch("https://mygram-1-1nua.onrender.com/verify-device-otp", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, otp, deviceId }),
-      });
+      const res = await fetch("http://localhost:8000/verify-device-otp", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({ email, otp, deviceId }),
+});
+
 
       const data = await res.json();
       setIsLoading(false);
@@ -135,6 +140,7 @@ const handleSubmit = async (e) => {
           </form>
         ) : (
           <form className="form3">
+           
             <input
               className="inp"
               type="text"
