@@ -37,20 +37,7 @@ export default function Devices() {
     }
   };
 
-  const removeAllDevices = async () => {
-    try {
-      const { res, data } = await apiFetch(`https://mygram-1-1nua.onrender.com/devices/remove-all`, {
-        method: "DELETE",
-      });
 
-      if (res.ok) {
-        setDevices([]);
-        setMessage("All devices removed");
-      } else setMessage(data.message || "Failed to remove devices");
-    } catch {
-      setMessage("Error removing devices");
-    }
-  };
 
   const removeOtherDevices = async () => {
     try {
@@ -90,9 +77,7 @@ export default function Devices() {
             >
               Logout from all other devices
             </button>
-            <button className="btn-danger" onClick={removeAllDevices}>
-              Remove All Devices
-            </button>
+           
           </div>
 
           <ul className="device-list">
