@@ -25,17 +25,21 @@ export default function Profile() {
     async function fetchStatsAndPosts() {
       try {
         const res = await fetch(`https://mygram-1-1nua.onrender.com/users/${targetUserId}/stats`, {
-          headers: {
-            Authorization: `Bearer ${loggedUser.token}`,
-          },
+         headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${loggedUser.token}`,
+          "x-device-id": localStorage.getItem("deviceId"), // 👈 required
+        },
         });
         const data = await res.json();
         setStats(data);
 
         const postsRes = await fetch("https://mygram-1-1nua.onrender.com/allposts", {
-          headers: {
-            Authorization: `Bearer ${loggedUser.token}`,
-          },
+         headers: {
+          
+          "Authorization": `Bearer ${loggedUser.token}`,
+          "x-device-id": localStorage.getItem("deviceId"), // 👈 required
+        },
         });
         const allPosts = await postsRes.json();
         const userPosts = allPosts.filter(post => post.postedBy?._id === targetUserId);
@@ -59,8 +63,10 @@ export default function Profile() {
       try {
         const res = await fetch(`https://mygram-1-1nua.onrender.com/follow-status/${targetUserId}`, {
           headers: {
-            Authorization: `Bearer ${loggedUser.token}`,
-          },
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${loggedUser.token}`,
+          "x-device-id": localStorage.getItem("deviceId"), // 👈 required
+        },
         });
 
         const data = await res.json();
@@ -91,7 +97,10 @@ export default function Profile() {
       method: "POST",
      headers: {
   Authorization: `Bearer ${loggedUser.token?.trim()}`,
+  "x-device-id": localStorage.getItem("deviceId"), // 👈 required
+  
 },
+
 
       
       body: formData,
@@ -115,6 +124,7 @@ export default function Profile() {
         method: "PUT",
         headers: {
           Authorization: `Bearer ${loggedUser.token}`,
+          "x-device-id": localStorage.getItem("deviceId"), // 👈 required
         },
       });
       const updated = await res.json();

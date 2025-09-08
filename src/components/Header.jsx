@@ -8,32 +8,42 @@ import './chat.css'
 
 export default function Header() {
 
-  const loggedData = useContext(UserContext);
+  const {loggedUser} = useContext(UserContext);
   const [targetUserId, setTargetUserId] = useState("");
   const [menuOpen, setMenuOpen] = useState(false);
   const navigate = useNavigate();
-
-  useEffect(() => {
-    const fetchUsers = async () => {
-      const res = await fetch('https://mygram-1-1nua.onrender.com/allusers2', {
+useEffect(() => {
+  const fetchUsers = async () => {
+    try {
+      const res = await fetch("https://mygram-1-1nua.onrender.com/allusers2", {
         headers: {
-          Authorization: `Bearer ${loggedData.loggedUser.token}`,
+          
+          Authorization: `Bearer ${loggedUser.token}`,
+          "x-device-id": localStorage.getItem("deviceId"), // 👈 required
         },
       });
 
       const data = await res.json();
+      console.log("Fetched users response:", data);
 
-      const followers = data.filter((user) =>
+      // ✅ Ensure we use the array
+      const users = Array.isArray(data.users) ? data.users : [];
+
+      const followers = users.filter((user) =>
         user.following.includes(loggedData.loggedUser.userid)
       );
 
       if (followers.length > 0) {
         setTargetUserId(followers[0]._id);
       }
-    };
+    } catch (err) {
+      console.error("Error fetching users:", err);
+    }
+  };
 
-    fetchUsers();
-  }, []);
+  fetchUsers();
+}, [loggedUser]);
+
 
   function logOut() {
     localStorage.removeItem('token-auth');

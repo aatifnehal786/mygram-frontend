@@ -14,9 +14,11 @@ export default function Home() {
   useEffect(() => {
     fetch("https://mygram-1-1nua.onrender.com/allusers1", {
       method: "GET",
-      headers: {
-        Authorization: `Bearer ${loggedUser.token}`,
-      },
+     headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${loggedUser?.token}`,
+          "x-device-id": localStorage.getItem("deviceId"), // 👈 required
+        },
     })
       .then((res) => res.json())
       .then((data) => {
@@ -29,23 +31,29 @@ export default function Home() {
 
 
   useEffect(() => {
-  users.forEach((user) => {
-    if (user._id !== loggedUser._id) {
-      fetch(`https://mygram-1-1nua.onrender.com/follow-status/${user._id}`, {
-        headers: {
-          Authorization: `Bearer ${loggedUser.token}`,
+  if (Array.isArray(users) && loggedUser?._id) {
+    users.forEach((user) => {
+      if (user._id !== loggedUser._id) {
+        fetch(`https://mygram-1-1nua.onrender.com/follow-status/${user._id}`, {
+         headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${loggedUser?.token}`,
+          "x-device-id": localStorage.getItem("deviceId"), // 👈 required
         },
-      })
-        .then((res) => res.json())
-        .then((statusData) => {
-          setFollowStatus((prev) => ({
-            ...prev,
-            [user._id]: statusData.isFollowing,
-          }));
-        });
-    }
-  });
-}, [users]); // ✅ only run when users are loaded
+        })
+          .then((res) => res.json())
+          .then((statusData) => {
+            setFollowStatus((prev) => ({
+              ...prev,
+              [user._id]: statusData.isFollowing,
+            }));
+          })
+          .catch((err) => console.error("Follow status fetch error:", err));
+      }
+    });
+  }
+}, [users, loggedUser]);
+
 
 
 
@@ -68,8 +76,10 @@ export default function Home() {
     const res = await fetch(url, {
       method: "PUT",
       headers: {
-        Authorization: `Bearer ${loggedUser.token}`,
-      },
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${loggedUser?.token}`,
+          "x-device-id": localStorage.getItem("deviceId"), // 👈 required
+        },
     });
 
     const data = await res.json();
