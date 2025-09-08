@@ -9,6 +9,7 @@ import './chat.css'
 export default function Header() {
 
   const {loggedUser} = useContext(UserContext);
+  const loggedData = useContext(UserContext);
   const [targetUserId, setTargetUserId] = useState("");
   const [menuOpen, setMenuOpen] = useState(false);
   const navigate = useNavigate();
