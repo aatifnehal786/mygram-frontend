@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import "./Devices.css"; // Import CSS file
 
 export default function Devices() {
   const [devices, setDevices] = useState([]);
