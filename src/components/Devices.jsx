@@ -31,51 +31,44 @@ export default function Devices() {
   };
 
   // Remove single device
-  const removeDevice = async (deviceId) => {
-    if (!window.confirm("Are you sure you want to remove this device?")) return;
+const removeDevice = async (deviceId) => {
+  try {
+    const res = await fetch(`http://localhost:8000/devices/${deviceId}`, {
+      method: "DELETE",
+      headers: { Authorization: `Bearer ${token}` },
+    });
 
-    try {
-      const res = await fetch(`https://mygram-1-1nua.onrender.com/remove-device/${deviceId}`, {
-        method: "DELETE",
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const data = await res.json();
-      if (res.ok) {
-        setMessage("Device removed successfully");
-        setDevices((prev) => prev.filter((d) => d.deviceId !== deviceId));
-      } else {
-        setMessage(data.message || "Failed to remove device");
-      }
-    } catch (err) {
-      console.error("Error removing device:", err);
-      setMessage("Error removing device");
+    const data = await res.json();
+    if (res.ok) {
+      setDevices(data.devices); // ✅ update with DB result
+      setMessage("Device removed successfully");
+    } else {
+      setMessage(data.message || "Failed to remove device");
     }
-  };
+  } catch (err) {
+    setMessage("Error removing device");
+  }
+};
 
-  // Remove all other devices
-  const removeOtherDevices = async () => {
-    if (!window.confirm("This will logout all other devices. Continue?")) return;
+const removeOtherDevices = async () => {
+  try {
+    const res = await fetch(`http://localhost:8000/devices/remove-others/${currentDeviceId}`, {
+      method: "DELETE",
+      headers: { Authorization: `Bearer ${token}` },
+    });
 
-    try {
-      const res = await fetch(
-        `https://mygram-1-1nua.onrender.com/remove-other-devices/${currentDeviceId}`,
-        {
-          method: "DELETE",
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-      const data = await res.json();
-      if (res.ok) {
-        setMessage("Logged out from all other devices");
-        setDevices((prev) => prev.filter((d) => d.deviceId === currentDeviceId));
-      } else {
-        setMessage(data.message || "Failed to logout from other devices");
-      }
-    } catch (err) {
-      console.error("Error removing other devices:", err);
-      setMessage("Error removing other devices");
+    const data = await res.json();
+    if (res.ok) {
+      setDevices(data.devices); // ✅ sync with DB
+      setMessage("Logged out from all other devices");
+    } else {
+      setMessage(data.message || "Failed to remove devices");
     }
-  };
+  } catch (err) {
+    setMessage("Error removing devices");
+  }
+};
+
 
   useEffect(() => {
     fetchDevices();
