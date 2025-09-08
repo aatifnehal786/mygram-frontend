@@ -18,6 +18,7 @@ import ChatWrapper from './components/chatWrapper';
 import ChatSidebar from './components/ChatSideBar';
 import SetChatPin from './components/setChatPin';
 import PublicRoute from './components/PublicRoute';
+import Devices from './components/Devices';
 
 
 
@@ -68,6 +69,14 @@ const router = createBrowserRouter(
           element: (
             <Private>
               <Home />
+            </Private>
+          ),
+        },
+        {
+          path: "/getdevices",
+          element: (
+            <Private>
+              <Devices />
             </Private>
           ),
         },
