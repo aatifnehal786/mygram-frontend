@@ -39,10 +39,11 @@ export default function Devices() {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
+
       const data = await res.json();
       if (res.ok) {
-        setDevices(data.devices); // always trust backend response
-        setMessage("Device removed successfully");
+        setDevices(data.devices); // ✅ backend response is the source of truth
+        setMessage(data.message);
       } else {
         setMessage(data.message || "Failed to remove device");
       }
@@ -61,10 +62,11 @@ export default function Devices() {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
+
       const data = await res.json();
       if (res.ok) {
-        setDevices([]); // backend already cleared
-        setMessage("All devices removed");
+        setDevices(data.devices); // will be empty []
+        setMessage(data.message);
       } else {
         setMessage(data.message || "Failed to remove devices");
       }
@@ -73,7 +75,7 @@ export default function Devices() {
     }
   };
 
-  // ✅ Remove all other devices
+  // ✅ Remove all other devices except current
   const removeOtherDevices = async () => {
     try {
       const res = await fetch(
@@ -83,10 +85,11 @@ export default function Devices() {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
+
       const data = await res.json();
       if (res.ok) {
-        setDevices(data.devices); // updated from backend
-        setMessage("Logged out from all other devices");
+        setDevices(data.devices); // backend sends only current device
+        setMessage(data.message);
       } else {
         setMessage(data.message || "Failed to remove devices");
       }
