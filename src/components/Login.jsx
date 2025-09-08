@@ -54,7 +54,7 @@ const handleSubmit = async (e) => {
   localStorage.setItem("token-auth", JSON.stringify(data));
   navigate("/home");
  
-} else if (data.requiresOtp) {
+} else if (data.otpRequired) {
   // ⚠️ OTP flow
   setOtpRequired(true);
   setEmail(data.email); // 👈 Store email for OTP verification
