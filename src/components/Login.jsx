@@ -39,7 +39,10 @@ export default function Login() {
     try {
       const res = await fetch("https://mygram-1-1nua.onrender.com/login", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json",
+        "x-device-id": deviceId
+         },
+        
         body: JSON.stringify({ ...user, deviceId }),
       });
       const data = await res.json();
@@ -67,7 +70,9 @@ export default function Login() {
     try {
       const res = await fetch("https://mygram-1-1nua.onrender.com/verify-device-otp", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json",
+          "x-device-id": deviceId
+         },
         body: JSON.stringify({ email, otp, deviceId }),
       });
       const data = await res.json();
