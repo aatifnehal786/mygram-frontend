@@ -13,7 +13,7 @@ export default function Devices() {
   const fetchDevices = async () => {
     try {
       setLoading(true);
-      const res = await fetch("http://localhost:8000/devices", {
+      const res = await fetch("https://mygram-1-1nua.onrender.com/devices", {
         headers: { Authorization: `Bearer ${token}` },
       });
       const data = await res.json();
