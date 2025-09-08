@@ -32,55 +32,50 @@ export default function Devices() {
   // ✅ Remove one device
   const removeDevice = async (deviceId) => {
     try {
-      // Optimistic update (remove from UI instantly)
-      setDevices((prev) => prev.filter((d) => d.deviceId !== deviceId));
-
-      const res = await fetch(`https://mygram-1-1nua.onrender.com/devices/${deviceId}`, {
-        method: "DELETE",
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
+      const res = await fetch(
+        `https://mygram-1-1nua.onrender.com/devices/${deviceId}`,
+        {
+          method: "DELETE",
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
       const data = await res.json();
       if (res.ok) {
+        setDevices(data.devices); // always trust backend response
         setMessage("Device removed successfully");
       } else {
         setMessage(data.message || "Failed to remove device");
-        fetchDevices(); // rollback if failed
       }
     } catch {
       setMessage("Error removing device");
-      fetchDevices();
     }
   };
 
   // ✅ Remove all devices
   const removeAllDevices = async () => {
     try {
-      setDevices([]); // Optimistic clear
-
-      const res = await fetch(`https://mygram-1-1nua.onrender.com/devices/remove-all`, {
-        method: "DELETE",
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
+      const res = await fetch(
+        `https://mygram-1-1nua.onrender.com/devices/remove-all`,
+        {
+          method: "DELETE",
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
       const data = await res.json();
       if (res.ok) {
+        setDevices([]); // backend already cleared
         setMessage("All devices removed");
       } else {
         setMessage(data.message || "Failed to remove devices");
-        fetchDevices();
       }
     } catch {
       setMessage("Error removing devices");
-      fetchDevices();
     }
   };
 
   // ✅ Remove all other devices
   const removeOtherDevices = async () => {
     try {
-      setDevices((prev) => prev.filter((d) => d.deviceId === currentDeviceId));
-
       const res = await fetch(
         `https://mygram-1-1nua.onrender.com/devices/remove-others/${currentDeviceId}`,
         {
@@ -88,17 +83,15 @@ export default function Devices() {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
-
       const data = await res.json();
       if (res.ok) {
+        setDevices(data.devices); // updated from backend
         setMessage("Logged out from all other devices");
       } else {
         setMessage(data.message || "Failed to remove devices");
-        fetchDevices();
       }
     } catch {
       setMessage("Error removing devices");
-      fetchDevices();
     }
   };
 
