@@ -35,7 +35,7 @@ export default function Devices() {
       // Optimistic update (remove from UI instantly)
       setDevices((prev) => prev.filter((d) => d.deviceId !== deviceId));
 
-      const res = await fetch(`http://localhost:8000/devices/${deviceId}`, {
+      const res = await fetch(`https://mygram-1-1nua.onrender.com/devices/${deviceId}`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -58,7 +58,7 @@ export default function Devices() {
     try {
       setDevices([]); // Optimistic clear
 
-      const res = await fetch(`http://localhost:8000/devices/remove-all`, {
+      const res = await fetch(`https://mygram-1-1nua.onrender.com/devices/remove-all`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -82,7 +82,7 @@ export default function Devices() {
       setDevices((prev) => prev.filter((d) => d.deviceId === currentDeviceId));
 
       const res = await fetch(
-        `http://localhost:8000/devices/remove-others/${currentDeviceId}`,
+        `https://mygram-1-1nua.onrender.com/devices/remove-others/${currentDeviceId}`,
         {
           method: "DELETE",
           headers: { Authorization: `Bearer ${token}` },
