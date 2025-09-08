@@ -82,7 +82,7 @@ export default function Devices() {
   }, []);
 
   return (
-    <section className="container">
+    <section className="container4">
       <h2>Authorized Devices</h2>
       {loading && <p>Loading...</p>}
       {message && <p>{message}</p>}
