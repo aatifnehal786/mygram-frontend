@@ -3,7 +3,7 @@ import { useState, useContext, useEffect } from "react";
 import { UserContext } from "../contexts/UserContext";
 import hide from "../assets/hide.png";
 import show from "../assets/show.png";
-import { v4 as uuidv4 } from "uuid"; // 👈 install with `npm i uuid`
+import { v4 as uuidv4 } from "uuid";
 
 export default function Login() {
   const loggedData = useContext(UserContext);
@@ -18,7 +18,7 @@ export default function Login() {
 
   const navigate = useNavigate();
 
-  // ✅ Generate/persist deviceId in localStorage
+  // ✅ Persist deviceId
   useEffect(() => {
     let savedId = localStorage.getItem("deviceId");
     if (!savedId) {
@@ -32,54 +32,44 @@ export default function Login() {
     setUser((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
-const handleSubmit = async (e) => {
-  e.preventDefault();
-  setIsLoading(true);
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setIsLoading(true);
 
-  try {
-    const res = await fetch("https://mygram-1-1nua.onrender.com/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ...user, deviceId }),
-    });
+    try {
+      const res = await fetch("https://mygram-1-1nua.onrender.com/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...user, deviceId }),
+      });
+      const data = await res.json();
+      setIsLoading(false);
 
-    const data = await res.json();
-    console.log("Login response:", data);
-
-    setIsLoading(false);
-
-    if (res.status === 200 && data.token) {
-  // ✅ Normal login
-  loggedData.setLoggedUser(data);
-  localStorage.setItem("token-auth", JSON.stringify(data));
-  navigate("/home");
- 
-} else if (data.otpRequired) {
-  // ⚠️ OTP flow
-  setOtpRequired(true);
-  setEmail(data.email); // 👈 Store email for OTP verification
-  setMessage({ type: "info", text: "OTP sent to your email. Please verify." });
-} else {
-  setMessage({ type: "error", text: data.message || "Login failed" });
-}
-
-  } catch (err) {
-    setIsLoading(false);
-    setMessage({ type: "error", text: "An error occurred" });
-  }
-};
-
+      if (res.status === 200 && data.token) {
+        loggedData.setLoggedUser(data);
+        localStorage.setItem("token-auth", JSON.stringify(data));
+        navigate("/home");
+      } else if (data.otpRequired) {
+        setOtpRequired(true);
+        setEmail(data.email);
+        setMessage({ type: "info", text: "OTP sent to your email. Please verify." });
+      } else {
+        setMessage({ type: "error", text: data.message || "Login failed" });
+      }
+    } catch {
+      setIsLoading(false);
+      setMessage({ type: "error", text: "An error occurred" });
+    }
+  };
 
   const handleVerifyOtp = async () => {
     setIsLoading(true);
     try {
       const res = await fetch("https://mygram-1-1nua.onrender.com/verify-device-otp", {
-  method: "POST",
-  headers: { "Content-Type": "application/json" },
-  body: JSON.stringify({ email, otp, deviceId }),
-});
-
-
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, otp, deviceId }),
+      });
       const data = await res.json();
       setIsLoading(false);
 
@@ -90,7 +80,7 @@ const handleSubmit = async (e) => {
       } else {
         setMessage({ type: "error", text: data.message || "OTP verification failed" });
       }
-    } catch (err) {
+    } catch {
       setIsLoading(false);
       setMessage({ type: "error", text: "An error occurred during OTP verification" });
     }
@@ -100,68 +90,62 @@ const handleSubmit = async (e) => {
 
   return (
     <section className="container">
-      
-
-        {!otpRequired ? (
-          <form className="form" onSubmit={handleSubmit}>
-        <h1>Login</h1>
+      {!otpRequired ? (
+        <form className="form" onSubmit={handleSubmit}>
+          <h1>Login</h1>
+          <input
+            className="inp"
+            type="text"
+            placeholder="Enter Username, Email, or Mobile"
+            required
+            name="loginId"
+            onChange={handleInput}
+            value={user.loginId}
+          />
+          <div className="pass2">
             <input
               className="inp"
-              type="text"
-              placeholder="Enter Username, Email, or Mobile"
-              required
-              name="loginId"
+              type={isPassword ? "text" : "password"}
+              placeholder="Enter Password"
+              maxLength={16}
               onChange={handleInput}
-              value={user.loginId}
-            />
-            <div className="pass2">
-              <input
-                className="inp"
-                type={isPassword ? "text" : "password"}
-                placeholder="Enter Password"
-                maxLength={16}
-                onChange={handleInput}
-                required
-                name="password"
-                value={user.password}
-              />
-              <img onClick={showHide} src={isPassword ? show : hide} alt="toggle" />
-            </div>
-            <button type="submit" className="btn" disabled={isLoading}>
-              {isLoading ? "Loading..." : "Login"}
-            </button>
-            <div className="form-content">
-          <p>
-            Don't Have an Account ? <Link to="/register">create now</Link>
-          </p>
-          <Link to="/forgot-password">Forgot Password</Link>
-        </div>
-        <p className={message.type}>{message.text}</p>
-          </form>
-        ) : (
-          <form className="form3">
-           
-            <input
-              className="inp"
-              type="text"
-              placeholder="Enter OTP"
               required
-              value={otp}
-              onChange={(e) => setOtp(e.target.value)}
+              name="password"
+              value={user.password}
             />
-            <button
-              type="button"
-              className="btn"
-              onClick={handleVerifyOtp}
-              disabled={isLoading}
-            >
-              {isLoading ? "Verifying..." : "Verify OTP"}
-            </button>
-          </form>
-        )}
-
-        
-      
+            <img onClick={showHide} src={isPassword ? show : hide} alt="toggle" />
+          </div>
+          <button type="submit" className="btn" disabled={isLoading}>
+            {isLoading ? "Loading..." : "Login"}
+          </button>
+          <div className="form-content">
+            <p>
+              Don't Have an Account ? <Link to="/register">create now</Link>
+            </p>
+            <Link to="/forgot-password">Forgot Password</Link>
+          </div>
+          <p className={message.type}>{message.text}</p>
+        </form>
+      ) : (
+        <form className="form3">
+          <input
+            className="inp"
+            type="text"
+            placeholder="Enter OTP"
+            required
+            value={otp}
+            onChange={(e) => setOtp(e.target.value)}
+          />
+          <button
+            type="button"
+            className="btn"
+            onClick={handleVerifyOtp}
+            disabled={isLoading}
+          >
+            {isLoading ? "Verifying..." : "Verify OTP"}
+          </button>
+        </form>
+      )}
     </section>
   );
 }

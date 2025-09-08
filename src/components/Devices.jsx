@@ -1,27 +1,20 @@
 import { useEffect, useState } from "react";
-import "./devices.css"; // Import CSS file
+import { apiFetch } from "../utils/api"; // 👈 import the helper
+import "./devices.css";
 
 export default function Devices() {
   const [devices, setDevices] = useState([]);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
 
-  const token = JSON.parse(localStorage.getItem("token-auth"))?.token;
-  const currentDeviceId = localStorage.getItem("deviceId"); // 👈 current device id
+  const currentDeviceId = localStorage.getItem("deviceId");
 
-  // ✅ Fetch devices from backend
   const fetchDevices = async () => {
+    setLoading(true);
     try {
-      setLoading(true);
-      const res = await fetch("https://mygram-1-1nua.onrender.com/devices", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const data = await res.json();
-      if (res.ok) {
-        setDevices(data.devices || []);
-      } else {
-        setMessage(data.message || "Failed to fetch devices");
-      }
+      const { res, data } = await apiFetch("https://mygram-1-1nua.onrender.com/devices");
+      if (res.ok) setDevices(data.devices || []);
+      else setMessage(data.message || "Failed to fetch devices");
     } catch {
       setMessage("Error fetching devices");
     } finally {
@@ -29,70 +22,47 @@ export default function Devices() {
     }
   };
 
-  // ✅ Remove one device
   const removeDevice = async (deviceId) => {
     try {
-      const res = await fetch(
-        `https://mygram-1-1nua.onrender.com/devices/${deviceId}`,
-        {
-          method: "DELETE",
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
+      const { res, data } = await apiFetch(`https://mygram-1-1nua.onrender.com/devices/${deviceId}`, {
+        method: "DELETE",
+      });
 
-      const data = await res.json();
       if (res.ok) {
-        setDevices(data.devices); // ✅ backend response is the source of truth
-        setMessage(data.message);
-      } else {
-        setMessage(data.message || "Failed to remove device");
-      }
+        setDevices(data.devices); // update UI
+        setMessage("Device removed successfully");
+      } else setMessage(data.message || "Failed to remove device");
     } catch {
       setMessage("Error removing device");
     }
   };
 
-  // ✅ Remove all devices
   const removeAllDevices = async () => {
     try {
-      const res = await fetch(
-        `https://mygram-1-1nua.onrender.com/devices/remove-all`,
-        {
-          method: "DELETE",
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
+      const { res, data } = await apiFetch(`https://mygram-1-1nua.onrender.com/devices/remove-all`, {
+        method: "DELETE",
+      });
 
-      const data = await res.json();
       if (res.ok) {
-        setDevices(data.devices); // will be empty []
-        setMessage(data.message);
-      } else {
-        setMessage(data.message || "Failed to remove devices");
-      }
+        setDevices([]);
+        setMessage("All devices removed");
+      } else setMessage(data.message || "Failed to remove devices");
     } catch {
       setMessage("Error removing devices");
     }
   };
 
-  // ✅ Remove all other devices except current
   const removeOtherDevices = async () => {
     try {
-      const res = await fetch(
+      const { res, data } = await apiFetch(
         `https://mygram-1-1nua.onrender.com/devices/remove-others/${currentDeviceId}`,
-        {
-          method: "DELETE",
-          headers: { Authorization: `Bearer ${token}` },
-        }
+        { method: "DELETE" }
       );
 
-      const data = await res.json();
       if (res.ok) {
-        setDevices(data.devices); // backend sends only current device
-        setMessage(data.message);
-      } else {
-        setMessage(data.message || "Failed to remove devices");
-      }
+        setDevices(data.devices);
+        setMessage("Logged out from all other devices");
+      } else setMessage(data.message || "Failed to remove devices");
     } catch {
       setMessage("Error removing devices");
     }
@@ -135,12 +105,10 @@ export default function Devices() {
                   <strong>IP:</strong> {device.ip}
                 </p>
                 <p>
-                  <strong>UserAgent:</strong>{" "}
-                  {device.userAgent || device.browser}
+                  <strong>UserAgent:</strong> {device.userAgent || device.browser}
                 </p>
                 <p>
-                  <strong>Last Used:</strong>{" "}
-                  {new Date(device.lastUsed).toLocaleString()}
+                  <strong>Last Used:</strong> {new Date(device.lastUsed).toLocaleString()}
                 </p>
                 <button
                   onClick={() => removeDevice(device.deviceId)}
