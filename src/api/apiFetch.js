@@ -1,4 +1,4 @@
-import API_BASE_URL from "../config/api";
+
 
 export const apiFetch = async (endpoint, options = {}) => {
   const token = JSON.parse(localStorage.getItem("token-auth"))?.token;
@@ -13,7 +13,7 @@ export const apiFetch = async (endpoint, options = {}) => {
     ...options.headers,
   };
 
-  const res = await fetch(`${API_BASE_URL}${endpoint}`, {
+  const res = await fetch(`https://mygram-mvc.onrender.com/${endpoint}`, {
     ...options,
     headers,
   });
