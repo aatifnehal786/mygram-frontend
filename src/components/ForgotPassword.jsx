@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { Link } from "react-router-dom";
 import hide from '../assets/hide.png';
 import show from '../assets/show.png';
-import { apiFetch } from "../api/apifetch";
+import { apiFetch } from "../api/apiFetch";
 
 export default function ForgotPassword() {
   const [email, setEmail] = useState("");

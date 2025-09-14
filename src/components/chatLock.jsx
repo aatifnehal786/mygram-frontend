@@ -2,7 +2,7 @@
 import React, { useState, useContext } from "react";
 import { UserContext } from "../contexts/UserContext";
 import ForgotChatPin from "./forgotChatPin";
-import { apiFetch } from "../api/apifetch";
+import { apiFetch } from "../api/apiFetch";
 
 function ChatLock({ onUnlock }) {
   const { loggedUser } = useContext(UserContext);

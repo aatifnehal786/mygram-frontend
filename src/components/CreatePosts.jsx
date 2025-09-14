@@ -1,5 +1,6 @@
 import React, { useContext,useState } from 'react';
 import './Post.css'
+import { apiFetch } from "../api/apiFetch";
 // import './App.css';
 import { UserContext } from '../contexts/UserContext';
 const CreatePost = () => {

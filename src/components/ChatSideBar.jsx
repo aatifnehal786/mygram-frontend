@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { UserContext } from '../contexts/UserContext';
+import { apiFetch } from "../api/apiFetch";
 import './chat.css';
 
 const ChatSidebar = ({

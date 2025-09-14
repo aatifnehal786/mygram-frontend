@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import hide from '../assets/hide.png'
 import show from '../assets/show.png'
-import { apiFetch } from "../utils/api";
+import { apiFetch } from "../api/apiFetch";
 
 export default function SignUp(){
 

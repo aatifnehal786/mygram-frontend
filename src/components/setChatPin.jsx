@@ -1,6 +1,6 @@
 import { useState, useContext, useEffect } from "react";
 import { UserContext } from "../contexts/UserContext";
-import { apiFetch } from "../utils/api";
+import { apiFetch } from "../api/apiFetch";
 export default function SetChatPin({ onSetPin }) {
   const { loggedUser } = useContext(UserContext);
   const [pin, setPin] = useState("");

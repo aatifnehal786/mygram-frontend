@@ -3,6 +3,7 @@ import ChatLock from "./chatLock";
 import Chat from "./Chat";
 import SetChatPin from "./setChatPin";
 import { UserContext } from "../contexts/UserContext";
+import { apiFetch } from "../api/apiFetch";
 
 export default function ChatWrapper({ userId }) {
   const { loggedUser } = useContext(UserContext);

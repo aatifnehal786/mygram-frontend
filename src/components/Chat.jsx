@@ -5,7 +5,7 @@ import ChatWindow from './ChatWindow';
 import io from 'socket.io-client';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { apiFetch } from '../api/apifetch';
+import { apiFetch } from '../api/apiFetch';
 import './chat.css';
 
 const Chat = ({onLock, canRemovePin, onRemovePin }) => {

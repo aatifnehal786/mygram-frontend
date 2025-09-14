@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { apiFetch } from "../api/api"; // 👈 import the helper
+import { apiFetch } from "../api/apiFetch"; // 👈 import the helper
 import "./devices.css";
 
 export default function Devices() {

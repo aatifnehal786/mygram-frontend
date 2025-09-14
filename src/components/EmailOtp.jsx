@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 
-import { apiFetch } from "../api/apifetch";
+import { apiFetch } from "../api/apiFetch";
 export default function EmailOtp() {
     const [otp, setOtp] = useState("");
     const [email, setEmail] = useState("");

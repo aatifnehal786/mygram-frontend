@@ -2,7 +2,7 @@ import { useParams } from "react-router-dom";
 import { useContext, useEffect, useState, useRef } from "react";
 import { UserContext } from "../contexts/UserContext";
 import ImagePostWithMusic from "./ImagePostWithMusic";
-import { apiFetch } from "../utils/apiFetch"; // 👈 adjust path as needed
+import { apiFetch } from "../api/apiFetch"; // 👈 adjust path as needed
 import './Profile.css'
 export default function Profile() {
   const { id } = useParams();
