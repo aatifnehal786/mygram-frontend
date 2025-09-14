@@ -1,4 +1,6 @@
 import React, { useState } from "react";
+import { apiFetch } from "../api/apifetch";
+
 
 export default function ForgotChatPin({ onClose }) {
   const [email, setEmail] = useState(""); // separate email input
@@ -9,62 +11,65 @@ export default function ForgotChatPin({ onClose }) {
   const [otpSent, setOtpSent] = useState(false);
 
   // Send OTP to provided email
-  const requestOtp = async () => {
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      setMessage("❌ Invalid email format");
-      return;
-    }
 
-    try {
-      setLoading(true);
-      const res = await fetch("https://mygram-1-1nua.onrender.com/forgot-chat-pin", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email }),
-      });
-      const data = await res.json();
-      setMessage(data.message || "OTP sent");
-      setOtpSent(true);
-    } catch (err) {
-      setMessage("❌ Error sending OTP");
-    } finally {
-      setLoading(false);
-    }
-  };
+const requestOtp = async () => {
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    setMessage("❌ Invalid email format");
+    return;
+  }
 
-  // Reset PIN after entering OTP
-  const resetPin = async () => {
-    if (!/^\d{6}$/.test(otp)) {
-      setMessage("❌ OTP must be 6 digits");
-      return;
-    }
-    if (!/^\d{4}$/.test(newPin)) {
-      setMessage("❌ PIN must be 4 digits");
-      return;
-    }
+  try {
+    setLoading(true);
 
-    try {
-      setLoading(true);
-      const res = await fetch("https://mygram-1-1nua.onrender.com/reset-chat-pin", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, otp, newPin }),
-      });
-      const data = await res.json();
-      setMessage(data.message);
-      if (res.ok) {
-        setOtp("");
-        setNewPin("");
-        setOtpSent(false);
-        setEmail("");
-        onClose(); // close modal
-      }
-    } catch {
-      setMessage("❌ Error resetting PIN");
-    } finally {
-      setLoading(false);
-    }
-  };
+    const data = await apiFetch("/forgot-chat-pin", {
+      method: "POST",
+      body: JSON.stringify({ email }),
+    });
+
+    setMessage(data.message || "OTP sent");
+    setOtpSent(true);
+  } catch (err) {
+    console.error("Error requesting chat pin OTP:", err);
+    setMessage("❌ Error sending OTP");
+  } finally {
+    setLoading(false);
+  }
+};
+
+// Reset PIN after entering OTP
+const resetPin = async () => {
+  if (!/^\d{6}$/.test(otp)) {
+    setMessage("❌ OTP must be 6 digits");
+    return;
+  }
+  if (!/^\d{4}$/.test(newPin)) {
+    setMessage("❌ PIN must be 4 digits");
+    return;
+  }
+
+  try {
+    setLoading(true);
+
+    const data = await apiFetch("/reset-chat-pin", {
+      method: "POST",
+      body: JSON.stringify({ email, otp, newPin }),
+    });
+
+    setMessage(data.message);
+
+    // ✅ Clear state on success
+    setOtp("");
+    setNewPin("");
+    setOtpSent(false);
+    setEmail("");
+    onClose(); // close modal
+  } catch (err) {
+    console.error("Error resetting chat pin:", err);
+    setMessage("❌ Error resetting PIN");
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <div className="forgot-pin-modal">

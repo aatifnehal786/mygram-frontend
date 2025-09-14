@@ -2,6 +2,7 @@ import { useParams } from "react-router-dom";
 import { useContext, useEffect, useState, useRef } from "react";
 import { UserContext } from "../contexts/UserContext";
 import ImagePostWithMusic from "./ImagePostWithMusic";
+import { apiFetch } from "../utils/apiFetch"; // 👈 adjust path as needed
 import './Profile.css'
 export default function Profile() {
   const { id } = useParams();
@@ -19,166 +20,131 @@ export default function Profile() {
   const targetUserId =  loggedUser?.userid;
   console.log(loggedUser)
 
-  useEffect(() => {
-    if (!targetUserId || !loggedUser?.token) return;
-
-    async function fetchStatsAndPosts() {
-      try {
-        const res = await fetch(`https://mygram-1-1nua.onrender.com/users/${targetUserId}/stats`, {
-         headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${loggedUser.token}`,
-          "x-device-id": localStorage.getItem("deviceId"), // 👈 required
-        },
-        });
-        const data = await res.json();
-        setStats(data);
-
-        const postsRes = await fetch("https://mygram-1-1nua.onrender.com/allposts", {
-         headers: {
-          
-          "Authorization": `Bearer ${loggedUser.token}`,
-          "x-device-id": localStorage.getItem("deviceId"), // 👈 required
-        },
-        });
-        const allPosts = await postsRes.json();
-        const userPosts = allPosts.filter(post => post.postedBy?._id === targetUserId);
-        setPosts(userPosts);
-
-        if (!isOwnProfile) {
-          setIsFollowing(data.followers.some(f => f._id === loggedUser._id));
-        }
-      } catch (err) {
-        console.error("Failed to fetch data:", err);
-      }
-    }
-
-    fetchStatsAndPosts();
-  }, [id, loggedUser]);
-
-  useEffect(() => {
-    const checkFollowStatus = async () => {
-      if (!targetUserId || isOwnProfile) return;
-
-      try {
-        const res = await fetch(`https://mygram-1-1nua.onrender.com/follow-status/${targetUserId}`, {
-          headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${loggedUser.token}`,
-          "x-device-id": localStorage.getItem("deviceId"), // 👈 required
-        },
-        });
-
-        const data = await res.json();
-        if (res.ok) {
-          setIsFollowing(data.isFollowing);
-        } else {
-          console.error("Failed to fetch follow status:", data.error || data.message);
-        }
-      } catch (err) {
-        console.error("Error checking follow status:", err);
-      }
-    };
-
-    checkFollowStatus();
-  }, [id, loggedUser]);
-
-  
-  const handleFileChange = async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-
-    const formData = new FormData();
-    formData.append("profilePic", file);
-    console.log(loggedUser.token);
-
-    setIsUploading(true);
-    const res = await fetch("https://mygram-1-1nua.onrender.com/user/profile-pic", {
-      method: "POST",
-     headers: {
-  Authorization: `Bearer ${loggedUser.token?.trim()}`,
-  "x-device-id": localStorage.getItem("deviceId"), // 👈 required
-  
-},
 
 
-      
-      body: formData,
-    });
+// FETCH STATS AND POSTS
+useEffect(() => {
+  if (!targetUserId || !loggedUser?.token) return;
 
-    const data = await res.json();
-    setIsUploading(false);
-    console.log(data)
-
-
-      setStats((prev) => ({ ...prev, profilePic: data.profilePic }));
-    
- 
-  };
-  // console.log(posts)
-    // console.log(stats)
-
-  const handleLike = async (postId) => {
+  async function fetchStatsAndPosts() {
     try {
-      const res = await fetch(`https://mygram-1-1nua.onrender.com/like/${postId}`, {
-        method: "PUT",
-        headers: {
-          Authorization: `Bearer ${loggedUser.token}`,
-          "x-device-id": localStorage.getItem("deviceId"), // 👈 required
-        },
-      });
-      const updated = await res.json();
-      setPosts(posts.map(p => p._id === postId ? updated : p));
-    } catch (err) {
-      console.error("Failed to like post", err);
-    }
-  };
+      const statsData = await apiFetch(`/users/${targetUserId}/stats`);
+      setStats(statsData);
 
-  const handleComment = async (postId, text) => {
-    if (!text) return;
+      const allPosts = await apiFetch("/posts/all");
+      const userPosts = allPosts.filter(
+        (post) => post.postedBy?._id === targetUserId
+      );
+      setPosts(userPosts);
+
+      if (!isOwnProfile) {
+        setIsFollowing(statsData.followers.some((f) => f._id === loggedUser._id));
+      }
+    } catch (err) {
+      console.error("Failed to fetch data:", err);
+    }
+  }
+
+  fetchStatsAndPosts();
+}, [id, loggedUser]);
+
+
+// CHECK FOLLOW STATUS
+
+useEffect(() => {
+  const checkFollowStatus = async () => {
+    if (!targetUserId || isOwnProfile) return;
+
     try {
-      const res = await fetch(`https://mygram-1-1nua.onrender.com/comment/${postId}`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${loggedUser.token}`,
-        },
-        body: JSON.stringify({ text }),
-      });
-
-      const updated = await res.json();
-      setPosts(posts.map(p => p._id === postId ? updated : p));
+      const data = await apiFetch(`/follow/status/${targetUserId}`);
+      setIsFollowing(data.isFollowing);
     } catch (err) {
-      console.error("Failed to comment", err);
+      console.error("Error checking follow status:", err);
     }
   };
 
- const handledeletePost = async (deletePostId) => {
+  checkFollowStatus();
+}, [id, loggedUser]);
+
+// HANDLE FILE CHANGE
+
+const handleFileChange = async (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  const formData = new FormData();
+  formData.append("profilePic", file);
+
   try {
-    const deleteres = await fetch(`https://mygram-1-1nua.onrender.com/delete-post/${deletePostId}`, {
-      method: "DELETE",
-      headers: {
-        Authorization: `Bearer ${loggedUser.token}`,
-      },
+    setIsUploading(true);
+
+    const data = await apiFetch("/uploads/profile-pic", {
+      method: "POST",
+      body: formData, // apiFetch skips Content-Type for FormData
     });
 
-    const data = await deleteres.json();
-    setMessage({text:"delete",data:data.message})
-    setTimeout(()=>{
-        setMessage({text:"",data:""})
-      },3000)
-    if (deleteres.ok) {
-      // Remove the deleted post from the posts state
-      
-      setPosts(prevPosts => prevPosts.filter(post => post._id !== deletePostId));
-      
-    } else {
-      console.error("Failed to delete post:", data.error || data.message);
-    }
+    setStats((prev) => ({ ...prev, profilePic: data.profilePic }));
+  } catch (err) {
+    console.error(err);
+  } finally {
+    setIsUploading(false);
+  }
+};
+
+
+// HANDLE LIKE
+
+const handleLike = async (postId) => {
+  try {
+    const updated = await apiFetch(`/posts/like/${postId}`, {
+      method: "PUT",
+    });
+
+    setPosts(posts.map((p) => (p._id === postId ? updated : p)));
+  } catch (err) {
+    console.error("Failed to like post", err);
+  }
+};
+
+
+// HANDLE COMMENT
+
+const handleComment = async (postId, text) => {
+  if (!text) return;
+  try {
+    const updated = await apiFetch(`/posts/comment/${postId}`, {
+      method: "POST",
+      body: JSON.stringify({ text }),
+    });
+
+    setPosts(posts.map((p) => (p._id === postId ? updated : p)));
+  } catch (err) {
+    console.error("Failed to comment", err);
+  }
+};
+
+
+// HANDLE DELETE POSTS
+
+const handleDeletePost = async (deletePostId) => {
+  try {
+    const data = await apiFetch(`/posts/${deletePostId}`, {
+      method: "DELETE",
+    });
+
+    setMessage({ text: "delete", data: data.message });
+    setTimeout(() => {
+      setMessage({ text: "", data: "" });
+    }, 3000);
+
+    setPosts((prevPosts) =>
+      prevPosts.filter((post) => post._id !== deletePostId)
+    );
   } catch (err) {
     console.error("Delete post failed:", err);
   }
 };
+
 
 
   if (!loggedUser || !stats) return <p>Loading...</p>;
@@ -254,7 +220,7 @@ export default function Profile() {
         <div key={post._id} className="post">
           <p>delete post</p>
          
-          <button onClick={()=>handledeletePost(post._id)}>Delete</button>
+          <button onClick={()=>handleDeletePost(post._id)}>Delete</button>
           
           <p><strong>{post.caption}</strong></p>
     {post.mediaUrl.endsWith(".mp4") ? (

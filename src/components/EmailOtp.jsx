@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
+
+import { apiFetch } from "../api/apifetch";
 export default function EmailOtp() {
     const [otp, setOtp] = useState("");
     const [email, setEmail] = useState("");
@@ -7,90 +9,59 @@ export default function EmailOtp() {
     const [isLoading1, setIsLoading1] = useState(false);
     const [isLoading2, setIsLoading2] = useState(false);
 
-    const sendOtp = (e) => {
-        if(!email){
-            setMessage({type:"error",text:"Email is required"})
-            setTimeout(()=>{
-                setMessage({type:"",text:""})
-            },3000)
-            return
-        }
-        setIsLoading1(true)
+
+    const sendOtp = async (e) => {
         e.preventDefault();
-        fetch("https://mygram-1-1nua.onrender.com/send-email-otp", {
-            method: "POST",
-            body: JSON.stringify({ email }),
-            headers: {
-                "Content-Type": "application/json",
-            },
-        })
-        .then((res)=>{
-            
-            return res.json()
-            })
-        .then((data) => {
-                 setIsLoading1(false)
-                setMessage({ type: "success", text: data.message });
-                
-                setTimeout(()=>{
-                    setMessage({type:"",text:""})
-                   
-                },5000)
-            })
-            .catch((err) => {
-                console.log(err);
-                setMessage({ type: "error", text: "Failed to send OTP" });
+
+        if (!email) {
+            setMessage({ type: "error", text: "Email is required" });
+            setTimeout(() => setMessage({ type: "", text: "" }), 3000);
+            return;
+        }
+
+        try {
+            setIsLoading1(true);
+
+            const data = await apiFetch("/send-email-otp", {
+                method: "POST",
+                body: JSON.stringify({ email }),
             });
+
+            setMessage({ type: "success", text: data.message });
+            setTimeout(() => setMessage({ type: "", text: "" }), 5000);
+        } catch (err) {
+            console.error("Send OTP error:", err);
+            setMessage({ type: "error", text: "Failed to send OTP" });
+        } finally {
+            setIsLoading1(false);
+        }
     };
 
-    const verifyOtp = (e) => {
-            if(!email || !otp){
-            setMessage({type:"error",text:"Email and otp is required"})
-            setTimeout(()=>{
-                setMessage({type:"",text:""})
-            },3000)
-            return
-        }
-         setIsLoading2(true);
+    const verifyOtp = async (e) => {
         e.preventDefault();
-        fetch("https://mygram-1-1nua.onrender.com/verify-email-otp", {
-            method: "POST",
-            body: JSON.stringify({ email, otp }),
-            headers: {
-                "Content-Type": "application/json",
-            },
-        })
-           .then((res)=>{
-           
-                if (!res.ok) {
-                    if (res.status === 404) {
-                        setMessage({ type: "error", text: "User Not Found With this Email, Please Login Again" });
-                    } else if (res.status === 401) {
-                        setMessage({ type: "error", text: "Wrong Password" });
-                    } else {
-                        setMessage({ type: "error", text: "Something went wrong. Please try again later." });
-                    }
-                    throw new Error(`HTTP error! status: ${res.status}`);
-                }
-                return res.json();
-           })
-            .then((data) => {
-                if (data) {
-                    setIsLoading2(false);
-                   
-                    setMessage({ type: "success", text: "OTP verified successfully" });
-                    setTimeout(()=>{
-                         
-                        setMessage({type:"",text:""})
-                    },5000)
-                } else {
-                    setMessage({ type: "error", text: data.error });
-                }
-            })
-            .catch((err) => {
-                console.log(err);
-                setMessage({ type: "error", text: "Failed to verify OTP" });
+
+        if (!email || !otp) {
+            setMessage({ type: "error", text: "Email and OTP are required" });
+            setTimeout(() => setMessage({ type: "", text: "" }), 3000);
+            return;
+        }
+
+        try {
+            setIsLoading2(true);
+
+            const data = await apiFetch("/verify-email-otp", {
+                method: "POST",
+                body: JSON.stringify({ email, otp }),
             });
+
+            setMessage({ type: "success", text: "OTP verified successfully" });
+            setTimeout(() => setMessage({ type: "", text: "" }), 5000);
+        } catch (err) {
+            console.error("Verify OTP error:", err);
+            setMessage({ type: "error", text: err.message || "Failed to verify OTP" });
+        } finally {
+            setIsLoading2(false);
+        }
     };
 
     return (
@@ -106,8 +77,8 @@ export default function EmailOtp() {
                     name="email"
                     value={email}
                 />
-                 <button type="submit" className="btn" disabled={isLoading1} onClick={sendOtp}>
-                {isLoading1 ? "Loading..." : "send otp"}
+                <button type="submit" className="btn" disabled={isLoading1} onClick={sendOtp}>
+                    {isLoading1 ? "Loading..." : "send otp"}
                 </button>
                 <input
                     className="inp"
@@ -117,9 +88,9 @@ export default function EmailOtp() {
                     name="otp"
                     value={otp}
                 />
-               
+
                 <button type="submit" className="btn" disabled={isLoading2} onClick={verifyOtp}>
-                {isLoading2 ? "Loading..." : "verify otp"}
+                    {isLoading2 ? "Loading..." : "verify otp"}
                 </button>
                 {message.text && <div><p className={message.type}>{message.text}</p></div>}
                 <p><Link className="link1" to="/login">Go to login page</Link></p>

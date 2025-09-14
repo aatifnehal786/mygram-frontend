@@ -4,6 +4,7 @@ import { UserContext } from "../contexts/UserContext";
 import { useNavigate, Link } from "react-router-dom";
 import { FaBars } from "react-icons/fa";
 import { RxCross1 } from "react-icons/rx";
+import { apiFetch } from "../api/apiFetch";
 import './chat.css'
 
 export default function Header() {
@@ -13,18 +14,18 @@ export default function Header() {
   const [targetUserId, setTargetUserId] = useState("");
   const [menuOpen, setMenuOpen] = useState(false);
   const navigate = useNavigate();
+
+
+
+// FETCH ALL USERS EXCEPT THE CURRENT LOGGED IN
+
+
+
 useEffect(() => {
   const fetchUsers = async () => {
     try {
-      const res = await fetch("https://mygram-1-1nua.onrender.com/allusers2", {
-        headers: {
-          
-          Authorization: `Bearer ${loggedUser.token}`,
-          "x-device-id": localStorage.getItem("deviceId"), // 👈 required
-        },
-      });
+      const data = await apiFetch("/allusers2");
 
-      const data = await res.json();
       console.log("Fetched users response:", data);
 
       // ✅ Ensure we use the array
@@ -38,12 +39,15 @@ useEffect(() => {
         setTargetUserId(followers[0]._id);
       }
     } catch (err) {
-      console.error("Error fetching users:", err);
+      console.error("Error fetching users:", err.message);
     }
   };
 
-  fetchUsers();
+  if (loggedUser?.token) {
+    fetchUsers();
+  }
 }, [loggedUser]);
+
 
 
   function logOut() {

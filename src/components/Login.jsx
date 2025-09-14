@@ -4,6 +4,7 @@ import { UserContext } from "../contexts/UserContext";
 import hide from "../assets/hide.png";
 import show from "../assets/show.png";
 import { v4 as uuidv4 } from "uuid";
+import {apiFetch} from '../api/apiFetch'
 
 export default function Login() {
   const loggedData = useContext(UserContext);
@@ -32,64 +33,73 @@ export default function Login() {
     setUser((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
+  // HANDLE DEVICE LOGIN
+
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    setIsLoading(true);
+  e.preventDefault();
+  setIsLoading(true);
 
-    try {
-      const res = await fetch("https://mygram-1-1nua.onrender.com/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json",
-        "x-device-id": deviceId
-         },
-        
-        body: JSON.stringify({ ...user, deviceId }),
+  try {
+    const { data, res } = await apiFetch("/api/auth/login", {
+      method: "POST",
+      body: JSON.stringify({ ...user, deviceId }),
+    });
+
+    setIsLoading(false);
+
+    if (res.status === 200 && data.token) {
+      loggedData.setLoggedUser(data);
+      localStorage.setItem("token-auth", JSON.stringify(data));
+      navigate("/home");
+    } else if (data.otpRequired) {
+      setOtpRequired(true);
+      setEmail(data.email);
+      setMessage({
+        type: "info",
+        text: "OTP sent to your email. Please verify.",
       });
-      const data = await res.json();
-      setIsLoading(false);
-
-      if (res.status === 200 && data.token) {
-        loggedData.setLoggedUser(data);
-        localStorage.setItem("token-auth", JSON.stringify(data));
-        navigate("/home");
-      } else if (data.otpRequired) {
-        setOtpRequired(true);
-        setEmail(data.email);
-        setMessage({ type: "info", text: "OTP sent to your email. Please verify." });
-      } else {
-        setMessage({ type: "error", text: data.message || "Login failed" });
-      }
-    } catch {
-      setIsLoading(false);
-      setMessage({ type: "error", text: "An error occurred" });
+    } else {
+      setMessage({ type: "error", text: data.message || "Login failed" });
     }
-  };
+  } catch (err) {
+    console.error(err);
+    setIsLoading(false);
+    setMessage({ type: "error", text: "An error occurred" });
+  }
+};
 
-  const handleVerifyOtp = async () => {
-    setIsLoading(true);
-    try {
-      const res = await fetch("https://mygram-1-1nua.onrender.com/verify-device-otp", {
-        method: "POST",
-        headers: { "Content-Type": "application/json",
-          "x-device-id": deviceId
-         },
-        body: JSON.stringify({ email, otp, deviceId }),
+// HANDLE NEW DEVICE VERIFY LOGIN VIA OTP
+
+const handleVerifyOtp = async () => {
+  setIsLoading(true);
+
+  try {
+    const { data } = await apiFetch("/otp/verify-device-otp", {
+      method: "POST",
+      body: JSON.stringify({ email, otp, deviceId }),
+    });
+
+    setIsLoading(false);
+
+    if (data.token) {
+      loggedData.setLoggedUser(data);
+      localStorage.setItem("token-auth", JSON.stringify(data));
+      navigate("/home");
+    } else {
+      setMessage({
+        type: "error",
+        text: data.message || "OTP verification failed",
       });
-      const data = await res.json();
-      setIsLoading(false);
-
-      if (data.token) {
-        loggedData.setLoggedUser(data);
-        localStorage.setItem("token-auth", JSON.stringify(data));
-        navigate("/home");
-      } else {
-        setMessage({ type: "error", text: data.message || "OTP verification failed" });
-      }
-    } catch {
-      setIsLoading(false);
-      setMessage({ type: "error", text: "An error occurred during OTP verification" });
     }
-  };
+  } catch (err) {
+    console.error(err);
+    setIsLoading(false);
+    setMessage({
+      type: "error",
+      text: "An error occurred during OTP verification",
+    });
+  }
+};
 
   const showHide = () => setIsPassword((prev) => !prev);
 

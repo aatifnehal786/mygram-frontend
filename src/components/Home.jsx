@@ -10,38 +10,23 @@ export default function Home() {
   const [followStatus, setFollowStatus] = useState({});
 
   console.log(loggedUser);
+// FETCH ALL USERS
 
-  useEffect(() => {
-    fetch("https://mygram-1-1nua.onrender.com/allusers1", {
-      method: "GET",
-     headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${loggedUser?.token}`,
-          "x-device-id": localStorage.getItem("deviceId"), // 👈 required
-        },
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        console.log(data);
-      
-        setUsers(data);
-      });
-  }, []);
+useEffect(() => {
+  apiFetch("/allusers1")
+    .then((data) => setUsers(data))
+    .catch((err) => console.error("All users fetch error:", err));
+}, []);
 
 
 
-  useEffect(() => {
+// CHECK FOLLOW STATUS
+
+useEffect(() => {
   if (Array.isArray(users) && loggedUser?._id) {
     users.forEach((user) => {
       if (user._id !== loggedUser._id) {
-        fetch(`https://mygram-1-1nua.onrender.com/follow-status/${user._id}`, {
-         headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${loggedUser?.token}`,
-          "x-device-id": localStorage.getItem("deviceId"), // 👈 required
-        },
-        })
-          .then((res) => res.json())
+        apiFetch(`/follow-status/${user._id}`)
           .then((statusData) => {
             setFollowStatus((prev) => ({
               ...prev,
@@ -67,39 +52,30 @@ export default function Home() {
 
   
 
-  const handleFollowToggle = async (targetUserId) => {
-  const isFollowing = followStatus[targetUserId];
+// TOGGLE FOLLOW AND UNFOLLOW
 
-  const url = `https://mygram-1-1nua.onrender.com/${isFollowing ? "unfollow" : "follow"}/${targetUserId}`;
+const handleFollowToggle = async (targetUserId) => {
+  const isFollowing = followStatus[targetUserId];
+  const url = `/${isFollowing ? "unfollow" : "follow"}/${targetUserId}`;
 
   try {
-    const res = await fetch(url, {
-      method: "PUT",
-      headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${loggedUser?.token}`,
-          "x-device-id": localStorage.getItem("deviceId"), // 👈 required
-        },
-    });
-
-    const data = await res.json();
-
-    if (res.ok) {
-      setFollowStatus((prev) => ({
-        ...prev,
-        [targetUserId]: !isFollowing,
-      }));
-    } else {
-      console.error("Failed to toggle follow:", data.error);
-    }
+    await apiFetch(url, { method: "PUT" });
+    setFollowStatus((prev) => ({
+      ...prev,
+      [targetUserId]: !isFollowing,
+    }));
   } catch (error) {
-    console.error("Error toggling follow:", error);
+    console.error("Error toggling follow:", error.message);
   }
 };
 
 
+
   return (
     <div className="home">
+
+
+      {showVerifyMessage ? <p> Mobile Veified</p>: <p>verify Mobile</p>}
      
  <div className="users">
   {Array.isArray(users) && users.map((user) =>

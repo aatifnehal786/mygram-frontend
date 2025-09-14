@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { apiFetch } from "../utils/api"; // 👈 import the helper
+import { apiFetch } from "../api/api"; // 👈 import the helper
 import "./devices.css";
 
 export default function Devices() {
@@ -10,54 +10,63 @@ export default function Devices() {
   const currentDeviceId = localStorage.getItem("deviceId");
 
   const fetchDevices = async () => {
-    setLoading(true);
-    try {
-      const { res, data } = await apiFetch("https://mygram-1-1nua.onrender.com/devices");
-      if (res.ok) setDevices(data.devices || []);
-      else setMessage(data.message || "Failed to fetch devices");
-    } catch {
-      setMessage("Error fetching devices");
-    } finally {
-      setLoading(false);
+  setLoading(true);
+  try {
+    const { res, data } = await apiFetch("/devices"); // ✅ relative path
+    if (res.ok) {
+      setDevices(data.devices || []);
+    } else {
+      setMessage(data.message || "Failed to fetch devices");
     }
-  };
+  } catch (err) {
+    console.error("Error fetching devices:", err);
+    setMessage("Error fetching devices");
+  } finally {
+    setLoading(false);
+  }
+};
 
-  const removeDevice = async (deviceId) => {
-    try {
-      const { res, data } = await apiFetch(`https://mygram-1-1nua.onrender.com/devices/${deviceId}`, {
-        method: "DELETE",
-      });
+const removeDevice = async (deviceId) => {
+  try {
+    const { res, data } = await apiFetch(`/devices/${deviceId}`, {
+      method: "DELETE",
+    });
 
-      if (res.ok) {
-        setDevices(data.devices); // update UI
-        setMessage("Device removed successfully");
-      } else setMessage(data.message || "Failed to remove device");
-    } catch {
-      setMessage("Error removing device");
+    if (res.ok) {
+      setDevices(data.devices || []); // ✅ ensure array
+      setMessage("Device removed successfully");
+    } else {
+      setMessage(data.message || "Failed to remove device");
     }
-  };
+  } catch (err) {
+    console.error("Error removing device:", err);
+    setMessage("Error removing device");
+  }
+};
 
+const removeOtherDevices = async () => {
+  try {
+    const { res, data } = await apiFetch(`/devices/remove-others/${currentDeviceId}`, {
+      method: "DELETE",
+    });
 
-
-  const removeOtherDevices = async () => {
-    try {
-      const { res, data } = await apiFetch(
-        `https://mygram-1-1nua.onrender.com/devices/remove-others/${currentDeviceId}`,
-        { method: "DELETE" }
-      );
-
-      if (res.ok) {
-        setDevices(data.devices);
-        setMessage("Logged out from all other devices");
-      } else setMessage(data.message || "Failed to remove devices");
-    } catch {
-      setMessage("Error removing devices");
+    if (res.ok) {
+      setDevices(data.devices || []);
+      setMessage("Logged out from all other devices");
+    } else {
+      setMessage(data.message || "Failed to remove devices");
     }
-  };
+  } catch (err) {
+    console.error("Error removing other devices:", err);
+    setMessage("Error removing devices");
+  }
+};
 
-  useEffect(() => {
-    fetchDevices();
-  }, []);
+// ✅ Auto-fetch on mount
+useEffect(() => {
+  fetchDevices();
+}, []);
+
 
   return (
     <section className="container4">

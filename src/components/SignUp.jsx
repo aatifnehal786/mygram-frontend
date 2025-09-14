@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import hide from '../assets/hide.png'
 import show from '../assets/show.png'
+import { apiFetch } from "../utils/api";
 
 export default function SignUp(){
 
@@ -74,40 +75,36 @@ export default function SignUp(){
         setIsPassword((prev)=>!prev)
     }
 
-    const handleSubmit = (e)=>{
-        setIsLoading(true)
-        e.preventDefault();
-       
-        fetch("https://mygram-1-1nua.onrender.com/signup",{
-            method:"POST",
-            body:JSON.stringify(userDetails),
-            headers:{
-                "Content-Type":"application/json"
-            }
-        })
-        .then((res)=>{
-        return res.json();
-        })
-        .then((data)=>{
-           setMessage({type:"success",text:data.message})
-           setTimeout(()=>{
-                setMessage({type:"",text:""})
-                setIsLoading(false);
-                setUserDetails({
-                    username:"",
-                    email:"",
-                    password:"",
-                    mobile:""
+  
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  setIsLoading(true);
 
-                })
-            },10000)
+  try {
+    const data = await apiFetch("/auth/signup", {
+      method: "POST",
+      body: JSON.stringify(userDetails),
+    });
 
-        })
-        .catch((err)=>{
-            console.log(err)
-        })
+    setMessage({ type: "success", text: data.message });
 
-    }
+    setTimeout(() => {
+      setMessage({ type: "", text: "" });
+      setIsLoading(false);
+      setUserDetails({
+        username: "",
+        email: "",
+        password: "",
+        mobile: "",
+      });
+    }, 10000);
+  } catch (err) {
+    console.error(err);
+    setMessage({ type: "error", text: err.message });
+    setIsLoading(false);
+  }
+};
+
 
 
 

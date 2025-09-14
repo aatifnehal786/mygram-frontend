@@ -12,48 +12,24 @@ const CreatePost = () => {
   const { loggedUser } = useContext(UserContext);
 
  
+const handleCreatePost = async () => {
+  const formData = new FormData();
+  formData.append("caption", caption);
+  formData.append("mediaType", mediaType);
+  if (mediaType === "image" && musicFile) formData.append("backgroundMusic", musicFile);
+  formData.append("image", mediaFile);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  try {
+    const data = await apiFetch("/create-post", {
+      method: "POST",
+      body: formData, // ✅ FormData is handled automatically
+    });
+    setStatus("Post created successfully!");
+  } catch (err) {
+    setStatus(err.message);
+  }
+};
 
-    if (!mediaFile) {
-      setStatus('Please upload a media file.');
-      return;
-    }
-
-    const formData = new FormData();
-    formData.append('caption', caption);
-    formData.append('mediaType', mediaType);
-    if (mediaType === "image" && musicFile) {
-  formData.append("backgroundMusic", musicFile);
-}
-
-    formData.append('image', mediaFile);
-
-    try {
-      const res = await fetch('https://mygram-1-1nua.onrender.com/create-post', {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${loggedUser.token}`,
-        },
-        body: formData,
-      });
-
-      const data = await res.json();
-
-      if (res.ok) {
-        setStatus('Post created successfully!');
-        setCaption('');
-        setMediaType('image');
-        setMusicFile('')
-        setMediaFile(null);
-      } else {
-        setStatus(data.error || 'Failed to create post.');
-      }
-    } catch (err) {
-      setStatus('Error: ' + err.message);
-    }
-  };
 
   return (
     <div className="app-wrapper">
@@ -65,7 +41,7 @@ const CreatePost = () => {
       <main className="main-content">
         <div className="create-post-container">
           <h2 className="title">Create Post</h2>
-          <form className="post-form" onSubmit={handleSubmit}>
+          <form className="post-form" onSubmit={handleCreatePost}>
             <input
               type="text"
               placeholder="Caption"

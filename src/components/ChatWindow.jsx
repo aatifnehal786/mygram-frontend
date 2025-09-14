@@ -60,52 +60,53 @@ useEffect(() => {
     setInput('');
   };
 
-  const handleFileUpload = async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
+ // File upload
+const handleFileUpload = async (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
 
-    const formData = new FormData();
-    formData.append('file', file);
+  const formData = new FormData();
+  formData.append("file", file);
 
-    const res = await fetch('https://mygram-1-1nua.onrender.com/upload/chat', {
-      method: 'POST',
+  try {
+    const { fileUrl, fileType } = await apiFetch("/upload/chat", {
+      method: "POST",
       body: formData,
     });
 
-    const { fileUrl, fileType } = await res.json();
-
-    socket.emit('sendMessage', {
+    socket.emit("sendMessage", {
       senderId: currentUserId,
       receiverId: selectedUser._id,
       fileUrl,
       fileType,
     });
-  };
-const deleteMessage = () => {
+  } catch (err) {
+    console.error("File upload failed:", err.message);
+    setToastMessage("Failed to upload file.");
+  }
+};
+
+// Delete chat message
+const deleteMessage = async () => {
   if (!messageToDelete) return;
 
-  fetch("https://mygram-1-1nua.onrender.com/delete-chat", {
-    method: 'DELETE',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${loggedUser?.token}`,
-    },
-    body: JSON.stringify({ messageIds: [messageToDelete] }),
-  })
-    .then(res => res.json())
-    .then(data => {
-      setMessages(prev => prev.filter(msg => msg._id !== messageToDelete));
-      setToastMessage("Message deleted successfully.");
-    })
-    .catch(err => {
-      console.error("Delete failed:", err);
-      setToastMessage("Failed to delete message.");
-    })
-    .finally(() => {
-      setShowConfirmModal(false);
-      setMessageToDelete(null);
+  try {
+    await apiFetch("/delete-chat", {
+      method: "DELETE",
+      body: JSON.stringify({ messageIds: [messageToDelete] }),
     });
+
+    setMessages((prev) => prev.filter((msg) => msg._id !== messageToDelete));
+    setToastMessage("Message deleted successfully.");
+  } catch (err) {
+    console.error("Delete failed:", err.message);
+    setToastMessage("Failed to delete message.");
+  } finally {
+    setShowConfirmModal(false);
+    setMessageToDelete(null);
+  }
 };
+
 
 
 const confirmDelete = (msgId) => {

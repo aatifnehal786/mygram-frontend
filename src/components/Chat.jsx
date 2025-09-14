@@ -5,6 +5,7 @@ import ChatWindow from './ChatWindow';
 import io from 'socket.io-client';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { apiFetch } from '../api/apifetch';
 import './chat.css';
 
 const Chat = ({onLock, canRemovePin, onRemovePin }) => {
@@ -25,24 +26,21 @@ const Chat = ({onLock, canRemovePin, onRemovePin }) => {
 
   const socketRef = useRef(null);
   
-
- 
-
-  useEffect(() => {
-    if (!socketRef.current) {
-      socketRef.current = io('https://mygram-1-1nua.onrender.com');
-    }
-  }, []);
-
+// Fetch chat messages with selected user
 useEffect(() => {
   if (!selectedUser || !loggedUser?.token) return;
 
-  fetch(`https://mygram-1-1nua.onrender.com/chat/${selectedUser._id}`, {
-    headers: { Authorization: `Bearer ${loggedUser.token}` },
-  })
-    .then(res => res.ok ? res.json() : [])
-    .then(data => setMessages(data || []))
-    .catch(err => console.error('Fetch chat error:', err));
+  const fetchChat = async () => {
+    try {
+      const data = await apiFetch(`/chat/${selectedUser._id}`);
+      setMessages(data || []);
+    } catch (err) {
+      console.error('Fetch chat error:', err);
+      setMessages([]);
+    }
+  };
+
+  fetchChat();
 
   socketRef.current.emit('join', loggedUser.userid);
 
@@ -57,37 +55,22 @@ useEffect(() => {
 
   socketRef.current.on('receiveMessage', handleReceiveMessage);
 
-  // ✅ Cleanup listener on component unmount or when selectedUser changes
   return () => {
     socketRef.current.off('receiveMessage', handleReceiveMessage);
   };
 }, [selectedUser]);
 
- const handleLock = () => {
-    onLock(); // Lock the chats
-    localStorage.setItem("chatUnlocked", "false");
-  };
-
- 
-
-  const triggerForwardMode = (msg) => {
-    setIsForwarding(true);
-    setMessageToForward(msg);
-    
-  };
-
- const forwardMessageToUsers = async (msg, receiverIds) => {
+// Forward message to multiple users
+const forwardMessageToUsers = async (msg, receiverIds) => {
   const receivers = Array.isArray(receiverIds) ? receiverIds : [receiverIds];
-
   setIsForwarding(true);
 
   try {
     for (const receiverId of receivers) {
       if (receiverId === loggedUser.userid) continue;
 
-      const res = await fetch("https://mygram-1-1nua.onrender.com/chat/forward", {
+      const newMsg = await apiFetch("/chat/forward", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           senderId: loggedUser.userid,
           receiverId,
@@ -98,13 +81,6 @@ useEffect(() => {
         }),
       });
 
-      if (!res.ok) {
-        const err = await res.json();
-        console.error(`Forward to ${receiverId} failed:`, err);
-        continue;
-      }
-
-      const newMsg = await res.json();
       socketRef.current?.emit("sendMessage", newMsg);
 
       if (selectedUser?._id === receiverId) {
@@ -121,31 +97,46 @@ useEffect(() => {
   }
 };
 
+// Remove chat PIN
 const handleRemovePinClick = async () => {
-    try {
-      setLoading(true);
-      const res = await fetch("https://mygram-1-1nua.onrender.com/remove-chat-pin", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId: loggedUser.userid }),
-      });
+  try {
+    setLoading(true);
+    await apiFetch("/remove-chat-pin", {
+      method: "POST",
+      body: JSON.stringify({ userId: loggedUser.userid }),
+    });
 
-      const data = await res.json();
-      if (res.ok) {
-        setMessage("✅ Chat lock removed successfully");
-        if (onRemovePin) onRemovePin();
-      } else {
-        setMessage("❌ " + data.message);
-      }
-    } catch {
-      setMessage("❌ Error removing chat lock");
-    } finally {
-      setLoading(false);
+    setMessage("✅ Chat lock removed successfully");
+    if (onRemovePin) onRemovePin();
+  } catch (err) {
+    setMessage("❌ " + (err.message || "Error removing chat lock"));
+  } finally {
+    setLoading(false);
+  }
+};
+
+ 
+
+  useEffect(() => {
+    if (!socketRef.current) {
+      socketRef.current = io('https://mygram-1-1nua.onrender.com');
     }
+  }, []);
+
+ const handleLock = () => {
+    onLock(); // Lock the chats
+    localStorage.setItem("chatUnlocked", "false");
   };
 
+ 
 
+  const triggerForwardMode = (msg) => {
+    setIsForwarding(true);
+    setMessageToForward(msg);
+    
+  };
 
+ 
 
   return (
     <div className="chat-container">

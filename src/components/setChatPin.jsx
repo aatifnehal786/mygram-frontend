@@ -1,6 +1,6 @@
 import { useState, useContext, useEffect } from "react";
 import { UserContext } from "../contexts/UserContext";
-
+import { apiFetch } from "../utils/api";
 export default function SetChatPin({ onSetPin }) {
   const { loggedUser } = useContext(UserContext);
   const [pin, setPin] = useState("");
@@ -8,58 +8,53 @@ export default function SetChatPin({ onSetPin }) {
   const [loading, setLoading] = useState(false);
   const [hasPin, setHasPin] = useState(false);
 
-  useEffect(() => {
-    const checkPin = async () => {
-      try {
-        const res = await fetch("https://mygram-1-1nua.onrender.com/check-chat-pin", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${loggedUser?.token}`,
-          },
-          body: JSON.stringify({ userId: loggedUser?.userid }),
-        });
-        const data = await res.json();
-        setHasPin(res.ok && data.hasPin);
-        if (res.ok && data.hasPin) setMessage("✅ You already set a chat PIN.");
-      } catch (err) {
-        console.error(err);
-      }
-    };
-    if (loggedUser?.userid) checkPin();
-  }, [loggedUser]);
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!/^\d{4}$/.test(pin)) {
-      setMessage("❌ PIN must be exactly 4 digits");
-      return;
-    }
+   // 🔹 Check if user already has a PIN
+useEffect(() => {
+  const checkPin = async () => {
     try {
-      setLoading(true);
-      const res = await fetch("https://mygram-1-1nua.onrender.com/set-chat-pin", {
+      const data = await apiFetch("/auth/check-chat-pin", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${loggedUser?.token}`,
-        },
-        body: JSON.stringify({ userId: loggedUser?.userid, pin }),
+        body: JSON.stringify({ userId: loggedUser?.userid }),
       });
-      const data = await res.json();
-      if (res.ok) {
-        setMessage(`✅ ${data.msg}`);
-        setPin("");
-        setHasPin(true);
-        if (onSetPin) onSetPin(); // notify parent
-      } else {
-        setMessage(`❌ ${data.msg}`);
-      }
-    } catch {
-      setMessage("❌ Something went wrong. Please try again.");
-    } finally {
-      setLoading(false);
+
+      setHasPin(data.hasPin);
+      if (data.hasPin) setMessage("✅ You already set a chat PIN.");
+    } catch (err) {
+      console.error(err);
     }
   };
+
+  if (loggedUser?.userid) checkPin();
+}, [loggedUser]);
+
+
+  // 🔹 Handle SET PIN
+ const handleSubmit = async (e) => {
+  e.preventDefault();
+  if (!/^\d{4}$/.test(pin)) {
+    setMessage("❌ PIN must be exactly 4 digits");
+    return;
+  }
+
+  try {
+    setLoading(true);
+    const data = await apiFetch("/auth/set-chat-pin", {
+      method: "POST",
+      body: JSON.stringify({ userId: loggedUser?.userid, pin }),
+    });
+
+    setMessage(`✅ ${data.msg}`);
+    setPin("");
+    setHasPin(true);
+    if (onSetPin) onSetPin(); // notify parent
+  } catch (err) {
+    setMessage(`❌ ${err.message}`);
+  } finally {
+    setLoading(false);
+  }
+};
+
+
 
   if (hasPin) return null; // hide form if PIN already exists
 

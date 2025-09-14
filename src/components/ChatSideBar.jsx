@@ -14,33 +14,33 @@ const ChatSidebar = ({
   const [followedUsers, setFollowedUsers] = useState([]);
   const [selectedForwardUsers, setSelectedForwardUsers] = useState([]);
 
-  useEffect(() => {
-    if (!loggedUser?.token) return;
+ useEffect(() => {
+  if (!loggedUser?.token) return;
 
-    fetch(`https://mygram-1-1nua.onrender.com/followers/${loggedUser.userid}`, {
-      headers: { Authorization: `Bearer ${loggedUser.token}` },
-    })
-      .then((res) => res.json())
-      .then((data) => setFollowedUsers(data.followers || []))
-      .catch((err) => console.error('Error fetching followed users:', err));
-  }, [loggedUser]);
-
-  const handleSearch = async (q) => {
-    setSearchQuery(q);
-    if (!q.trim()) return setResults([]);
+  const fetchFollowedUsers = async () => {
     try {
-      const res = await fetch(
-        `https://mygram-1-1nua.onrender.com/search-users?q=${q}`,
-        {
-          headers: { Authorization: `Bearer ${loggedUser.token}` },
-        }
-      );
-      const data = await res.json();
-      setResults(data);
+      const data = await apiFetch(`/followers/${loggedUser.userid}`);
+      setFollowedUsers(data.followers || []);
     } catch (err) {
-      console.error('Search error:', err);
+      console.error("Error fetching followed users:", err.message);
     }
   };
+
+  fetchFollowedUsers();
+}, [loggedUser]);
+
+const handleSearch = async (q) => {
+  setSearchQuery(q);
+  if (!q.trim()) return setResults([]);
+
+  try {
+    const data = await apiFetch(`/search-users?q=${encodeURIComponent(q)}`);
+    setResults(data);
+  } catch (err) {
+    console.error("Search error:", err.message);
+  }
+};
+
 
   const toggleUserSelection = (userId) => {
     setSelectedForwardUsers((prev) =>

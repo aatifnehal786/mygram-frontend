@@ -21,46 +21,43 @@ export default function ChatWrapper({ userId }) {
   }, [unlocked]);
 
   // Check if user already has a PIN
-  useEffect(() => {
-    const checkPin = async () => {
-      try {
-        const res = await fetch("https://mygram-1-1nua.onrender.com/check-chat-pin", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${loggedUser?.token}`,
-          },
-          body: JSON.stringify({ userId: loggedUser?.userid }),
-        });
-        const data = await res.json();
-        setHasPin(res.ok && data.hasPin);
-      } catch (err) {
-        console.error(err);
-      }
-    };
-    if (loggedUser?.userid) checkPin();
-  }, [loggedUser]);
+  // Check if user already has a PIN
+useEffect(() => {
+  const checkPin = async () => {
+    try {
+      const data = await apiFetch("/check-chat-pin", {
+        method: "POST",
+        body: JSON.stringify({ userId: loggedUser?.userid }),
+      });
+
+      setHasPin(data.hasPin);
+    } catch (err) {
+      console.error("Failed to check chat PIN:", err.message);
+    }
+  };
+
+  if (loggedUser?.userid) checkPin();
+}, [loggedUser]);
 
   const handleUnlock = () => setUnlocked(true);
   const handleLock = () => setUnlocked(false);
+const handleRemovePin = async () => {
+  try {
+    const data = await apiFetch("/remove-chat-pin", {
+      method: "POST",
+      body: JSON.stringify({ userId: loggedUser.userid }),
+    });
 
-  const handleRemovePin = async () => {
-    try {
-      const res = await fetch("https://mygram-1-1nua.onrender.com/remove-chat-pin", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId: loggedUser.userid }),
-      });
-      const data = await res.json();
-      if (res.ok) {
-        setHasPin(false);
-        setUnlocked(false); // auto-lock after removing PIN
-        localStorage.setItem("chatUnlocked", "false");
-      }
-    } catch (err) {
-      console.error(err);
-    }
-  };
+    // If apiFetch succeeds, we assume PIN is removed
+    setHasPin(false);
+    setUnlocked(false); // auto-lock after removing PIN
+    localStorage.setItem("chatUnlocked", "false");
+  } catch (err) {
+    console.error("Failed to remove chat PIN:", err.message);
+  }
+};
+
+
 
   if (!hasPin) return <SetChatPin onSetPin={() => setHasPin(true)} />;
 

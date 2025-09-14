@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { Link } from "react-router-dom";
 import hide from '../assets/hide.png';
 import show from '../assets/show.png';
+import { apiFetch } from "../api/apifetch";
 
 export default function ForgotPassword() {
   const [email, setEmail] = useState("");
@@ -28,6 +29,8 @@ export default function ForgotPassword() {
   }
 };
 
+
+// PASSWORD CHECKER ( WEAK , MEDIUM , STRONG )
 useEffect(() => {
     const val = newPassword;
     const weakRegex = /.{1,5}/;
@@ -65,79 +68,79 @@ useEffect(() => {
     }
   };
 
+// HANDLE OTP SEDING CALL FOR RESSETING PASSWORD
 
+const Forgotpassword = async () => {
+  if (!email) {
+    setMessage({ type: "error", text: "Email is required" });
+    setTimeout(() => {
+      setMessage({ type: "", text: "" });
+    }, 3000);
+    return;
+  }
 
-  const Forgotpassword = async () => {
-    if(!email){
-      setMessage({type:"error",text:"Email is required"})
-      setTimeout(()=>{
-        setMessage({type:"",text:""})
-      },3000)
-      return
-    }
-    try {
-      setIsLoading(true);
-      const res = await fetch("https://mygram-1-1nua.onrender.com/forgot-password", {
-        method: "POST",
-        body: JSON.stringify({ email }),
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-      const data = await res.json();
-      
+  try {
+    setIsLoading(true);
+
+    const data = await apiFetch("/forgot-password", {
+      method: "POST",
+      body: JSON.stringify({ email }),
+    });
+
+    setMessage({ type: "success", text: data.message });
+    setTimeout(() => {
+      setMessage({ type: "", text: "" });
+      setEmail("");
+      setNewPassword("");
+      setOtp("");
+      setIsLoading(false);
+    }, 10000);
+  } catch (error) {
+    console.error("Error sending forgot-password request:", error);
+    setMessage({ type: "error", text: "Failed to send OTP" });
+    setIsLoading(false);
+  }
+};
+
+// HANDLE RESET PASSWORD
+
+const handleResetPassword = async () => {
+  if (!newPassword) {
+    setMessage({ type: "error", text: "Password cannot be empty." });
+    setTimeout(() => {
+      setMessage({ type: "", text: "" });
+    }, 3000);
+    return;
+  }
+
+  try {
+    setIsLoading2(true);
+
+    const data = await apiFetch("/reset-password", {
+      method: "POST",
+      body: JSON.stringify({ email, newPass: newPassword, otp }),
+    });
+
+    setIsLoading2(false);
+
+    if (data.error) {
+      setMessage({ type: "error", text: data.error });
+    } else {
       setMessage({ type: "success", text: data.message });
       setTimeout(() => {
         setMessage({ type: "", text: "" });
-        setEmail("")
-        setNewPassword("")
-        setOtp("")
-        
-        setIsLoading(false);
-      }, 10000);
-    } catch (error) {
-      setMessage({ type: "error", text: "Failed to send OTP" });
+        setEmail("");
+        setNewPassword("");
+        setOtp("");
+      }, 8000);
     }
-  };
+  } catch (err) {
+    console.error("Error resetting password:", err);
+    setMessage({ type: "error", text: "Failed to reset password." });
+    setIsLoading2(false);
+  }
+};
 
-  const handleResetPassword = async () => {
-    if (!newPassword) {
-      setMessage({ type: "error", text: "Password cannot be empty." });
-      setTimeout(()=>{
-        setMessage({type:"",text:""})
-      },3000)
-      return;
-    }
-
-    try {
-      setIsLoading2(true);
-      const res = await fetch("https://mygram-1-1nua.onrender.com/reset-password", {
-        method: "POST",
-        body: JSON.stringify({ email, newPass: newPassword, otp }),
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-
-      const data = await res.json();
-      setIsLoading2(false);
-
-      if (data.error) {
-        setMessage({ type: "error", text: data.error });
-      } else {
-        setMessage({ type: "success", text: data.message });
-        setTimeout(() => {
-          setMessage({ type: "", text: "" });
-          setEmail("");
-          setNewPassword("");
-          setOtp("");
-        }, 8000);
-      }
-    } catch (err) {
-      console.error("Error:", err);
-      setMessage({ type: "error", text: "Failed to reset password." });
-    }
-  };
 
   const showHide = () => {
     setIsPassword((prev) => !prev);

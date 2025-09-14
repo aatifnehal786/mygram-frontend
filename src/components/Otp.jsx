@@ -1,5 +1,8 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import {apiFetch} from '../api/apiFetch'
+
+
 export default function Otp() {
     const [otp, setOtp] = useState("");
     const [mobile, setMobile] = useState("");
@@ -7,76 +10,71 @@ export default function Otp() {
     const [isLoading, setIsLoading] = useState(false);
     const [isLoading2, setIsLoading2] = useState(false);
 
-    const sendOtp = (e) => {
-        setIsLoading(true)
-        e.preventDefault();
-        fetch("https://mygram-1-1nua.onrender.com/send-otp", {
-            method: "POST",
-            body: JSON.stringify({ mobile }),
-            headers: {
-                "Content-Type": "application/json",
-            },
-        })
-        .then((res)=>{
-            return res.json()
-            })
-        .then((data) => {
-                setMessage({ type: "success", text: data.message });
 
-                setTimeout(()=>{
-                    setIsLoading(false)
-                    setIsLoading2(false)
-                    setMessage({type:"",text:""})
-                },10000)
-            })
-            .catch((err) => {
-                console.log(err);
-                setMessage({ type: "error", text: "Failed to send OTP" });
-            });
-    };
+// HANDLE MOBILE SENDING OTP
 
-    const verifyOtp = (e) => {
-        setIsLoading2(true)
-        e.preventDefault();
-        fetch("https://mygram-1-1nua.onrender.com/verify-otp", {
-            method: "POST",
-            body: JSON.stringify({ mobile, otp }),
-            headers: {
-                "Content-Type": "application/json",
-            },
-        })
-           .then((res)=>{
-            setIsLoading(false);
-                if (!res.ok) {
-                    if (res.status === 404) {
-                        setMessage({ type: "error", text: "User Not Found With this Email, Please Login Again" });
-                    } else if (res.status === 401) {
-                        setMessage({ type: "error", text: "Wrong Password" });
-                    } else {
-                        setMessage({ type: "error", text: "Something went wrong. Please try again later." });
-                    }
-                    throw new Error(`HTTP error! status: ${res.status}`);
-                }
-                return res.json();
-           })
-            .then((data) => {
-                if (data) {
-                    localStorage.setItem("mobileVerified", "true");
+const sendOtp = async (e) => {
+  e.preventDefault();
+  setIsLoading(true);
 
-                   
-                    setMessage({ type: "success", text: "OTP verified successfully" });
-                    setTimeout(()=>{
-                        setMessage({type:"",text:""})
-                    },10000)
-                } else {
-                    setMessage({ type: "error", text: data.error });
-                }
-            })
-            .catch((err) => {
-                console.log(err);
-                setMessage({ type: "error", text: "Failed to verify OTP" });
-            });
-    };
+  try {
+    const data = await apiFetch("/otp/send-otp", {
+      method: "POST",
+      body: JSON.stringify({ mobile }),
+    });
+
+    setMessage({ type: "success", text: data.message });
+
+    setTimeout(() => {
+      setIsLoading(false);
+      setIsLoading2(false);
+      setMessage({ type: "", text: "" });
+    }, 10000);
+  } catch (err) {
+    console.error(err);
+    setMessage({ type: "error", text: "Failed to send OTP" });
+    setIsLoading(false);
+  }
+};
+
+
+// VERIFY MOBILE OTP
+
+const verifyOtp = async (e) => {
+  e.preventDefault();
+  setIsLoading2(true);
+
+  try {
+    const data = await apiFetch("/otp/verify-otp", {
+      method: "POST",
+      body: JSON.stringify({ mobile, otp }),
+    });
+
+    localStorage.setItem("mobileVerified", "true");
+
+    setMessage({ type: "success", text: "OTP verified successfully" });
+
+    setTimeout(() => {
+      setMessage({ type: "", text: "" });
+    }, 10000);
+  } catch (err) {
+    console.error(err);
+
+    setMessage({
+      type: "error",
+      text:
+        err.message.includes("404") 
+          ? "User not found. Please login again." 
+          : err.message.includes("401") 
+          ? "Wrong OTP" 
+          : "Failed to verify OTP",
+    });
+  } finally {
+    setIsLoading(false);
+    setIsLoading2(false);
+  }
+};
+
 
     return (
         <section className="container">

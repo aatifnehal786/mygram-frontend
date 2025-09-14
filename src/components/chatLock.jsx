@@ -2,6 +2,7 @@
 import React, { useState, useContext } from "react";
 import { UserContext } from "../contexts/UserContext";
 import ForgotChatPin from "./forgotChatPin";
+import { apiFetch } from "../api/apifetch";
 
 function ChatLock({ onUnlock }) {
   const { loggedUser } = useContext(UserContext);
@@ -11,31 +12,27 @@ function ChatLock({ onUnlock }) {
   const [showForgot, setShowForgot] = useState(false);
 
   const handleVerify = async () => {
-    if (!/^\d{4}$/.test(pin)) {
-      setMessage("❌ PIN must be 4 digits");
-      return;
-    }
+  if (!/^\d{4}$/.test(pin)) {
+    setMessage("❌ PIN must be 4 digits");
+    return;
+  }
 
-    try {
-      setLoading(true);
-      const res = await fetch("https://mygram-1-1nua.onrender.com/verify-chat-pin", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId: loggedUser.userid,  pin: pin.toString() }),
-      });
-      const data = await res.json();
+  try {
+    setLoading(true);
+    const data = await apiFetch("/verify-chat-pin", {
+      method: "POST",
+      body: JSON.stringify({ userId: loggedUser.userid, pin: pin.toString() }),
+    });
 
-      if (res.ok) {
-        onUnlock(); // unlock chat
-      } else {
-        setMessage(data.message || "Invalid PIN");
-      }
-    } catch {
-      setMessage("❌ Error verifying PIN");
-    } finally {
-      setLoading(false);
-    }
-  };
+    // If apiFetch succeeds, PIN is correct
+    onUnlock(); // unlock chat
+  } catch (err) {
+    setMessage(err.message || "❌ Error verifying PIN");
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   return (
     <div className="set-chat-pin-container">
