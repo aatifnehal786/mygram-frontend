@@ -30,7 +30,7 @@ const Chat = ({onLock, canRemovePin, onRemovePin }) => {
 
   useEffect(() => {
   if (!socketRef.current) {
-    socketRef.current = io("http://localhost:8000", {
+    socketRef.current = io("https://mygram-mvc.onrender.com", {
       transports: ["websocket"],
     });
 
