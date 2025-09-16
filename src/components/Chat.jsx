@@ -30,9 +30,7 @@ const Chat = ({onLock, canRemovePin, onRemovePin }) => {
 
   useEffect(() => {
   if (!socketRef.current) {
-    socketRef.current = io("https://mygram-mvc.onrender.com", {
-      transports: ["websocket"],
-    });
+    socketRef.current = io("https://mygram-mvc.onrender.com");
 
     socketRef.current.on("connect", () => {
       console.log("✅ Socket connected:", socketRef.current.id);
