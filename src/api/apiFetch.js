@@ -11,7 +11,7 @@ export const apiFetch = async (endpoint, options = {}) => {
     ...options.headers,
   };
 
-  const res = await fetch(`http://localhost:8000/${endpoint}`, {
+  const res = await fetch(`https://mygram-mvc.onrender.com/${endpoint}`, {
     ...options,
     headers,
   });
