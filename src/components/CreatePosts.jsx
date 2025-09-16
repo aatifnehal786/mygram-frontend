@@ -1,4 +1,4 @@
-import React, { useContext,useState } from 'react';
+import React, { useContext,useEffect,useState } from 'react';
 import './Post.css'
 import { apiFetch } from "../api/apiFetch";
 // import './App.css';
@@ -10,27 +10,42 @@ const CreatePost = () => {
   const [mediaFile, setMediaFile] = useState(null);
   const [status, setStatus] = useState('');
  
-  const { loggedUser } = useContext(UserContext);
+const handleCreatePost = async (e) => {
+  e.preventDefault()
+  if (!mediaFile) {
+    setStatus("Please select a media file before posting.");
+    return;
+  }
 
- 
-const handleCreatePost = async () => {
   const formData = new FormData();
   formData.append("caption", caption);
   formData.append("mediaType", mediaType);
-  if (mediaType === "image" && musicFile) formData.append("backgroundMusic", musicFile);
-  formData.append("image", mediaFile);
+  formData.append("image", mediaFile); // ✅ must match backend field name
+
+  if (mediaType === "image" && musicFile) {
+    formData.append("backgroundMusic", musicFile); // ✅ must match backend
+  }
 
   try {
-    const data = await apiFetch("/create-post", {
+    const data = await apiFetch("api/create-posts/create", {
       method: "POST",
-      body: formData, // ✅ FormData is handled automatically
+      body: formData,
     });
-    setStatus("Post created successfully!");
+
+    setStatus(data.message);
+
+   
   } catch (err) {
-    setStatus(err.message);
+    console.error("Create post failed:", err);
+    setStatus("Failed to create post. Please try again.");
   }
 };
 
+
+
+useEffect(()=>{
+  console.log("Post Created")
+},[handleCreatePost])
 
   return (
     <div className="app-wrapper">

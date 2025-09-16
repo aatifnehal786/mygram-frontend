@@ -12,12 +12,8 @@ export default function Devices() {
   const fetchDevices = async () => {
   setLoading(true);
   try {
-    const { res, data } = await apiFetch("/devices"); // ✅ relative path
-    if (res.ok) {
-      setDevices(data.devices || []);
-    } else {
-      setMessage(data.message || "Failed to fetch devices");
-    }
+    const data = await apiFetch("api/devices"); // ✅ relative path
+  setDevices(data.devices || []);
   } catch (err) {
     console.error("Error fetching devices:", err);
     setMessage("Error fetching devices");
@@ -28,7 +24,7 @@ export default function Devices() {
 
 const removeDevice = async (deviceId) => {
   try {
-    const { res, data } = await apiFetch(`/devices/${deviceId}`, {
+    const { res, data } = await apiFetch(`api/devices/${deviceId}`, {
       method: "DELETE",
     });
 
@@ -46,7 +42,7 @@ const removeDevice = async (deviceId) => {
 
 const removeOtherDevices = async () => {
   try {
-    const { res, data } = await apiFetch(`/devices/remove-others/${currentDeviceId}`, {
+    const { res, data } = await apiFetch(`api/devices/remove-others/${currentDeviceId}`, {
       method: "DELETE",
     });
 

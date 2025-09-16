@@ -7,7 +7,7 @@
   border: 1px solid var(--border-color);
   border-radius: 12px;
   box-shadow: 0 4px 16px rgba(149, 37, 209, 0.1);
-  /* background: var(--bg-color); */
+  background: greenyellow;
   /* color: var(--text-color); */
   transition: all 0.3s ease-in-out;
 }
@@ -59,6 +59,7 @@
 .status-message {
   margin-top: 15px;
   text-align: center;
-  font-size: 14px;
+  font-size: 2rem;
+  color: #e1306c;
   
 }

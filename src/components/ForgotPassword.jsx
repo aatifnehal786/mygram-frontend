@@ -82,7 +82,7 @@ const Forgotpassword = async () => {
   try {
     setIsLoading(true);
 
-    const data = await apiFetch("/forgot-password", {
+    const data = await apiFetch("api/password/forgot-password", {
       method: "POST",
       body: JSON.stringify({ email }),
     });
@@ -116,7 +116,7 @@ const handleResetPassword = async () => {
   try {
     setIsLoading2(true);
 
-    const data = await apiFetch("/reset-password", {
+    const data = await apiFetch("api/password/reset-password", {
       method: "POST",
       body: JSON.stringify({ email, newPass: newPassword, otp }),
     });

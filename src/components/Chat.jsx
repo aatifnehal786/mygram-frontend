@@ -18,40 +18,63 @@ const Chat = ({onLock, canRemovePin, onRemovePin }) => {
   const [loading, setLoading] = useState(false);
  
   const [loggedUser, setLoggedUser] = useState(
-    JSON.parse(sessionStorage.getItem('token-auth'))
+    JSON.parse(localStorage.getItem('token-auth'))
   );
   const [isForwarding, setIsForwarding] = useState(false);
   const [messageToForward, setMessageToForward] = useState(null);
 
 
   const socketRef = useRef(null);
+
+ 
+
+  useEffect(() => {
+  if (!socketRef.current) {
+    socketRef.current = io("http://localhost:8000", {
+      transports: ["websocket"],
+    });
+
+    socketRef.current.on("connect", () => {
+      console.log("✅ Socket connected:", socketRef.current.id);
+      socketRef.current.emit("join", loggedUser?.userid);
+    });
+  }
+}, [loggedUser?.userid]);
+
   
 // Fetch chat messages with selected user
 useEffect(() => {
   if (!selectedUser || !loggedUser?.token) return;
 
-  const fetchChat = async () => {
-    try {
-      const data = await apiFetch(`/chat/${selectedUser._id}`);
-      setMessages(data || []);
-    } catch (err) {
-      console.error('Fetch chat error:', err);
-      setMessages([]);
-    }
-  };
+ const fetchChat = async () => {
+  try {
+    const data = await apiFetch(`api/chats/chat/${selectedUser._id}`);
+    console.log("Fetched messages:", data);
+    setMessages(Array.isArray(data) ? data : []);
+  } catch (err) {
+    console.error('Fetch chat error:', err);
+    setMessages([]);
+  }
+};
+
 
   fetchChat();
 
   socketRef.current.emit('join', loggedUser.userid);
 
   const handleReceiveMessage = (msg) => {
-    const isCurrentChat =
-      (msg.sender === loggedUser.userid && msg.receiver === selectedUser._id) ||
-      (msg.receiver === loggedUser.userid && msg.sender === selectedUser._id);
-    if (isCurrentChat) {
-      setMessages(prev => [...prev, msg]);
-    }
-  };
+  const senderId = msg.sender?._id || msg.sender; // if populated, use _id
+  const receiverId = msg.receiver?._id || msg.receiver;
+
+  const isCurrentChat =
+    (senderId === loggedUser.userid && receiverId === selectedUser._id) ||
+    (receiverId === loggedUser.userid && senderId === selectedUser._id);
+
+  if (isCurrentChat) {
+    setMessages(prev => [...prev, msg]);
+  }
+};
+
 
   socketRef.current.on('receiveMessage', handleReceiveMessage);
 
@@ -59,6 +82,12 @@ useEffect(() => {
     socketRef.current.off('receiveMessage', handleReceiveMessage);
   };
 }, [selectedUser]);
+
+useEffect(() => {
+  console.log("selectedUser changed:", selectedUser);
+}, [selectedUser]);
+console.log("loggedUser", loggedUser);
+
 
 // Forward message to multiple users
 const forwardMessageToUsers = async (msg, receiverIds) => {
@@ -69,7 +98,7 @@ const forwardMessageToUsers = async (msg, receiverIds) => {
     for (const receiverId of receivers) {
       if (receiverId === loggedUser.userid) continue;
 
-      const newMsg = await apiFetch("/chat/forward", {
+      const newMsg = await apiFetch("api/chats/chat/forward", {
         method: "POST",
         body: JSON.stringify({
           senderId: loggedUser.userid,
@@ -101,7 +130,7 @@ const forwardMessageToUsers = async (msg, receiverIds) => {
 const handleRemovePinClick = async () => {
   try {
     setLoading(true);
-    await apiFetch("/remove-chat-pin", {
+    await apiFetch("api/chats/remove-chat-pin", {
       method: "POST",
       body: JSON.stringify({ userId: loggedUser.userid }),
     });
@@ -117,11 +146,6 @@ const handleRemovePinClick = async () => {
 
  
 
-  useEffect(() => {
-    if (!socketRef.current) {
-      socketRef.current = io('https://mygram-1-1nua.onrender.com');
-    }
-  }, []);
 
  const handleLock = () => {
     onLock(); // Lock the chats

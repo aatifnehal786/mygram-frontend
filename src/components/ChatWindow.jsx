@@ -25,7 +25,7 @@ useEffect(() => {
 }, [toastMessage]);
 
 
-
+console.log(messages)
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -70,7 +70,7 @@ const handleFileUpload = async (e) => {
   formData.append("file", file);
 
   try {
-    const { fileUrl, fileType } = await apiFetch("/upload/chat", {
+    const { fileUrl, fileType } = await apiFetch("api/chats/upload", {
       method: "POST",
       body: formData,
     });
@@ -92,7 +92,7 @@ const deleteMessage = async () => {
   if (!messageToDelete) return;
 
   try {
-    await apiFetch("/delete-chat", {
+    await apiFetch("api/chats/delete-chat", {
       method: "DELETE",
       body: JSON.stringify({ messageIds: [messageToDelete] }),
     });
@@ -178,6 +178,7 @@ const handleDynamicEnter = (e)=>{
 
         <div className="chat-messages">
           {sortedMessages.map((msg, idx) => {
+            const senderId = msg.sender?._id || msg.sender; // handle both cases
             const isOwnMessage = msg.sender === currentUserId;
             const isDropdownOpen = openDropdownId === msg._id;
            

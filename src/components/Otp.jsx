@@ -18,7 +18,7 @@ const sendOtp = async (e) => {
   setIsLoading(true);
 
   try {
-    const data = await apiFetch("/otp/send-otp", {
+    const data = await apiFetch("otp/send-otp", {
       method: "POST",
       body: JSON.stringify({ mobile }),
     });
@@ -45,7 +45,7 @@ const verifyOtp = async (e) => {
   setIsLoading2(true);
 
   try {
-    const data = await apiFetch("/otp/verify-otp", {
+    const data = await apiFetch("otp/verify-otp", {
       method: "POST",
       body: JSON.stringify({ mobile, otp }),
     });

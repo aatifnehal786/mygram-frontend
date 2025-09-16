@@ -26,7 +26,7 @@ export default function ChatWrapper({ userId }) {
 useEffect(() => {
   const checkPin = async () => {
     try {
-      const data = await apiFetch("/check-chat-pin", {
+      const data = await apiFetch("api/chats/check-chat-pin", {
         method: "POST",
         body: JSON.stringify({ userId: loggedUser?.userid }),
       });
@@ -44,7 +44,7 @@ useEffect(() => {
   const handleLock = () => setUnlocked(false);
 const handleRemovePin = async () => {
   try {
-    const data = await apiFetch("/remove-chat-pin", {
+    const data = await apiFetch("api/chats/remove-chat-pin", {
       method: "POST",
       body: JSON.stringify({ userId: loggedUser.userid }),
     });

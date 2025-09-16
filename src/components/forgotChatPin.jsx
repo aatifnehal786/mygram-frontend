@@ -21,7 +21,7 @@ const requestOtp = async () => {
   try {
     setLoading(true);
 
-    const data = await apiFetch("/forgot-chat-pin", {
+    const data = await apiFetch("api/chats/forgot-chat-pin", {
       method: "POST",
       body: JSON.stringify({ email }),
     });
@@ -50,7 +50,7 @@ const resetPin = async () => {
   try {
     setLoading(true);
 
-    const data = await apiFetch("/reset-chat-pin", {
+    const data = await apiFetch("api/chats/reset-chat-pin", {
       method: "POST",
       body: JSON.stringify({ email, otp, newPin }),
     });

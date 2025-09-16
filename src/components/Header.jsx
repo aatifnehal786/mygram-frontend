@@ -24,7 +24,7 @@ export default function Header() {
 useEffect(() => {
   const fetchUsers = async () => {
     try {
-      const data = await apiFetch("/allusers2");
+      const data = await apiFetch("api/user/allusers2");
 
       console.log("Fetched users response:", data);
 
@@ -78,7 +78,7 @@ useEffect(() => {
         <li><Link onClick={removeMenu} to='/home'>Home</Link></li>
         <li><Link onClick={removeMenu} to='/profile'>Profile</Link></li>
         <li><Link onClick={removeMenu} to='/createpost' >Create Post</Link></li>
-        <li><Link onClick={removeMenu} to={`/chat/${targetUserId}`}>Chat</Link></li>
+        <li><Link onClick={removeMenu} to={'/chat'}>Chat</Link></li>
         <li><Link onClick={removeMenu} to={'/getdevices'}>Devices</Link></li>
         <li>
          </li>

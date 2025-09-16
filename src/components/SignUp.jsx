@@ -81,7 +81,7 @@ const handleSubmit = async (e) => {
   setIsLoading(true);
 
   try {
-    const data = await apiFetch("/auth/signup", {
+    const data = await apiFetch("api/auth/signup", {
       method: "POST",
       body: JSON.stringify(userDetails),
     });

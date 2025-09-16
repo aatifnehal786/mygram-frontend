@@ -12,7 +12,7 @@ export default function SetChatPin({ onSetPin }) {
 useEffect(() => {
   const checkPin = async () => {
     try {
-      const data = await apiFetch("/auth/check-chat-pin", {
+      const data = await apiFetch("api/chats/check-chat-pin", {
         method: "POST",
         body: JSON.stringify({ userId: loggedUser?.userid }),
       });
@@ -38,7 +38,7 @@ useEffect(() => {
 
   try {
     setLoading(true);
-    const data = await apiFetch("/auth/set-chat-pin", {
+    const data = await apiFetch("api/chats/set-chat-pin", {
       method: "POST",
       body: JSON.stringify({ userId: loggedUser?.userid, pin }),
     });

@@ -33,6 +33,8 @@ export default function Login() {
     setUser((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
+ 
+
   // HANDLE DEVICE LOGIN
 
   const handleSubmit = async (e) => {
@@ -40,14 +42,14 @@ export default function Login() {
   setIsLoading(true);
 
   try {
-    const { data, res } = await apiFetch("/api/auth/login", {
+    const data = await apiFetch("api/auth/login", {
       method: "POST",
       body: JSON.stringify({ ...user, deviceId }),
     });
 
     setIsLoading(false);
 
-    if (res.status === 200 && data.token) {
+    if ( data.token) {
       loggedData.setLoggedUser(data);
       localStorage.setItem("token-auth", JSON.stringify(data));
       navigate("/home");
@@ -68,13 +70,14 @@ export default function Login() {
   }
 };
 
+
 // HANDLE NEW DEVICE VERIFY LOGIN VIA OTP
 
 const handleVerifyOtp = async () => {
   setIsLoading(true);
 
   try {
-    const { data } = await apiFetch("/otp/verify-device-otp", {
+    const data = await apiFetch("api/verify-device-otp", {
       method: "POST",
       body: JSON.stringify({ email, otp, deviceId }),
     });
@@ -100,6 +103,10 @@ const handleVerifyOtp = async () => {
     });
   }
 };
+
+ useEffect(()=>{
+    console.log(deviceId,email,otp)
+  },[handleVerifyOtp])
 
   const showHide = () => setIsPassword((prev) => !prev);
 

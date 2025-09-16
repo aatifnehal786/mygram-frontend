@@ -1,5 +1,3 @@
-
-
 export const apiFetch = async (endpoint, options = {}) => {
   const token = JSON.parse(localStorage.getItem("token-auth"))?.token;
   const deviceId = localStorage.getItem("deviceId");
@@ -13,20 +11,22 @@ export const apiFetch = async (endpoint, options = {}) => {
     ...options.headers,
   };
 
-  const res = await fetch(`https://mygram-mvc.onrender.com/${endpoint}`, {
+  const res = await fetch(`http://localhost:8000/${endpoint}`, {
     ...options,
     headers,
   });
 
+  // ✅ Try parsing JSON, fallback to text
   let data;
+  const text = await res.text();
   try {
-    data = await res.json();
+    data = JSON.parse(text);
   } catch {
-    data = {};
+    data = { raw: text };
   }
 
   // ⚠️ Auto logout if device removed
-  if (res.status === 403 && data.error?.includes("Device removed")) {
+  if ( data.error?.includes("Device removed")) {
     alert("This device has been removed. Redirecting to login...");
     localStorage.removeItem("token-auth");
     localStorage.removeItem("deviceId");
@@ -34,9 +34,7 @@ export const apiFetch = async (endpoint, options = {}) => {
     return;
   }
 
-  if (!res.ok) {
-    throw new Error(data.message || "Something went wrong");
-  }
+
 
   return data;
 };

@@ -20,7 +20,7 @@ const ChatSidebar = ({
 
   const fetchFollowedUsers = async () => {
     try {
-      const data = await apiFetch(`/followers/${loggedUser.userid}`);
+      const data = await apiFetch(`api/followers/${loggedUser.userid}`);
       setFollowedUsers(data.followers || []);
     } catch (err) {
       console.error("Error fetching followed users:", err.message);
@@ -35,7 +35,7 @@ const handleSearch = async (q) => {
   if (!q.trim()) return setResults([]);
 
   try {
-    const data = await apiFetch(`/search-users?q=${encodeURIComponent(q)}`);
+    const data = await apiFetch(`api/chats/search-users?q=${encodeURIComponent(q)}`);
     setResults(data);
   } catch (err) {
     console.error("Search error:", err.message);

@@ -89,7 +89,7 @@ const router = createBrowserRouter(
           ),
         },
         {
-          path: "/chat/:targetUserId",
+          path: "/chat",
           element: (
             <Private>
               <ChatWrapper />

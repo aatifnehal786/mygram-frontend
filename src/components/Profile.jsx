@@ -18,7 +18,8 @@ export default function Profile() {
 
   const isOwnProfile = loggedUser && (!id || id === loggedUser.userid);
   const targetUserId =  loggedUser?.userid;
-  console.log(loggedUser)
+  // console.log(loggedUser)
+  
 
 
 
@@ -28,11 +29,11 @@ useEffect(() => {
 
   async function fetchStatsAndPosts() {
     try {
-      const statsData = await apiFetch(`/users/${targetUserId}/stats`);
+      const statsData = await apiFetch(`api/user/stats/${targetUserId}`);
       setStats(statsData);
 
-      const allPosts = await apiFetch("/posts/all");
-      const userPosts = allPosts.filter(
+      const data = await apiFetch("api/posts/allposts");
+      const userPosts = data.filter(
         (post) => post.postedBy?._id === targetUserId
       );
       setPosts(userPosts);
@@ -56,7 +57,7 @@ useEffect(() => {
     if (!targetUserId || isOwnProfile) return;
 
     try {
-      const data = await apiFetch(`/follow/status/${targetUserId}`);
+      const data = await apiFetch(`api/follow-status/${targetUserId}`);
       setIsFollowing(data.isFollowing);
     } catch (err) {
       console.error("Error checking follow status:", err);
@@ -78,14 +79,15 @@ const handleFileChange = async (e) => {
   try {
     setIsUploading(true);
 
-    const data = await apiFetch("/uploads/profile-pic", {
+    const data = await apiFetch("api/uploads/profile", {
       method: "POST",
-      body: formData, // apiFetch skips Content-Type for FormData
+      body: formData, // ✅ handled by apiFetch (skips Content-Type for FormData)
     });
-
+console.log(data)
+    // Update profilePic in stats state
     setStats((prev) => ({ ...prev, profilePic: data.profilePic }));
   } catch (err) {
-    console.error(err);
+    console.error("Profile pic upload failed:", err);
   } finally {
     setIsUploading(false);
   }
@@ -96,7 +98,7 @@ const handleFileChange = async (e) => {
 
 const handleLike = async (postId) => {
   try {
-    const updated = await apiFetch(`/posts/like/${postId}`, {
+    const updated = await apiFetch(`api/posts/like/${postId}`, {
       method: "PUT",
     });
 
@@ -112,7 +114,7 @@ const handleLike = async (postId) => {
 const handleComment = async (postId, text) => {
   if (!text) return;
   try {
-    const updated = await apiFetch(`/posts/comment/${postId}`, {
+    const updated = await apiFetch(`api/posts/comment/${postId}`, {
       method: "POST",
       body: JSON.stringify({ text }),
     });
@@ -128,7 +130,7 @@ const handleComment = async (postId, text) => {
 
 const handleDeletePost = async (deletePostId) => {
   try {
-    const data = await apiFetch(`/posts/${deletePostId}`, {
+    const data = await apiFetch(`api/posts/delete-post/${deletePostId}`, {
       method: "DELETE",
     });
 

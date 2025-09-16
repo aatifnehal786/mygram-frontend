@@ -14,7 +14,7 @@ export default function Home() {
 // FETCH ALL USERS
 
 useEffect(() => {
-  apiFetch("/allusers1")
+  apiFetch("api/user/allusers1")
     .then((data) => setUsers(data))
     .catch((err) => console.error("All users fetch error:", err));
 }, []);
@@ -24,10 +24,10 @@ useEffect(() => {
 // CHECK FOLLOW STATUS
 
 useEffect(() => {
-  if (Array.isArray(users) && loggedUser?._id) {
+  if (Array.isArray(users) && loggedUser?.userid) {
     users.forEach((user) => {
       if (user._id !== loggedUser._id) {
-        apiFetch(`/follow-status/${user._id}`)
+        apiFetch(`api/follow-status/${user?._id}`)
           .then((statusData) => {
             setFollowStatus((prev) => ({
               ...prev,
@@ -57,7 +57,7 @@ useEffect(() => {
 
 const handleFollowToggle = async (targetUserId) => {
   const isFollowing = followStatus[targetUserId];
-  const url = `/${isFollowing ? "unfollow" : "follow"}/${targetUserId}`;
+  const url = `api/${isFollowing ? "unfollow" : "follow"}/${targetUserId}`;
 
   try {
     await apiFetch(url, { method: "PUT" });
@@ -84,7 +84,7 @@ const handleFollowToggle = async (targetUserId) => {
       <div className="user" key={user._id}>
         <img
           className="profile-photo-img"
-          src={user.profilePic}
+          src={user.profilePic || null}
           alt={user.username}
         />
         <div className="user-content">

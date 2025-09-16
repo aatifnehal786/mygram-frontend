@@ -19,7 +19,7 @@ function ChatLock({ onUnlock }) {
 
   try {
     setLoading(true);
-    const data = await apiFetch("/verify-chat-pin", {
+    const data = await apiFetch("api/chats/verify-chat-pin", {
       method: "POST",
       body: JSON.stringify({ userId: loggedUser.userid, pin: pin.toString() }),
     });

@@ -22,7 +22,7 @@ export default function EmailOtp() {
         try {
             setIsLoading1(true);
 
-            const data = await apiFetch("/send-email-otp", {
+            const data = await apiFetch("otp/send-email-otp", {
                 method: "POST",
                 body: JSON.stringify({ email }),
             });
@@ -49,7 +49,7 @@ export default function EmailOtp() {
         try {
             setIsLoading2(true);
 
-            const data = await apiFetch("/verify-email-otp", {
+            const data = await apiFetch("otp/verify-email-otp", {
                 method: "POST",
                 body: JSON.stringify({ email, otp }),
             });
