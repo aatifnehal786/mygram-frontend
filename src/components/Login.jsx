@@ -49,7 +49,7 @@ export default function Login() {
 
     setIsLoading(false);
 
-    if ( data.token) {
+    if ( data.token!=null) {
       loggedData.setLoggedUser(data);
       localStorage.setItem("token-auth", JSON.stringify(data));
       navigate("/home");
