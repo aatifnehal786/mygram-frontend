@@ -2,7 +2,7 @@ export const apiFetch = async (endpoint, options = {}) => {
   const token = JSON.parse(localStorage.getItem("token-auth"))?.token;
   const deviceId = localStorage.getItem("deviceId");
 
-  // ✅ Build headers (skip Content-Type if using FormData)
+  // ✅ Check if body is FormData (don't set Content-Type manually)
   const isFormData = options.body instanceof FormData;
   const headers = {
     ...(isFormData ? {} : { "Content-Type": "application/json" }),
@@ -11,22 +11,29 @@ export const apiFetch = async (endpoint, options = {}) => {
     ...options.headers,
   };
 
-  const res = await fetch(`https://mygram-mvc.onrender.com/${endpoint}`, {
-    ...options,
-    headers,
-  });
+  let response;
+  try {
+    response = await fetch(`https://mygram-1-1nua.onrender.com/${endpoint}`, {
+      ...options,
+      headers,
+    });
+  } catch (err) {
+    // ⚠️ Handle network errors (no server response)
+    console.error("Network error:", err);
+    return { error: "Network error. Please check your connection." };
+  }
 
-  // ✅ Try parsing JSON, fallback to text
+  // ✅ Parse JSON safely (fallback to text if not valid JSON)
   let data;
-  const text = await res.text();
+  const text = await response.text();
   try {
     data = JSON.parse(text);
   } catch {
     data = { raw: text };
   }
 
-  // ⚠️ Auto logout if device removed
-  if ( data.error?.includes("Device removed")) {
+  // ⚠️ Handle unauthorized / device removal
+  if (data?.error?.includes("Device removed")) {
     alert("This device has been removed. Redirecting to login...");
     localStorage.removeItem("token-auth");
     localStorage.removeItem("deviceId");
@@ -34,7 +41,13 @@ export const apiFetch = async (endpoint, options = {}) => {
     return;
   }
 
-
+  // ⚠️ Handle expired/invalid token (common case)
+  if (response.status === 401 || data?.error?.includes("Invalid token")) {
+    alert("Session expired. Please log in again.");
+    localStorage.removeItem("token-auth");
+    window.location.href = "/login";
+    return;
+  }
 
   return data;
 };

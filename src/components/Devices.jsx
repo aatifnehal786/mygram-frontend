@@ -24,16 +24,15 @@ export default function Devices() {
 
 const removeDevice = async (deviceId) => {
   try {
-    const { res, data } = await apiFetch(`api/devices/${deviceId}`, {
+    const  data  = await apiFetch(`api/${deviceId}`, {
       method: "DELETE",
     });
 
-    if (res.ok) {
-      setDevices(data.devices || []); // ✅ ensure array
+   
+      setDevices(data.devices || []); // ensure array
       setMessage("Device removed successfully");
-    } else {
-      setMessage(data.message || "Failed to remove device");
-    }
+   ;
+    
   } catch (err) {
     console.error("Error removing device:", err);
     setMessage("Error removing device");
@@ -42,11 +41,11 @@ const removeDevice = async (deviceId) => {
 
 const removeOtherDevices = async () => {
   try {
-    const { res, data } = await apiFetch(`api/devices/remove-others/${currentDeviceId}`, {
+    const data = await apiFetch(`api/devices/remove-others/${currentDeviceId}`, {
       method: "DELETE",
     });
 
-    if (res.ok) {
+    if (data) {
       setDevices(data.devices || []);
       setMessage("Logged out from all other devices");
     } else {

@@ -16,10 +16,7 @@ export default function ChatWrapper({ userId }) {
     if (storedUnlocked === "true") setUnlocked(true);
   }, []);
 
-  // Persist unlocked state in localStorage
-  useEffect(() => {
-    localStorage.setItem("chatUnlocked", unlocked ? "true" : "false");
-  }, [unlocked]);
+
 
   // Check if user already has a PIN
   // Check if user already has a PIN
@@ -51,7 +48,7 @@ const handleRemovePin = async () => {
 
     // If apiFetch succeeds, we assume PIN is removed
     setHasPin(false);
-    setUnlocked(false); // auto-lock after removing PIN
+   
     localStorage.setItem("chatUnlocked", "false");
   } catch (err) {
     console.error("Failed to remove chat PIN:", err.message);

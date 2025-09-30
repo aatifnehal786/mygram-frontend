@@ -69,7 +69,8 @@ useEffect(() => {
   }
 
   return (
-   <header>
+   <div>
+    <header>
     
 
      <nav className="header">
@@ -90,5 +91,8 @@ useEffect(() => {
           {menuOpen ? <RxCross1 /> : <FaBars />}
         </div>
    </header>
+
+   
+   </div>
   );
 }
