@@ -48,6 +48,7 @@ export default function Login() {
     });
 
     setIsLoading(false);
+    console.log(data)
 
     if ( data.token!=null) {
       loggedData.setLoggedUser(data);

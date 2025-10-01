@@ -13,7 +13,7 @@ export const apiFetch = async (endpoint, options = {}) => {
 
   let response;
   try {
-    response = await fetch(`https://mygram-1-1nua.onrender.com/${endpoint}`, {
+    response = await fetch(`https://mygram-mvc.onrender.com/${endpoint}`, {
       ...options,
       headers,
     });
