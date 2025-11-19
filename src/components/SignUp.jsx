@@ -97,7 +97,7 @@ const handleSubmit = async (e) => {
         password: "",
         mobile: "",
       });
-    }, 10000);
+    }, 3000);
   } catch (err) {
     console.error(err);
     setMessage({ type: "error", text: err.message });
