@@ -19,7 +19,7 @@ import ChatSidebar from './components/ChatSideBar';
 import SetChatPin from './components/setChatPin';
 import PublicRoute from './components/PublicRoute';
 import Devices from './components/Devices';
-import Footer from './components/Footer';
+
 
 
 
@@ -113,14 +113,7 @@ const router = createBrowserRouter(
             </Private>
           ),
         },
-        {
-          path: "/footer",
-          element: (
-            <Private>
-              <Footer />
-            </Private>
-          ),
-        },
+        
       ],
     },
     {

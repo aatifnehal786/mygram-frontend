@@ -22,69 +22,79 @@ const Chat = ({onLock, canRemovePin, onRemovePin }) => {
   );
   const [isForwarding, setIsForwarding] = useState(false);
   const [messageToForward, setMessageToForward] = useState(null);
+  const [socket, setSocket] = useState(null);
 
 
   const socketRef = useRef(null);
 
- 
 
-  useEffect(() => {
+
+useEffect(() => {
   if (!socketRef.current) {
-    socketRef.current = io("https://mygram-mvc.onrender.com");
+    const s = io("http://localhost:8000");
 
-    socketRef.current.on("connect", () => {
-      console.log("✅ Socket connected:", socketRef.current.id);
-      socketRef.current.emit("join", loggedUser?.userid);
+    s.on("connect", () => {
+      console.log("Socket connected:", s.id);
+      if (loggedUser?.userid) {
+        s.emit("join", loggedUser.userid);
+      }
     });
+
+    socketRef.current = s;
+    setSocket(s);  // **IMPORTANT: triggers re-render**
   }
 }, [loggedUser?.userid]);
 
+
+
+
+
   
-// Fetch chat messages with selected user
 useEffect(() => {
   if (!selectedUser || !loggedUser?.token) return;
 
- const fetchChat = async () => {
-  try {
-    const data = await apiFetch(`api/chats/chat/${selectedUser._id}`);
-    console.log("Fetched messages:", data);
-    setMessages(Array.isArray(data) ? data : []);
-  } catch (err) {
-    console.error('Fetch chat error:', err);
-    setMessages([]);
-  }
-};
+  // Clear existing messages when switching users
+  setMessages([]);
 
+  const fetchChat = async () => {
+    try {
+      const data = await apiFetch(`api/chats/chat/${selectedUser._id}`);
+      setMessages(Array.isArray(data) ? data : []);
+    } catch (err) {
+      console.error("Fetch chat error:", err);
+      setMessages([]);
+    }
+  };
 
   fetchChat();
 
-  socketRef.current.emit('join', loggedUser.userid);
+  // JOIN SOCKET ROOM
+  if (socket && loggedUser?.userid) {
+    socket.emit("join",  loggedUser.userid );
+  }
 
   const handleReceiveMessage = (msg) => {
-  const senderId = msg.sender?._id || msg.sender; // if populated, use _id
-  const receiverId = msg.receiver?._id || msg.receiver;
+    const senderId = msg.sender?._id || msg.sender;
+    const receiverId = msg.receiver?._id || msg.receiver;
 
-  const isCurrentChat =
-    (senderId === loggedUser.userid && receiverId === selectedUser._id) ||
-    (receiverId === loggedUser.userid && senderId === selectedUser._id);
+    const isCurrentChat =
+      (senderId === loggedUser.userid && receiverId === selectedUser._id) ||
+      (receiverId === loggedUser.userid && senderId === selectedUser._id);
 
-  if (isCurrentChat) {
-    setMessages(prev => [...prev, msg]);
+    if (isCurrentChat) {
+      setMessages((prev) => [...prev, msg]);
+    }
+  };
+
+  if (socket) {
+    socket.on("receiveMessage", handleReceiveMessage);
   }
-};
-
-
-  socketRef.current.on('receiveMessage', handleReceiveMessage);
 
   return () => {
-    socketRef.current.off('receiveMessage', handleReceiveMessage);
+    if (socket) socket.off("receiveMessage", handleReceiveMessage);
   };
-}, [selectedUser]);
+}, [selectedUser, loggedUser, socket]);
 
-useEffect(() => {
-  console.log("selectedUser changed:", selectedUser);
-}, [selectedUser]);
-console.log("loggedUser", loggedUser);
 
 
 // Forward message to multiple users
@@ -108,7 +118,7 @@ const forwardMessageToUsers = async (msg, receiverIds) => {
         }),
       });
 
-      socketRef.current?.emit("sendMessage", newMsg);
+      socket?.emit("sendMessage", newMsg);
 
       if (selectedUser?._id === receiverId) {
         setMessages(prev => [...prev, newMsg]);
@@ -191,7 +201,7 @@ const handleRemovePinClick = async () => {
         chatList={chatList}
         messages={messages}
         setMessages={setMessages}
-        socket={socketRef.current}
+        socket={socket}
         triggerForwardMode={triggerForwardMode}
         onBack={() => setSelectedUser(null)} // 👈 important for mobile back button
       />

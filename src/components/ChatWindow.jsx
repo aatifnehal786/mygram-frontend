@@ -15,6 +15,10 @@ const ChatWindow = ({ selectedUser, triggerForwardMode, socket, messages, setMes
   const [showConfirmModal, setShowConfirmModal] = useState(false);
 const [messageToDelete, setMessageToDelete] = useState(null);
 const [toastMessage, setToastMessage] = useState('');
+const [isTyping, setIsTyping] = useState(false);
+const typingTimeout = useRef(null);
+
+
 
 
 useEffect(() => {
@@ -25,7 +29,7 @@ useEffect(() => {
 }, [toastMessage]);
 
 
-console.log(messages)
+// console.log(messages)
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -109,6 +113,47 @@ const deleteMessage = async () => {
 };
 
 
+// use Effect for Typing indicators
+
+useEffect(() => {
+  if (!socket || !selectedUser) return;
+
+  const handleTyping = (senderId) => {
+    if (senderId === selectedUser._id) setIsTyping(true);
+  };
+
+  const handleStopTyping = (senderId) => {
+    if (senderId === selectedUser._id) setIsTyping(false);
+  };
+
+  socket.on("typing", handleTyping);
+  socket.on("stopTyping", handleStopTyping);
+
+  return () => {
+    socket.off("typing", handleTyping);
+    socket.off("stopTyping", handleStopTyping);
+  };
+}, [socket, selectedUser,input]);
+
+
+useEffect(() => {
+  setIsTyping(false); // reset typing when switching users
+}, [selectedUser]);
+
+
+
+useEffect(() => {
+  if (!socket || !selectedUser) return;
+
+  socket.emit("markSeen", {
+    userId: currentUserId,
+    otherUserId: selectedUser._id
+  });
+}, [socket, selectedUser, currentUserId]);
+
+
+
+
 
 const confirmDelete = (msgId) => {
   setMessageToDelete(msgId);
@@ -141,6 +186,28 @@ const renderMessageWithLinks = (text) => {
   });
 };
 
+function formatTime(timestamp) {
+  const date = new Date(timestamp);
+  const now = new Date();
+
+  const isToday =
+    date.getDate() === now.getDate() &&
+    date.getMonth() === now.getMonth() &&
+    date.getFullYear() === now.getFullYear();
+
+  const yesterday = new Date();
+  yesterday.setDate(now.getDate() - 1);
+
+  const isYesterday =
+    date.getDate() === yesterday.getDate() &&
+    date.getMonth() === yesterday.getMonth() &&
+    date.getFullYear() === yesterday.getFullYear();
+
+  if (isToday) return "Today";
+  if (isYesterday) return "Yesterday";
+
+  return date.toLocaleDateString();
+}
 
   const sortedMessages = [...messages].sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
 const handleDynamicEnter = (e)=>{
@@ -152,6 +219,26 @@ const handleDynamicEnter = (e)=>{
 
 }
 
+useEffect(() => {
+  if (!socket) return;
+
+  const handler = ({ userId }) => {
+    setMessages(prev =>
+      prev.map(m =>
+        m.sender === currentUserId ? { ...m, isSeen: true } : m
+      )
+    );
+  };
+
+  socket.on("messagesSeen", handler);
+
+  return () => {
+    socket.off("messagesSeen", handler);
+  };
+}, [socket]);
+
+
+
   return (
     <div className="chat">
       
@@ -162,16 +249,19 @@ const handleDynamicEnter = (e)=>{
 
     <div className="chat-header-user-info">
       <h3>{selectedUser.username}</h3>
-      <p className="user-status">
-        {selectedUser.isOnline
-          ? "Online"
-          : selectedUser.lastSeen
-          ? `Last seen ${new Date(selectedUser.lastSeen).toLocaleTimeString([], {
-              hour: "2-digit",
-              minute: "2-digit",
-            })}`
-          : "Offline"}
-      </p>
+ <p className="user-status">
+  {isTyping ? (`typing....`
+  ) : selectedUser.isOnline ? (
+    "Online"
+  ) : selectedUser.lastSeen ? (
+    `Last seen ${formatTime(selectedUser.lastSeen)}`
+  ) : (
+    "Offline"
+  )}
+</p>
+
+
+
     </div>
   </div>
 </div>
@@ -185,6 +275,8 @@ const handleDynamicEnter = (e)=>{
 
             return (
               <div key={msg._id || idx} className={`message-bubble ${isOwnMessage ? 'own' : 'other'}`}>
+               
+
                 <button className="message-options-btn"
                   onClick={() => setOpenDropdownId(openDropdownId === msg._id ? null : msg._id)}>⋮
                 </button>
@@ -209,11 +301,16 @@ const handleDynamicEnter = (e)=>{
 )}
 
 
-
-
-                <b className="timestamp">
-                  { new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+               <b className="timestamp">
+                   { new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                  {isOwnMessage && (
+                    msg.isSeen ? " ✓✓" :
+                      msg.isDelivered ? " ✓✓ (grey)" :
+                        " ✓"
+                  )}
                 </b>
+
+                
 
               {isDropdownOpen && (
   <div className="option-menu" ref={dropdownRef}>
@@ -228,7 +325,7 @@ const handleDynamicEnter = (e)=>{
       msg.fileType?.includes('audio') ||
       msg.fileType?.includes('application') ? (
         <li>
-          <a href={msg.fileUrl} download="" target='/blank' >
+          <a href={msg.fileUrl} download="" >
             Download
           </a>
         </li>
@@ -259,14 +356,39 @@ const handleDynamicEnter = (e)=>{
 
       <div className="chat-input-area">
         <input
-          type="text"
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          placeholder="Type a message..."
-          className="chat-input"
-          name='message'
-          onKeyDown={handleDynamicEnter}
-        />
+  type="text"
+  value={input}
+  onChange={(e) => {
+    
+  const text = e.target.value;
+  setInput(text);
+
+ if (!socket || !selectedUser) return;
+
+  if (text.length > 0) {
+    socket.emit("typing", {
+      senderId: currentUserId,
+      receiverId: selectedUser._id
+    });
+  }
+
+  clearTimeout(typingTimeout.current);
+
+  typingTimeout.current = setTimeout(() => {
+    if (!socket) return;
+
+    socket.emit("stopTyping", {
+      senderId: currentUserId,
+      receiverId: selectedUser._id
+    });
+  }, 1000);
+}}
+
+  placeholder="Type a message..."
+  className="chat-input"
+  onKeyDown={handleDynamicEnter}
+/>
+
         <label className="chat-file-label">
           📎
           <input type="file" style={{ display: 'none' }} onChange={handleFileUpload} />
