@@ -31,7 +31,7 @@ const Chat = ({onLock, canRemovePin, onRemovePin }) => {
 
 useEffect(() => {
   if (!socketRef.current) {
-    const s = io("http://localhost:8000");
+    const s = io("https://mygram-mvc.onrender.com");
 
     s.on("connect", () => {
       console.log("Socket connected:", s.id);
