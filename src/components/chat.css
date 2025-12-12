@@ -16,6 +16,7 @@
   flex: 1;
   display: flex;
   flex-direction: column;
+  /* border: 2px solid green; */
 }
 
 
@@ -29,17 +30,18 @@
   display: flex;
   flex-direction: column;
   height: 80%;
-  width: 50%;
-  background-color: #f7f9fc;
+  width: 600px;
+  background-color: #838891;
   margin-top: 5rem;
-  margin-left: 7px;
-   border-radius: 30px;
+  /* margin-left: 7px; */
+  border-radius: 80px;
   
  
 }
 .chat-sidebar {
-   width: 300px;
+   width: 310px;
   height: 80%;
+  margin-left: 2.8rem;
   
   background-color: #f7f9fc;
   /* border: 5px solid #292626e7; */
@@ -588,16 +590,14 @@
 
   .chat-window {
     position: absolute;
-    top: 5%;
+    top: 40%;
     left: 20%;
-    width: 60%;
-    height: 80%;
+    width: 350px;
+    height: 500px;
     
   }
 
-  .hide-mobile {
-    display: none;
-  }
+ 
 
   .back-btn {
     display: inline-block;
@@ -614,11 +614,11 @@
     height: auto;
     border-right: none;
     margin: 0 auto;
-    /* border: 5px solid #181515; */
-    /* position: absolute;
-    top: 20%;
-    left: 50%;
-    transform: translate(-27%,-50%); */
+    border: 5px solid #181515;
+    position: absolute;
+    top: 50%;
+    left: 0;
+    /* transform: translate(-27%,-50%);  */
     
   }
 .chat-actions{
@@ -636,7 +636,7 @@
   width: 550px;
   height: 95%;
   position: absolute;
-  top: 18%;
+  top: 60%;
   left: 0;
   transform: translate(-16%,-10%);
   

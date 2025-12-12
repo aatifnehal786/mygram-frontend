@@ -173,7 +173,7 @@ const handleRemovePinClick = async () => {
   return (
     <div className="chat-container">
   {/* Sidebar */}
-  <div className={`sidebar ${selectedUser ? "hide-mobile" : ""}`}>
+  <div className="sidebar" >
     <ChatSidebar
       onSelectUser={(user) => {
         if (!isForwarding) {
