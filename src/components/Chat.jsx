@@ -194,7 +194,7 @@ const handleRemovePinClick = async () => {
   </div>
 
   {/* Chat Window */}
-  <div className={`chat-window ${!selectedUser ? "hide-mobile" : ""}`}>
+  <div className="chat-window">
     {selectedUser && (
       <ChatWindow
         selectedUser={selectedUser}
