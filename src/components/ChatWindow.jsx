@@ -17,6 +17,8 @@ const [messageToDelete, setMessageToDelete] = useState(null);
 const [toastMessage, setToastMessage] = useState('');
 const [isTyping, setIsTyping] = useState(false);
 const typingTimeout = useRef(null);
+const [onlineMap, setOnlineMap] = useState({});
+
 
 
 
@@ -238,6 +240,31 @@ useEffect(() => {
 }, [socket]);
 
 
+useEffect(() => {
+  if (!socket) return;
+
+  socket.on("user-online", ({ userId }) => {
+    setOnlineMap(prev => ({
+      ...prev,
+      [userId]: { isOnline: true, lastSeen: null }
+    }));
+  });
+
+  socket.on("user-offline", ({ userId, lastSeen }) => {
+    setOnlineMap(prev => ({
+      ...prev,
+      [userId]: { isOnline: false, lastSeen }
+    }));
+  });
+
+  return () => {
+    socket.off("user-online");
+    socket.off("user-offline");
+  };
+}, [socket]);
+
+
+
 
   return (
     <div className="chat">
@@ -250,15 +277,17 @@ useEffect(() => {
     <div className="chat-header-user-info">
       <h3>{selectedUser.username}</h3>
  <p className="user-status">
-  {isTyping ? (`typing....`
-  ) : selectedUser.isOnline ? (
+  {isTyping ? (
+    "typing..."
+  ) : onlineMap[selectedUser._id]?.isOnline ? (
     "Online"
-  ) : selectedUser.lastSeen ? (
-    `Last seen ${formatTime(selectedUser.lastSeen)}`
+  ) : onlineMap[selectedUser._id]?.lastSeen ? (
+    `Last seen ${formatTime(onlineMap[selectedUser._id].lastSeen)}`
   ) : (
     "Offline"
   )}
 </p>
+
 
 
 
@@ -269,7 +298,7 @@ useEffect(() => {
         <div className="chat-messages">
           {sortedMessages.map((msg, idx) => {
             const senderId = msg.sender?._id || msg.sender; // handle both cases
-            const isOwnMessage = msg.sender === currentUserId;
+            const isOwnMessage = senderId === currentUserId;
             const isDropdownOpen = openDropdownId === msg._id;
            
 
@@ -387,6 +416,7 @@ useEffect(() => {
   placeholder="Type a message..."
   className="chat-input"
   onKeyDown={handleDynamicEnter}
+  name='message'
 />
 
         <label className="chat-file-label">

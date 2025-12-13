@@ -14,7 +14,7 @@ export default function ChatWrapper({ userId }) {
   useEffect(() => {
     const storedUnlocked = localStorage.getItem("chatUnlocked");
     if (storedUnlocked === "true") setUnlocked(true);
-  }, []);
+  }, [loggedUser]);
 
 
 

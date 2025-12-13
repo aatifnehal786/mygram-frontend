@@ -26,6 +26,7 @@ function ChatLock({ onUnlock }) {
 
     // If apiFetch succeeds, PIN is correct
     onUnlock(); // unlock chat
+    localStorage.setItem("chatUnlocked",true)
   } catch (err) {
     setMessage(err.message || "❌ Error verifying PIN");
   } finally {
