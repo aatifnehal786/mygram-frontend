@@ -525,6 +525,17 @@ input{
   padding: 15px;
 }
 
+.unread-badge {
+  background: #de0505;
+  color: #fff;
+  border-radius: 50%;
+  min-width: 5px;
+  width: 12px;
+  height: 20px;
+  font-size: 12px;
+  
+}
+
 
 /* Extra small devices (phones, 600px and down) */
 @media (min-width: 320px) and (max-width: 767px) {
