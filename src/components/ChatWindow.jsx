@@ -259,6 +259,8 @@ useEffect(() => {
     }));
   });
 
+  
+
   return () => {
     socket.off("user-online");
     socket.off("user-offline");
@@ -283,6 +285,7 @@ useEffect(() => {
     ...prev,
     [selectedUser._id]: 0
   }));
+  
 
 }, [selectedUser]);
 

@@ -10,11 +10,12 @@ const ChatSidebar = ({
   selectedUserId,
   onSelectForwardUser,
   isForwarding = false,
+  onBack
   
   
 }) => {
   const { loggedUser } = useContext(UserContext);
-  const { setUnreadCounts, socket,unreadCounts} = useSocket();
+  const { unreadCounts} = useSocket();
   const [searchQuery, setSearchQuery] = useState('');
   const [results, setResults] = useState([]);
   const [followedUsers, setFollowedUsers] = useState([]);

@@ -10,9 +10,7 @@ import './chat.css';
 import { useSocket } from '../contexts/SocketContext';
 
 const Chat = ({onLock, canRemovePin, onRemovePin }) => {
-  const [selectedUser, setSelectedUser] = useState(
-    JSON.parse(localStorage.getItem('selected-chat-user')) || null
-  );
+  const [selectedUser, setSelectedUser] = useState(null);
    const { setUnreadCounts, socket,unreadCounts} = useSocket();
   const [chatList, setChatList] = useState([]);
   const [messages, setMessages] = useState([]);
@@ -152,6 +150,7 @@ const forwardMessageToUsers = async (msg, receiverIds) => {
           forwardMessageToUsers(messageToForward, userIds);
         }
       }}
+       
     />
   </div>
 
