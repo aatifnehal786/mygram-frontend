@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState, useContext } from 'react';
 import { UserContext } from '../contexts/UserContext';
 import { apiFetch } from "../api/apiFetch";
 import './chat.css';
+import { useNotification } from "../contexts/NotificationContext";
 
 
 const ChatWindow = ({ selectedUser, triggerForwardMode, socket, messages, setMessages, onBack, setUnreadCounts }) => {
@@ -18,6 +19,7 @@ const [toastMessage, setToastMessage] = useState('');
 const [isTyping, setIsTyping] = useState(false);
 const typingTimeout = useRef(null);
 const [onlineMap, setOnlineMap] = useState({});
+const { clearUnread } = useNotification();
 
 
 
@@ -276,13 +278,10 @@ useEffect(() => {
     otherUserId: selectedUser._id
   });
 
-  // Reset unread count for this user
-  setUnreadCounts(prev => ({
-    ...prev,
-    [selectedUser._id]: 0
-  }));
+  clearUnread(selectedUser._id); // ✅ global unread reset
 
-}, [selectedUser]);
+}, [selectedUser, socket]);
+
 
 
   return (

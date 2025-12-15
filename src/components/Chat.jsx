@@ -7,11 +7,15 @@ import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { apiFetch } from '../api/apiFetch';
 import './chat.css';
+import { useSocket } from "../contexts/SocketContext";
+import { useNotification } from "../contexts/NotificationContext";
 
 const Chat = ({onLock, canRemovePin, onRemovePin }) => {
   const [selectedUser, setSelectedUser] = useState(
     JSON.parse(localStorage.getItem('selected-chat-user')) || null
   );
+   const socket = useSocket();
+  const { unreadCounts, clearUnread } = useNotification();
   const [chatList, setChatList] = useState([]);
   const [messages, setMessages] = useState([]);
   const [message, setMessage] = useState("");
@@ -22,30 +26,12 @@ const Chat = ({onLock, canRemovePin, onRemovePin }) => {
   );
   const [isForwarding, setIsForwarding] = useState(false);
   const [messageToForward, setMessageToForward] = useState(null);
-  const [socket, setSocket] = useState(null);
-  const [unreadCounts, setUnreadCounts] = useState({});
+  
 
 
 
-  const socketRef = useRef(null);
 
-
-
-useEffect(() => {
-  if (!socketRef.current) {
-    const s = io("https://mygram-mvc.onrender.com");
-
-    s.on("connect", () => {
-      console.log("Socket connected:", s.id);
-      if (loggedUser?.userid) {
-        s.emit("join", loggedUser.userid);
-      }
-    });
-
-    socketRef.current = s;
-    setSocket(s);  // **IMPORTANT: triggers re-render**
-  }
-}, [loggedUser?.userid]);
+  
 
 
 
@@ -170,30 +156,7 @@ const handleRemovePinClick = async () => {
     
   };
 
-  useEffect(() => {
-  if (!socket) return;
-
-  socket.on("newNotification", ({ senderId }) => {
-    setUnreadCounts(prev => ({
-      ...prev,
-      [senderId]: (prev[senderId] || 0) + 1
-    }));
-  });
-
-  if (Notification.permission === "granted") {
-  const n = new Notification("New message", {
-  body: message
-});
-
-n.onclick = () => {
-  window.focus();
-};
-
-}
-
-
-  return () => socket.off("newNotification");
-}, [socket]);
+  
 
 
  
@@ -204,7 +167,6 @@ n.onclick = () => {
   <div className={`sidebar ${selectedUser ? "hide-on-mobile" : ""}`} >
     <ChatSidebar
       unreadCounts={unreadCounts}
-  setUnreadCounts={setUnreadCounts}
       onSelectUser={(user) => {
         if (!isForwarding) {
           setSelectedUser(user);

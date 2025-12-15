@@ -151,9 +151,16 @@ const router = createBrowserRouter(
 
 
   return (
+    
+    <SocketProvider>
+  <NotificationProvider>
+    <GlobalNotifications />
     <UserProvider>
       <RouterProvider router={router} />
     </UserProvider>
+  </NotificationProvider>
+</SocketProvider>
+
   );
 }
 
