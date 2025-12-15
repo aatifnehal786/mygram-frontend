@@ -4,7 +4,7 @@ import { apiFetch } from "../api/apiFetch";
 import './chat.css';
 
 
-const ChatWindow = ({ selectedUser, triggerForwardMode, socket, messages, setMessages, onBack }) => {
+const ChatWindow = ({ selectedUser, triggerForwardMode, socket, messages, setMessages, onBack, setUnreadCounts }) => {
   const { loggedUser } = useContext(UserContext);
   const currentUserId = loggedUser?.userid;
   const [input, setInput] = useState('');
@@ -264,6 +264,25 @@ useEffect(() => {
 }, [socket]);
 
 
+useEffect(() => {
+  if (!socket || !selectedUser) return;
+
+  socket.emit("chatOpen", {
+    chattingWith: selectedUser._id
+  });
+
+  socket.emit("markSeen", {
+    userId: currentUserId,
+    otherUserId: selectedUser._id
+  });
+
+  // Reset unread count for this user
+  setUnreadCounts(prev => ({
+    ...prev,
+    [selectedUser._id]: 0
+  }));
+
+}, [selectedUser]);
 
 
   return (

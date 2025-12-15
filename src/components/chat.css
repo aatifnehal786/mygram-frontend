@@ -12,7 +12,7 @@
   width: 70%;
   height: auto;
   border-right: 1px solid #ddd;
-  overflow-y: auto;
+  /* overflow-y: auto; */
 }
 
 /* Chat window */
@@ -45,9 +45,9 @@
  
 }
 .chat-sidebar {
-   width: 310px;
+   width: 340px;
   height: 80%;
-  margin-left: 2.8rem;
+  /* margin-left: 2.8rem; */
   
   background-color: #f7f9fc;
   /* border: 5px solid #292626e7; */
@@ -546,6 +546,21 @@
 
 }
 
+.unread-badge {
+  background: #de0505;
+  color: #fff;
+  border-radius: 50%;
+  min-width: 5px;
+  width: 12px;
+  height: 20px;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: auto;
+}
+
+
 /* Mobile responsive */
 
 /* === Responsive Design === */
@@ -554,6 +569,9 @@
     flex-direction: column;
   }
 
+  .chat-sidebar{
+    width: 100%;
+  }
   
   /* Hide sidebar when chat is open */
   .chat-sidebar.hide-on-mobile {

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import { UserProvider } from './contexts/UserContext';
 import Login from './components/Login';
@@ -30,6 +30,13 @@ function App() {
   const [loggedUser, setLoggedUser] = useState(
   JSON.parse(localStorage.getItem('token-auth'))
 );
+
+useEffect(() => {
+  if ("Notification" in window) {
+    Notification.requestPermission();
+  }
+}, []);
+
 
  
 

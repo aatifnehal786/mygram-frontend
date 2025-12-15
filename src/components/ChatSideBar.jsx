@@ -8,6 +8,8 @@ const ChatSidebar = ({
   selectedUserId,
   onSelectForwardUser,
   isForwarding = false,
+  unreadCounts
+  
 }) => {
   const { loggedUser } = useContext(UserContext);
   const [searchQuery, setSearchQuery] = useState('');
@@ -91,7 +93,14 @@ const handleSearch = async (q) => {
             <img className="profile-photo" src={user.profilePic} alt={user.username} />
             <div className="user-info">
               <h1>{user.username}</h1>
+                {unreadCounts?.[user._id] > 0 && (
+                <span className="unread-badge">
+                  {unreadCounts[user._id]}
+                </span>
+              )}
               <span className={`status-dot ${user.isOnline ? 'online' : 'offline'}`} />
+            
+
             </div>
 
             {isForwarding && (

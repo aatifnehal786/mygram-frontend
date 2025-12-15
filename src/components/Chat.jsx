@@ -23,6 +23,8 @@ const Chat = ({onLock, canRemovePin, onRemovePin }) => {
   const [isForwarding, setIsForwarding] = useState(false);
   const [messageToForward, setMessageToForward] = useState(null);
   const [socket, setSocket] = useState(null);
+  const [unreadCounts, setUnreadCounts] = useState({});
+
 
 
   const socketRef = useRef(null);
@@ -168,6 +170,32 @@ const handleRemovePinClick = async () => {
     
   };
 
+  useEffect(() => {
+  if (!socket) return;
+
+  socket.on("newNotification", ({ senderId }) => {
+    setUnreadCounts(prev => ({
+      ...prev,
+      [senderId]: (prev[senderId] || 0) + 1
+    }));
+  });
+
+  if (Notification.permission === "granted") {
+  const n = new Notification("New message", {
+  body: message
+});
+
+n.onclick = () => {
+  window.focus();
+};
+
+}
+
+
+  return () => socket.off("newNotification");
+}, [socket]);
+
+
  
 
   return (
@@ -175,6 +203,8 @@ const handleRemovePinClick = async () => {
   {/* Sidebar */}
   <div className={`sidebar ${selectedUser ? "hide-on-mobile" : ""}`} >
     <ChatSidebar
+      unreadCounts={unreadCounts}
+  setUnreadCounts={setUnreadCounts}
       onSelectUser={(user) => {
         if (!isForwarding) {
           setSelectedUser(user);
@@ -197,6 +227,7 @@ const handleRemovePinClick = async () => {
   <div className={`chat-window ${selectedUser ? "show-on-mobile" : ""}`}>
     {selectedUser && (
       <ChatWindow
+        setUnreadCounts={setUnreadCounts}
         selectedUser={selectedUser}
         chatList={chatList}
         messages={messages}
