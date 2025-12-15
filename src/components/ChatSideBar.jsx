@@ -2,20 +2,24 @@ import React, { useState, useEffect, useContext } from 'react';
 import { UserContext } from '../contexts/UserContext';
 import { apiFetch } from "../api/apiFetch";
 import './chat.css';
+import { useSocket } from '../contexts/SocketContext';
+
 
 const ChatSidebar = ({
   onSelectUser,
   selectedUserId,
   onSelectForwardUser,
   isForwarding = false,
-  unreadCounts
+  
   
 }) => {
   const { loggedUser } = useContext(UserContext);
+  const { setUnreadCounts, socket,unreadCounts} = useSocket();
   const [searchQuery, setSearchQuery] = useState('');
   const [results, setResults] = useState([]);
   const [followedUsers, setFollowedUsers] = useState([]);
   const [selectedForwardUsers, setSelectedForwardUsers] = useState([]);
+ 
 
  useEffect(() => {
   if (!loggedUser?.token) return;

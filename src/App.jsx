@@ -17,7 +17,7 @@ import Layout from './components/Layout'; // 👈 import the layout
 import ChatSidebar from './components/ChatSideBar';
 import PublicRoute from './components/PublicRoute';
 import Devices from './components/Devices';
-
+import { SocketProvider } from './contexts/SocketContext';
 
 
 
@@ -150,7 +150,9 @@ const router = createBrowserRouter(
 
   return (
     <UserProvider>
-      <RouterProvider router={router} />
+      <SocketProvider>
+        <RouterProvider router={router} />
+      </SocketProvider>
     </UserProvider>
   );
 }

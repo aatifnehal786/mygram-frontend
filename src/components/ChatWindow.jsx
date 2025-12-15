@@ -2,10 +2,12 @@ import React, { useEffect, useRef, useState, useContext } from 'react';
 import { UserContext } from '../contexts/UserContext';
 import { apiFetch } from "../api/apiFetch";
 import './chat.css';
+import { useSocket } from '../contexts/SocketContext';
 
 
-const ChatWindow = ({ selectedUser, triggerForwardMode, socket, messages, setMessages, onBack, setUnreadCounts }) => {
+const ChatWindow = ({ selectedUser, triggerForwardMode, messages, setMessages, onBack }) => {
   const { loggedUser } = useContext(UserContext);
+   const { setUnreadCounts, socket,unreadCounts} = useSocket();
   const currentUserId = loggedUser?.userid;
   const [input, setInput] = useState('');
   const [openDropdownId, setOpenDropdownId] = useState(null);
