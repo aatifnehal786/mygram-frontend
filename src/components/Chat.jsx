@@ -9,7 +9,7 @@ import { apiFetch } from '../api/apiFetch';
 import './chat.css';
 import { useSocket } from '../contexts/SocketContext';
 
-const Chat = ({onLock, canRemovePin, onRemovePin }) => {
+const Chat = () => {
   const [selectedUser, setSelectedUser] = useState(null);
    const { setUnreadCounts, socket,unreadCounts} = useSocket();
   const [chatList, setChatList] = useState([]);
