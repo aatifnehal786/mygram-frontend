@@ -14,9 +14,7 @@ import ForgotPassword from './components/ForgotPassword';
 import Otp from './components/Otp';
 import EmailOtp from './components/EmailOtp';
 import Layout from './components/Layout'; // 👈 import the layout
-import ChatWrapper from './components/chatWrapper';
 import ChatSidebar from './components/ChatSideBar';
-import SetChatPin from './components/setChatPin';
 import PublicRoute from './components/PublicRoute';
 import Devices from './components/Devices';
 
@@ -100,7 +98,7 @@ const router = createBrowserRouter(
           path: "/chat",
           element: (
             <Private>
-              <ChatWrapper />
+              <Chat />
             </Private>
           ),
         },
@@ -151,16 +149,9 @@ const router = createBrowserRouter(
 
 
   return (
-    
-    <SocketProvider>
-  <NotificationProvider>
-    <GlobalNotifications />
     <UserProvider>
       <RouterProvider router={router} />
     </UserProvider>
-  </NotificationProvider>
-</SocketProvider>
-
   );
 }
 
