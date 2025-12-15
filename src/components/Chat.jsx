@@ -120,29 +120,6 @@ const forwardMessageToUsers = async (msg, receiverIds) => {
   }
 };
 
-// Remove chat PIN
-const handleRemovePinClick = async () => {
-  try {
-    setLoading(true);
-    await apiFetch("api/chats/remove-chat-pin", {
-      method: "POST",
-      body: JSON.stringify({ userId: loggedUser.userid }),
-    });
-
-    setMessage("✅ Chat lock removed successfully");
-    if (onRemovePin) onRemovePin();
-  } catch (err) {
-    setMessage("❌ " + (err.message || "Error removing chat lock"));
-  } finally {
-    setLoading(false);
-  }
-};
-
- 
-
-
-
-
   const triggerForwardMode = (msg) => {
     setIsForwarding(true);
     setMessageToForward(msg);
