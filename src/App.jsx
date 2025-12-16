@@ -18,6 +18,8 @@ import ChatSidebar from './components/ChatSideBar';
 import PublicRoute from './components/PublicRoute';
 import Devices from './components/Devices';
 import { SocketProvider } from './contexts/SocketContext';
+import { Provider } from "react-redux";
+import { store } from "./redux/store";
 
 
 
@@ -30,10 +32,11 @@ function App() {
 );
 
 useEffect(() => {
-  if ("Notification" in window) {
+  if (Notification.permission !== "granted") {
     Notification.requestPermission();
   }
 }, []);
+
 
 
  
@@ -149,11 +152,13 @@ const router = createBrowserRouter(
 
 
   return (
-    <UserProvider>
-      <SocketProvider>
-        <RouterProvider router={router} />
-      </SocketProvider>
-    </UserProvider>
+  <Provider store={store}>
+  <UserProvider>
+    <SocketProvider>
+      <RouterProvider router={router} />
+    </SocketProvider>
+  </UserProvider>
+</Provider>
   );
 }
 

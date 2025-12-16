@@ -6,6 +6,7 @@ import { FaBars } from "react-icons/fa";
 import { RxCross1 } from "react-icons/rx";
 import { apiFetch } from "../api/apiFetch";
 import './chat.css'
+import { useSocket } from '../contexts/SocketContext';
 
 export default function Header() {
 
@@ -14,12 +15,15 @@ export default function Header() {
   const [targetUserId, setTargetUserId] = useState("");
   const [menuOpen, setMenuOpen] = useState(false);
   const navigate = useNavigate();
+  const {unreadCounts} = useSocket();
 
 
 
 // FETCH ALL USERS EXCEPT THE CURRENT LOGGED IN
 
-
+useEffect(()=>{
+  console.log(unreadCounts);
+},[])
 
 useEffect(() => {
   const fetchUsers = async () => {

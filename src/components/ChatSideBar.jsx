@@ -2,20 +2,13 @@ import React, { useState, useEffect, useContext } from 'react';
 import { UserContext } from '../contexts/UserContext';
 import { apiFetch } from "../api/apiFetch";
 import './chat.css';
-import { useSocket } from '../contexts/SocketContext';
+
+import { useSelector } from "react-redux";
 
 
-const ChatSidebar = ({
-  onSelectUser,
-  selectedUserId,
-  onSelectForwardUser,
-  isForwarding = false,
-  onBack
-  
-  
-}) => {
+const ChatSidebar = ({onSelectUser,selectedUserId,onSelectForwardUser,isForwarding = false,onBack}) => {
   const { loggedUser } = useContext(UserContext);
-  const { unreadCounts} = useSocket();
+  const unreadCounts = useSelector(state => state.notifications.unreadCounts);
   const [searchQuery, setSearchQuery] = useState('');
   const [results, setResults] = useState([]);
   const [followedUsers, setFollowedUsers] = useState([]);

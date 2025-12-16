@@ -2,12 +2,16 @@ import React, { useEffect, useRef, useState, useContext } from 'react';
 import { UserContext } from '../contexts/UserContext';
 import { apiFetch } from "../api/apiFetch";
 import './chat.css';
-import { useSocket } from '../contexts/SocketContext';
+import { SocketProvider, useSocket } from '../contexts/SocketContext';
+import { useDispatch } from "react-redux";
+import { clearUnread } from "../redux/slices/notificationSlice";
+import { setActiveChat, clearActiveChat } from "../redux/slices/chatSlice";
+
 
 
 const ChatWindow = ({ selectedUser, triggerForwardMode, messages, setMessages, onBack }) => {
   const { loggedUser } = useContext(UserContext);
-   const { setUnreadCounts, socket,unreadCounts} = useSocket();
+  const {socket} = useSocket()
   const currentUserId = loggedUser?.userid;
   const [input, setInput] = useState('');
   const [openDropdownId, setOpenDropdownId] = useState(null);
@@ -20,10 +24,20 @@ const [toastMessage, setToastMessage] = useState('');
 const [isTyping, setIsTyping] = useState(false);
 const typingTimeout = useRef(null);
 const [onlineMap, setOnlineMap] = useState({});
+const dispatch = useDispatch();
 
 
 
 
+useEffect(() => {
+  if (selectedUser?._id) {
+    dispatch(setActiveChat(selectedUser._id));
+  }
+
+  return () => {
+    dispatch(clearActiveChat()); // chat closed
+  };
+}, [selectedUser, dispatch]);
 
 useEffect(() => {
   if (toastMessage) {
@@ -53,6 +67,14 @@ useEffect(() => {
   };
 }, []);
 
+
+
+
+useEffect(() => {
+  if (selectedUser?._id) {
+    dispatch(clearUnread(selectedUser._id));
+  }
+}, [selectedUser, dispatch]);
 
 
 
@@ -116,6 +138,33 @@ const deleteMessage = async () => {
   }
 };
 
+
+// use effect for online and offline status
+
+useEffect(() => {
+  if (!socket) return;
+
+  socket.on("user-online", ({ userId }) => {
+    setOnlineMap(prev => ({
+      ...prev,
+      [userId]: { isOnline: true, lastSeen: null }
+    }));
+  });
+
+  socket.on("user-offline", ({ userId, lastSeen }) => {
+    setOnlineMap(prev => ({
+      ...prev,
+      [userId]: { isOnline: false, lastSeen }
+    }));
+  });
+
+  
+
+  return () => {
+    socket.off("user-online");
+    socket.off("user-offline");
+  };
+}, [socket]);
 
 // use Effect for Typing indicators
 
@@ -242,30 +291,7 @@ useEffect(() => {
 }, [socket]);
 
 
-useEffect(() => {
-  if (!socket) return;
 
-  socket.on("user-online", ({ userId }) => {
-    setOnlineMap(prev => ({
-      ...prev,
-      [userId]: { isOnline: true, lastSeen: null }
-    }));
-  });
-
-  socket.on("user-offline", ({ userId, lastSeen }) => {
-    setOnlineMap(prev => ({
-      ...prev,
-      [userId]: { isOnline: false, lastSeen }
-    }));
-  });
-
-  
-
-  return () => {
-    socket.off("user-online");
-    socket.off("user-offline");
-  };
-}, [socket]);
 
 
 useEffect(() => {
@@ -279,12 +305,6 @@ useEffect(() => {
     userId: currentUserId,
     otherUserId: selectedUser._id
   });
-
-  // Reset unread count for this user
-  setUnreadCounts(prev => ({
-    ...prev,
-    [selectedUser._id]: 0
-  }));
   
 
 }, [selectedUser]);

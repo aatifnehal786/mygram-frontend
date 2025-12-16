@@ -1,5 +1,8 @@
-import React, { createContext, useState, useEffect, useContext } from 'react';
-import { io } from 'socket.io-client';
+import React, { createContext, useState, useEffect, useContext } from "react";
+import { io } from "socket.io-client";
+import { useDispatch } from "react-redux";
+import { notificationReceived } from "../redux/slices/notificationSlice";
+import { useSelector } from "react-redux";
 
 const SocketContext = createContext();
 
@@ -7,49 +10,54 @@ export const useSocket = () => useContext(SocketContext);
 
 export const SocketProvider = ({ children }) => {
   const [socket, setSocket] = useState(null);
-  const [notifications, setNotifications] = useState([]);
-  const [unreadCounts, setUnreadCounts] = useState({});
-  // Add other shared states here if needed (e.g., online users list)
+  const dispatch = useDispatch();
+  const activeChatUserId = useSelector(
+  state => state.chat.activeChatUserId
+);
 
+  // 🔹 Create socket connection ONCE
   useEffect(() => {
-    const newSocket = io("https://mygram-mvc.onrender.com"); // Replace with your backend URL
+    const newSocket = io("https://mygram-mvc.onrender.com", {
+      transports: ["websocket"],
+      withCredentials: true
+    });
+
     setSocket(newSocket);
 
-    // Clean up on unmount
-    return () => newSocket.close();
+    return () => {
+      newSocket.disconnect();
+    };
   }, []);
 
-  // Place the global notification listener here
+  // 🔹 Global notification listener (Redux-driven)
   useEffect(() => {
     if (!socket) return;
 
-    const handleNewNotification = ({ senderId, text }) => {
-      console.log("Global notification received!");
-      
-      // Update global notification list (optional, maybe just counts is enough)
-      // setNotifications(prev => [...prev, { senderId, text, isRead: false }]);
+   const handleNewNotification = ({ senderId, text }) => {
 
-      // Increase unread count (This is what you need)
-      setUnreadCounts(prev => ({
-        ...prev,
-        [senderId]: (prev[senderId] || 0) + 1
-      }));
+  // 🚫 Do NOT notify if user is actively chatting with sender
+  if (activeChatUserId === senderId) return;
 
-      // Show browser notification if needed
-      if (Notification.permission === "granted") {
-        new Notification("New message", { body: text || "You have a new message" });
-      }
-    };
+  dispatch(notificationReceived(senderId));
+
+  if (Notification.permission === "granted") {
+    const n = new Notification("New message", {
+      body: text || "You have a new message"
+    });
+    n.onclick = () => window.focus();
+  }
+};
+
 
     socket.on("newNotification", handleNewNotification);
 
     return () => {
       socket.off("newNotification", handleNewNotification);
     };
-  }, [socket]); // Dependency on socket instance
+  }, [socket, dispatch]);
 
   return (
-    <SocketContext.Provider value={{ socket, notifications, unreadCounts, setUnreadCounts }}>
+    <SocketContext.Provider value={{ socket }}>
       {children}
     </SocketContext.Provider>
   );
