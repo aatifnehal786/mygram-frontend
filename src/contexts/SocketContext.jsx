@@ -18,7 +18,7 @@ export const SocketProvider = ({ children }) => {
 
   // 🔹 Create socket connection ONCE
   useEffect(() => {
-    const newSocket = io("https://mygram-mvc.onrender.com", {
+    const newSocket = io("http://localhost:8000", {
       transports: ["websocket"],
       withCredentials: true
     });

@@ -155,9 +155,7 @@ useEffect(() => {
     });
   });
 
-  return () => {
-    socket.off("online-users");
-  };
+  return () => socket.off("online-users");
 }, [socket]);
 
 
@@ -307,7 +305,7 @@ useEffect(() => {
       chattingWith: selectedUser._id
     });
   };
-}, [selectedUser, socket, currentUserId]);
+}, [selectedUser, socket]);
 
 
   return (
