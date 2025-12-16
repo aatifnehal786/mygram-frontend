@@ -29,6 +29,10 @@ const dispatch = useDispatch();
 
 
 
+
+
+
+
 useEffect(() => {
   if (selectedUser?._id) {
     dispatch(setActiveChat(selectedUser._id));
@@ -70,11 +74,7 @@ useEffect(() => {
 
 
 
-useEffect(() => {
-  if (selectedUser?._id) {
-    dispatch(clearUnread(selectedUser._id));
-  }
-}, [selectedUser, dispatch]);
+
 
 
 
@@ -193,7 +193,12 @@ useEffect(() => {
   setIsTyping(false); // reset typing when switching users
 }, [selectedUser]);
 
-
+useEffect(() => {
+  if (selectedUser?._id) {
+    dispatch(setActiveChat(selectedUser._id));
+    dispatch(clearUnread(selectedUser._id));
+  }
+}, [selectedUser]);
 
 useEffect(() => {
   if (!socket || !selectedUser) return;

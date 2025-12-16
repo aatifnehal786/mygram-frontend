@@ -3,6 +3,7 @@ import { io } from "socket.io-client";
 import { useDispatch } from "react-redux";
 import { notificationReceived } from "../redux/slices/notificationSlice";
 import { useSelector } from "react-redux";
+import { UserContext } from "./UserContext";
 
 const SocketContext = createContext();
 
@@ -10,10 +11,10 @@ export const useSocket = () => useContext(SocketContext);
 
 export const SocketProvider = ({ children }) => {
   const [socket, setSocket] = useState(null);
+  const [notificationhandle,setNotificationHandle] = useState(false)
   const dispatch = useDispatch();
-  const activeChatUserId = useSelector(
-  state => state.chat.activeChatUserId
-);
+  const activeChatUserId = useSelector(state => state.chat.activeChatUserId);
+  const {loggedUser} = useContext(UserContext)
 
   // 🔹 Create socket connection ONCE
   useEffect(() => {
@@ -24,10 +25,17 @@ export const SocketProvider = ({ children }) => {
 
     setSocket(newSocket);
 
+    // 🔥 JOIN USER ROOM IMMEDIATELY
+     
+
     return () => {
       newSocket.disconnect();
     };
   }, []);
+
+  useEffect(()=>{
+    setNotificationHandle(true)
+  },[socket])
 
   // 🔹 Global notification listener (Redux-driven)
   useEffect(() => {
@@ -54,7 +62,7 @@ export const SocketProvider = ({ children }) => {
     return () => {
       socket.off("newNotification", handleNewNotification);
     };
-  }, [socket, dispatch]);
+  }, [socket, dispatch,notificationhandle]);
 
   return (
     <SocketContext.Provider value={{ socket }}>

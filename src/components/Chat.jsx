@@ -52,10 +52,9 @@ useEffect(() => {
 
   fetchChat();
 
-  // JOIN SOCKET ROOM
-  if (socket && loggedUser?.userid) {
-    socket.emit("join",  loggedUser.userid );
-  }
+ if (loggedUser?.userid) {
+        socket.emit("join", loggedUser.userid);
+      }
 
   const handleReceiveMessage = (msg) => {
     const senderId = msg.sender?._id || msg.sender;
