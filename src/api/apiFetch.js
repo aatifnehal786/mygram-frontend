@@ -13,7 +13,7 @@ export const apiFetch = async (endpoint, options = {}) => {
 
   let response;
   try {
-    response = await fetch(`http://localhost:8000/${endpoint}`, {
+    response = await fetch(`https://mygram-mvc.onrender.com/${endpoint}`, {
       ...options,
       headers,
     });
