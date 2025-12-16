@@ -140,31 +140,26 @@ const deleteMessage = async () => {
 
 
 // use effect for online and offline status
-
 useEffect(() => {
   if (!socket) return;
 
-  socket.on("user-online", ({ userId }) => {
-    setOnlineMap(prev => ({
-      ...prev,
-      [userId]: { isOnline: true, lastSeen: null }
-    }));
-  });
+  socket.emit("get-online-users");
 
-  socket.on("user-offline", ({ userId, lastSeen }) => {
-    setOnlineMap(prev => ({
-      ...prev,
-      [userId]: { isOnline: false, lastSeen }
-    }));
+  socket.on("online-users", (userIds) => {
+    setOnlineMap(prev => {
+      const map = { ...prev };
+      userIds.forEach(id => {
+        map[id] = { isOnline: true, lastSeen: null };
+      });
+      return map;
+    });
   });
-
-  
 
   return () => {
-    socket.off("user-online");
-    socket.off("user-offline");
+    socket.off("online-users");
   };
 }, [socket]);
+
 
 // use Effect for Typing indicators
 
@@ -295,10 +290,6 @@ useEffect(() => {
   };
 }, [socket]);
 
-
-
-
-
 useEffect(() => {
   if (!socket || !selectedUser) return;
 
@@ -310,9 +301,13 @@ useEffect(() => {
     userId: currentUserId,
     otherUserId: selectedUser._id
   });
-  
 
-}, [selectedUser]);
+  return () => {
+    socket.emit("chatClose", {
+      chattingWith: selectedUser._id
+    });
+  };
+}, [selectedUser, socket, currentUserId]);
 
 
   return (
