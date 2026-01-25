@@ -70,37 +70,49 @@ useEffect(() => {
 
 // HANDLE OTP SEDING CALL FOR RESSETING PASSWORD
 
-const Forgotpassword = async () => {
-  if (!email) {
-    setMessage({ type: "error", text: "Email is required" });
-    setTimeout(() => {
-      setMessage({ type: "", text: "" });
-    }, 3000);
-    return;
-  }
 
-  try {
+  const Forgotpassword = async () => {
+    if (!email) {
+      setMessage({ type: "error", text: "Email is required" });
+      setTimeout(() => setMessage({ type: "", text: "" }), 3000);
+      return;
+    }
+
     setIsLoading(true);
 
-    const data = await apiFetch("api/password/forgot-password", {
-      method: "POST",
-      body: JSON.stringify({ email }),
-    });
+    try {
+      // Optional: AbortController to prevent infinite waiting
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 10000); // 10s timeout
 
-    setMessage({ type: "success", text: data.message });
-    setTimeout(() => {
-      setMessage({ type: "", text: "" });
-      setEmail("");
-      setNewPassword("");
-      setOtp("");
-      setIsLoading(false);
-    }, 1000);
-  } catch (error) {
-    console.error("Error sending forgot-password request:", error);
-    setMessage({ type: "error", text: "Failed to send OTP" });
-    setIsLoading(false);
-  }
-};
+      const data = await apiFetch("api/password/forgot-password", {
+        method: "POST",
+        body: JSON.stringify({ email }),
+        signal: controller.signal,
+      });
+
+      clearTimeout(timeout);
+
+      if (data?.error) {
+        setMessage({ type: "error", text: data.error });
+      } else {
+        setMessage({ type: "success", text: data.message || "OTP sent!" });
+      }
+
+      // Clear message after 3 seconds
+      setTimeout(() => setMessage({ type: "", text: "" }), 5000);
+
+    } catch (err) {
+      console.error("Forgot password error:", err);
+      setMessage({ type: "error", text: "Failed to send OTP. Try again." });
+      setTimeout(() => setMessage({ type: "", text: "" }), 3000);
+    } finally {
+      setIsLoading(false); // ✅ ensures button always resets
+    }
+  };
+
+
+
 
 // HANDLE RESET PASSWORD
 
@@ -176,7 +188,6 @@ const handleResetPassword = async () => {
         ref={buttonRef1}
         type="button"
         onClick={Forgotpassword}
-        disabled={isLoading}
         className="
           w-full bg-blue-600 text-white py-2 rounded-lg text-sm
           hover:bg-blue-700 transition
