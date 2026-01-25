@@ -81,14 +81,12 @@ useEffect(() => {
     setIsLoading(true);
 
     try {
-      // Optional: AbortController to prevent infinite waiting
-      const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), 10000); // 10s timeout
+     
 
       const data = await apiFetch("api/password/forgot-password", {
         method: "POST",
         body: JSON.stringify({ email }),
-        signal: controller.signal,
+        
       });
 
       clearTimeout(timeout);
