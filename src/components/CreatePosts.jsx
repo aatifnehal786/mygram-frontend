@@ -48,64 +48,109 @@ useEffect(()=>{
 },[handleCreatePost])
 
   return (
-    <div className="app-wrapper">
-      <nav className="navbar">
-        <h1 className="logo">MyGram</h1>
-        
-      </nav>
+  <div className="min-h-screen bg-gray-100 flex flex-col">
 
-      <main className="main-content">
-        <div className="create-post-container">
-          <h2 className="title">Create Post</h2>
-          <form className="post-form" onSubmit={handleCreatePost}>
-            <input
-              type="text"
-              placeholder="Caption"
-              value={caption}
-              onChange={(e) => setCaption(e.target.value)}
-              className="input-field"
-              required
-            />
-           <select
-              value={mediaType}
-              onChange={(e) => setMediaType(e.target.value)}
-              className="input-field"
-            >
-              <option value="image">Image</option>
-              <option value="video">Video</option>
-            </select>
+    {/* Navbar */}
+    <nav className="bg-white border-b px-6 py-4 flex items-center justify-between">
+      <h1 className="text-xl font-bold tracking-wide text-blue-600">
+        MyGram
+      </h1>
+    </nav>
 
-            {/* Show audio file upload only for image posts */}
-            {mediaType === "image" && (
-             
-              <div>
-                <p>Choose Audio File</p>
-                <input
+    {/* Main */}
+    <main className="flex-1 flex items-center justify-center px-4">
+      <div className="w-full max-w-md bg-white rounded-xl shadow-md p-6">
+
+        <h2 className="text-lg font-semibold mb-5 text-center">
+          Create Post
+        </h2>
+
+        <form onSubmit={handleCreatePost} className="space-y-4">
+
+          {/* Caption */}
+          <input
+            type="text"
+            placeholder="Write a caption..."
+            value={caption}
+            onChange={(e) => setCaption(e.target.value)}
+            required
+            className="
+              w-full px-4 py-2 rounded-lg border
+              focus:outline-none focus:ring-2 focus:ring-blue-500
+              text-sm
+            "
+          />
+
+          {/* Media Type */}
+          <select
+            value={mediaType}
+            onChange={(e) => setMediaType(e.target.value)}
+            className="
+              w-full px-4 py-2 rounded-lg border
+              focus:outline-none focus:ring-2 focus:ring-blue-500
+              text-sm bg-white
+            "
+          >
+            <option value="image">Image</option>
+            <option value="video">Video</option>
+          </select>
+
+          {/* Audio (image only) */}
+          {mediaType === "image" && (
+            <div className="space-y-1">
+              <p className="text-xs text-gray-500">Optional background audio</p>
+              <input
                 type="file"
                 accept="audio/*"
                 onChange={(e) => setMusicFile(e.target.files[0])}
-                className="file-input" placeholder='Choose Audio'
+                className="w-full text-sm file:mr-4 file:py-2 file:px-4
+                           file:rounded-lg file:border-0
+                           file:bg-gray-100 file:text-gray-700
+                           hover:file:bg-gray-200"
               />
-              </div>
-              )}
+            </div>
+          )}
 
-            <p>Choose image or video</p>
+          {/* Media */}
+          <div className="space-y-1">
+            <p className="text-xs text-gray-500">
+              Choose image or video
+            </p>
             <input
               type="file"
               accept="image/*,video/*"
               onChange={(e) => setMediaFile(e.target.files[0])}
-              className="file-input" placeholder='Choose image or Video File'
               required
+              className="w-full text-sm file:mr-4 file:py-2 file:px-4
+                         file:rounded-lg file:border-0
+                         file:bg-blue-50 file:text-blue-600
+                         hover:file:bg-blue-100"
             />
-            <button type="submit" className="submit-button">
-              Upload Post
-            </button>
-          </form>
-          {status && <p className="status-message">{status}</p>}
-        </div>
-      </main>
-    </div>
-  );
+          </div>
+
+          {/* Submit */}
+          <button
+            type="submit"
+            className="
+              w-full bg-blue-600 text-white py-2 rounded-lg
+              font-medium hover:bg-blue-700 transition
+            "
+          >
+            Upload Post
+          </button>
+        </form>
+
+        {/* Status */}
+        {status && (
+          <p className="mt-4 text-center text-sm text-gray-600">
+            {status}
+          </p>
+        )}
+      </div>
+    </main>
+  </div>
+);
+
 };
 
 export default CreatePost;

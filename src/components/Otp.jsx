@@ -77,34 +77,78 @@ const verifyOtp = async (e) => {
 
 
     return (
-        <section className="container">
-            <form className="form">
-                <input
-                    className="inp"
-                    type="text"
-                    onChange={(e) => setMobile(e.target.value)}
-                    placeholder="Enter Mobile"
-                    required
-                    name="mobile"
-                    value={mobile}
-                />
-                <input
-                    className="inp"
-                    type="text"
-                    onChange={(e) => setOtp(e.target.value)}
-                    placeholder="Enter OTP"
-                    name="otp"
-                    value={otp}
-                />
-                <button type="submit" className="btn" disabled={isLoading} onClick={sendOtp}>
-                {isLoading ? "Loading..." : "send otp"}
-                </button>
-                <button type="submit" className="btn" disabled={isLoading2} onClick={verifyOtp}>
-                {isLoading2 ? "Loading..." : "verify otp"}
-                </button>
-                {message.text && <div><p className={message.type}>{message.text}</p></div>}
-                <p><Link to="/profile">Go back to Profile page</Link></p>
-            </form>
-        </section>
-    );
+  <section className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-50 to-purple-100 px-4">
+    <form className="w-full max-w-md bg-white rounded-2xl shadow-xl p-8 space-y-6">
+      
+      <h2 className="text-2xl font-bold text-center text-gray-800">
+        Verify Mobile Number
+      </h2>
+
+      {/* Mobile Input */}
+      <input
+        type="text"
+        onChange={(e) => setMobile(e.target.value)}
+        placeholder="Enter Mobile Number"
+        required
+        name="mobile"
+        value={mobile}
+        className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+      />
+
+      {/* OTP Input */}
+      <input
+        type="text"
+        onChange={(e) => setOtp(e.target.value)}
+        placeholder="Enter OTP"
+        name="otp"
+        value={otp}
+        className="w-full px-4 py-3 rounded-lg border border-gray-300 text-center tracking-widest text-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+      />
+
+      {/* Send OTP */}
+      <button
+        type="submit"
+        disabled={isLoading}
+        onClick={sendOtp}
+        className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 rounded-lg transition disabled:opacity-60"
+      >
+        {isLoading ? "Sending OTP..." : "Send OTP"}
+      </button>
+
+      {/* Verify OTP */}
+      <button
+        type="submit"
+        disabled={isLoading2}
+        onClick={verifyOtp}
+        className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-3 rounded-lg transition disabled:opacity-60"
+      >
+        {isLoading2 ? "Verifying..." : "Verify OTP"}
+      </button>
+
+      {/* Message */}
+      {message?.text && (
+        <p
+          className={`text-center text-sm ${
+            message.type === "error"
+              ? "text-red-500"
+              : "text-green-600"
+          }`}
+        >
+          {message.text}
+        </p>
+      )}
+
+      {/* Back Link */}
+      <p className="text-center text-sm">
+        <Link
+          to="/profile"
+          className="text-indigo-600 hover:underline font-medium"
+        >
+          Go back to Profile page
+        </Link>
+      </p>
+    </form>
+  </section>
+);
+
 }

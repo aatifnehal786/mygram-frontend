@@ -234,6 +234,7 @@ const ChatWindow = ({ selectedUser, triggerForwardMode, messages, setMessages, o
 
 
   const confirmDelete = (msgId) => {
+    
     setMessageToDelete(msgId);
     setShowConfirmModal(true);
   };
@@ -390,136 +391,8 @@ const ChatWindow = ({ selectedUser, triggerForwardMode, messages, setMessages, o
     };
   }, [selectedUser, socket]);
 
-
-  return (
-    <div className="chat">
-
-      <div className="chat-header">
-        <div className="chat-header-left">
-          {/* Back button only for mobile */}
-          <button className="back-btn" onClick={onBack}>←</button>
-
-          <div className="chat-header-user-info">
-            <h3>{selectedUser.username}</h3>
-            <p className="user-status">
-              {isTyping ? (
-                "typing..."
-              ) : onlineMap[selectedUser._id]?.isOnline ? (
-                "Online"
-              ) : onlineMap[selectedUser._id]?.lastSeen ? (
-                `Last seen ${formatTime(onlineMap[selectedUser._id].lastSeen)}`
-              ) : (
-                "Offline"
-              )}
-            </p>
-
-
-
-
-          </div>
-        </div>
-      </div>
-
-      <div
-        className="chat-messages"
-        ref={chatContainerRef}
-        onScroll={handleScroll}
-      >
-
-        {sortedMessages.map((msg, idx) => {
-          const senderId = msg.sender?._id || msg.sender; // handle both cases
-          const isOwnMessage = senderId === currentUserId;
-          const isDropdownOpen = openDropdownId === msg._id;
-
-
-          return (
-            <div key={msg._id || idx} className={`message-bubble ${isOwnMessage ? 'own' : 'other'}`}>
-
-
-              <button className="message-options-btn"
-                onClick={() => setOpenDropdownId(openDropdownId === msg._id ? null : msg._id)}>⋮
-              </button>
-
-              <p>{renderMessageWithLinks(msg.message)}</p>
-              {msg.fileType?.includes('image') && (
-                <img src={msg.fileUrl} alt="chat-img" className="chat-img" />
-              )}
-
-              {msg.fileType?.includes('video') && (
-                <video src={msg.fileUrl} controls className="chat-video" />
-              )}
-
-              {msg.fileType?.includes('audio') && (
-                <audio src={msg.fileUrl} controls className="chat-audio" />
-              )}
-
-              {msg.fileType?.includes('pdf') && (
-                <a href={msg.fileUrl} target="_blank" rel="noopener noreferrer" className="chat-doc-link">
-                  View PDF
-                </a>
-              )}
-
-
-              <b className="timestamp">
-                {new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                {isOwnMessage && (
-                  msg.isSeen ? " ✓✓" :
-                    msg.isDelivered ? " ✓✓ (grey)" :
-                      " ✓"
-                )}
-              </b>
-
-
-
-              {isDropdownOpen && (
-                <div className="option-menu" ref={dropdownRef}>
-                  <ul>
-                    <li><button onClick={() => triggerForwardMode(msg)}>Forward</button></li>
-                    <li>
-                      <button onClick={() => confirmDelete(msg._id)}>Delete</button>
-                    </li>
-
-                    {msg.fileType?.includes('image') ||
-                      msg.fileType?.includes('video') ||
-                      msg.fileType?.includes('audio') ||
-                      msg.fileType?.includes('application') ? (
-                      <li>
-                        <a href={msg.fileUrl} download="" >
-                          Download
-                        </a>
-                      </li>
-                    ) : null}
-                  </ul>
-                </div>
-              )}
-              {showConfirmModal && (
-                <div className="modal-overlay">
-                  <div className="modal-content">
-                    <p>Are you sure you want to delete this message?</p>
-                    <button className="confirm-btn" onClick={deleteMessage}>Yes, Delete</button>
-                    <button className="cancel-btn" onClick={() => setShowConfirmModal(false)}>Cancel</button>
-                  </div>
-                </div>
-              )}
-              {toastMessage && (
-                <div className="toast">{toastMessage}</div>
-              )}
-
-
-            </div>
-          );
-        })}
-        <div ref={messagesEndRef} />
-      </div>
-
-
-      <div className="chat-input-area">
-        <input
-          type="text"
-          value={input}
-          onChange={(e) => {
-
-            const text = e.target.value;
+  const handleTypingLogic = (e) => {
+    const text = e.target.value;
             setInput(text);
 
             if (!socket || !selectedUser) return;
@@ -541,22 +414,213 @@ const ChatWindow = ({ selectedUser, triggerForwardMode, messages, setMessages, o
                 receiverId: selectedUser._id
               });
             }, 1000);
-          }}
+  };
 
-          placeholder="Type a message..."
-          className="chat-input"
-          onKeyDown={handleDynamicEnter}
-          name='message'
-        />
+  return (
+  <div className="flex flex-col h-full bg-gray-50">
 
-        <label className="chat-file-label">
-          📎
-          <input type="file" style={{ display: 'none' }} onChange={handleFileUpload} />
-        </label>
-        <button ref={chatBtn} className="chat-send-btn" onClick={sendMessage}>Send</button>
+    {/* Header */}
+    <div className="flex items-center gap-3 px-4 py-3 border-b bg-white sticky top-0 z-10">
+      {/* Back (mobile only) */}
+      <button
+        onClick={onBack}
+        className="md:hidden text-xl text-gray-600 hover:text-black"
+      >
+        ←
+      </button>
+
+      <div>
+        <h3 className="font-semibold text-sm">
+          {selectedUser.username}
+        </h3>
+        <p className="text-xs text-gray-500">
+          {isTyping
+            ? "typing..."
+            : onlineMap[selectedUser._id]?.isOnline
+              ? "Online"
+              : onlineMap[selectedUser._id]?.lastSeen
+                ? `Last seen ${formatTime(onlineMap[selectedUser._id].lastSeen)}`
+                : "Offline"}
+        </p>
       </div>
     </div>
-  );
+
+    {/* Messages */}
+    <div
+      ref={chatContainerRef}
+      onScroll={handleScroll}
+      className="flex-1 overflow-y-auto px-4 py-3 space-y-3"
+    >
+      {sortedMessages.map((msg, idx) => {
+        const senderId = msg.sender?._id || msg.sender;
+        const isOwnMessage = senderId === currentUserId;
+        const isDropdownOpen = openDropdownId === msg._id;
+
+        return (
+          <div
+            key={msg._id || idx}
+            className={`flex ${isOwnMessage ? "justify-end" : "justify-start"}`}
+          >
+            <div
+              className={`
+                relative max-w-[75%] rounded-xl px-3 py-2 text-sm
+                ${isOwnMessage
+                  ? "bg-green-600 text-white rounded-br-none"
+                  : "bg-white text-gray-800 rounded-bl-none border"}
+              `}
+            >
+              {/* Options */}
+              <button
+                onClick={() =>
+                  setOpenDropdownId(isDropdownOpen ? null : msg._id)
+                }
+                className="absolute -top-2 -right-2 text-xs text-gray-400 hover:text-gray-700"
+              >
+                ⋮
+              </button>
+
+              {/* Message */}
+              <p className="whitespace-pre-wrap break-words">
+                {renderMessageWithLinks(msg.message)}
+              </p>
+
+              {/* Attachments */}
+              {msg.fileType?.includes("image") && (
+                <img
+                  src={msg.fileUrl}
+                  className="mt-2 rounded-lg max-h-60"
+                  alt="chat"
+                />
+              )}
+
+              {msg.fileType?.includes("video") && (
+                <video
+                  src={msg.fileUrl}
+                  controls
+                  className="mt-2 rounded-lg max-h-60"
+                />
+              )}
+
+              {msg.fileType?.includes("audio") && (
+                <audio src={msg.fileUrl} controls className="mt-2 w-full" />
+              )}
+
+              {msg.fileType?.includes("pdf") && (
+                <a
+                  href={msg.fileUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="block mt-2 text-blue-500 underline text-xs"
+                >
+                  View PDF
+                </a>
+              )}
+
+              {/* Timestamp */}
+              <div className="text-[10px] text-right mt-1 opacity-70">
+                {new Date(msg.createdAt).toLocaleTimeString([], {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })}
+                {isOwnMessage &&
+                  (msg.isSeen ? " ✓✓" : msg.isDelivered ? " ✓✓" : " ✓")}
+              </div>
+
+              {/* Dropdown */}
+              {isDropdownOpen && (
+                <div
+                  ref={dropdownRef}
+                  className="absolute right-0 top-6 bg-white border rounded-md shadow-lg text-xs z-20"
+                >
+                  <button
+                    onClick={() => triggerForwardMode(msg)}
+                    className="block px-3 py-2 text-blue-800 w-full text-left hover:bg-gray-100"
+                  >
+                    Forward
+                  </button>
+                  <button
+                    onClick={() => confirmDelete(msg._id)}
+                    className="block px-3 py-2 w-full text-left text-red-500 hover:bg-gray-100"
+                  >
+                    Delete
+                  </button>
+                  {msg.fileUrl && (
+                    <a
+                      href={msg.fileUrl}
+                      download
+                      className="block px-3 py-2 hover:bg-gray-100"
+                    >
+                      Download
+                    </a>
+                  )}
+
+                </div>
+              )}
+              {showConfirmModal && (
+  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+    <div className="bg-white rounded-xl shadow-lg p-6 w-80 max-w-sm text-center space-y-4">
+      <p className="text-gray-800 font-medium">
+        Are you sure you want to delete this message?
+      </p>
+
+      <div className="flex justify-between gap-4 mt-4">
+        <button
+          onClick={deleteMessage}
+          className="flex-1 bg-red-600 text-white py-2 rounded-lg font-semibold hover:bg-red-700 transition"
+        >
+          Yes, Delete
+        </button>
+        <button
+          onClick={() => setShowConfirmModal(false)}
+          className="flex-1 bg-gray-200 text-gray-800 py-2 rounded-lg font-semibold hover:bg-gray-300 transition"
+        >
+          Cancel
+        </button>
+      </div>
+    </div>
+  </div>
+)}
+
+{toastMessage && (
+  <div className="fixed bottom-4 right-4 bg-indigo-600 text-white px-4 py-2 rounded-lg shadow-md animate-slide-in">
+    {toastMessage}
+  </div>
+)}
+
+            </div>
+          </div>
+        );
+      })}
+      <div ref={messagesEndRef} />
+    </div>
+
+    {/* Input */}
+    <div className="flex items-center gap-2 px-3 py-2 border-t bg-white">
+      <input
+        type="text"
+        value={input}
+        onChange={(e)=>{handleTypingLogic(e.target.value)}}
+        onKeyDown={handleDynamicEnter}
+        placeholder="Type a message..."
+        className="flex-1 px-4 py-2 rounded-full border text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+      />
+
+      <label className="cursor-pointer text-xl">
+        📎
+        <input type="file" hidden onChange={handleFileUpload} />
+      </label>
+
+      <button
+        ref={chatBtn}
+        onClick={sendMessage}
+        className="bg-blue-600 text-white px-4 py-2 rounded-full hover:bg-blue-700 transition"
+      >
+        Send
+      </button>
+    </div>
+  </div>
+);
+
 };
 
 export default ChatWindow;

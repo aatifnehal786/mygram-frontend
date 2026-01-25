@@ -152,125 +152,145 @@ const handleDeletePost = async (deletePostId) => {
   if (!loggedUser || !stats) return <p>Loading...</p>;
 
   return (
-    <div className="profile-page">
-      <div className="profile-header">
-        <div className="profile-photo2">
-          <img
-            src={stats.profilePic}
-            alt="Profile"
-            className="profile-photo-img"
-            style={{
-              width: 150,
-              height: 150,
-              borderRadius: "50%",
-              objectFit: "cover",
-              border: "2px solid #ccc",
-              marginTop: '2rem',
-            }}
-          />
-          {isOwnProfile && (
-            <>
-              <button
-                onClick={() => fileInputRef.current.click()}
-                style={{
-                 
-                 
-                  top:"24%",
-                  left:"35%",
-                  backgroundColor: "#fff",
-                  color: "#222",
-                  borderRadius: "50%",
-                  width: "5rem",
-                  height: "4rem",
-                  border: "none",
-                  cursor: "pointer",
-                }}
-                title="Edit Profile Picture"
-              >
-                Edit Profile Pic
-              </button>
-              <input
-                type="file"
-                accept="image/*"
-                ref={fileInputRef}
-                onChange={handleFileChange}
-                style={{ display: "none" }}
-              />
-            </>
-          )}
-        </div>
-        {isUploading && <p>Uploading...</p>}
+  <div className="max-w-5xl mx-auto px-4 py-8">
+
+    {/* ===== Profile Header ===== */}
+    <div className="flex flex-col md:flex-row items-center md:items-start gap-10 border-b pb-8">
+
+      {/* Profile Image */}
+      <div className="relative">
+        <img
+          src={stats.profilePic}
+          alt="Profile"
+          className="w-36 h-36 md:w-40 md:h-40 rounded-full object-cover border"
+        />
+
+        {isOwnProfile && (
+          <>
+            <button
+              onClick={() => fileInputRef.current.click()}
+              className="absolute bottom-2 right-2 bg-white text-sm px-3 py-1 rounded-full shadow hover:bg-gray-100"
+            >
+              Edit
+            </button>
+
+            <input
+              type="file"
+              accept="image/*"
+              ref={fileInputRef}
+              onChange={handleFileChange}
+              className="hidden"
+            />
+          </>
+        )}
       </div>
 
-      <div className="profile-info">
-        <h2>{stats.username}</h2>
-        <p>Posts: {stats.postsCount}</p>
-        <p>Followers: {stats.followersCount}</p>
-        <p>Following: {stats.followingCount}</p>
-        <p>Total Likes: {stats.likesReceived}</p>
+      {/* Profile Info */}
+      <div className="flex-1 space-y-4 text-center md:text-left">
+        <h2 className="text-2xl font-semibold">{stats.username}</h2>
 
-        
-      </div>
-
-   <div className="delete-message">
-       <h3>Posts</h3>
-      {message && <p className={message.text}>{message.data}</p>}
-   </div>
-      
-      {
-      posts.map((post) => (
-        <div key={post._id} className="post">
-          <p>delete post</p>
-         
-          <button onClick={()=>handleDeletePost(post._id)}>Delete</button>
-          
-          <p><strong>{post.caption}</strong></p>
-    {post.mediaUrl.endsWith(".mp4") ? (
-  <video
-    ref={videoRef}
-    controls
-    width="100%"
-    src={post.mediaUrl}
-    onPlay={() => {
-      setCurrentlyPlayingId(null); // Stop music
-    }}
-  />
-) : (
-  <ImagePostWithMusic
-    post={post}
-    currentlyPlayingId={currentlyPlayingId}
-    setCurrentlyPlayingId={setCurrentlyPlayingId}
-    videoRef={videoRef}
-  />
-)}
-
-
-
-
-          
-          <p>Likes: {post.likes.length}</p>
-          <button onClick={() => handleLike(post._id)}>Like</button>
-
-          <div className="comments">
-            {post.comments.map((c, idx) => (
-              <p key={idx}>
-                <strong>{c.commentedBy?.username || "User"}:</strong> {c.text}
-              </p>
-            ))}
-          </div>
-
-          <input
-            type="text"
-            placeholder="Add a comment"
-            onKeyDown={(e) => {
-              if (e.key === "Enter") {
-                handleComment(post._id, e.target.value);
-                e.target.value = "";
-              }
-            }}
-          />
+        <div className="flex justify-center md:justify-start gap-6 text-sm">
+          <span><strong>{stats.postsCount}</strong> posts</span>
+          <span><strong>{stats.followersCount}</strong> followers</span>
+          <span><strong>{stats.followingCount}</strong> following</span>
         </div>
-      ))}
+
+        <p className="text-sm text-gray-600">
+          ❤️ Total Likes: {stats.likesReceived}
+        </p>
+
+        {isUploading && (
+          <p className="text-sm text-indigo-500">Uploading profile picture...</p>
+        )}
+      </div>
     </div>
-  );
+
+    {/* ===== Posts Section ===== */}
+    <div className="mt-10">
+      <h3 className="text-xl font-semibold mb-6">Posts</h3>
+
+      {message && (
+        <p className="text-sm text-red-500 mb-4">{message.data}</p>
+      )}
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {posts.map((post) => (
+          <div
+            key={post._id}
+            className="bg-white border rounded-lg shadow-sm overflow-hidden"
+          >
+
+            {/* Media */}
+            {post.mediaUrl.endsWith(".mp4") ? (
+              <video
+                ref={videoRef}
+                controls
+                className="w-full h-64 object-cover"
+                src={post.mediaUrl}
+                onPlay={() => setCurrentlyPlayingId(null)}
+              />
+            ) : (
+              <ImagePostWithMusic
+                post={post}
+                currentlyPlayingId={currentlyPlayingId}
+                setCurrentlyPlayingId={setCurrentlyPlayingId}
+                videoRef={videoRef}
+              />
+            )}
+
+            {/* Post Content */}
+            <div className="p-4 space-y-3">
+              <p className="font-medium">{post.caption}</p>
+
+              <div className="flex justify-between items-center text-sm">
+                <span>❤️ {post.likes.length}</span>
+
+                <button
+                  onClick={() => handleLike(post._id)}
+                  className="text-indigo-600 hover:underline"
+                >
+                  Like
+                </button>
+              </div>
+
+              {/* Comments */}
+              <div className="space-y-1 text-sm text-gray-700">
+                {post.comments.map((c, idx) => (
+                  <p key={idx}>
+                    <strong>{c.commentedBy?.username || "User"}:</strong>{" "}
+                    {c.text}
+                  </p>
+                ))}
+              </div>
+
+              {/* Add Comment */}
+              <input
+                type="text"
+                placeholder="Add a comment..."
+                className="w-full border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-gray-300"
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    handleComment(post._id, e.target.value);
+                    e.target.value = "";
+                  }
+                }}
+              />
+
+              {/* Delete Post */}
+              {isOwnProfile && (
+                <button
+                  onClick={() => handleDeletePost(post._id)}
+                  className="text-xs text-red-500 hover:underline"
+                >
+                  Delete post
+                </button>
+              )}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  </div>
+);
+
 }

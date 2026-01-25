@@ -112,63 +112,117 @@ const handleVerifyOtp = async () => {
   const showHide = () => setIsPassword((prev) => !prev);
 
   return (
-    <section className="container">
-      {!otpRequired ? (
-        <form className="form" onSubmit={handleSubmit}>
-          <h1>Login</h1>
+  <section className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-50 to-purple-100 px-4">
+    {!otpRequired ? (
+      <form
+        onSubmit={handleSubmit}
+        className="w-full max-w-md bg-white rounded-2xl shadow-xl p-8 space-y-6"
+      >
+        <h1 className="text-3xl font-bold text-center text-gray-800">
+          Login
+        </h1>
+
+        {/* Login ID */}
+        <input
+          type="text"
+          placeholder="Username, Email, or Mobile"
+          required
+          name="loginId"
+          onChange={handleInput}
+          value={user.loginId}
+          className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+        />
+
+        {/* Password */}
+        <div className="relative">
           <input
-            className="inp"
-            type="text"
-            placeholder="Enter Username, Email, or Mobile"
-            required
-            name="loginId"
+            type={isPassword ? "text" : "password"}
+            placeholder="Password"
+            maxLength={16}
             onChange={handleInput}
-            value={user.loginId}
-          />
-          <div className="pass2">
-            <input
-              className="inp"
-              type={isPassword ? "text" : "password"}
-              placeholder="Enter Password"
-              maxLength={16}
-              onChange={handleInput}
-              required
-              name="password"
-              value={user.password}
-            />
-            <img onClick={showHide} src={isPassword ? show : hide} alt="toggle" />
-          </div>
-          <button type="submit" className="btn" disabled={isLoading}>
-            {isLoading ? "Loading..." : "Login"}
-          </button>
-          <div className="form-content">
-            <p>
-              Don't Have an Account ? <Link to="/register">create now</Link>
-            </p>
-            <Link to="/forgot-password">Forgot Password</Link>
-          </div>
-          <p className={message.type}>{message.text}</p>
-        </form>
-      ) : (
-        <form className="form3">
-          <input
-            className="inp"
-            type="text"
-            placeholder="Enter OTP"
             required
-            value={otp}
-            onChange={(e) => setOtp(e.target.value)}
+            name="password"
+            value={user.password}
+            className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500"
           />
-          <button
-            type="button"
-            className="btn"
-            onClick={handleVerifyOtp}
-            disabled={isLoading}
+
+          <img
+            onClick={showHide}
+            src={isPassword ? show : hide}
+            alt="toggle"
+            className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 cursor-pointer opacity-70 hover:opacity-100"
+          />
+        </div>
+
+        {/* Button */}
+        <button
+          type="submit"
+          disabled={isLoading}
+          className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 rounded-lg transition disabled:opacity-60"
+        >
+          {isLoading ? "Logging in..." : "Login"}
+        </button>
+
+        {/* Links */}
+        <div className="text-sm text-center space-y-2">
+          <p>
+            Don’t have an account?{" "}
+            <Link
+              to="/register"
+              className="text-indigo-600 hover:underline font-medium"
+            >
+              Create now
+            </Link>
+          </p>
+
+          <Link
+            to="/forgot-password"
+            className="text-indigo-600 hover:underline font-medium"
           >
-            {isLoading ? "Verifying..." : "Verify OTP"}
-          </button>
-        </form>
-      )}
-    </section>
-  );
+            Forgot Password?
+          </Link>
+        </div>
+
+        {/* Message */}
+        {message?.text && (
+          <p
+            className={`text-center text-sm ${
+              message.type === "error"
+                ? "text-red-500"
+                : "text-green-600"
+            }`}
+          >
+            {message.text}
+          </p>
+        )}
+      </form>
+    ) : (
+      /* OTP FORM */
+      <form className="w-full max-w-sm bg-white rounded-2xl shadow-xl p-8 space-y-6">
+        <h2 className="text-2xl font-bold text-center text-gray-800">
+          Verify OTP
+        </h2>
+
+        <input
+          type="text"
+          placeholder="Enter OTP"
+          required
+          value={otp}
+          onChange={(e) => setOtp(e.target.value)}
+          className="w-full px-4 py-3 rounded-lg border border-gray-300 text-center tracking-widest text-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+        />
+
+        <button
+          type="button"
+          onClick={handleVerifyOtp}
+          disabled={isLoading}
+          className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 rounded-lg transition disabled:opacity-60"
+        >
+          {isLoading ? "Verifying..." : "Verify OTP"}
+        </button>
+      </form>
+    )}
+  </section>
+);
+
 }

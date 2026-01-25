@@ -128,12 +128,17 @@ const forwardMessageToUsers = async (msg, receiverIds) => {
  
 
   return (
-    <div className="chat-container">
+    <div className="flex h-screen w-full bg-gray-100 overflow-hidden">
   {/* Sidebar */}
-  <div className={`sidebar ${selectedUser ? "hide-on-mobile" : ""}`} >
+  <div
+    className={`
+      w-full md:w-1/3 lg:w-1/4
+      bg-white border-r
+      transition-all duration-300
+      ${selectedUser ? "hidden md:block" : "block"}
+    `}
+  >
     <ChatSidebar
-     
-  
       onSelectUser={(user) => {
         if (!isForwarding) {
           setSelectedUser(user);
@@ -149,30 +154,44 @@ const forwardMessageToUsers = async (msg, receiverIds) => {
           forwardMessageToUsers(messageToForward, userIds);
         }
       }}
-       
     />
   </div>
 
   {/* Chat Window */}
-  <div className={`chat-window ${selectedUser ? "show-on-mobile" : ""}`}>
-    {selectedUser && (
+  <div
+    className={`
+      flex-1 bg-gray-50
+      transition-all duration-300
+      ${selectedUser ? "block" : "hidden md:block"}
+    `}
+  >
+    {selectedUser ? (
       <ChatWindow
         selectedUser={selectedUser}
         chatList={chatList}
         messages={messages}
         setMessages={setMessages}
         triggerForwardMode={triggerForwardMode}
-        onBack={() => setSelectedUser(null)} // 👈 important for mobile back button
+        onBack={() => setSelectedUser(null)} // mobile back
       />
+    ) : (
+      <div className="hidden md:flex h-full items-center justify-center text-gray-400">
+        Select a chat to start messaging
+      </div>
     )}
   </div>
 
-
-
-  {message && <p>{message}</p>}
-
+  {/* Toast */}
   <ToastContainer position="bottom-right" autoClose={3000} />
+
+  {/* Optional message */}
+  {message && (
+    <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-black text-white px-4 py-2 rounded-md shadow">
+      {message}
+    </div>
+  )}
 </div>
+
 
   );
 };

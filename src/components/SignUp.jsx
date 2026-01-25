@@ -109,32 +109,119 @@ const handleSubmit = async (e) => {
 
 
 
-    return (
-<section className="container">
-<form className="form">
-<h1>SignUp to Create Account</h1>
+  return (
+  <section className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
+    <form className="w-full max-w-md bg-white border rounded-lg shadow-sm p-8 space-y-6">
 
-<input className="inp" type="text" onChange={handleInput} placeholder="Enter Username" required name="username" value={userDetails.username} />
-<input className="inp" type="email" onChange={handleInput} placeholder="Enter Email" required name="email" value={userDetails.email} />
-<div className="pass1">
-<input className="inp" type={isPassword ? "text" : "password"} onChange={handleInput} placeholder="Enter Password" maxLength={16} required name="password" value={userDetails.password} />
+      <h1 className="text-2xl font-semibold text-center">
+        Sign up to create an account
+      </h1>
 
-    <img onClick={showHide} src={isPassword ? show : hide} alt="" />
-     <div className={`strength ${strength}`}>{getStrengthText()}</div>
-</div>
-<input className="inp" type="text" onChange={handleInput} placeholder="Enter Mobile" minLength={12} required name="mobile" value={userDetails.mobile} />
-<button onClick={handleSubmit} className="btn" disabled={isLoading}>{isLoading ? "Loading..." : "Join"}</button>
+      {/* Username */}
+      <input
+        className="w-full border rounded-md px-4 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-gray-400"
+        type="text"
+        placeholder="Username"
+        required
+        name="username"
+        value={userDetails.username}
+        onChange={handleInput}
+      />
 
-<div className="form-content">
-    <p>Already Registered ? <Link to='/login'>Login</Link></p>
+      {/* Email */}
+      <input
+        className="w-full border rounded-md px-4 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-gray-400"
+        type="email"
+        placeholder="Email"
+        required
+        name="email"
+        value={userDetails.email}
+        onChange={handleInput}
+      />
 
-</div>
-<div className="emailotp">
-    <p><Link to='/emailotp'>verify email to login</Link></p>
-</div>
-<p className={message.type}>{message.text}</p>
-</form>
+      {/* Password */}
+      <div className="relative">
+        <input
+          className="w-full border rounded-md px-4 py-2 text-sm pr-12 focus:outline-none focus:ring-1 focus:ring-gray-400"
+          type={isPassword ? "text" : "password"}
+          placeholder="Password"
+          maxLength={16}
+          required
+          name="password"
+          value={userDetails.password}
+          onChange={handleInput}
+        />
 
-</section>
-    )
+        <img
+          onClick={showHide}
+          src={isPassword ? show : hide}
+          alt="toggle"
+          className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 cursor-pointer opacity-70 hover:opacity-100"
+        />
+
+        <p
+          className={`mt-1 text-xs font-medium ${
+            strength === "weak"
+              ? "text-red-500"
+              : strength === "medium"
+              ? "text-yellow-500"
+              : "text-green-600"
+          }`}
+        >
+          {getStrengthText()}
+        </p>
+      </div>
+
+      {/* Mobile */}
+      <input
+        className="w-full border rounded-md px-4 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-gray-400"
+        type="text"
+        placeholder="Mobile number"
+        minLength={12}
+        required
+        name="mobile"
+        value={userDetails.mobile}
+        onChange={handleInput}
+      />
+
+      {/* Submit */}
+      <button
+        onClick={handleSubmit}
+        disabled={isLoading}
+        className="w-full bg-indigo-600 text-white py-2 rounded-md font-medium hover:bg-indigo-700 transition disabled:opacity-60"
+      >
+        {isLoading ? "Creating account..." : "Join"}
+      </button>
+
+      {/* Login link */}
+      <div className="text-center text-sm">
+        <p>
+          Already registered?{" "}
+          <Link to="/login" className="text-indigo-600 hover:underline">
+            Log in
+          </Link>
+        </p>
+      </div>
+
+      {/* Email OTP */}
+      <div className="text-center text-sm">
+        <Link to="/emailotp" className="text-gray-500 hover:underline">
+          Verify email to login
+        </Link>
+      </div>
+
+      {/* Message */}
+      {message?.text && (
+        <p
+          className={`text-center text-sm ${
+            message.type === "error" ? "text-red-500" : "text-green-600"
+          }`}
+        >
+          {message.text}
+        </p>
+      )}
+    </form>
+  </section>
+);
+
 }

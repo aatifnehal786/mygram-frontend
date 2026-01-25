@@ -65,36 +65,90 @@ export default function EmailOtp() {
     };
 
     return (
-        <section className="container">
-            <form className="form">
-                <h2>Enter Email For Verification</h2>
-                <input
-                    className="inp"
-                    type="email"
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="Enter Email"
-                    required
-                    name="email"
-                    value={email}
-                />
-                <button type="submit" className="btn" disabled={isLoading1} onClick={sendOtp}>
-                    {isLoading1 ? "Loading..." : "send otp"}
-                </button>
-                <input
-                    className="inp"
-                    type="text"
-                    onChange={(e) => setOtp(e.target.value)}
-                    placeholder="Enter OTP"
-                    name="otp"
-                    value={otp}
-                />
+  <section className="min-h-screen flex items-center justify-center bg-gray-100 px-4">
+    <form className="w-full max-w-sm bg-white p-6 rounded-xl shadow-md space-y-4">
 
-                <button type="submit" className="btn" disabled={isLoading2} onClick={verifyOtp}>
-                    {isLoading2 ? "Loading..." : "verify otp"}
-                </button>
-                {message.text && <div><p className={message.type}>{message.text}</p></div>}
-                <p><Link className="link1" to="/login">Go to login page</Link></p>
-            </form>
-        </section>
-    );
+      <h2 className="text-lg font-semibold text-center">
+        Email Verification
+      </h2>
+
+      {/* Email */}
+      <input
+        type="email"
+        placeholder="Enter email"
+        required
+        name="email"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+        className="
+          w-full px-4 py-2 rounded-lg border
+          text-sm
+          focus:outline-none focus:ring-2 focus:ring-blue-500
+        "
+      />
+
+      <button
+        type="button"
+        onClick={sendOtp}
+        disabled={isLoading1}
+        className="
+          w-full bg-blue-600 text-white py-2 rounded-lg text-sm
+          hover:bg-blue-700 transition
+          disabled:opacity-50 disabled:cursor-not-allowed
+        "
+      >
+        {isLoading1 ? "Sending OTP..." : "Send OTP"}
+      </button>
+
+      {/* OTP */}
+      <input
+        type="text"
+        placeholder="Enter OTP"
+        name="otp"
+        value={otp}
+        onChange={(e) => setOtp(e.target.value)}
+        className="
+          w-full px-4 py-2 rounded-lg border
+          text-sm tracking-widest
+          focus:outline-none focus:ring-2 focus:ring-blue-500
+        "
+      />
+
+      <button
+        type="button"
+        onClick={verifyOtp}
+        disabled={isLoading2}
+        className="
+          w-full bg-green-600 text-white py-2 rounded-lg text-sm
+          hover:bg-green-700 transition
+          disabled:opacity-50 disabled:cursor-not-allowed
+        "
+      >
+        {isLoading2 ? "Verifying..." : "Verify OTP"}
+      </button>
+
+      {/* Message */}
+      {message.text && (
+        <p
+          className={`
+            text-center text-sm mt-2
+            ${message.type === "success"
+              ? "text-green-600"
+              : "text-red-600"}
+          `}
+        >
+          {message.text}
+        </p>
+      )}
+
+      {/* Link */}
+      <p className="text-center text-sm text-gray-500">
+        <Link to="/login" className="text-blue-600 hover:underline">
+          Go to login page
+        </Link>
+      </p>
+    </form>
+  </section>
+);
+
 }

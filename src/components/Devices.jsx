@@ -64,53 +64,89 @@ useEffect(() => {
 
 
   return (
-    <section className="container4">
-      <h2>Authorized Devices</h2>
-      {loading && <p>Loading...</p>}
-      {message && <p>{message}</p>}
+  <section className="max-w-4xl mx-auto px-4 py-6">
 
-      {devices.length === 0 ? (
-        <p>No devices found</p>
-      ) : (
-        <>
-          <div className="device-actions">
-            <button
-              className="btn-warning"
-              onClick={removeOtherDevices}
-              disabled={!currentDeviceId}
+    <h2 className="text-xl font-semibold mb-4">
+      Authorized Devices
+    </h2>
+
+    {loading && (
+      <p className="text-sm text-gray-500 mb-3">Loading...</p>
+    )}
+
+    {message && (
+      <p className="text-sm text-green-600 mb-3">{message}</p>
+    )}
+
+    {devices.length === 0 ? (
+      <p className="text-sm text-gray-500">
+        No devices found
+      </p>
+    ) : (
+      <>
+        {/* Actions */}
+        <div className="mb-4 flex flex-wrap gap-2">
+          <button
+            onClick={removeOtherDevices}
+            disabled={!currentDeviceId}
+            className="
+              bg-yellow-500 text-white px-4 py-2 rounded-md text-sm
+              hover:bg-yellow-600 transition
+              disabled:opacity-50 disabled:cursor-not-allowed
+            "
+          >
+            Logout from all other devices
+          </button>
+        </div>
+
+        {/* Device List */}
+        <ul className="space-y-3">
+          {devices.map((device, index) => (
+            <li
+              key={index}
+              className="
+                bg-white border rounded-lg p-4
+                flex flex-col sm:flex-row sm:justify-between sm:items-center
+                gap-3 shadow-sm
+              "
             >
-              Logout from all other devices
-            </button>
-           
-          </div>
+              {/* Info */}
+              <div className="text-sm text-gray-700 space-y-1">
+                <p>
+                  <span className="font-medium">Device ID:</span>{" "}
+                  <span className="break-all">{device.deviceId}</span>
+                </p>
+                <p>
+                  <span className="font-medium">IP:</span> {device.ip}
+                </p>
+                <p>
+                  <span className="font-medium">User Agent:</span>{" "}
+                  {device.userAgent || device.browser}
+                </p>
+                <p className="text-xs text-gray-500">
+                  Last used:{" "}
+                  {new Date(device.lastUsed).toLocaleString()}
+                </p>
+              </div>
 
-          <ul className="device-list">
-            {devices.map((device, index) => (
-              <li key={index} className="device-item">
-                <p>
-                  <strong>Device ID:</strong> {device.deviceId}
-                </p>
-                <p>
-                  <strong>IP:</strong> {device.ip}
-                </p>
-                <p>
-                  <strong>UserAgent:</strong> {device.userAgent || device.browser}
-                </p>
-                <p>
-                  <strong>Last Used:</strong> {new Date(device.lastUsed).toLocaleString()}
-                </p>
-                <button
-                  onClick={() => removeDevice(device.deviceId)}
-                  className="btn-danger"
-                  disabled={device.deviceId === currentDeviceId} // prevent removing current
-                >
-                  Remove
-                </button>
-              </li>
-            ))}
-          </ul>
-        </>
-      )}
-    </section>
-  );
+              {/* Action */}
+              <button
+                onClick={() => removeDevice(device.deviceId)}
+                disabled={device.deviceId === currentDeviceId}
+                className="
+                  bg-red-500 text-white px-4 py-2 rounded-md text-sm
+                  hover:bg-red-600 transition
+                  disabled:opacity-40 disabled:cursor-not-allowed
+                "
+              >
+                Remove
+              </button>
+            </li>
+          ))}
+        </ul>
+      </>
+    )}
+  </section>
+);
+
 }
