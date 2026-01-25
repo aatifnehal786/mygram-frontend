@@ -11,7 +11,7 @@ import { setActiveChat, clearActiveChat } from "../redux/slices/chatSlice";
 
 const ChatWindow = ({ selectedUser, triggerForwardMode, messages, setMessages, onBack }) => {
   const { loggedUser } = useContext(UserContext);
-  const {socket} = useSocket()
+  const { socket } = useSocket()
   const currentUserId = loggedUser?.userid;
   const [input, setInput] = useState('');
   const [openDropdownId, setOpenDropdownId] = useState(null);
@@ -19,57 +19,84 @@ const ChatWindow = ({ selectedUser, triggerForwardMode, messages, setMessages, o
   const dropdownRef = useRef(null);
   const chatBtn = useRef(null)
   const [showConfirmModal, setShowConfirmModal] = useState(false);
-const [messageToDelete, setMessageToDelete] = useState(null);
-const [toastMessage, setToastMessage] = useState('');
-const [isTyping, setIsTyping] = useState(false);
-const typingTimeout = useRef(null);
-const [onlineMap, setOnlineMap] = useState({});
-const dispatch = useDispatch();
+  const [messageToDelete, setMessageToDelete] = useState(null);
+  const [toastMessage, setToastMessage] = useState('');
+  const [isTyping, setIsTyping] = useState(false);
+  const typingTimeout = useRef(null);
+  const [onlineMap, setOnlineMap] = useState({});
+  const dispatch = useDispatch();
+  const chatContainerRef = useRef(null);
 
+  const [limit, setLimit] = useState(20);
+  const [skip, setSkip] = useState(0);
+  const [hasMore, setHasMore] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
 
-
-
-
-
-
-
-useEffect(() => {
-  if (selectedUser?._id) {
-    dispatch(setActiveChat(selectedUser._id));
-  }
-
-  return () => {
-    dispatch(clearActiveChat()); // chat closed
-  };
-}, [selectedUser, dispatch]);
-
-useEffect(() => {
-  if (toastMessage) {
-    const timer = setTimeout(() => setToastMessage(''), 3000);
-    return () => clearTimeout(timer);
-  }
-}, [toastMessage]);
-
-
-// console.log(messages)
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
+    if (!chatContainerRef.current) return;
+
+    const height = chatContainerRef.current.clientHeight;
+    const MESSAGE_HEIGHT = 60; // avg bubble height
+    const calculatedLimit = Math.ceil(height / MESSAGE_HEIGHT);
+
+    setLimit(calculatedLimit);
+  }, []);
+
+
+
+
+
+
+
+
 
   useEffect(() => {
-  const handleClickOutside = (event) => {
-    if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-      setOpenDropdownId(null);
+    if (selectedUser?._id) {
+      dispatch(setActiveChat(selectedUser._id));
     }
-  };
 
-  document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      dispatch(clearActiveChat()); // chat closed
+    };
+  }, [selectedUser, dispatch]);
 
-  return () => {
-    document.removeEventListener('mousedown', handleClickOutside);
-  };
-}, []);
+  useEffect(() => {
+    if (toastMessage) {
+      const timer = setTimeout(() => setToastMessage(''), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [toastMessage]);
+
+
+  // console.log(messages)
+
+ useEffect(() => {
+  if (!chatContainerRef.current) return;
+
+  const container = chatContainerRef.current;
+  const isNearBottom =
+    container.scrollHeight - container.scrollTop - container.clientHeight < 100;
+
+  if (isNearBottom) {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }
+}, [messages]);
+
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setOpenDropdownId(null);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
 
 
 
@@ -91,375 +118,436 @@ useEffect(() => {
     setInput('');
   };
 
- // File upload
-const handleFileUpload = async (e) => {
-  const file = e.target.files[0];
-  if (!file) return;
+  // File upload
+  const handleFileUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
 
-  const formData = new FormData();
-  formData.append("file", file);
+    const formData = new FormData();
+    formData.append("file", file);
 
-  try {
-    const { fileUrl, fileType } = await apiFetch("api/chats/upload", {
-      method: "POST",
-      body: formData,
-    });
-
-    socket.emit("sendMessage", {
-      senderId: currentUserId,
-      receiverId: selectedUser._id,
-      fileUrl,
-      fileType,
-    });
-  } catch (err) {
-    console.error("File upload failed:", err.message);
-    setToastMessage("Failed to upload file.");
-  }
-};
-
-// Delete chat message
-const deleteMessage = async () => {
-  if (!messageToDelete) return;
-
-  try {
-    await apiFetch("api/chats/delete-chat", {
-      method: "DELETE",
-      body: JSON.stringify({ messageIds: [messageToDelete] }),
-    });
-
-    setMessages((prev) => prev.filter((msg) => msg._id !== messageToDelete));
-    setToastMessage("Message deleted successfully.");
-  } catch (err) {
-    console.error("Delete failed:", err.message);
-    setToastMessage("Failed to delete message.");
-  } finally {
-    setShowConfirmModal(false);
-    setMessageToDelete(null);
-  }
-};
-
-
-// use effect for online and offline status
-useEffect(() => {
-  if (!socket) return;
-
-  socket.emit("get-online-users");
-
-  socket.on("online-users", (userIds) => {
-    setOnlineMap(prev => {
-      const map = { ...prev };
-      userIds.forEach(id => {
-        map[id] = { isOnline: true, lastSeen: null };
+    try {
+      const { fileUrl, fileType } = await apiFetch("api/chats/upload", {
+        method: "POST",
+        body: formData,
       });
-      return map;
-    });
-  });
 
-  return () => socket.off("online-users");
-}, [socket]);
-
-
-// use Effect for Typing indicators
-
-useEffect(() => {
-  if (!socket || !selectedUser) return;
-
-  const handleTyping = (senderId) => {
-    if (senderId === selectedUser._id) setIsTyping(true);
-  };
-
-  const handleStopTyping = (senderId) => {
-    if (senderId === selectedUser._id) setIsTyping(false);
-  };
-
-  socket.on("typing", handleTyping);
-  socket.on("stopTyping", handleStopTyping);
-
-  return () => {
-    socket.off("typing", handleTyping);
-    socket.off("stopTyping", handleStopTyping);
-  };
-}, [socket, selectedUser,input]);
-
-
-useEffect(() => {
-  setIsTyping(false); // reset typing when switching users
-}, [selectedUser]);
-
-useEffect(() => {
-  if (selectedUser?._id) {
-    dispatch(setActiveChat(selectedUser._id));
-    dispatch(clearUnread(selectedUser._id));
-  }
-}, [selectedUser]);
-
-useEffect(() => {
-  if (!socket || !selectedUser) return;
-
-  socket.emit("markSeen", {
-    userId: currentUserId,
-    otherUserId: selectedUser._id
-  });
-}, [socket, selectedUser, currentUserId]);
-
-
-
-
-
-const confirmDelete = (msgId) => {
-  setMessageToDelete(msgId);
-  setShowConfirmModal(true);
-};
-
-// Utility function to detect and render links
-const renderMessageWithLinks = (text) => {
-  if (!text) return null;
-
-  // Regex to detect URLs
-  const urlRegex = /(https?:\/\/[^\s]+)/g;
-
-  // Split text by URLs and map
-  return text.split(urlRegex).map((part, index) => {
-    if (part.match(urlRegex)) {
-      return (
-        <a
-          key={index}
-          href={part}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="chat-link"
-        >
-          {part}
-        </a>
-      );
+      socket.emit("sendMessage", {
+        senderId: currentUserId,
+        receiverId: selectedUser._id,
+        fileUrl,
+        fileType,
+      });
+    } catch (err) {
+      console.error("File upload failed:", err.message);
+      setToastMessage("Failed to upload file.");
     }
-    return part;
-  });
-};
+  };
 
-function formatTime(timestamp) {
-  const date = new Date(timestamp);
-  const now = new Date();
+  // Delete chat message
+  const deleteMessage = async () => {
+    if (!messageToDelete) return;
 
-  const isToday =
-    date.getDate() === now.getDate() &&
-    date.getMonth() === now.getMonth() &&
-    date.getFullYear() === now.getFullYear();
+    try {
+      await apiFetch("api/chats/delete-chat", {
+        method: "DELETE",
+        body: JSON.stringify({ messageIds: [messageToDelete] }),
+      });
 
-  const yesterday = new Date();
-  yesterday.setDate(now.getDate() - 1);
+      setMessages((prev) => prev.filter((msg) => msg._id !== messageToDelete));
+      setToastMessage("Message deleted successfully.");
+    } catch (err) {
+      console.error("Delete failed:", err.message);
+      setToastMessage("Failed to delete message.");
+    } finally {
+      setShowConfirmModal(false);
+      setMessageToDelete(null);
+    }
+  };
 
-  const isYesterday =
-    date.getDate() === yesterday.getDate() &&
-    date.getMonth() === yesterday.getMonth() &&
-    date.getFullYear() === yesterday.getFullYear();
 
-  if (isToday) return "Today";
-  if (isYesterday) return "Yesterday";
+  // use effect for online and offline status
+  useEffect(() => {
+    if (!socket) return;
 
-  return date.toLocaleDateString();
-}
+    socket.emit("get-online-users");
+
+    socket.on("online-users", (userIds) => {
+      setOnlineMap(prev => {
+        const map = { ...prev };
+        userIds.forEach(id => {
+          map[id] = { isOnline: true, lastSeen: null };
+        });
+        return map;
+      });
+    });
+
+    return () => socket.off("online-users");
+  }, [socket]);
+
+
+  // use Effect for Typing indicators
+
+  useEffect(() => {
+    if (!socket || !selectedUser) return;
+
+    const handleTyping = (senderId) => {
+      if (senderId === selectedUser._id) setIsTyping(true);
+    };
+
+    const handleStopTyping = (senderId) => {
+      if (senderId === selectedUser._id) setIsTyping(false);
+    };
+
+    socket.on("typing", handleTyping);
+    socket.on("stopTyping", handleStopTyping);
+
+    return () => {
+      socket.off("typing", handleTyping);
+      socket.off("stopTyping", handleStopTyping);
+    };
+  }, [socket, selectedUser, input]);
+
+
+  useEffect(() => {
+    setIsTyping(false); // reset typing when switching users
+  }, [selectedUser]);
+
+  useEffect(() => {
+    if (selectedUser?._id) {
+      dispatch(setActiveChat(selectedUser._id));
+      dispatch(clearUnread(selectedUser._id));
+    }
+  }, [selectedUser]);
+
+  useEffect(() => {
+    if (!socket || !selectedUser) return;
+
+    socket.emit("markSeen", {
+      userId: currentUserId,
+      otherUserId: selectedUser._id
+    });
+  }, [socket, selectedUser, currentUserId]);
+
+
+
+
+
+  const confirmDelete = (msgId) => {
+    setMessageToDelete(msgId);
+    setShowConfirmModal(true);
+  };
+
+  // Utility function to detect and render links
+  const renderMessageWithLinks = (text) => {
+    if (!text) return null;
+
+    // Regex to detect URLs
+    const urlRegex = /(https?:\/\/[^\s]+)/g;
+
+    // Split text by URLs and map
+    return text.split(urlRegex).map((part, index) => {
+      if (part.match(urlRegex)) {
+        return (
+          <a
+            key={index}
+            href={part}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="chat-link"
+          >
+            {part}
+          </a>
+        );
+      }
+      return part;
+    });
+  };
+
+  function formatTime(timestamp) {
+    const date = new Date(timestamp);
+    const now = new Date();
+
+    const isToday =
+      date.getDate() === now.getDate() &&
+      date.getMonth() === now.getMonth() &&
+      date.getFullYear() === now.getFullYear();
+
+    const yesterday = new Date();
+    yesterday.setDate(now.getDate() - 1);
+
+    const isYesterday =
+      date.getDate() === yesterday.getDate() &&
+      date.getMonth() === yesterday.getMonth() &&
+      date.getFullYear() === yesterday.getFullYear();
+
+    if (isToday) return "Today";
+    if (isYesterday) return "Yesterday";
+
+    return date.toLocaleDateString();
+  }
+
+  const loadMessages = async (initial = false) => {
+    if (loadingMore || !hasMore || !selectedUser) return;
+
+    setLoadingMore(true);
+
+    const prevScrollHeight = chatContainerRef.current?.scrollHeight || 0;
+
+    try {
+      const data = await apiFetch(
+        `api/chats/chat/${selectedUser._id}?limit=${limit}&skip=${initial ? 0 : skip}`
+      );
+
+      if (data.length < limit) setHasMore(false);
+
+      setMessages(prev =>
+        initial ? data : [...data, ...prev]
+      );
+
+      setSkip(prev => prev + limit);
+
+      // 🔒 preserve scroll position
+      requestAnimationFrame(() => {
+        if (!initial && chatContainerRef.current) {
+          const newHeight = chatContainerRef.current.scrollHeight;
+          chatContainerRef.current.scrollTop =
+            newHeight - prevScrollHeight;
+        }
+      });
+
+    } catch (err) {
+      console.error("Failed to load messages", err);
+    } finally {
+      setLoadingMore(false);
+    }
+  };
+
+
+  useEffect(() => {
+    if (!selectedUser) return;
+
+    setSkip(0);
+    setHasMore(true);
+    loadMessages(true);
+  }, [selectedUser, limit]);
+
+
+  const handleScroll = () => {
+    if (!chatContainerRef.current) return;
+
+    if (chatContainerRef.current.scrollTop === 0) {
+      loadMessages();
+    }
+  };
+
+
 
   const sortedMessages = [...messages].sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
-const handleDynamicEnter = (e)=>{
-  if(e.key==="Enter"){
-    if(document.activeElement.name==="message"){
-      chatBtn.current.click()
+  const handleDynamicEnter = (e) => {
+    if (e.key === "Enter") {
+      if (document.activeElement.name === "message") {
+        chatBtn.current.click()
+      }
     }
+
   }
 
-}
+  useEffect(() => {
+    if (!socket) return;
 
-useEffect(() => {
-  if (!socket) return;
+    const handler = ({ userId }) => {
+      setMessages(prev =>
+        prev.map(m =>
+          m.sender === currentUserId ? { ...m, isSeen: true } : m
+        )
+      );
+    };
 
-  const handler = ({ userId }) => {
-    setMessages(prev =>
-      prev.map(m =>
-        m.sender === currentUserId ? { ...m, isSeen: true } : m
-      )
-    );
-  };
+    socket.on("messagesSeen", handler);
 
-  socket.on("messagesSeen", handler);
+    return () => {
+      socket.off("messagesSeen", handler);
+    };
+  }, [socket]);
 
-  return () => {
-    socket.off("messagesSeen", handler);
-  };
-}, [socket]);
+  useEffect(() => {
+    if (!socket || !selectedUser) return;
 
-useEffect(() => {
-  if (!socket || !selectedUser) return;
-
-  socket.emit("chatOpen", {
-    chattingWith: selectedUser._id
-  });
-
-  socket.emit("markSeen", {
-    userId: currentUserId,
-    otherUserId: selectedUser._id
-  });
-
-  return () => {
-    socket.emit("chatClose", {
+    socket.emit("chatOpen", {
       chattingWith: selectedUser._id
     });
-  };
-}, [selectedUser, socket]);
+
+    socket.emit("markSeen", {
+      userId: currentUserId,
+      otherUserId: selectedUser._id
+    });
+
+    return () => {
+      socket.emit("chatClose", {
+        chattingWith: selectedUser._id
+      });
+    };
+  }, [selectedUser, socket]);
 
 
   return (
     <div className="chat">
-      
-        <div className="chat-header">
-  <div className="chat-header-left">
-    {/* Back button only for mobile */}
-    <button className="back-btn" onClick={onBack}>←</button>
 
-    <div className="chat-header-user-info">
-      <h3>{selectedUser.username}</h3>
- <p className="user-status">
-  {isTyping ? (
-    "typing..."
-  ) : onlineMap[selectedUser._id]?.isOnline ? (
-    "Online"
-  ) : onlineMap[selectedUser._id]?.lastSeen ? (
-    `Last seen ${formatTime(onlineMap[selectedUser._id].lastSeen)}`
-  ) : (
-    "Offline"
-  )}
-</p>
+      <div className="chat-header">
+        <div className="chat-header-left">
+          {/* Back button only for mobile */}
+          <button className="back-btn" onClick={onBack}>←</button>
 
-
+          <div className="chat-header-user-info">
+            <h3>{selectedUser.username}</h3>
+            <p className="user-status">
+              {isTyping ? (
+                "typing..."
+              ) : onlineMap[selectedUser._id]?.isOnline ? (
+                "Online"
+              ) : onlineMap[selectedUser._id]?.lastSeen ? (
+                `Last seen ${formatTime(onlineMap[selectedUser._id].lastSeen)}`
+              ) : (
+                "Offline"
+              )}
+            </p>
 
 
-    </div>
-  </div>
-</div>
-
-        <div className="chat-messages">
-          {sortedMessages.map((msg, idx) => {
-            const senderId = msg.sender?._id || msg.sender; // handle both cases
-            const isOwnMessage = senderId === currentUserId;
-            const isDropdownOpen = openDropdownId === msg._id;
-           
-
-            return (
-              <div key={msg._id || idx} className={`message-bubble ${isOwnMessage ? 'own' : 'other'}`}>
-               
-
-                <button className="message-options-btn"
-                  onClick={() => setOpenDropdownId(openDropdownId === msg._id ? null : msg._id)}>⋮
-                </button>
-
-               <p>{renderMessageWithLinks(msg.message)}</p>
-{msg.fileType?.includes('image') && (
-  <img src={msg.fileUrl} alt="chat-img" className="chat-img" />
-)}
-
-{msg.fileType?.includes('video') && (
-  <video src={msg.fileUrl} controls className="chat-video" />
-)}
-
-{msg.fileType?.includes('audio') && (
-  <audio src={msg.fileUrl} controls className="chat-audio" />
-)}
-
-{msg.fileType?.includes('pdf') && (
-  <a href={msg.fileUrl} target="_blank" rel="noopener noreferrer" className="chat-doc-link">
-    View PDF
-  </a>
-)}
 
 
-               <b className="timestamp">
-                   { new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                  {isOwnMessage && (
-                    msg.isSeen ? " ✓✓" :
-                      msg.isDelivered ? " ✓✓ (grey)" :
-                        " ✓"
-                  )}
-                </b>
+          </div>
+        </div>
+      </div>
 
-                
+      <div
+        className="chat-messages"
+        ref={chatContainerRef}
+        onScroll={handleScroll}
+      >
+
+        {sortedMessages.map((msg, idx) => {
+          const senderId = msg.sender?._id || msg.sender; // handle both cases
+          const isOwnMessage = senderId === currentUserId;
+          const isDropdownOpen = openDropdownId === msg._id;
+
+
+          return (
+            <div key={msg._id || idx} className={`message-bubble ${isOwnMessage ? 'own' : 'other'}`}>
+
+
+              <button className="message-options-btn"
+                onClick={() => setOpenDropdownId(openDropdownId === msg._id ? null : msg._id)}>⋮
+              </button>
+
+              <p>{renderMessageWithLinks(msg.message)}</p>
+              {msg.fileType?.includes('image') && (
+                <img src={msg.fileUrl} alt="chat-img" className="chat-img" />
+              )}
+
+              {msg.fileType?.includes('video') && (
+                <video src={msg.fileUrl} controls className="chat-video" />
+              )}
+
+              {msg.fileType?.includes('audio') && (
+                <audio src={msg.fileUrl} controls className="chat-audio" />
+              )}
+
+              {msg.fileType?.includes('pdf') && (
+                <a href={msg.fileUrl} target="_blank" rel="noopener noreferrer" className="chat-doc-link">
+                  View PDF
+                </a>
+              )}
+
+
+              <b className="timestamp">
+                {new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                {isOwnMessage && (
+                  msg.isSeen ? " ✓✓" :
+                    msg.isDelivered ? " ✓✓ (grey)" :
+                      " ✓"
+                )}
+              </b>
+
+
 
               {isDropdownOpen && (
-  <div className="option-menu" ref={dropdownRef}>
-    <ul>
-      <li><button onClick={() => triggerForwardMode(msg)}>Forward</button></li>
-      <li>
-  <button onClick={() => confirmDelete(msg._id)}>Delete</button>
-</li>
+                <div className="option-menu" ref={dropdownRef}>
+                  <ul>
+                    <li><button onClick={() => triggerForwardMode(msg)}>Forward</button></li>
+                    <li>
+                      <button onClick={() => confirmDelete(msg._id)}>Delete</button>
+                    </li>
 
-      {msg.fileType?.includes('image') ||
-      msg.fileType?.includes('video') ||
-      msg.fileType?.includes('audio') ||
-      msg.fileType?.includes('application') ? (
-        <li>
-          <a href={msg.fileUrl} download="" >
-            Download
-          </a>
-        </li>
-      ) : null}
-    </ul>
-  </div>
-)}
-{showConfirmModal && (
-  <div className="modal-overlay">
-    <div className="modal-content">
-      <p>Are you sure you want to delete this message?</p>
-      <button className="confirm-btn" onClick={deleteMessage}>Yes, Delete</button>
-      <button className="cancel-btn" onClick={() => setShowConfirmModal(false)}>Cancel</button>
-    </div>
-  </div>
-)}
-{toastMessage && (
-  <div className="toast">{toastMessage}</div>
-)}
+                    {msg.fileType?.includes('image') ||
+                      msg.fileType?.includes('video') ||
+                      msg.fileType?.includes('audio') ||
+                      msg.fileType?.includes('application') ? (
+                      <li>
+                        <a href={msg.fileUrl} download="" >
+                          Download
+                        </a>
+                      </li>
+                    ) : null}
+                  </ul>
+                </div>
+              )}
+              {showConfirmModal && (
+                <div className="modal-overlay">
+                  <div className="modal-content">
+                    <p>Are you sure you want to delete this message?</p>
+                    <button className="confirm-btn" onClick={deleteMessage}>Yes, Delete</button>
+                    <button className="cancel-btn" onClick={() => setShowConfirmModal(false)}>Cancel</button>
+                  </div>
+                </div>
+              )}
+              {toastMessage && (
+                <div className="toast">{toastMessage}</div>
+              )}
 
 
-              </div>
-            );
-          })}
-          <div ref={messagesEndRef} />
-        </div>
-      
+            </div>
+          );
+        })}
+        <div ref={messagesEndRef} />
+      </div>
+
 
       <div className="chat-input-area">
         <input
-  type="text"
-  value={input}
-  onChange={(e) => {
-    
-  const text = e.target.value;
-  setInput(text);
+          type="text"
+          value={input}
+          onChange={(e) => {
 
- if (!socket || !selectedUser) return;
+            const text = e.target.value;
+            setInput(text);
 
-  if (text.length > 0) {
-    socket.emit("typing", {
-      senderId: currentUserId,
-      receiverId: selectedUser._id
-    });
-  }
+            if (!socket || !selectedUser) return;
 
-  clearTimeout(typingTimeout.current);
+            if (text.length > 0) {
+              socket.emit("typing", {
+                senderId: currentUserId,
+                receiverId: selectedUser._id
+              });
+            }
 
-  typingTimeout.current = setTimeout(() => {
-    if (!socket) return;
+            clearTimeout(typingTimeout.current);
 
-    socket.emit("stopTyping", {
-      senderId: currentUserId,
-      receiverId: selectedUser._id
-    });
-  }, 1000);
-}}
+            typingTimeout.current = setTimeout(() => {
+              if (!socket) return;
 
-  placeholder="Type a message..."
-  className="chat-input"
-  onKeyDown={handleDynamicEnter}
-  name='message'
-/>
+              socket.emit("stopTyping", {
+                senderId: currentUserId,
+                receiverId: selectedUser._id
+              });
+            }, 1000);
+          }}
+
+          placeholder="Type a message..."
+          className="chat-input"
+          onKeyDown={handleDynamicEnter}
+          name='message'
+        />
 
         <label className="chat-file-label">
           📎
