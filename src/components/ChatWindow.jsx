@@ -663,7 +663,7 @@ const ChatWindow = ({ selectedUser, triggerForwardMode, messages, setMessages, o
         Send
       </button>
     </div>
-    <VideoCallManager socket={socket} />
+    <VideoCallManager selectedUser={selectedUser} socket={socket} />
   </div>
 );
 

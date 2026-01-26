@@ -6,7 +6,7 @@ import useVideoCallStore from "../store/VideoCallStore"
 import { useContext } from "react"
 import { UserContext } from "../contexts/UserContext"
 
-const VideoCallModal = ({ socket }) => {
+const VideoCallModal = ({ socket, selectedUser }) => {
   const localVideoRef = useRef(null)
   const remoteVideoRef = useRef(null)
     const { loggedUser } = useContext(UserContext);

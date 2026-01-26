@@ -8,7 +8,7 @@ import useVideoCallStore from "../store/VideoCallStore"
 
 
 
-const VideoCallManager = ({ socket }) => {
+const VideoCallManager = ({ socket, selectedUser }) => {
   const { setIncomingCall, setCurrentCall, setCallType, setCallModalOpen, setCallStatus, endCall } = useVideoCallStore()
 const {loggedUser} = useContext(UserContext);
     const callerAvatar = loggedUser.profilePic;
@@ -109,7 +109,7 @@ const {loggedUser} = useContext(UserContext);
     useVideoCallStore.getState().initiateCall = initiateCall
   }, [initiateCall])
 
-  return <VideoCallModal socket={socket} />
+  return <VideoCallModal selectedUser={selectedUser} socket={socket} />
 }
 
 export default VideoCallManager
