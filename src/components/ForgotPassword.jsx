@@ -89,7 +89,7 @@ useEffect(() => {
         
       });
 
-      clearTimeout(timeout);
+      
 
       if (data?.error) {
         setMessage({ type: "error", text: data.error });
@@ -97,8 +97,7 @@ useEffect(() => {
         setMessage({ type: "success", text: data.message || "OTP sent!" });
       }
 
-      // Clear message after 3 seconds
-      setTimeout(() => setMessage({ type: "", text: "" }), 5000);
+      // Clear message after 3 seconds setTimeout(() => setMessage({ type: "", text: "" }), 5000);
 
     } catch (err) {
       console.error("Forgot password error:", err);
