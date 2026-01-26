@@ -85,17 +85,17 @@ const {loggedUser} = useContext(UserContext);
         receiverId,
         callType,
         callerInfo: {
-          username: user.username,
-          profilePicture: user.profilePicture,
+          username: selectedUser?.username,
+          profilePicture: selectedUser?.profilePic,
         },
       })
 
       console.log("Call initiated, currentCall set to:", callData)
     },
     [
-      user._id,
-      user.username,
-      user.profilePicture,
+      selectedUser?._id,
+      selectedUser?.username,
+      selectedUser?.profilePic,
       socket,
       setCurrentCall,
       setCallType,
