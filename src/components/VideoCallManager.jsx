@@ -52,7 +52,7 @@ const {loggedUser} = useContext(UserContext);
   // Memoized function to initiate a call
   const initiateCall = useCallback(
     (receiverId, receiverName, receiverAvatar, callType = "video") => {
-      const callId = `${user._id}-${receiverId}-${Date.now()}`
+      const callId = `${selectedUser._id}-${receiverId}-${Date.now()}`
 
       console.log("Initiating call with:", {
         receiverId,
@@ -81,7 +81,7 @@ const {loggedUser} = useContext(UserContext);
 
       // Emit the call initiation
       socket.emit("initiate_call", {
-        callerId: user._id,
+        callerId: selectedUser._id,
         receiverId,
         callType,
         callerInfo: {
