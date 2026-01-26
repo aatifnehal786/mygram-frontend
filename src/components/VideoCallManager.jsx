@@ -81,7 +81,7 @@ const {loggedUser} = useContext(UserContext);
 
       // Emit the call initiation
       socket.emit("initiate_call", {
-        callerId: loggedUser._id,
+        callerId: loggedUser.userid,
         receiverId,
         callType,
         callerInfo: {
@@ -93,7 +93,7 @@ const {loggedUser} = useContext(UserContext);
       console.log("Call initiated, currentCall set to:", callData)
     },
     [
-      loggedUser?._id,
+      loggedUser?.userid,
       loggedUser?.username,
       loggedUser?.profilePic,
       socket,
