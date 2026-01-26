@@ -294,7 +294,7 @@ const VideoCallModal = ({ socket, selectedUser }) => {
     // Call ended
   const handleCallEnded = () => {
       console.log(" Call ended")
-      endCall()
+      handleEndCall()
     }
 
 
