@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useMemo } from "react"
 import { FaVideo, FaVideoSlash, FaMicrophone, FaMicrophoneSlash, FaPhoneSlash, FaTimes } from "react-icons/fa"
-import {useVideoCallStore} from "../store/VideoCallStore"
+import useVideoCallStore from "../store/VideoCallStore"
 import { useContext } from "react"
 import { UserContext } from "../contexts/UserContext"
 
