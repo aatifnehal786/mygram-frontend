@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useRef, useMemo, useCallback } from "react"
+import { useEffect, useRef, useMemo } from "react"
 import { FaVideo, FaVideoSlash, FaMicrophone, FaMicrophoneSlash, FaPhoneSlash, FaTimes } from "react-icons/fa"
 import useVideoCallStore from "../store/VideoCallStore"
 import { useContext } from "react"
@@ -252,20 +252,18 @@ const VideoCallModal = ({ socket, selectedUser }) => {
   }
 
   // Handle end call
- const handleEndCall = useCallback(() => {
-  const participantId = currentCall?.participantId || incomingCall?.callerId
-  const callId = currentCall?.callId || incomingCall?.callId
+  const handleEndCall = () => {
+    const participantId = currentCall?.participantId || incomingCall?.callerId
+    const callId = currentCall?.callId || incomingCall?.callId
 
-  if (participantId && callId) {
-    socket.emit("end_call", {
-      callId,
-      participantId,
-    })
+    if (participantId && callId) {
+      socket.emit("end_call", {
+        callId: callId,
+        participantId: participantId,
+      })
+    }
+    endCall()
   }
-
-  endCall()
-}, [currentCall, incomingCall, socket, endCall])
-
 
   // Socket event listeners - FIXED
   useEffect(() => {
@@ -291,11 +289,10 @@ const VideoCallModal = ({ socket, selectedUser }) => {
     }
 
     // Call ended
-   const handleCallEnded = ({ callId }) => {
-  console.log("📴 Call ended remotely:", callId)
-  handleEndCall()   // 🔥 NOT endCall()
-}
-
+    const handleCallEnded = () => {
+      console.log(" Call ended")
+      endCall()
+    }
 
     // Receive offer (RECEIVER)
     const handleWebRTCOffer = async ({ offer, senderId, callId }) => {
@@ -385,23 +382,6 @@ const VideoCallModal = ({ socket, selectedUser }) => {
         }
       }
     }
-
-useEffect(() => {
-  if (!socket) return
-
-  const handleCallEnded = ({ callId }) => {
-    console.log("📴 Call ended remotely:", callId)
-    handleEndCall()
-  }
-
-  socket.on("call_ended", handleCallEnded)
-
-  return () => {
-    socket.off("call_ended", handleCallEnded)
-  }
-}, [socket, handleEndCall])
-
-
 
     // Register all event listeners
     socket.on("call_accepted", handleCallAccepted)
