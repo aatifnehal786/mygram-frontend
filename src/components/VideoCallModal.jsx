@@ -264,25 +264,7 @@ const VideoCallModal = ({ socket, selectedUser }) => {
       })
     }
 
-    localStream?.getTracks().forEach(track => track.stop())
-
-  // stop remote stream
-  remoteStream?.getTracks().forEach(track => track.stop())
-
-  // close peer connection
-  if (peerConnection && peerConnection.signalingState !== "closed") {
-    peerConnection.close()
-  }
-
-  setPeerConnection(null)
-  setLocalStream(null)
-  setRemoteStream(null)
-
-  setCallStatus("ended")
-  setCurrentCall(null)
-  setIncomingCall(null)
-
-  navigate("/chat") // 🔥 THIS is what fixes receiver stuck screen
+    
     endCall()
   }
 
