@@ -439,10 +439,10 @@ const VideoCallModal = ({ socket, selectedUser }) => {
                   }}
                 />
               </div>
-              <h2 className={`text-2xl font-semibold mb-2 ${theme === "dark" ? "text-white" : "text-gray-900"}`}>
+              <h2 className={`text-2xl font-semibold mb-2`}>
                 {displayInfo?.name || "Unknown"}
               </h2>
-              <p className={`text-lg ${theme === "dark" ? "text-gray-300" : "text-gray-600"}`}>
+              <p className={`text-lg`}>
                 Incoming {callType} call...
               </p>
             </div>
@@ -515,8 +515,8 @@ const VideoCallModal = ({ socket, selectedUser }) => {
 
             {/* Call Status */}
             <div className="absolute top-4 left-4">
-              <div className={`px-4 py-2 rounded-full ${theme === "dark" ? "bg-gray-800" : "bg-white"} bg-opacity-75`}>
-                <p className={`text-sm ${theme === "dark" ? "text-white" : "text-gray-900"}`}>
+              <div className={`px-4 py-2 rounded-full bg-opacity-75`}>
+                <p className={`text-sm font-medium text-white`}>
                   {callStatus === "connected" ? "Connected" : callStatus}
                 </p>
               </div>
