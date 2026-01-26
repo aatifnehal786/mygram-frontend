@@ -384,20 +384,7 @@ const VideoCallModal = ({ socket, selectedUser }) => {
       }
     }
 
-    useEffect(() => {
-  if (!socket) return
 
-  const handleCallEnded = ({ callId }) => {
-    console.log("📴 Call ended remotely:", callId)
-    handleEndCall()
-  }
-
-  socket.on("call_ended", handleCallEnded)
-
-  return () => {
-    socket.off("call_ended", handleCallEnded)
-  }
-}, [socket, handleEndCall])
 
 
     // Register all event listeners
