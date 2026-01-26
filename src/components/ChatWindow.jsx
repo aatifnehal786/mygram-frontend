@@ -416,6 +416,36 @@ const ChatWindow = ({ selectedUser, triggerForwardMode, messages, setMessages, o
             }, 1000);
   };
 
+  
+  const handleVideoCall = () => {
+    if (selectedUser && onlineMap[selectedUser._id]?.isOnline) {
+      // Get the initiateCall function from the store
+      const { initiateCall } = useVideoCallStore.getState();
+      console.log('this is initial call',initiateCall)
+
+      console.log("Starting video call with selectedContact:", {
+        id: selectedUser._id,
+        name: selectedUser.username,
+        avatar: selectedUser.profilePic, // This should be the URL, not "video"
+        fullContact: selectedUser,
+      });
+
+      // Make sure we're passing the correct profile picture URL
+      const avatarUrl =
+        selectedUser.profilePic ||
+        "/placeholder.svg?height=128&width=128";
+
+      initiateCall(
+        selectedUser._id,
+        selectedUser.username,
+        avatarUrl, // Pass the actual URL, not "video"
+        "video"
+      );
+    } else {
+      alert("User is offline. Cannot initiate video call.");
+    }
+  };
+
   return (
   <div className="flex flex-col h-full bg-gray-50">
 
