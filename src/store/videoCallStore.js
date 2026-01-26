@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { subscribeWithSelector } from "zustand/middleware";
 
-const useVideoCallStore = create(
+export const useVideoCallStore = create(
   subscribeWithSelector((set, get) => ({
     // Call state
     currentCall: null,
@@ -157,4 +157,4 @@ const useVideoCallStore = create(
   }))
 );
 
-export default useVideoCallStore;
+

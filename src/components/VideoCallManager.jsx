@@ -1,10 +1,11 @@
 "use client"
 
 import { useEffect, useCallback } from "react"
-import useVideoCallStore from "../store/VideoCallStore"
 import VideoCallModal from "./VideoCallModal"
 import { useContext } from "react"
 import { UserContext } from "../contexts/UserContext"
+import {useVideoCallStore} from "../store/VideoCallStore"
+
 
 const VideoCallManager = ({ socket }) => {
   const { setIncomingCall, setCurrentCall, setCallType, setCallModalOpen, setCallStatus, endCall } = useVideoCallStore()
