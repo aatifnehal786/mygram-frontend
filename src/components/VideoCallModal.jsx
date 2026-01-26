@@ -289,10 +289,11 @@ const VideoCallModal = ({ socket, selectedUser }) => {
     }
 
     // Call ended
-    const handleCallEnded = () => {
-      console.log(" Call ended")
-      endCall()
-    }
+   const handleCallEnded = ({ callId }) => {
+  console.log("📴 Call ended remotely:", callId)
+  handleEndCall()   // 🔥 NOT endCall()
+}
+
 
     // Receive offer (RECEIVER)
     const handleWebRTCOffer = async ({ offer, senderId, callId }) => {
