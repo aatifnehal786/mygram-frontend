@@ -421,9 +421,7 @@ const VideoCallModal = ({ socket, selectedUser }) => {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75">
       <div
-        className={`relative w-full h-full max-w-4xl max-h-3xl rounded-lg overflow-hidden ${
-          theme === "dark" ? "bg-gray-900" : "bg-white"
-        }`}
+        className={`relative w-full h-full max-w-4xl max-h-3xl rounded-lg overflow-hidden`}
       >
         {/* Incoming Call UI */}
         {incomingCall && !isCallActive && (
