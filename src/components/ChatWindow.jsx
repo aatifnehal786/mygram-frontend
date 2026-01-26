@@ -477,7 +477,7 @@ const ChatWindow = ({ selectedUser, triggerForwardMode, messages, setMessages, o
             <button
               className="focus:outline-none"
               onClick={handleVideoCall}
-              title={online ? "Start video call" : "User is offline"}
+              title={selectedUser.isOnline ? "Start video call" : "User is offline"}
             >
               <FaVideo
                 className={`h-5 w-5 text-green-500 hover:text-green-600`}
