@@ -292,10 +292,10 @@ const VideoCallModal = ({ socket, selectedUser }) => {
     }
 
     // Call ended
-   const handleCallEnded = ({ callId }) => {
-  console.log("📴 Call ended remotely:", callId)
-  handleEndCall()   // 🔥 NOT endCall()
-}
+  const handleCallEnded = () => {
+      console.log(" Call ended")
+      endCall()
+    }
 
 
     // Receive offer (RECEIVER)
