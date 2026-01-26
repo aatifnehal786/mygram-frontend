@@ -252,18 +252,20 @@ const VideoCallModal = ({ socket, selectedUser }) => {
   }
 
   // Handle end call
-  const handleEndCall = () => {
-    const participantId = currentCall?.participantId || incomingCall?.callerId
-    const callId = currentCall?.callId || incomingCall?.callId
+ const handleEndCall = useCallback(() => {
+  const participantId = currentCall?.participantId || incomingCall?.callerId
+  const callId = currentCall?.callId || incomingCall?.callId
 
-    if (participantId && callId) {
-      socket.emit("end_call", {
-        callId: callId,
-        participantId: participantId,
-      })
-    }
-    endCall()
+  if (participantId && callId) {
+    socket.emit("end_call", {
+      callId,
+      participantId,
+    })
   }
+
+  endCall()
+}, [currentCall, incomingCall, socket, endCall])
+
 
   // Socket event listeners - FIXED
   useEffect(() => {
@@ -384,6 +386,20 @@ const VideoCallModal = ({ socket, selectedUser }) => {
       }
     }
 
+useEffect(() => {
+  if (!socket) return
+
+  const handleCallEnded = ({ callId }) => {
+    console.log("📴 Call ended remotely:", callId)
+    handleEndCall()
+  }
+
+  socket.on("call_ended", handleCallEnded)
+
+  return () => {
+    socket.off("call_ended", handleCallEnded)
+  }
+}, [socket, handleEndCall])
 
 
 
