@@ -52,7 +52,7 @@ const {loggedUser} = useContext(UserContext);
   // Memoized function to initiate a call
   const initiateCall = useCallback(
     (receiverId, receiverName, receiverAvatar, callType = "video") => {
-      const callId = `${loggedUser._id}-${receiverId}-${Date.now()}`
+      const callId = `${loggedUser.userid}-${receiverId}-${Date.now()}`
 
       console.log("Initiating call with:", {
         receiverId,
