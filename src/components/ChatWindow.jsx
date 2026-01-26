@@ -7,6 +7,7 @@ import { useDispatch } from "react-redux";
 import { clearUnread } from "../redux/slices/notificationSlice";
 import { setActiveChat, clearActiveChat } from "../redux/slices/chatSlice";
 import { FaVideo, FaEllipsisV } from 'react-icons/fa';
+import VideoCallManager from './VideoCallManager';
 
 
 const ChatWindow = ({ selectedUser, triggerForwardMode, messages, setMessages, onBack }) => {
