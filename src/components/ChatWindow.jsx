@@ -393,30 +393,27 @@ const ChatWindow = ({ selectedUser, triggerForwardMode, messages, setMessages, o
     };
   }, [selectedUser, socket]);
 
-  const handleTypingLogic = (e) => {
-    const text = e.target.value;
-            setInput(text);
+  const handleTypingLogic = (text) => {
+  setInput(text);
 
-            if (!socket || !selectedUser) return;
+  if (!socket || !selectedUser) return;
 
-            if (text.length > 0) {
-              socket.emit("typing", {
-                senderId: currentUserId,
-                receiverId: selectedUser._id
-              });
-            }
+  if (text.length > 0) {
+    socket.emit("typing", {
+      senderId: currentUserId,
+      receiverId: selectedUser._id,
+    });
+  }
 
-            clearTimeout(typingTimeout.current);
+  clearTimeout(typingTimeout.current);
 
-            typingTimeout.current = setTimeout(() => {
-              if (!socket) return;
-
-              socket.emit("stopTyping", {
-                senderId: currentUserId,
-                receiverId: selectedUser._id
-              });
-            }, 1000);
-  };
+  typingTimeout.current = setTimeout(() => {
+    socket.emit("stopTyping", {
+      senderId: currentUserId,
+      receiverId: selectedUser._id,
+    });
+  }, 1000);
+};
 
   
   const handleVideoCall = () => {
@@ -645,7 +642,7 @@ const ChatWindow = ({ selectedUser, triggerForwardMode, messages, setMessages, o
       <input
         type="text"
         value={input}
-        onChange={(e)=>{handleTypingLogic}}
+        onChange={(e) => handleTypingLogic(e.target.value)}
         onKeyDown={handleDynamicEnter}
         placeholder="Type a message..."
         className="flex-1 px-4 py-2 rounded-full border text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
