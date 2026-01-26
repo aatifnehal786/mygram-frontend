@@ -6,7 +6,7 @@ import { SocketProvider, useSocket } from '../contexts/SocketContext';
 import { useDispatch } from "react-redux";
 import { clearUnread } from "../redux/slices/notificationSlice";
 import { setActiveChat, clearActiveChat } from "../redux/slices/chatSlice";
-
+import { FaVideo, FaEllipsisV } from 'react-icons/fa';
 
 
 const ChatWindow = ({ selectedUser, triggerForwardMode, messages, setMessages, onBack }) => {
@@ -443,6 +443,20 @@ const ChatWindow = ({ selectedUser, triggerForwardMode, messages, setMessages, o
                 : "Offline"}
         </p>
       </div>
+       <div className="flex items-center space-x-4">
+            <button
+              className="focus:outline-none"
+              onClick={handleVideoCall}
+              title={online ? "Start video call" : "User is offline"}
+            >
+              <FaVideo
+                className={`h-5 w-5 text-green-500 hover:text-green-600`}
+              />
+            </button>
+            <button className="focus:outline-none">
+              <FaEllipsisV className="h-5 w-5" />
+            </button>
+          </div>
     </div>
 
     {/* Messages */}
