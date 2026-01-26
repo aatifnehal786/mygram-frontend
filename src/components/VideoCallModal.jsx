@@ -289,10 +289,11 @@ const VideoCallModal = ({ socket, selectedUser }) => {
     }
 
     // Call ended
-    const handleCallEnded = () => {
-      console.log(" Call ended")
-      endCall()
-    }
+   const handleCallEnded = ({ callId }) => {
+  console.log("📴 Call ended remotely:", callId)
+  handleEndCall()   // 🔥 NOT endCall()
+}
+
 
     // Receive offer (RECEIVER)
     const handleWebRTCOffer = async ({ offer, senderId, callId }) => {
@@ -382,6 +383,22 @@ const VideoCallModal = ({ socket, selectedUser }) => {
         }
       }
     }
+
+    useEffect(() => {
+  if (!socket) return
+
+  const handleCallEnded = ({ callId }) => {
+    console.log("📴 Call ended remotely:", callId)
+    handleEndCall()
+  }
+
+  socket.on("call_ended", handleCallEnded)
+
+  return () => {
+    socket.off("call_ended", handleCallEnded)
+  }
+}, [socket, handleEndCall])
+
 
     // Register all event listeners
     socket.on("call_accepted", handleCallAccepted)
