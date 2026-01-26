@@ -4,11 +4,13 @@ import { useEffect, useCallback } from "react"
 import useVideoCallStore from "../../store/videoCallStore"
 import useUserStore from "../../store/useUserStore"
 import VideoCallModal from "./VideoCallModal"
+import { useContext } from "react"
+import { UserContext } from "../contexts/UserContext"
 
 const VideoCallManager = ({ socket }) => {
   const { setIncomingCall, setCurrentCall, setCallType, setCallModalOpen, setCallStatus, endCall } = useVideoCallStore()
-
-  const { user } = useUserStore()
+const {loggedUser} = useContext(UserContext);
+    const callerAvatar = loggedUser.profilePic;
 
   useEffect(() => {
     if (!socket) return
