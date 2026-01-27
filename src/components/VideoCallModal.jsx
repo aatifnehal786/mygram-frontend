@@ -110,17 +110,18 @@ const VideoCallModal = ({ socket, selectedUser }) => {
 
 
   // useEffect to track call duration
-  useEffect(() => {
-  if (!isCallActive) return
-
-  setCallStartTime(Date.now())
+ useEffect(() => {
+  if (!isCallActive || !callStartTime) return
 
   const interval = setInterval(() => {
-    setCallDuration(Math.floor((Date.now() - callStartTime) / 1000))
+    setCallDuration(
+      Math.floor((Date.now() - callStartTime) / 1000)
+    )
   }, 1000)
 
   return () => clearInterval(interval)
-}, [isCallActive])
+}, [isCallActive, callStartTime])
+
 
 
   // Initialize media stream
@@ -171,12 +172,7 @@ const VideoCallModal = ({ socket, selectedUser }) => {
         }
       }
     }
-    pc.ontrack = () => {
-      if (!callStartTime) {
-        setCallStartTime(Date.now())
-        setCallActive(true)
-      }
-    }
+
 
     // Handle remote stream - CRITICAL FIX
     pc.ontrack = (event) => {
@@ -188,6 +184,11 @@ const VideoCallModal = ({ socket, selectedUser }) => {
         const stream = new MediaStream([event.track])
         setRemoteStream(stream)
       }
+      setCallStartTime((prev) => {
+        if (prev) return prev   // prevents double start
+        setCallActive(true)
+        return Date.now()
+      })
     }
 
 
@@ -559,9 +560,10 @@ const VideoCallModal = ({ socket, selectedUser }) => {
             {callType === "video" && localStream && (
               <div className="absolute top-4 right-4 w-48 h-36 bg-gray-800 rounded-lg overflow-hidden border-2 border-white">
                 <video ref={localVideoRef} autoPlay playsInline muted className="w-full h-full object-cover" />
-                <div className="text-white text-sm font-mono">
+                <div className="absolute bottom-1 right-1 bg-black/60 px-2 py-0.5 rounded text-xs font-mono text-white">
                   {formatTime(callDuration)}
                 </div>
+
               </div>
             )}
 
