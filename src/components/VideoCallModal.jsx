@@ -3,13 +3,17 @@
 import { useEffect, useRef, useMemo, useState } from "react"
 import { FaVideo, FaVideoSlash, FaMicrophone, FaMicrophoneSlash, FaPhoneSlash, FaTimes } from "react-icons/fa"
 import useVideoCallStore from "../store/VideoCallStore"
+import { useContext } from "react"
+import { UserContext } from "../context/UserContext"
 
 
 const VideoCallModal = ({ socket, selectedUser }) => {
+  const { loggedUser } = useContext(UserContext);
   const localVideoRef = useRef(null)
   const remoteVideoRef = useRef(null)
   const [callStartTime, setCallStartTime] = useState(null)
   const [callDuration, setCallDuration] = useState(0)
+  
   
 
  
