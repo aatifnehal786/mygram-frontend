@@ -11,6 +11,8 @@ const VideoCallModal = ({ socket, selectedUser }) => {
   const remoteVideoRef = useRef(null)
   const [callStartTime, setCallStartTime] = useState(null)
   const [callDuration, setCallDuration] = useState(0)
+  const [stats, setStats] = useState(null);
+  const targetUserId =  loggedUser?.userid;
 
   const { loggedUser } = useContext(UserContext);
 
@@ -40,6 +42,22 @@ const VideoCallModal = ({ socket, selectedUser }) => {
     processQueuedIceCandidates,
     setIncomingCall
   } = useVideoCallStore()
+
+
+  // useEffect of current user stats
+  useEffect(() => {
+    const fetchStats = async () => {
+      if (!targetUserId || !loggedUser?.token) return;
+      try {
+        const statsData = await apiFetch(`api/user/stats/${targetUserId}`);
+        setStats(statsData);
+      } catch (err) {
+        console.error("Failed to fetch stats:", err);
+      }
+    };
+    fetchStats();
+  }
+, [targetUserId, loggedUser]);
 
 
   // The rtcConfiguration object you posted is used to configure a WebRTC peer-to-peer connection. 
@@ -478,8 +496,8 @@ const VideoCallModal = ({ socket, selectedUser }) => {
             <div className="text-center mb-8">
               <div className="w-32 h-32 rounded-full bg-gray-300 mx-auto mb-4 overflow-hidden">
                 <img
-                  src={displayInfo?.avatar || "/placeholder.svg?height=128&width=128"}
-                  alt={displayInfo?.name || "Unknown"}
+                  src={stats?.profilePic || "/placeholder.svg?height=128&width=128"}
+                  alt={stats?.username || "Unknown"}
                   className="w-full h-full object-cover"
                   onError={(e) => {
                     e.target.src = "/placeholder.svg?height=128&width=128"
@@ -487,7 +505,7 @@ const VideoCallModal = ({ socket, selectedUser }) => {
                 />
               </div>
               <h2 className={`text-2xl font-semibold mb-2`}>
-                {displayInfo?.name || "Unknown"}
+                {stats?.username || "Unknown"}
               </h2>
               <p className={`text-lg`}>
                 Incoming {callType} call...
