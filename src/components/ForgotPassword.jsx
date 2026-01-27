@@ -185,6 +185,7 @@ const handleResetPassword = async () => {
         ref={buttonRef1}
         type="button"
         onClick={Forgotpassword}
+        disabled={isLoading}
         className="
           w-full bg-blue-600 text-white py-2 rounded-lg text-sm
           hover:bg-blue-700 transition
