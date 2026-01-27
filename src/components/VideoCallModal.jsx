@@ -4,7 +4,7 @@ import { useEffect, useRef, useMemo, useState } from "react"
 import { FaVideo, FaVideoSlash, FaMicrophone, FaMicrophoneSlash, FaPhoneSlash, FaTimes } from "react-icons/fa"
 import useVideoCallStore from "../store/VideoCallStore"
 import { useContext } from "react"
-import { UserContext } from "../context/UserContext"
+import { UserContext } from '../contexts/UserContext';
 
 
 const VideoCallModal = ({ socket, selectedUser }) => {
