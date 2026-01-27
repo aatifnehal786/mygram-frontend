@@ -5,6 +5,7 @@ import { FaVideo, FaVideoSlash, FaMicrophone, FaMicrophoneSlash, FaPhoneSlash, F
 import useVideoCallStore from "../store/VideoCallStore"
 import { useContext } from "react"
 import { UserContext } from "../contexts/UserContext"
+import { apiFetch } from "../api/apiFetch"; // 👈 adjust path as needed
 
 const VideoCallModal = ({ socket, selectedUser }) => {
   const localVideoRef = useRef(null)
@@ -12,9 +13,10 @@ const VideoCallModal = ({ socket, selectedUser }) => {
   const [callStartTime, setCallStartTime] = useState(null)
   const [callDuration, setCallDuration] = useState(0)
   const [stats, setStats] = useState(null);
+  const { loggedUser } = useContext(UserContext);
   const targetUserId =  loggedUser?.userid;
 
-  const { loggedUser } = useContext(UserContext);
+ 
 
   const {
     currentCall,
@@ -542,6 +544,7 @@ const VideoCallModal = ({ socket, selectedUser }) => {
               />
               
             )}
+           
             
 
 
@@ -551,8 +554,8 @@ const VideoCallModal = ({ socket, selectedUser }) => {
                 <div className="text-center">
                   <div className="w-32 h-32 rounded-full bg-gray-600 mx-auto mb-4 overflow-hidden">
                     <img
-                      src={displayInfo?.avatar || "/placeholder.svg?height=128&width=128"}
-                      alt={displayInfo?.name || "Unknown"}
+                      src={stats?.profilePic || "/placeholder.svg?height=128&width=128"}
+                      alt={stats?.username || "Unknown"}
                       className="w-full h-full object-cover"
                       onError={(e) => {
                         e.target.src = "/placeholder.svg?height=128&width=128"
