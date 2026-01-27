@@ -9,7 +9,10 @@ import { UserContext } from "../contexts/UserContext"
 const VideoCallModal = ({ socket, selectedUser }) => {
   const localVideoRef = useRef(null)
   const remoteVideoRef = useRef(null)
-    const { loggedUser } = useContext(UserContext);
+  const [callStartTime, setCallStartTime] = useState(null)
+  const [callDuration, setCallDuration] = useState(0)
+
+  const { loggedUser } = useContext(UserContext);
 
   const {
     currentCall,
@@ -50,6 +53,22 @@ const VideoCallModal = ({ socket, selectedUser }) => {
     ],
   }
 
+  // format time duration in mm:ss
+  const formatTime = (seconds) => {
+  const hrs = Math.floor(seconds / 3600)
+  const mins = Math.floor((seconds % 3600) / 60)
+  const secs = seconds % 60
+
+  return [
+    hrs > 0 ? String(hrs).padStart(2, "0") : null,
+    String(mins).padStart(2, "0"),
+    String(secs).padStart(2, "0"),
+  ]
+    .filter(Boolean)
+    .join(":")
+}
+
+
   // Memoize display info to prevent unnecessary re-renders
   const displayInfo = useMemo(() => {
     if (incomingCall && !isCallActive) {
@@ -88,6 +107,21 @@ const VideoCallModal = ({ socket, selectedUser }) => {
       remoteVideoRef.current.srcObject = remoteStream
     }
   }, [remoteStream])
+
+
+  // useEffect to track call duration
+  useEffect(() => {
+  if (!isCallActive) return
+
+  setCallStartTime(Date.now())
+
+  const interval = setInterval(() => {
+    setCallDuration(Math.floor((Date.now() - callStartTime) / 1000))
+  }, 1000)
+
+  return () => clearInterval(interval)
+}, [isCallActive])
+
 
   // Initialize media stream
   const initializeMedia = async (video = true) => {
@@ -149,6 +183,7 @@ const VideoCallModal = ({ socket, selectedUser }) => {
         setRemoteStream(stream)
       }
     }
+
 
     // Connection state monitoring
     pc.onconnectionstatechange = () => {
@@ -263,6 +298,9 @@ const VideoCallModal = ({ socket, selectedUser }) => {
         participantId: participantId,
       })
     }
+
+    setCallStartTime(null)
+    setCallDuration(0)
 
     
     endCall()
@@ -477,7 +515,10 @@ const VideoCallModal = ({ socket, selectedUser }) => {
                 playsInline
                 className={`w-full h-full object-cover bg-gray-800 ${remoteStream ? "block" : "hidden"}`}
               />
+              
             )}
+            
+
 
             {/* Avatar/Status Display */}
             {(!remoteStream || callType !== "video") && (
@@ -512,6 +553,9 @@ const VideoCallModal = ({ socket, selectedUser }) => {
             {callType === "video" && localStream && (
               <div className="absolute top-4 right-4 w-48 h-36 bg-gray-800 rounded-lg overflow-hidden border-2 border-white">
                 <video ref={localVideoRef} autoPlay playsInline muted className="w-full h-full object-cover" />
+                <div className="text-white text-sm font-mono">
+                  {formatTime(callDuration)}
+                </div>
               </div>
             )}
 
