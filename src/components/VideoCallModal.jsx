@@ -3,18 +3,14 @@
 import { useEffect, useRef, useMemo, useState } from "react"
 import { FaVideo, FaVideoSlash, FaMicrophone, FaMicrophoneSlash, FaPhoneSlash, FaTimes } from "react-icons/fa"
 import useVideoCallStore from "../store/VideoCallStore"
-import { useContext } from "react"
-import { UserContext } from "../contexts/UserContext"
-import { apiFetch } from "../api/apiFetch"; // 👈 adjust path as needed
+
 
 const VideoCallModal = ({ socket, selectedUser }) => {
   const localVideoRef = useRef(null)
   const remoteVideoRef = useRef(null)
   const [callStartTime, setCallStartTime] = useState(null)
   const [callDuration, setCallDuration] = useState(0)
-  const [stats, setStats] = useState(null);
-  const { loggedUser } = useContext(UserContext);
-  const targetUserId =  loggedUser?.userid;
+  
 
  
 
@@ -46,20 +42,7 @@ const VideoCallModal = ({ socket, selectedUser }) => {
   } = useVideoCallStore()
 
 
-  // useEffect of current user stats
-  useEffect(() => {
-    const fetchStats = async () => {
-      if (!targetUserId || !loggedUser?.token) return;
-      try {
-        const statsData = await apiFetch(`api/user/stats/${targetUserId}`);
-        setStats(statsData);
-      } catch (err) {
-        console.error("Failed to fetch stats:", err);
-      }
-    };
-    fetchStats();
-  }
-, [targetUserId, loggedUser]);
+  
 
 
   // The rtcConfiguration object you posted is used to configure a WebRTC peer-to-peer connection. 
@@ -499,8 +482,8 @@ const VideoCallModal = ({ socket, selectedUser }) => {
             <div className="text-center mb-8">
               <div className="w-32 h-32 rounded-full bg-gray-300 mx-auto mb-4 overflow-hidden">
                 <img
-                  src={stats?.profilePic || "/placeholder.svg?height=128&width=128"}
-                  alt={stats?.username || "Unknown"}
+                  src={selectedUser?.profilePic|| "/placeholder.svg?height=128&width=128"}
+                  alt={selectedUser?.username || "Unknown"}
                   className="w-full h-full object-cover"
                   onError={(e) => {
                     e.target.src = "/placeholder.svg?height=128&width=128"
@@ -508,7 +491,7 @@ const VideoCallModal = ({ socket, selectedUser }) => {
                 />
               </div>
               <h2 className={`text-2xl font-semibold mb-2`}>
-                {stats?.username || "Unknown"}
+                {selectedUser?.username|| "Unknown"}
               </h2>
               <p className={`text-lg`}>
                 Incoming {callType} call...
@@ -544,7 +527,11 @@ const VideoCallModal = ({ socket, selectedUser }) => {
                 className={`w-full h-full object-cover bg-gray-800 ${remoteStream ? "block" : "hidden"}`}
               />
               
+              
             )}
+            <div className="absolute bottom-1 right-1 bg-black/60 px-2 py-0.5 rounded text-xs font-mono text-white">
+                  {formatTime(callDuration)}
+                </div>
            
             
 
@@ -555,8 +542,8 @@ const VideoCallModal = ({ socket, selectedUser }) => {
                 <div className="text-center">
                   <div className="w-32 h-32 rounded-full bg-gray-600 mx-auto mb-4 overflow-hidden">
                     <img
-                      src={stats?.profilePic || "/placeholder.svg?height=128&width=128"}
-                      alt={stats?.username || "Unknown"}
+                      src={selectedUser?.profilePic || "/placeholder.svg?height=128&width=128"}
+                      alt={selectedUser?.username || "Unknown"}
                       className="w-full h-full object-cover"
                       onError={(e) => {
                         e.target.src = "/placeholder.svg?height=128&width=128"
