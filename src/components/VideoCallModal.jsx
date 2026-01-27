@@ -171,6 +171,12 @@ const VideoCallModal = ({ socket, selectedUser }) => {
         }
       }
     }
+    pc.ontrack = () => {
+      if (!callStartTime) {
+        setCallStartTime(Date.now())
+        setCallActive(true)
+      }
+    }
 
     // Handle remote stream - CRITICAL FIX
     pc.ontrack = (event) => {
