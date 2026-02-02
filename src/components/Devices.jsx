@@ -31,6 +31,8 @@ const removeDevice = async (deviceId) => {
    
       setDevices(data.devices || []); // ensure array
       setMessage("Device removed successfully");
+      localStorage.removeItem("deviceId");
+      setDevices([])
       setTimeout(() => setMessage(""), 5000)
    ;
     
