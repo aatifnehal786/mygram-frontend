@@ -15,7 +15,7 @@ export default function EmailOtp() {
 
         if (!email) {
             setMessage({ type: "error", text: "Email is required" });
-            setTimeout(() => setMessage({ type: "", text: "" }), 3000);
+            setTimeout(() => {setMessage({ type: "", text: "" }),setEmail("")}, 5000);
             return;
         }
 
@@ -42,7 +42,11 @@ export default function EmailOtp() {
 
         if (!email || !otp) {
             setMessage({ type: "error", text: "Email and OTP are required" });
-            setTimeout(() => setMessage({ type: "", text: "" }), 3000);
+            setTimeout(() => {
+                setMessage({ type: "", text: "" });
+                setEmail("");
+                setOtp("");
+            }, 5000);
             return;
         }
 
@@ -55,7 +59,11 @@ export default function EmailOtp() {
             });
 
             setMessage({ type: "success", text: "OTP verified successfully" });
-            setTimeout(() => setMessage({ type: "", text: "" }), 5000);
+             setTimeout(() => {
+                setMessage({ type: "", text: "" });
+                setEmail("");
+                setOtp("");
+            }, 5000);
         } catch (err) {
             console.error("Verify OTP error:", err);
             setMessage({ type: "error", text: err.message || "Failed to verify OTP" });
