@@ -31,6 +31,7 @@ const removeDevice = async (deviceId) => {
    
       setDevices(data.devices || []); // ensure array
       setMessage("Device removed successfully");
+      setTimeout(() => setMessage(""), 5000)
    ;
     
   } catch (err) {
@@ -48,6 +49,7 @@ const removeOtherDevices = async () => {
     if (data) {
       setDevices(data.devices || []);
       setMessage("Logged out from all other devices");
+      setTimeout(() => setMessage(""), 5000)
     } else {
       setMessage(data.message || "Failed to remove devices");
     }
