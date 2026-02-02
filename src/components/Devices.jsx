@@ -24,22 +24,26 @@ export default function Devices() {
 
 const removeDevice = async (deviceId) => {
   try {
-    const  data  = await apiFetch(`api/devices/${deviceId}`, {
+    const data = await apiFetch(`api/devices/${deviceId}`, {
       method: "DELETE",
     });
 
-   
-      setDevices(data.devices || []); // ensure array
-      setMessage("Device removed successfully");
+    setDevices(data.devices || []);
+    setMessage("Device removed successfully");
+    setTimeout(() => setMessage(""), 5000);
+
+    // 🔥 only logout if THIS device was removed
+    if (deviceId === currentDeviceId) {
       localStorage.removeItem("deviceId");
-      setTimeout(() => setMessage(""), 5000)
-   ;
-    
+      window.location.reload(); // or redirect to login
+    }
+
   } catch (err) {
     console.error("Error removing device:", err);
     setMessage("Error removing device");
   }
 };
+
 
 const removeOtherDevices = async () => {
   try {
