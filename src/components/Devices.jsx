@@ -24,7 +24,7 @@ export default function Devices() {
 
 const removeDevice = async (deviceId) => {
   try {
-    const  data  = await apiFetch(`api/${deviceId}`, {
+    const  data  = await apiFetch(`api/devices/${deviceId}`, {
       method: "DELETE",
     });
 
@@ -32,7 +32,6 @@ const removeDevice = async (deviceId) => {
       setDevices(data.devices || []); // ensure array
       setMessage("Device removed successfully");
       localStorage.removeItem("deviceId");
-      setDevices([])
       setTimeout(() => setMessage(""), 5000)
    ;
     
