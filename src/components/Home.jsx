@@ -112,6 +112,13 @@ const handleFollowToggle = async (targetUserId) => {
       ) : (
         <div className="bg-yellow-100 text-yellow-700 px-4 py-2 rounded-md text-sm">
           ⚠️ Verify your mobile number
+          <Link
+            to="/otp"
+            className="underline ml-2 font-medium"  
+            onClick={() => setShowVerifyMessage(false)}
+          >
+            Click here to verify
+          </Link>
         </div>
       )}
     </div>
