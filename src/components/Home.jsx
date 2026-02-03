@@ -26,21 +26,24 @@ useEffect(() => {
 // CHECK FOLLOW STATUS
 
 useEffect(() => {
-  if (Array.isArray(users) && loggedUser?.userid) {
+  if (Array.isArray(users) && loggedUser?._id) {
     users.forEach((user) => {
       if (user._id !== loggedUser._id) {
-        apiFetch(`api/follow-status/${user?._id}`)
+        apiFetch(`api/follow-status/${user._id}`)
           .then((statusData) => {
             setFollowStatus((prev) => ({
               ...prev,
-              [user._id]: statusData.isFollowing,
+              [user._id]: statusData.status, // "following" | "requested" | "none"
             }));
           })
-          .catch((err) => console.error("Follow status fetch error:", err));
+          .catch((err) =>
+            console.error("Follow status fetch error:", err)
+          );
       }
     });
   }
 }, [users, loggedUser]);
+
 
 
 
