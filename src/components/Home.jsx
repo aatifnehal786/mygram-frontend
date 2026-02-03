@@ -136,6 +136,9 @@ const handleFollowToggle = async (targetUserId) => {
                 <h5 className="font-medium text-sm mb-2">
                   {user.username}
                 </h5>
+<p className="text-xs text-red-500">
+  status: {followStatus[user._id]}
+</p>
 
                 <button
   onClick={() => handleFollowToggle(user._id)}
