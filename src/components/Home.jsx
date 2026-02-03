@@ -52,7 +52,7 @@ useEffect(() => {
     // Check if mobile is already verified
     const isVerified = localStorage.getItem("mobileVerified");
     if (isVerified === "true") {
-      setShowVerifyMessage(false);
+      setShowVerifyMessage(true);
     }
   }, []);
 
