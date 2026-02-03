@@ -2,6 +2,8 @@ import { useEffect, useState, useContext } from "react";
 import { UserContext } from "../contexts/UserContext";
 import { Link } from "react-router-dom";
 import { apiFetch } from "../api/apiFetch";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 export default function Home() {
   const [users, setUsers] = useState([]);
@@ -56,19 +58,42 @@ useEffect(() => {
 // TOGGLE FOLLOW AND UNFOLLOW
 
 const handleFollowToggle = async (targetUserId) => {
-  const isFollowing = followStatus[targetUserId];
-  const url = `api/${isFollowing ? "unfollow" : "follow"}/${targetUserId}`;
+  const status = followStatus[targetUserId]; // "following" | "requested" | undefined
 
   try {
-    await apiFetch(url, { method: "PUT" });
-    setFollowStatus((prev) => ({
-      ...prev,
-      [targetUserId]: !isFollowing,
-    }));
+    // 🔴 UNFOLLOW
+    if (status === "following") {
+      await apiFetch(`api/unfollow/${targetUserId}`, {
+        method: "POST",
+      });
+
+      setFollowStatus((prev) => ({
+        ...prev,
+        [targetUserId]: "none",
+      }));
+    }
+
+    // 🟡 SEND FOLLOW REQUEST
+    else if (!status || status === "none") {
+      await apiFetch(`api/follow/request/${targetUserId}`, {
+        method: "POST",
+      });
+
+      setFollowStatus((prev) => ({
+        ...prev,
+        [targetUserId]: "requested",
+      }));
+    }
+
+    // 🟠 REQUESTED → do nothing (or show toast)
+    else if (status === "requested") {
+      toast.info("Follow request already sent ⏳");
+    }
   } catch (error) {
     console.error("Error toggling follow:", error.message);
   }
 };
+
 
 
 
@@ -109,22 +134,31 @@ const handleFollowToggle = async (targetUserId) => {
                 </h5>
 
                 <button
-                  onClick={() => handleFollowToggle(user._id)}
-                  className={`
-                    px-4 py-1.5 rounded-full text-sm font-medium transition
-                    ${
-                      followStatus[user._id]
-                        ? "bg-gray-200 text-gray-700 hover:bg-gray-300"
-                        : "bg-blue-600 text-white hover:bg-blue-700"
-                    }
-                  `}
-                >
-                  {followStatus[user._id] ? "Unfollow" : "Follow"}
-                </button>
+  onClick={() => handleFollowToggle(user._id)}
+  disabled={followStatus[user._id] === "requested"}
+  className={`
+    px-4 py-1 rounded-md text-sm
+    ${
+      followStatus[user._id] === "following"
+        ? "bg-gray-200 text-black"
+        : followStatus[user._id] === "requested"
+        ? "bg-yellow-400 text-black cursor-not-allowed"
+        : "bg-blue-600 text-white hover:bg-blue-700"
+    }
+  `}
+>
+  {followStatus[user._id] === "following"
+    ? "Following"
+    : followStatus[user._id] === "requested"
+    ? "Requested"
+    : "Follow"}
+</button>
+
               </div>
             )
         )}
     </div>
+    <ToastContainer position="top-right" autoClose={3000} />
   </div>
 );
 
