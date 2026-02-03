@@ -8,7 +8,7 @@ import "react-toastify/dist/ReactToastify.css";
 export default function Home() {
   const [users, setUsers] = useState([]);
   const [userId, setUserId] = useState("");
-  const [showVerifyMessage, setShowVerifyMessage] = useState(true); // Renamed for clarity
+  const [showVerifyMessage, setShowVerifyMessage] = useState(false); // Renamed for clarity
   const { loggedUser } = useContext(UserContext);
   const [followStatus, setFollowStatus] = useState({});
 
