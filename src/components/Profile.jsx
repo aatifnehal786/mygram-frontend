@@ -30,19 +30,30 @@ export default function Profile() {
   // console.log(loggedUser)
   
 // FETCH FOLLOW REQUESTS
+// FETCH FOLLOW REQUESTS
 useEffect(() => {
   if (!isOwnProfile) return;
+
+  let isMounted = true;
+
   const fetchFollowRequests = async () => {
     try {
       const data = await apiFetch("api/follow/requests");
-      setRequests(data.requests || []);
+      if (isMounted) {
+        setRequests(data.requests || []);
+      }
     } catch (err) {
       console.error("Error fetching follow requests:", err);
-    }   
+    }
   };
+
   fetchFollowRequests();
-}
-, [isOwnProfile]);
+
+  return () => {
+    isMounted = false;
+  };
+}, [isOwnProfile]);
+
 
 // ACCEPT FOLLOW REQUEST
 const acceptRequest = async (requesterId) => {
