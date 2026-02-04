@@ -643,7 +643,12 @@ const ChatWindow = ({ selectedUser, triggerForwardMode, messages, setMessages, o
         type="text"
         value={input}
         onChange={(e) => handleTypingLogic(e.target.value)}
-        onKeyDown={handleDynamicEnter}
+       onKeyDown={(e) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      sendMessage();
+    }
+  }}
         placeholder="Type a message..."
         className="flex-1 px-4 py-2 rounded-full border text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
       />
