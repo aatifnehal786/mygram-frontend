@@ -83,7 +83,7 @@ const handleFollowToggle = async (targetUserId) => {
     // 🔴 UNFOLLOW
     if (currentStatus === "following") {
       await apiFetch(`api/unfollow/${targetUserId}`, {
-        method: "POST",
+        method: "PUT",
       });
 
       setFollowStatus((prev) => ({
