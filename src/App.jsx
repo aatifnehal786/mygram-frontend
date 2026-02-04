@@ -20,6 +20,8 @@ import Devices from './components/Devices';
 import { SocketProvider } from './contexts/SocketContext';
 import { Provider } from "react-redux";
 import { store } from "./redux/store";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 
 
@@ -42,7 +44,7 @@ useEffect(() => {
  
 
 const router = createBrowserRouter(
-  [
+  [ 
     {
       path: "/",
       element: (
@@ -155,6 +157,7 @@ const router = createBrowserRouter(
   <Provider store={store}>
   <UserProvider>
     <SocketProvider>
+      <ToastContainer position="top-right" autoClose={3000} />
       <RouterProvider router={router} />
     </SocketProvider>
   </UserProvider>

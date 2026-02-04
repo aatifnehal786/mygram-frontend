@@ -26,6 +26,7 @@ export default function Profile() {
 
   const isOwnProfile = loggedUser && (!id || id === loggedUser.userid);
   const targetUserId =  loggedUser?.userid;
+  const [followStatus, setFollowStatus] = useState({});
   // console.log(loggedUser)
   
 // FETCH FOLLOW REQUESTS
@@ -135,14 +136,17 @@ useEffect(() => {
 
     try {
       const data = await apiFetch(`api/follow-status/${targetUserId}`);
-      setIsFollowing(data.isFollowing);
+
+      // EXPECTED: { status: "following" | "requested" | "follow" }
+      setFollowStatus(data.status);
     } catch (err) {
       console.error("Error checking follow status:", err);
     }
   };
 
   checkFollowStatus();
-}, [id, loggedUser]);
+}, [targetUserId, loggedUser]);
+
 
 // HANDLE FILE CHANGE
 

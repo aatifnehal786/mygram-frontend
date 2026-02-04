@@ -2,7 +2,7 @@ import { useEffect, useState, useContext } from "react";
 import { UserContext } from "../contexts/UserContext";
 import { Link } from "react-router-dom";
 import { apiFetch } from "../api/apiFetch";
-import { ToastContainer, toast } from "react-toastify";
+import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 export default function Home() {
@@ -10,7 +10,9 @@ export default function Home() {
   const [userId, setUserId] = useState("");
   const [showVerifyMessage, setShowVerifyMessage] = useState(false); // Renamed for clarity
   const { loggedUser } = useContext(UserContext);
-  const [followStatus, setFollowStatus] = useState({});
+  const [followStatus, setFollowStatus] = useState(null);
+  const [loadingUserId, setLoadingUserId] = useState(null);
+
 
   console.log(loggedUser);
 // FETCH ALL USERS
@@ -23,31 +25,29 @@ useEffect(() => {
 
 
 
-// CHECK FOLLOW STATUS
 
+// CHECK FOLLOW STATUS
 useEffect(() => {
-  if (!Array.isArray(users) || !loggedUser?._id) return;
+  if (!Array.isArray(users) || !loggedUser?.userid) return;
 
   const fetchStatuses = async () => {
-    try {
-      const updates = {};
+    const statusMap = {};
 
+    try {
       await Promise.all(
         users.map(async (user) => {
-          if (user._id === loggedUser._id) return;
+          if (user._id === loggedUser.userid) return;
 
           const res = await apiFetch(
             `api/follow-status/${user._id}`
           );
 
-          updates[user._id] = res.status; // 🔥 NOT boolean
+          // backend returns { status: "requested" | "following" | "follow" }
+          statusMap[user._id] = res.status;
         })
       );
 
-      setFollowStatus((prev) => ({
-        ...prev,
-        ...updates,
-      }));
+      setFollowStatus(statusMap);
     } catch (err) {
       console.error("Follow status fetch error:", err);
     }
@@ -55,6 +55,7 @@ useEffect(() => {
 
   fetchStatuses();
 }, [users, loggedUser]);
+
 
 
 
@@ -71,41 +72,42 @@ useEffect(() => {
   
 
 // TOGGLE FOLLOW AND UNFOLLOW
-
 const handleFollowToggle = async (targetUserId) => {
-  const status = followStatus[targetUserId]; // "following" | "requested" | undefined
+  if (loadingUserId === targetUserId) return;
+
+  const currentStatus = followStatus[targetUserId];
 
   try {
-    // 🔴 UNFOLLOW
-    if (status === "following") {
-      await apiFetch(`api/unfollow/${targetUserId}`, {
-        method: "POST",
-      });
+    setLoadingUserId(targetUserId);
+
+    if (currentStatus === "following") {
+      await apiFetch(`api/unfollow/${targetUserId}`, { method: "POST" });
 
       setFollowStatus((prev) => ({
         ...prev,
-        [targetUserId]: "none",
+        [targetUserId]: "follow",
       }));
-    }
-
-    // 🟡 SEND FOLLOW REQUEST
-    else if (!status || status === "none") {
-      await apiFetch(`api/follow/request/${targetUserId}`, {
-        method: "POST",
-      });
-
+    } 
+    else if (currentStatus === "follow") {
       setFollowStatus((prev) => ({
         ...prev,
         [targetUserId]: "requested",
       }));
-    }
 
-    // 🟠 REQUESTED → do nothing (or show toast)
-    else if (status === "requested") {
+      await apiFetch(`api/follow/request/${targetUserId}`, {
+        method: "POST",
+      });
+
+      toast.success("Follow request sent");
+    } 
+    else if (currentStatus === "requested") {
       toast.info("Follow request already sent ⏳");
     }
-  } catch (error) {
-    console.error("Error toggling follow:", error.message);
+  } catch (err) {
+    console.error("Follow toggle error:", err);
+    toast.error("Something went wrong");
+  } finally {
+    setLoadingUserId(null);
   }
 };
 
@@ -131,53 +133,71 @@ const handleFollowToggle = async (targetUserId) => {
 
     {/* Users Grid */}
     <div className="max-w-5xl mx-auto grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-      {Array.isArray(users) &&
-        users.map(
-          (user) =>
-            user._id !== loggedUser._id && (
-              <div
-                key={user._id}
-                className="bg-white rounded-xl shadow-sm p-4 flex flex-col items-center text-center"
-              >
-                <img
-                  src={user.profilePic || ""}
-                  alt={user.username}
-                  className="w-20 h-20 rounded-full object-cover mb-3"
-                />
+     {Array.isArray(users) &&
+  users.map(
+    (user) => {
+      if (user._id === loggedUser._id) return null;
 
-                <h5 className="font-medium text-sm mb-2">
-                  {user.username}
-                </h5>
-<p className="text-xs text-red-500">
-  status: {followStatus[user._id]}
-</p>
+      // ✅ DEFINE STATUS HERE
+      const status = followStatus[user._id] ?? "loading";
+      console.log(user._id, status);
 
-                <button
-  onClick={() => handleFollowToggle(user._id)}
-  disabled={followStatus[user._id] === "requested"}
-  className={`
-    px-4 py-1 rounded-md text-sm
-    ${
-      followStatus[user._id] === "following"
-        ? "bg-gray-200 text-black"
-        : followStatus[user._id] === "requested"
-        ? "bg-yellow-400 text-black cursor-not-allowed"
-        : "bg-blue-600 text-white hover:bg-blue-700"
+      return (
+        <div
+          key={user._id}
+          className="bg-white rounded-xl shadow-sm p-4 flex flex-col items-center text-center"
+        >
+          <img
+            src={user.profilePic || ""}
+            alt={user.username}
+            className="w-20 h-20 rounded-full object-cover mb-3"
+          />
+
+          <h5 className="font-medium text-sm mb-2">
+            {user.username}
+          </h5>
+
+          {/* DEBUG (optional) */}
+          <p className="text-xs text-red-500">
+            status: {status}
+          </p>
+{followStatus === null ? (
+  <p className="text-xs text-gray-400">Loading status…</p>
+) : (
+  <button
+    disabled={
+      followStatus[user._id] === "requested" ||
+      loadingUserId === user._id
     }
-  `}
->
-  {followStatus[user._id] === "following"
-    ? "Following"
-    : followStatus[user._id] === "requested"
-    ? "Requested"
-    : "Follow"}
-</button>
+    onClick={() => handleFollowToggle(user._id)}
+    className={`
+      px-4 py-1 rounded-md text-sm transition
+      ${
+        followStatus[user._id] === "following"
+          ? "bg-gray-200 text-black"
+          : followStatus[user._id] === "requested"
+          ? "bg-yellow-400 text-black cursor-not-allowed"
+          : "bg-blue-600 text-white hover:bg-blue-700"
+      }
+    `}
+  >
+    {loadingUserId === user._id
+      ? "Loading..."
+      : followStatus[user._id] === "following"
+      ? "Following"
+      : followStatus[user._id] === "requested"
+      ? "Requested"
+      : "Follow"}
+  </button>
+)}
 
-              </div>
-            )
-        )}
+        </div>
+      );
+    }
+  )}
+
     </div>
-    <ToastContainer position="top-right" autoClose={3000} />
+   
   </div>
 );
 
