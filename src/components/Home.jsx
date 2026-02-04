@@ -169,10 +169,7 @@ const handleFollowToggle = async (targetUserId) => {
             {user.username}
           </h5>
 
-          {/* DEBUG (optional) */}
-          <p className="text-xs text-red-500">
-            status: {status}
-          </p>
+          
 {followStatus === null ? (
   <p className="text-xs text-gray-400">Loading status…</p>
 ) : (
