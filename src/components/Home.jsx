@@ -82,12 +82,16 @@ const handleFollowToggle = async (targetUserId) => {
 
     // 🔴 UNFOLLOW
     if (currentStatus === "following") {
-      await apiFetch(`api/unfollow/${targetUserId}`, { method: "POST" });
+      await apiFetch(`api/unfollow/${targetUserId}`, {
+        method: "POST",
+      });
 
       setFollowStatus((prev) => ({
         ...prev,
         [targetUserId]: "follow",
       }));
+
+      toast.info("Unfollowed");
     }
 
     // 🟡 SEND FOLLOW REQUEST
@@ -104,7 +108,7 @@ const handleFollowToggle = async (targetUserId) => {
       toast.success("Follow request sent");
     }
 
-    // ❌ CANCEL REQUEST
+    // ❌ CANCEL FOLLOW REQUEST
     else if (currentStatus === "requested") {
       await apiFetch(`api/follow/cancel/${targetUserId}`, {
         method: "POST",
@@ -124,6 +128,7 @@ const handleFollowToggle = async (targetUserId) => {
     setLoadingUserId(null);
   }
 };
+
 
 
  return (
@@ -177,12 +182,13 @@ const handleFollowToggle = async (targetUserId) => {
   disabled={loadingUserId === user._id}
   onClick={() => handleFollowToggle(user._id)}
   className={`
-    px-4 py-1 rounded-md text-sm transition
+    px-4 py-1 rounded-md text-sm font-medium transition
+    disabled:opacity-60 disabled:cursor-not-allowed
     ${
       followStatus[user._id] === "following"
-        ? "bg-gray-200 text-black"
+        ? "bg-gray-200 text-black hover:bg-gray-300"
         : followStatus[user._id] === "requested"
-        ? "bg-red-400 text-white hover:bg-red-500"
+        ? "bg-red-500 text-white hover:bg-red-600"
         : "bg-blue-600 text-white hover:bg-blue-700"
     }
   `}
@@ -195,6 +201,7 @@ const handleFollowToggle = async (targetUserId) => {
     ? "Cancel Request"
     : "Follow"}
 </button>
+
 
 )}
 
