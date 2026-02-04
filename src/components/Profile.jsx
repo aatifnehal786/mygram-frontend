@@ -563,44 +563,6 @@ const handleChangeUserName = async (newUsername) => {
   </div>
 )}
 
-<div className="p-4">
-  <h2 className="text-lg font-semibold mb-3">Follow Requests</h2>
-
-  {requests.length === 0 ? (
-    <p className="text-gray-500 text-sm">No follow requests</p>
-  ) : (
-    requests.map((user) => (
-      <div
-        key={user._id}
-        className="flex items-center justify-between mb-3"
-      >
-        <div className="flex items-center gap-3">
-          <img
-            src={user.profilePic}
-            className="w-10 h-10 rounded-full"
-          />
-          <span className="font-medium">{user.username}</span>
-        </div>
-
-        <div className="flex gap-2">
-          <button
-            onClick={() => acceptRequest(user._id)}
-            className="bg-blue-500 text-white px-3 py-1 rounded-md text-sm"
-          >
-            Accept
-          </button>
-
-          <button
-            onClick={() => rejectRequest(user._id)}
-            className="bg-gray-200 px-3 py-1 rounded-md text-sm"
-          >
-            Reject
-          </button>
-        </div>
-      </div>
-    ))
-  )}
-</div>
 
   </div>
 );
