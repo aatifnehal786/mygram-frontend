@@ -80,6 +80,7 @@ const handleFollowToggle = async (targetUserId) => {
   try {
     setLoadingUserId(targetUserId);
 
+    // 🔴 UNFOLLOW
     if (currentStatus === "following") {
       await apiFetch(`api/unfollow/${targetUserId}`, { method: "POST" });
 
@@ -87,21 +88,34 @@ const handleFollowToggle = async (targetUserId) => {
         ...prev,
         [targetUserId]: "follow",
       }));
-    } 
+    }
+
+    // 🟡 SEND FOLLOW REQUEST
     else if (currentStatus === "follow") {
+      await apiFetch(`api/follow/request/${targetUserId}`, {
+        method: "POST",
+      });
+
       setFollowStatus((prev) => ({
         ...prev,
         [targetUserId]: "requested",
       }));
 
-      await apiFetch(`api/follow/request/${targetUserId}`, {
+      toast.success("Follow request sent");
+    }
+
+    // ❌ CANCEL REQUEST
+    else if (currentStatus === "requested") {
+      await apiFetch(`api/follow/cancel/${targetUserId}`, {
         method: "POST",
       });
 
-      toast.success("Follow request sent");
-    } 
-    else if (currentStatus === "requested") {
-      toast.info("Follow request already sent ⏳");
+      setFollowStatus((prev) => ({
+        ...prev,
+        [targetUserId]: "follow",
+      }));
+
+      toast.info("Follow request cancelled");
     }
   } catch (err) {
     console.error("Follow toggle error:", err);
@@ -110,8 +124,6 @@ const handleFollowToggle = async (targetUserId) => {
     setLoadingUserId(null);
   }
 };
-
-
 
 
  return (
@@ -165,30 +177,28 @@ const handleFollowToggle = async (targetUserId) => {
   <p className="text-xs text-gray-400">Loading status…</p>
 ) : (
   <button
-    disabled={
-      followStatus[user._id] === "requested" ||
-      loadingUserId === user._id
+  disabled={loadingUserId === user._id}
+  onClick={() => handleFollowToggle(user._id)}
+  className={`
+    px-4 py-1 rounded-md text-sm transition
+    ${
+      followStatus[user._id] === "following"
+        ? "bg-gray-200 text-black"
+        : followStatus[user._id] === "requested"
+        ? "bg-red-400 text-white hover:bg-red-500"
+        : "bg-blue-600 text-white hover:bg-blue-700"
     }
-    onClick={() => handleFollowToggle(user._id)}
-    className={`
-      px-4 py-1 rounded-md text-sm transition
-      ${
-        followStatus[user._id] === "following"
-          ? "bg-gray-200 text-black"
-          : followStatus[user._id] === "requested"
-          ? "bg-yellow-400 text-black cursor-not-allowed"
-          : "bg-blue-600 text-white hover:bg-blue-700"
-      }
-    `}
-  >
-    {loadingUserId === user._id
-      ? "Loading..."
-      : followStatus[user._id] === "following"
-      ? "Following"
-      : followStatus[user._id] === "requested"
-      ? "Requested"
-      : "Follow"}
-  </button>
+  `}
+>
+  {loadingUserId === user._id
+    ? "Loading..."
+    : followStatus[user._id] === "following"
+    ? "Following"
+    : followStatus[user._id] === "requested"
+    ? "Cancel Request"
+    : "Follow"}
+</button>
+
 )}
 
         </div>
