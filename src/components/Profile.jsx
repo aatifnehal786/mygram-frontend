@@ -29,57 +29,7 @@ export default function Profile() {
   const [followStatus, setFollowStatus] = useState({});
   // console.log(loggedUser)
   
-// FETCH FOLLOW REQUESTS
-// FETCH FOLLOW REQUESTS
-useEffect(() => {
-  if (!isOwnProfile) return;
 
-  let isMounted = true;
-
-  const fetchFollowRequests = async () => {
-    try {
-      const data = await apiFetch("api/follow/requests");
-      if (isMounted) {
-        setRequests(data.requests || []);
-      }
-    } catch (err) {
-      console.error("Error fetching follow requests:", err);
-    }
-  };
-
-  fetchFollowRequests();
-
-  return () => {
-    isMounted = false;
-  };
-}, [isOwnProfile]);
-
-
-// ACCEPT FOLLOW REQUEST
-const acceptRequest = async (requesterId) => {
-  try {
-    const data = await apiFetch(`api/follow/accept/${requesterId}`, {
-      method: "POST",
-    });
-    setRequests((prev) => prev.filter((req) => req._id !== requesterId));
-  }
-  catch (err) {
-    console.error("Error accepting follow request:", err);
-  }
-};
-
-// REJECT FOLLOW REQUEST
-const rejectRequest = async (requesterId) => {
-  try {
-    const data = await apiFetch(`api/follow/reject/${requesterId}`, {
-      method: "POST",
-    });
-    setRequests((prev) => prev.filter((req) => req._id !== requesterId));
-  }
-  catch (err) {
-    console.error("Error rejecting follow request:", err);
-  } 
-};
 
 
 

@@ -72,10 +72,11 @@ useEffect(() => {
   
 
 // TOGGLE FOLLOW AND UNFOLLOW
+// TOGGLE FOLLOW / UNFOLLOW
 const handleFollowToggle = async (targetUserId) => {
   if (loadingUserId === targetUserId) return;
 
-  const currentStatus = followStatus[targetUserId];
+  const currentStatus = followStatus[targetUserId]; // "follow" | "following"
 
   try {
     setLoadingUserId(targetUserId);
@@ -83,7 +84,7 @@ const handleFollowToggle = async (targetUserId) => {
     // 🔴 UNFOLLOW
     if (currentStatus === "following") {
       await apiFetch(`api/unfollow/${targetUserId}`, {
-        method: "PUT",
+        method: "PUT", // or PUT based on your backend
       });
 
       setFollowStatus((prev) => ({
@@ -94,32 +95,18 @@ const handleFollowToggle = async (targetUserId) => {
       toast.info("Unfollowed");
     }
 
-    // 🟡 SEND FOLLOW REQUEST
-    else if (currentStatus === "follow") {
-      await apiFetch(`api/follow/request/${targetUserId}`, {
-        method: "POST",
+    // 🟢 FOLLOW
+    else {
+      await apiFetch(`api/follow/${targetUserId}`, {
+        method: "PUT",
       });
 
       setFollowStatus((prev) => ({
         ...prev,
-        [targetUserId]: "requested",
+        [targetUserId]: "following",
       }));
 
-      toast.success("Follow request sent");
-    }
-
-    // ❌ CANCEL FOLLOW REQUEST
-    else if (currentStatus === "requested") {
-      await apiFetch(`api/follow/cancel/${targetUserId}`, {
-        method: "POST",
-      });
-
-      setFollowStatus((prev) => ({
-        ...prev,
-        [targetUserId]: "follow",
-      }));
-
-      toast.info("Follow request cancelled");
+      toast.success("Followed");
     }
   } catch (err) {
     console.error("Follow toggle error:", err);
@@ -128,7 +115,6 @@ const handleFollowToggle = async (targetUserId) => {
     setLoadingUserId(null);
   }
 };
-
 
 
  return (
@@ -155,9 +141,7 @@ const handleFollowToggle = async (targetUserId) => {
     (user) => {
       if (user._id === loggedUser._id) return null;
 
-      // ✅ DEFINE STATUS HERE
-      const status = followStatus[user._id] ?? "loading";
-      console.log(user._id, status);
+    
 
       return (
         <div
@@ -175,35 +159,30 @@ const handleFollowToggle = async (targetUserId) => {
           </h5>
 
           
-{followStatus === null ? (
+{followStatus[user._id] === undefined ? (
   <p className="text-xs text-gray-400">Loading status…</p>
 ) : (
   <button
-  disabled={loadingUserId === user._id}
-  onClick={() => handleFollowToggle(user._id)}
-  className={`
-    px-4 py-1 rounded-md text-sm font-medium transition
-    disabled:opacity-60 disabled:cursor-not-allowed
-    ${
-      followStatus[user._id] === "following"
-        ? "bg-gray-200 text-black hover:bg-gray-300"
-        : followStatus[user._id] === "requested"
-        ? "bg-red-500 text-white hover:bg-red-600"
-        : "bg-blue-600 text-white hover:bg-blue-700"
-    }
-  `}
->
-  {loadingUserId === user._id
-    ? "Loading..."
-    : followStatus[user._id] === "following"
-    ? "Following"
-    : followStatus[user._id] === "requested"
-    ? "Cancel Request"
-    : "Follow"}
-</button>
-
-
+    disabled={loadingUserId === user._id}
+    onClick={() => handleFollowToggle(user._id)}
+    className={`
+      px-4 py-1 rounded-md text-sm font-medium transition
+      disabled:opacity-60 disabled:cursor-not-allowed
+      ${
+        followStatus[user._id] === "following"
+          ? "bg-gray-200 text-black hover:bg-gray-300"
+          : "bg-blue-600 text-white hover:bg-blue-700"
+      }
+    `}
+  >
+    {loadingUserId === user._id
+      ? "Loading..."
+      : followStatus[user._id] === "following"
+      ? "Following"
+      : "Follow"}
+  </button>
 )}
+
 
         </div>
       );
