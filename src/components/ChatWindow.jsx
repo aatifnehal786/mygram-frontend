@@ -11,7 +11,7 @@ import VideoCallManager from './VideoCallManager';
 import useVideoCallStore from "../store/VideoCallStore"
 import EmojiPicker from "emoji-picker-react";
 
-
+const REACTIONS = ["❤️", "😂", "😮", "😢", "👍", "👎"];
 
 const ChatWindow = ({ selectedUser, triggerForwardMode, messages, setMessages, onBack }) => {
   const { loggedUser } = useContext(UserContext);
@@ -33,7 +33,7 @@ const ChatWindow = ({ selectedUser, triggerForwardMode, messages, setMessages, o
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const inputRef = useRef(null);
 
-
+  const [reactionPickerFor, setReactionPickerFor] = useState(null);
   const [limit, setLimit] = useState(20);
   const [skip, setSkip] = useState(0);
   const [hasMore, setHasMore] = useState(true);
@@ -51,6 +51,27 @@ const ChatWindow = ({ selectedUser, triggerForwardMode, messages, setMessages, o
   }, []);
 
 
+
+ /* -------------------- SOCKET: REACTION UPDATE -------------------- */
+ useEffect(() => {
+  if (!socket) return;
+
+  const handleReaction = ({ messageId, reactions }) => {
+    setMessages(prev =>
+      prev.map(msg =>
+        msg._id === messageId
+          ? { ...msg, reactions }
+          : msg
+      )
+    );
+  };
+
+  socket.on("message-reaction", handleReaction);
+
+  return () => {
+    socket.off("message-reaction", handleReaction);
+  };
+}, [socket, setMessages]);
 
 
 
@@ -106,7 +127,16 @@ const ChatWindow = ({ selectedUser, triggerForwardMode, messages, setMessages, o
   }, []);
 
 
+ /* -------------------- ADD REACTION -------------------- */
+  const handleReaction = (messageId, emoji) => {
+    socket.emit("react-message", {
+      messageId,
+      userId: currentUserId,
+      emoji,
+    });
 
+    setReactionPickerFor(null);
+  };
 
 
 
@@ -553,6 +583,42 @@ const ChatWindow = ({ selectedUser, triggerForwardMode, messages, setMessages, o
               <p className="whitespace-pre-wrap break-words">
                 {renderMessageWithLinks(msg.message)}
               </p>
+               {/* REACTIONS DISPLAY */}
+                {msg.reactions?.length > 0 && (
+                  <div className="flex gap-1 mt-1">
+                    {msg.reactions.map((r, i) => (
+                      <span key={i} className="text-xs">{r.emoji}</span>
+                    ))}
+                  </div>
+                )}
+
+                {/* REACTION BUTTON */}
+                <button
+                  className="absolute -right-6 top-1 text-sm"
+                  onClick={() =>
+                    setReactionPickerFor(
+                      reactionPickerFor === msg._id ? null : msg._id
+                    )
+                  }
+                >
+                  😊
+                </button>
+
+                {/* REACTION PICKER */}
+                {reactionPickerFor === msg._id && (
+                  <div className="absolute right-0 top-8 bg-white border rounded-lg shadow p-2 flex gap-2 z-50">
+                    {REACTIONS.map((emoji) => (
+                      <button
+                        key={emoji}
+                        onClick={() => handleReaction(msg._id, emoji)}
+                        className="hover:scale-125 transition"
+                      >
+                        {emoji}
+                      </button>
+                    ))}
+                  </div>
+                )}
+
 
               {/* Attachments */}
               {msg.fileType?.includes("image") && (
