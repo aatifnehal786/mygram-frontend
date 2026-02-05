@@ -72,7 +72,8 @@ const ChatWindow = ({ selectedUser, triggerForwardMode, messages, setMessages, o
   return () => {
     socket.off("message-reaction", handleReaction);
   };
-}, [socket, setMessages]);
+}, [socket]);
+
 
 
 
@@ -129,15 +130,7 @@ const ChatWindow = ({ selectedUser, triggerForwardMode, messages, setMessages, o
 
 
  /* -------------------- ADD REACTION -------------------- */
-  const handleReaction = (messageId, emoji) => {
-    socket.emit("react-message", {
-      messageId,
-      userId: currentUserId,
-      emoji,
-    });
-
-    setReactionPickerFor(null);
-  };
+ 
 
 
 
@@ -402,6 +395,44 @@ const ChatWindow = ({ selectedUser, triggerForwardMode, messages, setMessages, o
     }
   };
 
+const handleReaction = (messageId, emoji) => {
+  // 🔥 Optimistic UI update
+  setMessages(prev =>
+    prev.map(msg => {
+      if (msg._id !== messageId) return msg;
+
+      const existing = msg.reactions?.find(
+        r => r.user === currentUserId && r.emoji === emoji
+      );
+
+      let updatedReactions;
+
+      if (existing) {
+        // remove reaction
+        updatedReactions = msg.reactions.filter(
+          r => !(r.user === currentUserId && r.emoji === emoji)
+        );
+      } else {
+        // add reaction
+        updatedReactions = [
+          ...(msg.reactions || []),
+          { user: currentUserId, emoji },
+        ];
+      }
+
+      return { ...msg, reactions: updatedReactions };
+    })
+  );
+
+  // 🔥 Send to server
+  socket.emit("react-message", {
+    messageId,
+    userId: currentUserId,
+    emoji,
+  });
+
+  setReactionPickerFor(null);
+};
 
 
   const sortedMessages = [...messages].sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
