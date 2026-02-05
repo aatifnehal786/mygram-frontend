@@ -550,7 +550,7 @@ const ChatWindow = ({ selectedUser, triggerForwardMode, messages, setMessages, o
     <div
       ref={chatContainerRef}
       onScroll={handleScroll}
-      className="flex-1 overflow-y-auto px-4 py-3 space-y-3"
+      className="flex-1 overflow-y-auto px-4 py-3 space-y-3 w-full"
     >
       {sortedMessages.map((msg, idx) => {
         const senderId = msg.sender?._id || msg.sender;
