@@ -669,13 +669,17 @@ const ChatWindow = ({ selectedUser, triggerForwardMode, messages, setMessages, o
 <div className="flex items-center gap-2 px-3 py-2 border-t bg-white relative">
 
   {/* Emoji Button */}
-  <button
-    type="button"
-    onClick={() => setShowEmojiPicker(prev => !prev)}
-    className="text-xl"
-  >
-    😊
-  </button>
+<button
+  type="button"
+  className="emoji-btn text-xl"
+  onClick={(e) => {
+    e.stopPropagation(); 
+    setShowEmojiPicker((prev) => !prev);
+  }}
+>
+  😊
+</button>
+
 
   {/* Emoji Picker */}
   {showEmojiPicker && (
