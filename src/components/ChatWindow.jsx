@@ -581,7 +581,7 @@ const handleReaction = (messageId, emoji) => {
     <div
       ref={chatContainerRef}
       onScroll={handleScroll}
-      className="flex-1 overflow-y-auto px-4 py-3 space-y-3 w-full m-5x-auto"
+      className="flex-1 overflow-y-auto px-4 py-3 space-y-3 w-full m-8x-auto"
     >
       {sortedMessages.map((msg, idx) => {
         const senderId = msg.sender?._id || msg.sender;
