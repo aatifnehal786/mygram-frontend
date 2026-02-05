@@ -449,13 +449,12 @@ const ChatWindow = ({ selectedUser, triggerForwardMode, messages, setMessages, o
   <div className="flex-1 w-full flex flex-col h-full bg-gray-50">
 
     {/* Header */}
-    <div className="flex items-center gap-3 px-4 py-3 border-b bg-white sticky top-0 z-10">
-      <div className='p-4 flex items-center'>
-        {/* Back (mobile only) */}
-        <button
+    <div className="flex justify-between gap-3 px-4 py-3 border-b bg-white sticky top-0 z-10">
+      {/* Back (mobile only) */}
+      <button
         onClick={onBack}
         className="md:hidden text-xl text-gray-600 hover:text-black mr-2 focus:outline-none"
-        >
+      >
         <FaArrowLeft className="h-6 w-6" />
       </button>
 
@@ -487,7 +486,6 @@ const ChatWindow = ({ selectedUser, triggerForwardMode, messages, setMessages, o
               <FaEllipsisV className="h-5 w-5" />
             </button>
           </div>
-      </div>
     </div>
 
     {/* Messages */}
