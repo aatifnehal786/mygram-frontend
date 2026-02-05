@@ -9,6 +9,7 @@ import { setActiveChat, clearActiveChat } from "../redux/slices/chatSlice";
 import { FaVideo, FaEllipsisV, FaArrowLeft} from 'react-icons/fa';
 import VideoCallManager from './VideoCallManager';
 import useVideoCallStore from "../store/VideoCallStore"
+import EmojiPicker from "emoji-picker-react";
 
 
 const ChatWindow = ({ selectedUser, triggerForwardMode, messages, setMessages, onBack }) => {
@@ -33,6 +34,8 @@ const ChatWindow = ({ selectedUser, triggerForwardMode, messages, setMessages, o
   const [skip, setSkip] = useState(0);
   const [hasMore, setHasMore] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const inputRef = useRef(null);
 
 
   useEffect(() => {
@@ -118,6 +121,7 @@ const ChatWindow = ({ selectedUser, triggerForwardMode, messages, setMessages, o
     });
 
     setInput('');
+    setShowEmojiPicker(false);
   };
 
   // File upload
@@ -145,6 +149,12 @@ const ChatWindow = ({ selectedUser, triggerForwardMode, messages, setMessages, o
       setToastMessage("Failed to upload file.");
     }
   };
+
+  const handleEmojiClick = (emojiData) => {
+  setMessages((prev) => prev + emojiData.emoji);
+  inputRef.current?.focus(); // keep typing after emoji
+};
+
 
   // Delete chat message
   const deleteMessage = async () => {
@@ -639,8 +649,28 @@ const ChatWindow = ({ selectedUser, triggerForwardMode, messages, setMessages, o
 
     {/* Input */}
     <div className="flex items-center gap-2 px-3 py-2 border-t bg-white">
+      {/* Emoji Button */}
+  <button
+    type="button"
+    onClick={() => setShowEmojiPicker((prev) => !prev)}
+    className="text-xl"
+  >
+    😊
+  </button>
+
+  {/* Emoji Picker */}
+  {showEmojiPicker && (
+    <div className="absolute bottom-14 left-0 z-50">
+      <EmojiPicker
+        onEmojiClick={handleEmojiClick}
+        height={350}
+        width={300}
+      />
+    </div>
+  )}
       <input
         type="text"
+        ref={inputRef}
         value={input}
         onChange={(e) => handleTypingLogic(e.target.value)}
        onKeyDown={(e) => {
