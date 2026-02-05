@@ -9,6 +9,8 @@ import { setActiveChat, clearActiveChat } from "../redux/slices/chatSlice";
 import { FaVideo, FaEllipsisV, FaArrowLeft} from 'react-icons/fa';
 import VideoCallManager from './VideoCallManager';
 import useVideoCallStore from "../store/VideoCallStore"
+import EmojiPicker from "emoji-picker-react";
+
 
 
 const ChatWindow = ({ selectedUser, triggerForwardMode, messages, setMessages, onBack }) => {
@@ -28,6 +30,9 @@ const ChatWindow = ({ selectedUser, triggerForwardMode, messages, setMessages, o
   const [onlineMap, setOnlineMap] = useState({});
   const dispatch = useDispatch();
   const chatContainerRef = useRef(null);
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const inputRef = useRef(null);
+
 
   const [limit, setLimit] = useState(20);
   const [skip, setSkip] = useState(0);
@@ -102,6 +107,16 @@ const ChatWindow = ({ selectedUser, triggerForwardMode, messages, setMessages, o
 
 
 
+useEffect(() => {
+  const closeEmoji = (e) => {
+    if (!e.target.closest(".emoji-picker-react")) {
+      setShowEmojiPicker(false);
+    }
+  };
+
+  document.addEventListener("click", closeEmoji);
+  return () => document.removeEventListener("click", closeEmoji);
+}, []);
 
 
 
@@ -119,6 +134,13 @@ const ChatWindow = ({ selectedUser, triggerForwardMode, messages, setMessages, o
 
     setInput('');
   };
+
+
+  const handleEmojiClick = (emojiData) => {
+  setInput((prev) => prev + emojiData.emoji);
+  inputRef.current?.focus();
+};
+
 
   // File upload
   const handleFileUpload = async (e) => {
@@ -638,35 +660,63 @@ const ChatWindow = ({ selectedUser, triggerForwardMode, messages, setMessages, o
     </div>
 
     {/* Input */}
-    <div className="flex items-center gap-2 px-3 py-2 border-t bg-white">
-      <input
-        type="text"
-        value={input}
-        onChange={(e) => handleTypingLogic(e.target.value)}
-       onKeyDown={(e) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      sendMessage();
-    }
-  }}
-        placeholder="Type a message..."
-        className="flex-1 px-4 py-2 rounded-full border text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+   {/* Input */}
+<div className="flex items-center gap-2 px-3 py-2 border-t bg-white relative">
+
+  {/* Emoji Button */}
+  <button
+    type="button"
+    onClick={() => setShowEmojiPicker(prev => !prev)}
+    className="text-xl"
+  >
+    😊
+  </button>
+
+  {/* Emoji Picker */}
+  {showEmojiPicker && (
+    <div className="absolute bottom-14 left-3 z-50">
+      <EmojiPicker
+        onEmojiClick={handleEmojiClick}
+        height={350}
+        width={300}
       />
-
-      <label className="cursor-pointer text-xl">
-        📎
-        <input type="file" hidden onChange={handleFileUpload} />
-      </label>
-
-      <button
-        ref={chatBtn}
-        onClick={sendMessage}
-        className="bg-blue-600 text-white px-4 py-2 rounded-full hover:bg-blue-700 transition"
-      >
-        Send
-      </button>
     </div>
+  )}
+
+  <input
+    ref={inputRef}
+    type="text"
+    value={input}
+    onChange={(e) => handleTypingLogic(e.target.value)}
+    onKeyDown={(e) => {
+      if (e.key === "Enter" && !e.shiftKey) {
+        e.preventDefault();
+        sendMessage();
+        setShowEmojiPicker(false);
+      }
+    }}
+    placeholder="Type a message..."
+    className="flex-1 px-4 py-2 rounded-full border text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+  />
+
+  <label className="cursor-pointer text-xl">
+    📎
+    <input type="file" hidden onChange={handleFileUpload} />
+  </label>
+
+  <button
+    ref={chatBtn}
+    onClick={() => {
+      sendMessage();
+      setShowEmojiPicker(false);
+    }}
+    className="bg-blue-600 text-white px-4 py-2 rounded-full hover:bg-blue-700 transition"
+  >
+    Send
+  </button>
+</div>
     <VideoCallManager selectedUser={selectedUser} socket={socket} />
+    
   </div>
 );
 
