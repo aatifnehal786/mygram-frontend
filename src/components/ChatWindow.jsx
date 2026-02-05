@@ -6,7 +6,7 @@ import { SocketProvider, useSocket } from '../contexts/SocketContext';
 import { useDispatch } from "react-redux";
 import { clearUnread } from "../redux/slices/notificationSlice";
 import { setActiveChat, clearActiveChat } from "../redux/slices/chatSlice";
-import { FaVideo, FaEllipsisV } from 'react-icons/fa';
+import { FaVideo, FaEllipsisV, FaArrowLeft} from 'react-icons/fa';
 import VideoCallManager from './VideoCallManager';
 import useVideoCallStore from "../store/VideoCallStore"
 
@@ -446,16 +446,16 @@ const ChatWindow = ({ selectedUser, triggerForwardMode, messages, setMessages, o
   };
 
   return (
-  <div className="flex flex-col h-full bg-gray-50">
+  <div className="flex-1 w-full flex flex-col h-full bg-gray-50">
 
     {/* Header */}
     <div className="flex items-center gap-3 px-4 py-3 border-b bg-white sticky top-0 z-10">
       {/* Back (mobile only) */}
       <button
         onClick={onBack}
-        className="md:hidden text-xl text-gray-600 hover:text-black"
+        className="md:hidden text-xl text-gray-600 hover:text-black mr-2 focus:outline-none"
       >
-        ←
+        <FaArrowLeft className="h-6 w-6" />
       </button>
 
       <div>
@@ -472,7 +472,7 @@ const ChatWindow = ({ selectedUser, triggerForwardMode, messages, setMessages, o
                 : "Offline"}
         </p>
       </div>
-       <div className="flex space-x-4">
+       <div className="flex justify-end space-x-4">
             <button
               className="focus:outline-none"
               onClick={handleVideoCall}
