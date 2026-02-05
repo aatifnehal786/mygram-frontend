@@ -10,6 +10,7 @@ import { FaVideo, FaEllipsisV, FaArrowLeft} from 'react-icons/fa';
 import VideoCallManager from './VideoCallManager';
 import useVideoCallStore from "../store/VideoCallStore"
 import EmojiPicker from "emoji-picker-react";
+import { VscReactions } from "react-icons/vsc";
 
 const REACTIONS = ["❤️", "😂", "😮", "😢", "👍", "👎"];
 
@@ -601,7 +602,7 @@ const ChatWindow = ({ selectedUser, triggerForwardMode, messages, setMessages, o
                     )
                   }
                 >
-                  😊
+                  <VscReactions className="h-4 w-4 text-gray-400 hover:text-gray-700" />
                 </button>
 
                 {/* REACTION PICKER */}
