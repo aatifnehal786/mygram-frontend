@@ -107,18 +107,6 @@ const ChatWindow = ({ selectedUser, triggerForwardMode, messages, setMessages, o
 
 
 
-useEffect(() => {
-  const closeEmoji = (e) => {
-    if (!e.target.closest(".emoji-picker-react")) {
-      setShowEmojiPicker(false);
-    }
-  };
-
-  document.addEventListener("click", closeEmoji);
-  return () => document.removeEventListener("click", closeEmoji);
-}, []);
-
-
 
 
 
@@ -134,6 +122,23 @@ useEffect(() => {
 
     setInput('');
   };
+
+
+  useEffect(() => {
+    const closeEmoji = (e) => {
+      // 🛑 allow emoji button click
+      if (
+        e.target.closest(".emoji-picker-react") ||
+        e.target.closest(".emoji-btn")
+      ) {
+        return;
+      }
+      setShowEmojiPicker(false);
+    };
+
+    document.addEventListener("click", closeEmoji);
+    return () => document.removeEventListener("click", closeEmoji);
+  }, []);
 
 
   const handleEmojiClick = (emojiData) => {
