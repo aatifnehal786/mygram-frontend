@@ -683,7 +683,7 @@ const ChatWindow = ({ selectedUser, triggerForwardMode, messages, setMessages, o
 
   {/* Emoji Picker */}
   {showEmojiPicker && (
-    <div className="absolute bottom-14 left-3 z-50">
+    <div className="absolute bottom-14 left-3 z-50"  onClick={(e) => e.stopPropagation()}>
       <EmojiPicker
         onEmojiClick={handleEmojiClick}
         height={350}
