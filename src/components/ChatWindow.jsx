@@ -472,7 +472,7 @@ const ChatWindow = ({ selectedUser, triggerForwardMode, messages, setMessages, o
                 : "Offline"}
         </p>
       </div>
-       <div className="flex items-center space-x-4">
+       <div className="flex space-x-4">
             <button
               className="focus:outline-none"
               onClick={handleVideoCall}
