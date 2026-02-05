@@ -450,15 +450,16 @@ const ChatWindow = ({ selectedUser, triggerForwardMode, messages, setMessages, o
 
     {/* Header */}
     <div className="flex items-center gap-3 px-4 py-3 border-b bg-white sticky top-0 z-10">
-      {/* Back (mobile only) */}
-      <button
+      <div className='p-4 flex items-center'>
+        {/* Back (mobile only) */}
+        <button
         onClick={onBack}
         className="md:hidden text-xl text-gray-600 hover:text-black mr-2 focus:outline-none"
-      >
+        >
         <FaArrowLeft className="h-6 w-6" />
       </button>
 
-      <div>
+      <div className="ml-3 flex-grow">
         <h3 className="font-semibold text-sm">
           {selectedUser.username}
         </h3>
@@ -472,7 +473,7 @@ const ChatWindow = ({ selectedUser, triggerForwardMode, messages, setMessages, o
                 : "Offline"}
         </p>
       </div>
-       <div className="flex justify-end space-x-4">
+       <div className="flex items-center space-x-4">
             <button
               className="focus:outline-none"
               onClick={handleVideoCall}
@@ -486,6 +487,7 @@ const ChatWindow = ({ selectedUser, triggerForwardMode, messages, setMessages, o
               <FaEllipsisV className="h-5 w-5" />
             </button>
           </div>
+      </div>
     </div>
 
     {/* Messages */}
