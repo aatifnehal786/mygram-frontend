@@ -33,6 +33,16 @@ export const SocketProvider = ({ children }) => {
     };
   }, []);
 
+  useEffect(() => {
+  if (!socket || !loggedUser?.userid) return;
+
+  socket.emit("join", loggedUser.userid);
+
+  console.log("🟢 Joined socket room:", loggedUser.userid);
+
+}, [socket, loggedUser]);
+
+
   useEffect(()=>{
     setNotificationHandle(true)
   },[socket])
