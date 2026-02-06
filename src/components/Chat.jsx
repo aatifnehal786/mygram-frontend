@@ -128,11 +128,11 @@ const forwardMessageToUsers = async (msg, receiverIds) => {
  
 
   return (
-    <div className="flex w-full h-full bg-gray-100 overflow-hidden">
+    <div className="flex h-screen w-full bg-gray-100 overflow-hidden">
   {/* Sidebar */}
   <div
     className={`
-      w-full md:w-1/2 lg:w-1/4
+      w-full md:w-1/3 lg:w-1/4
       bg-white border-r
       transition-all duration-300
       ${selectedUser ? "hidden md:block" : "block"}
