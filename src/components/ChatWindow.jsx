@@ -615,6 +615,7 @@ const handleReaction = (messageId, emoji) => {
               <p className="whitespace-pre-wrap break-words">
                 {renderMessageWithLinks(msg.message)}
               </p>
+              <p className='whitespace-pre-wrap break-words'>{msg.message}</p>
                {/* REACTIONS DISPLAY */}
                 {msg.reactions?.length > 0 && (
                   <div className="flex gap-1 mt-1">
