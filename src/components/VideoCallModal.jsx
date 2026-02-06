@@ -504,7 +504,7 @@ useEffect(() => {
   const shouldShowActiveCall = isCallActive || callStatus === "calling" || callStatus === "connecting"
 
   return (
-    <div  className={`fixed z-50 bg-black/75 transition-all duration-300 ${isMinimized ? "bottom-4 right-4 w-[300px] h-[200px] rounded-xl shadow-xl"
+    <div  className={`fixed z-50 bg-black/75 transition-all duration-300 ${isMinimized ? "top-0 right-4 w-[300px] h-[200px] rounded-xl shadow-xl"
       : "inset-0 flex items-center justify-center"
     }
   `}>
