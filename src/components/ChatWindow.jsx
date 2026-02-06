@@ -535,7 +535,7 @@ const handleReaction = (messageId, emoji) => {
   };
 
   return (
-  <div className="flex-1 w-screen flex flex-col h-full bg-gray-50">
+  <div className="flex-1 w-full flex flex-col h-full bg-gray-50">
 
     {/* Header */}
     <div className="flex gap-3 px-4 py-3 border-b bg-white sticky top-0 z-10">
