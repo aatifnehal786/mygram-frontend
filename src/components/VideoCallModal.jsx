@@ -6,6 +6,8 @@ import useVideoCallStore from "../store/VideoCallStore"
 import { useContext } from "react"
 import { UserContext } from '../contexts/UserContext';
 import { FaExpand, FaCompress } from "react-icons/fa";
+import { useLocation } from "react-router-dom";
+
 
 
 
@@ -16,8 +18,30 @@ const VideoCallModal = ({ socket, selectedUser }) => {
   const [callStartTime, setCallStartTime] = useState(null)
   const [callDuration, setCallDuration] = useState(0)
   const [isMinimized, setIsMinimized] = useState(false);
+  const location = useLocation();
 
-  
+
+  useEffect(() => {
+  // Only minimize if a call is active
+  if (isCallActive && !isMinimized) {
+    setIsMinimized(true);
+  }
+}, [location.pathname]);
+
+
+useEffect(() => {
+  if (location.pathname === "/chat" && isCallActive) {
+    setIsMinimized(false);
+  }
+}, [location.pathname]);
+
+// prevent minimize for incoming calls
+useEffect(() => {
+  if (!incomingCall && isCallActive && !isMinimized) {
+    setIsMinimized(true);
+  }
+}, [location.pathname]);
+
   
 
  
