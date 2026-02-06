@@ -17,10 +17,10 @@ const VideoCallModal = ({ socket, selectedUser }) => {
   const [callDuration, setCallDuration] = useState(0)
   const [isMinimized, setIsMinimized] = useState(false);
 
+  
+  
 
-
-
-
+ 
 
   const {
     currentCall,
@@ -50,7 +50,7 @@ const VideoCallModal = ({ socket, selectedUser }) => {
   } = useVideoCallStore()
 
 
-
+  
 
 
   // The rtcConfiguration object you posted is used to configure a WebRTC peer-to-peer connection. 
@@ -66,18 +66,18 @@ const VideoCallModal = ({ socket, selectedUser }) => {
 
   // format time duration in mm:ss
   const formatTime = (seconds) => {
-    const hrs = Math.floor(seconds / 3600)
-    const mins = Math.floor((seconds % 3600) / 60)
-    const secs = seconds % 60
+  const hrs = Math.floor(seconds / 3600)
+  const mins = Math.floor((seconds % 3600) / 60)
+  const secs = seconds % 60
 
-    return [
-      hrs > 0 ? String(hrs).padStart(2, "0") : null,
-      String(mins).padStart(2, "0"),
-      String(secs).padStart(2, "0"),
-    ]
-      .filter(Boolean)
-      .join(":")
-  }
+  return [
+    hrs > 0 ? String(hrs).padStart(2, "0") : null,
+    String(mins).padStart(2, "0"),
+    String(secs).padStart(2, "0"),
+  ]
+    .filter(Boolean)
+    .join(":")
+}
 
 
   // Memoize display info to prevent unnecessary re-renders
@@ -121,17 +121,17 @@ const VideoCallModal = ({ socket, selectedUser }) => {
 
 
   // useEffect to track call duration
-  useEffect(() => {
-    if (!isCallActive || !callStartTime) return
+ useEffect(() => {
+  if (!isCallActive || !callStartTime) return
 
-    const interval = setInterval(() => {
-      setCallDuration(
-        Math.floor((Date.now() - callStartTime) / 1000)
-      )
-    }, 1000)
+  const interval = setInterval(() => {
+    setCallDuration(
+      Math.floor((Date.now() - callStartTime) / 1000)
+    )
+  }, 1000)
 
-    return () => clearInterval(interval)
-  }, [isCallActive, callStartTime])
+  return () => clearInterval(interval)
+}, [isCallActive, callStartTime])
 
 
 
@@ -320,7 +320,7 @@ const VideoCallModal = ({ socket, selectedUser }) => {
     setCallStartTime(null)
     setCallDuration(0)
 
-
+    
     endCall()
   }
 
@@ -348,10 +348,10 @@ const VideoCallModal = ({ socket, selectedUser }) => {
     }
 
     // Call ended
-    const handleCallEnded = () => {
+  const handleCallEnded = () => {
       console.log(" Call ended")
       endCall()
-
+     
     }
 
 
@@ -401,7 +401,7 @@ const VideoCallModal = ({ socket, selectedUser }) => {
       }
 
       try {
-
+  
         await peerConnection.setRemoteDescription(new RTCSessionDescription(answer))
 
 
@@ -480,26 +480,26 @@ const VideoCallModal = ({ socket, selectedUser }) => {
   const shouldShowActiveCall = isCallActive || callStatus === "calling" || callStatus === "connecting"
 
   return (
-    <div className={`fixed z-50 bg-black/75 transition-all duration-300 ${isMinimized ? "bottom-4 right-4 w-[300px] h-[200px] rounded-xl shadow-xl"
+    <div  className={`fixed z-50 bg-black/75 transition-all duration-300 ${isMinimized ? "bottom-4 right-4 w-[300px] h-[200px] rounded-xl shadow-xl"
       : "inset-0 flex items-center justify-center"
-      }
+    }
   `}>
       <div
         className={`
     relative bg-black overflow-hidden
     ${isMinimized
-            ? "w-full h-full rounded-xl"
-            : "w-full h-[100dvh] max-w-5xl rounded-lg"
-          }
+      ? "w-full h-full rounded-xl"
+      : "w-full h-[100dvh] max-w-5xl rounded-lg"
+    }
   `}
       >
         {/* Incoming Call UI */}
-        {incomingCall && !isCallActive && !isMinimized && (
+        {incomingCall && !isCallActive  && !isMinimized && (
           <div className="flex flex-col items-center justify-center h-full p-8">
             <div className="text-center mb-8">
               <div className="w-32 h-32 rounded-full bg-gray-300 mx-auto mb-4 overflow-hidden">
                 <img
-                  src={selectedUser?.profilePic || "/placeholder.svg?height=128&width=128"}
+                  src={selectedUser?.profilePic|| "/placeholder.svg?height=128&width=128"}
                   alt={selectedUser?.username || "Unknown"}
                   className="w-full h-full object-cover"
                   onError={(e) => {
@@ -508,7 +508,7 @@ const VideoCallModal = ({ socket, selectedUser }) => {
                 />
               </div>
               <h2 className={`text-2xl font-semibold mb-2`}>
-                {selectedUser?.username || "Unknown"}
+                {selectedUser?.username|| "Unknown"}
               </h2>
               <p className={`text-lg`}>
                 Incoming {callType} call...
@@ -537,13 +537,13 @@ const VideoCallModal = ({ socket, selectedUser }) => {
           <div className="relative w-full h-full">
             {/* /// Minimize/Maximize Button */}
             <div className="absolute top-4 right-4 flex gap-2 z-50">
-              <button
-                onClick={() => setIsMinimized(prev => !prev)}
-                className="w-9 h-9 bg-black/60 hover:bg-black/80 rounded-full flex items-center justify-center text-white"
-              >
-                {isMinimized ? <FaExpand /> : <FaCompress />}
-              </button>
-            </div>
+  <button
+    onClick={() => setIsMinimized(prev => !prev)}
+    className="w-9 h-9 bg-black/60 hover:bg-black/80 rounded-full flex items-center justify-center text-white"
+  >
+    {isMinimized ? <FaExpand /> : <FaCompress />}
+  </button>
+</div>
 
             {/* Remote Video */}
             {callType === "video" && (
@@ -553,14 +553,14 @@ const VideoCallModal = ({ socket, selectedUser }) => {
                 playsInline
                 className={`w-full h-full object-cover bg-gray-800 ${remoteStream ? "block" : "hidden"}`}
               />
-
-
+              
+              
             )}
             <div className="absolute bottom-1 right-1 bg-black/60 px-2 py-0.5 rounded text-xs font-mono text-white">
-              {formatTime(callDuration)}
-            </div>
-
-
+                  {formatTime(callDuration)}
+                </div>
+           
+            
 
 
             {/* Avatar/Status Display */}
@@ -615,39 +615,40 @@ const VideoCallModal = ({ socket, selectedUser }) => {
 
             {/* Call Controls */}
             {!isMinimized && (
-              <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2">
-                <div className="flex space-x-4">
-                  {callType === "video" && (
-                    <button
-                      onClick={toggleVideo}
-                      className={`w-12 h-12 rounded-full flex items-center justify-center transition-colors ${isVideoEnabled
-                          ? "bg-gray-600 hover:bg-gray-700 text-white"
-                          : "bg-red-500 hover:bg-red-600 text-white"
-                        }`}
-                    >
-                      {isVideoEnabled ? <FaVideo className="w-5 h-5" /> : <FaVideoSlash className="w-5 h-5" />}
-                    </button>
-                  )}
-
+            <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2">
+              <div className="flex space-x-4">
+                {callType === "video" && (
                   <button
-                    onClick={toggleAudio}
-                    className={`w-12 h-12 rounded-full flex items-center justify-center transition-colors ${isAudioEnabled
+                    onClick={toggleVideo}
+                    className={`w-12 h-12 rounded-full flex items-center justify-center transition-colors ${
+                      isVideoEnabled
                         ? "bg-gray-600 hover:bg-gray-700 text-white"
                         : "bg-red-500 hover:bg-red-600 text-white"
-                      }`}
+                    }`}
                   >
-                    {isAudioEnabled ? <FaMicrophone className="w-5 h-5" /> : <FaMicrophoneSlash className="w-5 h-5" />}
+                    {isVideoEnabled ? <FaVideo className="w-5 h-5" /> : <FaVideoSlash className="w-5 h-5" />}
                   </button>
+                )}
 
-                  <button
-                    onClick={handleEndCall}
-                    className="absolute bottom-3 left-3 w-10 h-10 bg-red-500 hover:bg-red-600 rounded-full flex items-center justify-center text-white"
-                  >
-                    <FaPhoneSlash className="w-4 h-4" />
-                  </button>
+                <button
+                  onClick={toggleAudio}
+                  className={`w-12 h-12 rounded-full flex items-center justify-center transition-colors ${
+                    isAudioEnabled
+                      ? "bg-gray-600 hover:bg-gray-700 text-white"
+                      : "bg-red-500 hover:bg-red-600 text-white"
+                  }`}
+                >
+                  {isAudioEnabled ? <FaMicrophone className="w-5 h-5" /> : <FaMicrophoneSlash className="w-5 h-5" />}
+                </button>
 
-                </div>
-              </div>)}
+                <button
+                  onClick={handleEndCall}
+                  className="w-12 h-12 bg-red-500 hover:bg-red-600 rounded-full flex items-center justify-center text-white transition-colors"
+                >
+                  <FaPhoneSlash className="w-5 h-5" />
+                </button>
+              </div>
+            </div>)}
           </div>
         )}
 
