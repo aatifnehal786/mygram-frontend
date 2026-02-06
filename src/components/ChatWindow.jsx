@@ -293,30 +293,32 @@ const ChatWindow = ({ selectedUser, triggerForwardMode, messages, setMessages, o
   };
 
   // Utility function to detect and render links
-  const renderMessageWithLinks = (text) => {
-    if (!text) return null;
+  const urlRegex = /(https?:\/\/[^\s]+)/g;
 
-    // Regex to detect URLs
-    const urlRegex = /(https?:\/\/[^\s]+)/g;
+const renderMessageWithLinks = (text = "") => {
+  if (!text) return null;
 
-    // Split text by URLs and map
-    return text.split(urlRegex).map((part, index) => {
-      if (part.match(urlRegex)) {
-        return (
-          <a
-            key={index}
-            href={part}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="chat-link"
-          >
-            {part}
-          </a>
-        );
-      }
-      return part;
-    });
-  };
+  const parts = text.split(urlRegex);
+
+  return parts.map((part, index) => {
+    if (part.match(urlRegex)) {
+      return (
+        <a
+          key={index}
+          href={part}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-blue-500 underline break-all"
+        >
+          {part}
+        </a>
+      );
+    }
+
+    // 🔥 IMPORTANT: return normal text too
+    return <span key={index}>{part}</span>;
+  });
+};
 
   function formatTime(timestamp) {
     const date = new Date(timestamp);
