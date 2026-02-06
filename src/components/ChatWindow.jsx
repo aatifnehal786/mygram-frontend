@@ -612,7 +612,9 @@ const handleReaction = (messageId, emoji) => {
               </button>
 
               {/* Message */}
-              
+              <p className="whitespace-pre-wrap break-words">
+                {renderMessageWithLinks(msg.message)}
+              </p>
               
                {/* REACTIONS DISPLAY */}
                 {msg.reactions?.length > 0 && (
@@ -650,7 +652,7 @@ const handleReaction = (messageId, emoji) => {
                   </div>
                 )}
 
-              <div className='h-4 w-5 whitespace-break-spaces'>{renderMessageWithLinks(msg.message)}</div>
+
               {/* Attachments */}
               {msg.fileType?.includes("image") && (
                 <img
