@@ -616,7 +616,7 @@ const handleReaction = (messageId, emoji) => {
                 onClick={() =>
                   setOpenDropdownId(isDropdownOpen ? null : msg._id)
                 }
-                className={`absolute -top-2 ${isOwnMessage ? "right-0" : "left-0"} text-xs text-gray-400 hover:text-gray-700`}
+                className={`absolute -top-2 ${isOwnMessage ? "right-2" : "-left-2"} text-xs text-gray-400 hover:text-gray-700`}
               >
                 ⋮
               </button>
