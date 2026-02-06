@@ -626,7 +626,7 @@ const handleReaction = (messageId, emoji) => {
 
                 {/* REACTION BUTTON */}
                 <button
-                  className="absolute left-0 top-1 text-sm bg-yellow-300"
+                  className="absolute left-0 top-1 text-sm bg-yellow-300 p-1"
                   onClick={() =>
                     setReactionPickerFor(
                       reactionPickerFor === msg._id ? null : msg._id
@@ -638,7 +638,7 @@ const handleReaction = (messageId, emoji) => {
 
                 {/* REACTION PICKER */}
                 {reactionPickerFor === msg._id && (
-                  <div className="absolute -right-4 top-8 bg-white border rounded-lg shadow p-2 flex gap-2 z-50">
+                  <div className="absolute -right-8 top-5 bg-white border rounded-lg shadow p-2 flex gap-2 z-50">
                     {REACTIONS.map((emoji) => (
                       <button
                         key={emoji}
