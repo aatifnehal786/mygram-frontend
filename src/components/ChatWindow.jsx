@@ -605,7 +605,7 @@ const handleReaction = (messageId, emoji) => {
           >
             <div
               className={`
-                relative max-w-[75%] rounded-xl px-3 py-2 text-sm
+                relative max-w-[75%] rounded-xl px-3 py-2 text-sm m-10
                 ${isOwnMessage
                   ? "bg-green-600 text-white rounded-br-none"
                   : "bg-white text-gray-800 rounded-bl-none border"}
@@ -616,7 +616,7 @@ const handleReaction = (messageId, emoji) => {
                 onClick={() =>
                   setOpenDropdownId(isDropdownOpen ? null : msg._id)
                 }
-                className="absolute -top-2 -right-2 text-xs text-gray-400 hover:text-gray-700"
+                className={`absolute -top-2 ${isOwnMessage ? "right-0" : "left-0"} text-xs text-gray-400 hover:text-gray-700`}
               >
                 ⋮
               </button>
@@ -710,7 +710,7 @@ const handleReaction = (messageId, emoji) => {
               {isDropdownOpen && (
                 <div
                   ref={dropdownRef}
-                  className="absolute right-5 top-4 bg-white border rounded-md shadow-lg text-xs z-20"
+                  className="absolute -right-4 top-4 bg-white border rounded-md shadow-lg text-xs z-20"
                 >
                   <button
                     onClick={() => triggerForwardMode(msg)}
