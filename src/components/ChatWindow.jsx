@@ -316,7 +316,7 @@ const renderMessageWithLinks = (text = "") => {
     }
 
     // 🔥 IMPORTANT: return normal text too
-    return <span key={index}>{part}</span>;
+    return <span className='top-5 left-0' key={index}>{part}</span>;
   });
 };
 
