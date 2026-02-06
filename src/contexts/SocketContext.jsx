@@ -19,14 +19,20 @@ export const SocketProvider = ({ children }) => {
   // 🔹 Create socket connection ONCE
   useEffect(() => {
     const newSocket = io("https://mygram-mvc.onrender.com", {
-      transports: ["websocket"],
+      transports: ["websocket","polling"],
       withCredentials: true
     });
 
     setSocket(newSocket);
 
     // 🔥 JOIN USER ROOM IMMEDIATELY
-     
+     newSocket.on("connect_error", (err) => {
+  console.error("Socket connect error:", err.message);
+});
+
+newSocket.on("disconnect", (reason) => {
+  console.warn("Socket disconnected:", reason);
+});
 
     return () => {
       newSocket.disconnect();
