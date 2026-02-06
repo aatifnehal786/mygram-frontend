@@ -298,7 +298,7 @@ const ChatWindow = ({ selectedUser, triggerForwardMode, messages, setMessages, o
 
 const renderMessageWithLinks = (text) => {
   // 🔴 HARD GUARD
-  if (typeof text !== "string") return text;
+  if (typeof text === "string") return text;
 
   // ✅ NO LINKS → return plain text DIRECTLY
   if (!urlRegex.test(text)) {
@@ -324,6 +324,8 @@ const renderMessageWithLinks = (text) => {
     )
   );
 };
+
+
 
   function formatTime(timestamp) {
     const date = new Date(timestamp);
@@ -594,6 +596,7 @@ const handleReaction = (messageId, emoji) => {
         const senderId = msg.sender?._id || msg.sender;
         const isOwnMessage = senderId === currentUserId;
         const isDropdownOpen = openDropdownId === msg._id;
+        console.log("MSG:", msg.message, typeof msg.message);
 
         return (
           <div
