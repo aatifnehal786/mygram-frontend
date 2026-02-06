@@ -626,7 +626,7 @@ const handleReaction = (messageId, emoji) => {
 
                 {/* REACTION BUTTON */}
                 <button
-                  className="absolute left-6 top-1 text-sm"
+                  className="absolute left-0 top-1 text-sm"
                   onClick={() =>
                     setReactionPickerFor(
                       reactionPickerFor === msg._id ? null : msg._id
