@@ -298,7 +298,7 @@ const ChatWindow = ({ selectedUser, triggerForwardMode, messages, setMessages, o
 
 const renderMessageWithLinks = (text) => {
   // 🔴 HARD GUARD
-  if (typeof text === "string") return text;
+  if (typeof text !== "string") return text;
 
   // ✅ NO LINKS → return plain text DIRECTLY
   if (!urlRegex.test(text)) {
