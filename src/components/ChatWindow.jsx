@@ -75,7 +75,7 @@ const ChatWindow = ({ selectedUser, triggerForwardMode, messages, setMessages, o
 }, [socket]);
 
 
-console.log("MSG:", msg.message, typeof msg.message);
+
 
 
 
