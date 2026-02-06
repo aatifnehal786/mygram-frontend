@@ -710,7 +710,7 @@ const handleReaction = (messageId, emoji) => {
               {isDropdownOpen && (
                 <div
                   ref={dropdownRef}
-                  className="absolute right-0 top-4 bg-white border rounded-md shadow-lg text-xs z-20"
+                  className="absolute right-5 top-4 bg-white border rounded-md shadow-lg text-xs z-20"
                 >
                   <button
                     onClick={() => triggerForwardMode(msg)}
