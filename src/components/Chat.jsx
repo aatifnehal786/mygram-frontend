@@ -128,7 +128,7 @@ const forwardMessageToUsers = async (msg, receiverIds) => {
  
 
   return (
-    <div className="flex h-screen w-full bg-gray-100 overflow-hidden">
+    <div className="flex w-full h-[100dvh] bg-gray-100 overflow-hidden">
   {/* Sidebar */}
   <div
     className={`
