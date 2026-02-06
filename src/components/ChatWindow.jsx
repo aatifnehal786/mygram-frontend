@@ -293,31 +293,35 @@ const ChatWindow = ({ selectedUser, triggerForwardMode, messages, setMessages, o
   };
 
   // Utility function to detect and render links
-  const urlRegex = /(https?:\/\/[^\s]+)/g;
+ const urlRegex = /(https?:\/\/[^\s]+)/g;
 
-const renderMessageWithLinks = (text = "") => {
-  if (!text) return null;
+const renderMessageWithLinks = (text) => {
+  // 🔴 HARD GUARD
+  if (typeof text !== "string") return text;
 
-  const parts = text.split(urlRegex);
+  // ✅ NO LINKS → return plain text DIRECTLY
+  if (!urlRegex.test(text)) {
+    return text;
+  }
 
-  return parts.map((part, index) => {
-    if (part.match(urlRegex)) {
-      return (
-        <a
-          key={index}
-          href={part}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-blue-500 underline break-all"
-        >
-          {part}
-        </a>
-      );
-    }
+  // 🔁 Reset regex index (VERY IMPORTANT)
+  urlRegex.lastIndex = 0;
 
-    // 🔥 IMPORTANT: return normal text too
-    return <span className='top-5 left-0' key={index}>{part}</span>;
-  });
+  return text.split(urlRegex).map((part, index) =>
+    urlRegex.test(part) ? (
+      <a
+        key={index}
+        href={part}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="text-blue-500 underline break-all"
+      >
+        {part}
+      </a>
+    ) : (
+      <span key={index}>{part}</span>
+    )
+  );
 };
 
   function formatTime(timestamp) {
