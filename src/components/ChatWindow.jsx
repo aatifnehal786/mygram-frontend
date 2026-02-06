@@ -623,7 +623,7 @@ const handleReaction = (messageId, emoji) => {
 
               {/* Message */}
               <p className="whitespace-pre-wrap break-words">
-                {renderMessageWithLinks(msg.message)}
+                {msg.message}
               </p>
               
                {/* REACTIONS DISPLAY */}
