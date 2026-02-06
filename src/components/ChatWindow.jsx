@@ -638,7 +638,7 @@ const handleReaction = (messageId, emoji) => {
 
                 {/* REACTION PICKER */}
                 {reactionPickerFor === msg._id && (
-                  <div className={`absolute top-6 ${isOwnMessage ? "right-5" : "right-0"} bg-white border rounded-lg shadow p-2 flex gap-2 z-50`}>
+                  <div className={`absolute top-6 ${isOwnMessage ? "right-0" : "left-5"} bg-white border rounded-lg shadow p-2 flex gap-2 z-50`}>
                     {REACTIONS.map((emoji) => (
                       <button
                         key={emoji}
