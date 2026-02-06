@@ -622,9 +622,10 @@ const handleReaction = (messageId, emoji) => {
               </button>
 
               {/* Message */}
-              <p className="whitespace-pre-wrap break-words">
-                {msg.message}
-              </p>
+              <p className="whitespace-pre-wrap break-words min-h-[1rem]">
+  {renderMessageWithLinks(msg.message)}
+</p>
+
               
                {/* REACTIONS DISPLAY */}
                 {msg.reactions?.length > 0 && (
@@ -637,7 +638,7 @@ const handleReaction = (messageId, emoji) => {
 
                 {/* REACTION BUTTON */}
                 <button
-                  className="absolute left-0 top-1 text-sm bg-yellow-300 p-1"
+                  className="absolute -left-2 -top-4 text-sm p-1 m-t-0"
                   onClick={() =>
                     setReactionPickerFor(
                       reactionPickerFor === msg._id ? null : msg._id
@@ -649,7 +650,7 @@ const handleReaction = (messageId, emoji) => {
 
                 {/* REACTION PICKER */}
                 {reactionPickerFor === msg._id && (
-                  <div className={`absolute top-6 ${isOwnMessage ? "left-0" : "left-5"} bg-white border rounded-lg shadow p-2 flex gap-2 z-50`}>
+                  <div className={`absolute top-6 ${isOwnMessage ? "right-0" : "left-0"} bg-white border rounded-lg shadow p-2 flex gap-2 z-50`}>
                     {REACTIONS.map((emoji) => (
                       <button
                         key={emoji}
