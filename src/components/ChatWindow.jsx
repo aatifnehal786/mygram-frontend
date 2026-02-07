@@ -618,7 +618,7 @@ const handleReaction = (messageId, emoji) => {
                 }
                 className={`absolute top-5 ${isOwnMessage ? "-right-2" : "-left-2"} text-xs text-gray-400 hover:text-gray-700`}
               >
-                ⋮
+                 <FaEllipsisV className="h-3 w-3" />
               </button>
 
               {/* Message */}
