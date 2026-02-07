@@ -33,6 +33,7 @@ const ChatWindow = ({ selectedUser, triggerForwardMode, messages, setMessages, o
   const chatContainerRef = useRef(null);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const inputRef = useRef(null);
+  const handleReactionRef = useRef(null);
 
   const [reactionPickerFor, setReactionPickerFor] = useState(null);
   const [limit, setLimit] = useState(20);
@@ -119,6 +120,9 @@ const ChatWindow = ({ selectedUser, triggerForwardMode, messages, setMessages, o
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
         setOpenDropdownId(null);
+        
+      }
+      if (handleReactionRef.current && !handleReactionRef.current.contains(event.target)) {
         setReactionPickerFor(null);
       }
     };
@@ -597,8 +601,7 @@ const handleReaction = (messageId, emoji) => {
         const senderId = msg.sender?._id || msg.sender;
         const isOwnMessage = senderId === currentUserId;
         const isDropdownOpen = openDropdownId === msg._id;
-        console.log("MSG:", msg.message, typeof msg.message);
-
+        
         return (
           <div
             key={msg._id || idx}
@@ -651,7 +654,7 @@ const handleReaction = (messageId, emoji) => {
 
                 {/* REACTION PICKER */}
                 {reactionPickerFor === msg._id && (
-                  <div className={`absolute top-6 ${isOwnMessage ? "right-0" : "left-0"} bg-white border rounded-lg shadow p-2 flex gap-2 z-50`}>
+                  <div ref={handleReactionRef} className={`absolute top-6 ${isOwnMessage ? "right-0" : "left-0"} bg-white border rounded-lg shadow p-2 flex gap-2 z-50`}>
                     {REACTIONS.map((emoji) => (
                       <button
                         key={emoji}
