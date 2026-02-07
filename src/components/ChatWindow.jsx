@@ -119,7 +119,7 @@ const ChatWindow = ({ selectedUser, triggerForwardMode, messages, setMessages, o
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
         setOpenDropdownId(null);
-        setShowEmojiPicker(false);
+        setReactionPickerFor(null);
       }
     };
 
