@@ -46,7 +46,7 @@ export default function ImagePostWithMusic({ post, currentlyPlayingId, setCurren
       />
 
       {/* Play overlay (optional but 🔥) */}
-      {!isPlaying && post.backgroundMusic && (
+      {!isCurrent && post.backgroundMusic && (
         <div className="absolute inset-0 flex items-center justify-center
                         bg-black/30 opacity-0 group-hover:opacity-100
                         transition-opacity duration-300">
