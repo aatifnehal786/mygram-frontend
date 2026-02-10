@@ -34,6 +34,9 @@ const ChatWindow = ({ selectedUser, triggerForwardMode, messages, setMessages, o
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const inputRef = useRef(null);
   const handleReactionRef = useRef(null);
+  
+
+
 
   const [reactionPickerFor, setReactionPickerFor] = useState(null);
   const [limit, setLimit] = useState(20);
@@ -152,6 +155,23 @@ const ChatWindow = ({ selectedUser, triggerForwardMode, messages, setMessages, o
 
     setInput('');
   };
+
+
+  // handle copy text message to clipboard
+  const copyMessageToInput = (text) => {
+  if (!text) return;
+
+  // update input using your existing logic
+  handleTypingLogic(text);
+
+  // focus the input
+  setTimeout(() => {
+    inputRef.current?.focus();
+  }, 0);
+
+  // close message dropdown if open
+  setOpenDropdownId(null);
+};
 
 
   useEffect(() => {
@@ -450,6 +470,8 @@ const handleReaction = (messageId, emoji) => {
 
 
   const sortedMessages = [...messages].sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+
+
   const handleDynamicEnter = (e) => {
     if (e.key === "Enter") {
       if (document.activeElement.name === "message") {
@@ -712,10 +734,18 @@ const handleReaction = (messageId, emoji) => {
 
               {/* Dropdown */}
               {isDropdownOpen && (
+                
                 <div
                   ref={dropdownRef}
                   className="absolute -right-4 top-4 bg-white border rounded-md shadow-lg text-xs z-20"
                 >
+                  <button
+                    onClick={() => copyMessageToInput(msg.message)}
+                    className="block px-3 py-2 w-full text-left text-blue-800 hover:bg-gray-100"
+                  >
+                    Copy to input
+                  </button>
+
                   <button
                     onClick={() => triggerForwardMode(msg)}
                     className="block px-3 py-2 text-blue-800 w-full text-left hover:bg-gray-100"
@@ -724,7 +754,7 @@ const handleReaction = (messageId, emoji) => {
                   </button>
                   <button
                     onClick={() => confirmDelete(msg._id)}
-                    className="block px-3 py-2 w-full text-left text-red-500 hover:bg-gray-100"
+                    className="block px-3 py-2 w-full text-left text-blue-800 hover:bg-gray-100"
                   >
                     Delete
                   </button>
@@ -732,7 +762,7 @@ const handleReaction = (messageId, emoji) => {
                     <a
                       href={msg.fileUrl}
                       download
-                      className="block px-3 py-2 hover:bg-gray-100"
+                      className="block px-3 py-2 hover:bg-gray-100 text-blue-800 w-full text-left"
                     >
                       Download
                     </a>
@@ -809,15 +839,10 @@ const handleReaction = (messageId, emoji) => {
   <input
     ref={inputRef}
     type="text"
+    name='message'
     value={input}
     onChange={(e) => handleTypingLogic(e.target.value)}
-    onKeyDown={(e) => {
-      if (e.key === "Enter" && !e.shiftKey) {
-        e.preventDefault();
-        sendMessage();
-        setShowEmojiPicker(false);
-      }
-    }}
+    onKeyDown={handleDynamicEnter}
     placeholder="Type a message..."
     className="flex-1 px-4 py-2 rounded-full border text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
   />
