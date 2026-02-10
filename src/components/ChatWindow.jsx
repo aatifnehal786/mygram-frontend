@@ -34,18 +34,16 @@ const ChatWindow = ({ selectedUser, triggerForwardMode, messages, setMessages, o
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const inputRef = useRef(null);
   const handleReactionRef = useRef(null);
-  
-
-
-
   const [reactionPickerFor, setReactionPickerFor] = useState(null);
   const [limit, setLimit] = useState(20);
   const [skip, setSkip] = useState(0);
   const [hasMore, setHasMore] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
+  const shouldAutoScrollRef = useRef(true);
 
 
-  useEffect(() => {
+
+useEffect(() => {
     if (!chatContainerRef.current) return;
 
     const height = chatContainerRef.current.clientHeight;
@@ -58,7 +56,7 @@ const ChatWindow = ({ selectedUser, triggerForwardMode, messages, setMessages, o
 
 
  /* -------------------- SOCKET: REACTION UPDATE -------------------- */
- useEffect(() => {
+useEffect(() => {
   if (!socket) return;
 
   const handleReaction = ({ messageId, reactions }) => {
@@ -106,17 +104,7 @@ const ChatWindow = ({ selectedUser, triggerForwardMode, messages, setMessages, o
 
   // console.log(messages)
 
- useEffect(() => {
-  if (!chatContainerRef.current) return;
 
-  const container = chatContainerRef.current;
-  const isNearBottom =
-    container.scrollHeight - container.scrollTop - container.clientHeight < 100;
-
-  if (isNearBottom) {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }
-}, [messages]);
 
 
   useEffect(() => {
@@ -191,14 +179,14 @@ const ChatWindow = ({ selectedUser, triggerForwardMode, messages, setMessages, o
   }, []);
 
 
-  const handleEmojiClick = (emojiData) => {
+const handleEmojiClick = (emojiData) => {
   setInput((prev) => prev + emojiData.emoji);
   inputRef.current?.focus();
 };
 
 
   // File upload
-  const handleFileUpload = async (e) => {
+const handleFileUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
 
@@ -224,7 +212,7 @@ const ChatWindow = ({ selectedUser, triggerForwardMode, messages, setMessages, o
   };
 
   // Delete chat message
-  const deleteMessage = async () => {
+const deleteMessage = async () => {
     if (!messageToDelete) return;
 
     try {
@@ -245,8 +233,8 @@ const ChatWindow = ({ selectedUser, triggerForwardMode, messages, setMessages, o
   };
 
 
-  // use effect for online and offline status
-  useEffect(() => {
+// use effect for online and offline status
+useEffect(() => {
     if (!socket) return;
 
     socket.emit("get-online-users");
@@ -267,14 +255,14 @@ const ChatWindow = ({ selectedUser, triggerForwardMode, messages, setMessages, o
 
   // use Effect for Typing indicators
 
-  useEffect(() => {
+useEffect(() => {
     if (!socket || !selectedUser) return;
 
     const handleTyping = (senderId) => {
       if (senderId === selectedUser._id) setIsTyping(true);
     };
 
-    const handleStopTyping = (senderId) => {
+const handleStopTyping = (senderId) => {
       if (senderId === selectedUser._id) setIsTyping(false);
     };
 
@@ -299,7 +287,7 @@ const ChatWindow = ({ selectedUser, triggerForwardMode, messages, setMessages, o
     }
   }, [selectedUser]);
 
-  useEffect(() => {
+useEffect(() => {
     if (!socket || !selectedUser) return;
 
     socket.emit("markSeen", {
@@ -375,7 +363,7 @@ const renderMessageWithLinks = (text) => {
     return date.toLocaleDateString();
   }
 
-  const loadMessages = async (initial = false) => {
+const loadMessages = async (initial = false) => {
     if (loadingMore || !hasMore || !selectedUser) return;
 
     setLoadingMore(true);
@@ -412,7 +400,7 @@ const renderMessageWithLinks = (text) => {
   };
 
 
-  useEffect(() => {
+useEffect(() => {
     if (!selectedUser) return;
 
     setSkip(0);
@@ -421,13 +409,16 @@ const renderMessageWithLinks = (text) => {
   }, [selectedUser, limit]);
 
 
-  const handleScroll = () => {
-    if (!chatContainerRef.current) return;
+const handleScroll = () => {
+  const el = chatContainerRef.current;
+  if (!el) return;
 
-    if (chatContainerRef.current.scrollTop === 0) {
-      loadMessages();
-    }
-  };
+  const distanceFromBottom =
+    el.scrollHeight - el.scrollTop - el.clientHeight;
+
+  shouldAutoScrollRef.current = distanceFromBottom < 100;
+};
+
 
 const handleReaction = (messageId, emoji) => {
   // 🔥 Optimistic UI update
@@ -469,10 +460,18 @@ const handleReaction = (messageId, emoji) => {
 };
 
 
-  const sortedMessages = [...messages].sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+const sortedMessages = [...messages].sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+
+useEffect(() => {
+  if (!shouldAutoScrollRef.current) return;
+
+  messagesEndRef.current?.scrollIntoView({
+    behavior: "smooth",
+  });
+}, [sortedMessages]);
 
 
-  const handleDynamicEnter = (e) => {
+const handleDynamicEnter = (e) => {
     if (e.key === "Enter") {
       if (document.activeElement.name === "message") {
         chatBtn.current.click()
@@ -481,7 +480,7 @@ const handleReaction = (messageId, emoji) => {
 
   }
 
-  useEffect(() => {
+useEffect(() => {
     if (!socket) return;
 
     const handler = ({ userId }) => {
