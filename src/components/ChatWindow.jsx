@@ -807,8 +807,9 @@ return (
           </div>
         );
       })}
-      <div ref={messagesEndRef} />
-    </div>
+</div>
+
+<div ref={messagesEndRef} />
 
     {/* Input */}
    {/* Input */}
