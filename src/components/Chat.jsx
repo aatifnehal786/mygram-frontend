@@ -119,6 +119,7 @@ const forwardMessageToUsers = async (msg, receiverIds) => {
 
   const triggerForwardMode = (msg) => {
     setIsForwarding(true);
+    setSelectedUser(null)
     setMessageToForward(msg);
     
   };

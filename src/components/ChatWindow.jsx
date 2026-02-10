@@ -578,7 +578,7 @@ const handleReaction = (messageId, emoji) => {
       {/* Back (mobile only) */}
       <button
         onClick={onBack}
-        className="md:hidden text-xl text-gray-600 hover:text-black mr-2 focus:outline-none"
+        className="md:hidden text-xl text-gray-600 hover:text-black ml-2 mr-2 focus:outline-none"
       >
         <FaArrowLeft className="h-6 w-6" />
       </button>
@@ -771,7 +771,7 @@ const handleReaction = (messageId, emoji) => {
                 </div>
               )}
               {showConfirmModal && (
-  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+  <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900 bg-opacity-50">
     <div className="bg-white rounded-xl shadow-lg p-6 w-80 max-w-sm text-center space-y-4">
       <p className="text-gray-800 font-medium">
         Are you sure you want to delete this message?
