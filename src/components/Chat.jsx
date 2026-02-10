@@ -159,17 +159,13 @@ const forwardMessageToUsers = async (msg, receiverIds) => {
   </div>
 
   {/* Chat Window */}
-  {/* Chat Window */}
-<div
-  className={`
-    w-full h-full
-    md:flex-1
-    bg-gray-50
-    transition-all duration-300
-    ${selectedUser ? "block" : "hidden md:flex"}
-  `}
->
-
+  <div
+    className={`
+      flex-1 bg-gray-50
+      transition-all duration-300
+      ${selectedUser ? "block" : "hidden md:block"}
+    `}
+  >
     {selectedUser ? (
       <ChatWindow
         selectedUser={selectedUser}
