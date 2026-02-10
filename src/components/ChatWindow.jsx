@@ -570,7 +570,7 @@ const handleReaction = (messageId, emoji) => {
     }
   };
 
-{selectedUser ?  (
+{selectedUser ? (
 <div className="flex-1 w-full flex flex-col h-full bg-gray-50">
 
     {/* Header */}
