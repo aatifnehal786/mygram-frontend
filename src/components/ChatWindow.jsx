@@ -570,7 +570,9 @@ const handleReaction = (messageId, emoji) => {
     }
   };
 
-{selectedUser ? (
+
+return (
+  
 <div className="flex-1 w-full flex flex-col h-full bg-gray-50">
 
     {/* Header */}
@@ -865,13 +867,10 @@ const handleReaction = (messageId, emoji) => {
 </div>
     <VideoCallManager selectedUser={selectedUser} socket={socket} />
     
-  </div>) : (
-    <div className="hidden md:flex h-full items-center justify-center text-gray-400">
-        Select a chat to start messaging
-      </div>
-  )}  
+  </div> 
 
 
+)
 
 
 };
