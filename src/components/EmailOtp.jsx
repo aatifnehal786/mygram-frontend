@@ -26,6 +26,7 @@ export default function EmailOtp() {
                 method: "POST",
                 body: JSON.stringify({ email }),
             });
+            console.log(data.email)
 
             setMessage({ type: "success", text: data.message });
             setTimeout(() => {setMessage({ type: "", text: "" }),setEmail("")}, 3000);
