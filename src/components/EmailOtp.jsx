@@ -42,8 +42,8 @@ export default function EmailOtp() {
     const verifyOtp = async (e) => {
         e.preventDefault();
 
-        if (!email || !otp) {
-            setMessage({ type: "error", text: "Email and OTP are required" });
+        if (!otp) {
+            setMessage({ type: "error", text: "OTP is required" });
             setTimeout(() => {
                 setMessage({ type: "", text: "" });
                 setEmail("");
