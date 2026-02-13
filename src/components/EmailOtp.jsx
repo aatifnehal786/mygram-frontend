@@ -26,11 +26,9 @@ export default function EmailOtp() {
                 method: "POST",
                 body: JSON.stringify({ email }),
             });
-            console.log(data.email)
 
             setMessage({ type: "success", text: data.message });
-            setTimeout(() => {setMessage({ type: "", text: "" }),setEmail("")}, 3000);
-            setEmail(data.email)
+            setTimeout(() => setMessage({ type: "", text: "" }), 5000);
         } catch (err) {
             console.error("Send OTP error:", err);
             setMessage({ type: "error", text: "Failed to send OTP" });
@@ -42,13 +40,13 @@ export default function EmailOtp() {
     const verifyOtp = async (e) => {
         e.preventDefault();
 
-        if (!otp) {
-            setMessage({ type: "error", text: "OTP is required" });
+        if (!email || !otp) {
+            setMessage({ type: "error", text: "Email and OTP are required" });
             setTimeout(() => {
                 setMessage({ type: "", text: "" });
                 setEmail("");
                 setOtp("");
-            }, 3000);
+            }, 5000);
             return;
         }
 
