@@ -28,7 +28,8 @@ export default function EmailOtp() {
             });
 
             setMessage({ type: "success", text: data.message });
-            setTimeout(() => setMessage({ type: "", text: "" }), 5000);
+            setTimeout(() => {setMessage({ type: "", text: "" }),setEmail("")}, 3000);
+            setEmail(data.email)
         } catch (err) {
             console.error("Send OTP error:", err);
             setMessage({ type: "error", text: "Failed to send OTP" });
@@ -46,7 +47,7 @@ export default function EmailOtp() {
                 setMessage({ type: "", text: "" });
                 setEmail("");
                 setOtp("");
-            }, 5000);
+            }, 3000);
             return;
         }
 
