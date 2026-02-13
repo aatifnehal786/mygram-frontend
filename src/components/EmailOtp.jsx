@@ -58,7 +58,7 @@ export default function EmailOtp() {
                 body: JSON.stringify({ email, otp }),
             });
 
-            setMessage({ type: "success", text: "OTP verified successfully" });
+            setMessage({ type: "success", text:data.message });
              setTimeout(() => {
                 setMessage({ type: "", text: "" });
                 setEmail("");
