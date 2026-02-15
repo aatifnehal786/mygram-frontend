@@ -134,9 +134,11 @@ const handleResetPassword = async () => {
       toast.error(data.error || "Failed to reset password");
     } else {
       toast.success(data.message || "Password reset successfully!");
+       setTimeout(() => {
         setEmail("");
-        setNewPassword("");
         setOtp("");
+        setNewPassword("");
+    } , 5000);
       
     }
   } catch (err) {

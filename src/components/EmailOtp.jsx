@@ -30,7 +30,9 @@ export default function EmailOtp() {
 
         if (!email) {
             toast.error("Email is required");
-            setEmail("");
+            setTimeout(() => {
+                setEmail("");
+            } , 5000);
             return;
         }
 
@@ -56,8 +58,10 @@ export default function EmailOtp() {
 
         if (!email || !otp) {
             toast.error("Email and OTP are required");
-              setEmail("");
-              setOtp("");
+              setTimeout(() => {
+                setEmail("");
+                setOtp("");
+            }, 5000);
             return;
         }
 

@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import hide from '../assets/hide.png'
 import show from '../assets/show.png'
 import { apiFetch } from "../api/apiFetch";
+import { toast } from "react-toastify";
 
 export default function SignUp(){
 
@@ -10,18 +11,23 @@ export default function SignUp(){
         username:"",
         email:"",
         password:"",
+        confirmPassword: "",
         mobile:""
     })
-
-    const [message,setMessage] = useState({
-        type:"",
-        text:""
-    })
-
     const [isLoading, setIsLoading] = useState(false);
-      const [isPassword,setIsPassword] = useState(false)
-      const [strength, setStrength] = useState("");
-  const [typingTimeout, setTypingTimeout] = useState(null);
+    const [isPassword,setIsPassword] = useState(false)
+    const [strength, setStrength] = useState("");
+    const [typingTimeout, setTypingTimeout] = useState(null);
+    const [passwordError, setPasswordError] = useState("");
+
+    // handle enter key for form submission
+    const handleEnterKey = (e) => {
+        if (e.key === "Enter") {
+            handleSubmit(e);
+        }
+    };
+
+  
 
     const handleInput = (e)=>{
         e.preventDefault();
@@ -35,27 +41,54 @@ export default function SignUp(){
 
     useEffect(() => {
     const val = userDetails.password;
+
     const weakRegex = /.{1,5}/;
     const mediumRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.{6,})/;
-    const strongRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).{8,}$/;
+    const strongRegex =
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).{8,}$/;
 
     if (strongRegex.test(val)) setStrength("strong");
     else if (mediumRegex.test(val)) setStrength("medium");
     else if (weakRegex.test(val)) setStrength("weak");
     else setStrength("");
 
-     if (typingTimeout) clearTimeout(typingTimeout);
+    if (typingTimeout) clearTimeout(typingTimeout);
 
-  // Set timeout to clear strength after 2 seconds of inactivity
-  const timeout = setTimeout(() => {
-    setStrength("");
-  }, 3000);
+    const timeout = setTimeout(() => {
+      setStrength("");
+    }, 3000);
 
-  setTypingTimeout(timeout);
+    setTypingTimeout(timeout);
 
-  // Cleanup on component unmount
-  return () => clearTimeout(timeout);
+    return () => clearTimeout(timeout);
   }, [userDetails.password]);
+
+  const getStrengthColor = () => {
+    switch (strength) {
+      case "weak":
+        return "bg-red-500";
+      case "medium":
+        return "bg-yellow-500";
+      case "strong":
+        return "bg-green-500";
+      default:
+        return "bg-gray-200";
+    }
+  };
+
+   // 🔁 Confirm Password Validation
+  useEffect(() => {
+    if (!userDetails.confirmPassword) {
+      setPasswordError("");
+      return;
+    }
+
+    if (userDetails.password !== userDetails.confirmPassword) {
+      setPasswordError("Passwords do not match");
+    } else {
+      setPasswordError("");
+    }
+  }, [userDetails.password, userDetails.confirmPassword]);
 
   const getStrengthText = () => {
     switch (strength) {
@@ -78,6 +111,19 @@ export default function SignUp(){
   
 const handleSubmit = async (e) => {
   e.preventDefault();
+
+  if (!userDetails.username || !userDetails.email || !userDetails.password || !userDetails.mobile) {
+    toast.error("All fields are required");
+     setTimeout(() => {
+      setUserDetails({
+        username: "",
+        email: "",
+        password: "",
+        mobile: "",
+      });
+    }, 5000);
+    return;
+  }
   setIsLoading(true);
 
   try {
@@ -86,10 +132,13 @@ const handleSubmit = async (e) => {
       body: JSON.stringify(userDetails),
     });
 
-    setMessage({ type: "success", text: data.message });
+    if (data?.error) {
+      toast.error(data.error || "Failed to create account");
+    } else {
+      toast.success(data.message || "Account created successfully!");
+    }
 
     setTimeout(() => {
-      setMessage({ type: "", text: "" });
       setIsLoading(false);
       setUserDetails({
         username: "",
@@ -97,16 +146,17 @@ const handleSubmit = async (e) => {
         password: "",
         mobile: "",
       });
-    }, 3000);
+    },5000);
   } catch (err) {
-    console.error(err);
-    setMessage({ type: "error", text: err.message });
+    toast.error(data.error || "An error occurred. Please try again.");
     setIsLoading(false);
   }
 };
 
 
-
+const isFormValid =
+    strength === "strong" &&
+    userDetails.password === userDetails.confirmPassword;
 
 
   return (
@@ -126,6 +176,7 @@ const handleSubmit = async (e) => {
         name="username"
         value={userDetails.username}
         onChange={handleInput}
+        onKeyDown={handleEnterKey}
       />
 
       {/* Email */}
@@ -137,6 +188,7 @@ const handleSubmit = async (e) => {
         name="email"
         value={userDetails.email}
         onChange={handleInput}
+        onKeyDown={handleEnterKey}
       />
 
       {/* Password */}
@@ -150,6 +202,7 @@ const handleSubmit = async (e) => {
           name="password"
           value={userDetails.password}
           onChange={handleInput}
+          onKeyDown={handleEnterKey}
         />
 
         <img
@@ -159,17 +212,57 @@ const handleSubmit = async (e) => {
           className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 cursor-pointer opacity-70 hover:opacity-100"
         />
 
-        <p
-          className={`mt-1 text-xs font-medium ${
-            strength === "weak"
-              ? "text-red-500"
-              : strength === "medium"
-              ? "text-yellow-500"
-              : "text-green-600"
-          }`}
-        >
-          {getStrengthText()}
-        </p>
+        {/* Strength Bar */}
+        {strength && (
+        <div className="mt-4">
+          <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
+            <div
+              className={`h-full transition-all duration-500 ${getStrengthColor()} ${
+                strength === "weak"
+                  ? "w-1/3"
+                  : strength === "medium"
+                  ? "w-2/3"
+                  : "w-full"
+              }`}
+            />
+          </div>
+
+          <p
+            className={`mt-2 text-sm font-medium ${
+              strength === "weak"
+                ? "text-red-500"
+                : strength === "medium"
+                ? "text-yellow-500"
+                : "text-green-600"
+            }`}
+          >
+            {getStrengthText()}
+          </p>
+          </div>
+        )}
+        <input
+        type="password"
+        name="confirmPassword"
+        placeholder="Confirm password"
+        value={userDetails.confirmPassword}
+        onChange={handleInput}
+        className={`w-full px-4 py-2 mt-4 border rounded-xl outline-none focus:ring-2 ${
+          passwordError
+            ? "border-red-500 focus:ring-red-400"
+            : "focus:ring-green-400"
+         }`}
+        />
+        <img
+          onClick={showHide}
+          src={isPassword ? show : hide}
+          alt="toggle"
+          className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 cursor-pointer opacity-70 hover:opacity-100"
+        />
+
+        {/* Error Message */}
+        {passwordError && (
+        <p className="text-red-500 text-sm mt-2">{passwordError}</p>
+        )}
       </div>
 
       {/* Mobile */}
@@ -182,12 +275,13 @@ const handleSubmit = async (e) => {
         name="mobile"
         value={userDetails.mobile}
         onChange={handleInput}
+        onKeyDown={handleEnterKey}
       />
 
       {/* Submit */}
       <button
         onClick={handleSubmit}
-        disabled={isLoading}
+        disabled={isLoading || !isFormValid}
         className="w-full bg-indigo-600 text-white py-2 rounded-md font-medium hover:bg-indigo-700 transition disabled:opacity-60"
       >
         {isLoading ? "Creating account..." : "Join"}
@@ -211,15 +305,7 @@ const handleSubmit = async (e) => {
       </div>
 
       {/* Message */}
-      {message?.text && (
-        <p
-          className={`text-center text-sm ${
-            message.type === "error" ? "text-red-500" : "text-green-600"
-          }`}
-        >
-          {message.text}
-        </p>
-      )}
+      <ToastContainer position="top-right" autoClose={3000} />
     </form>
   </section>
 );

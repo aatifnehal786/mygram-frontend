@@ -5,6 +5,8 @@ import hide from "../assets/hide.png";
 import show from "../assets/show.png";
 import { v4 as uuidv4 } from "uuid";
 import {apiFetch} from '../api/apiFetch'
+import { toast,ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 export default function Login() {
   const loggedData = useContext(UserContext);
@@ -18,6 +20,17 @@ export default function Login() {
   const [email, setEmail] = useState("");
 
   const navigate = useNavigate();
+
+  // handle enter key for both forms
+  const handleEnterKey = (e) => {
+    if (e.key === "Enter") {
+      if (otpRequired) {
+        handleVerifyOtp();
+      } else {
+        handleSubmit(e);
+      }
+    }
+  };
 
   // ✅ Persist deviceId
   useEffect(() => {
@@ -40,6 +53,15 @@ export default function Login() {
   const handleSubmit = async (e) => {
   e.preventDefault();
   setIsLoading(true);
+
+  if (!user.loginId || !user.password) {
+    toast.error("All fields are required");
+     setTimeout(() => {
+      setUser({ loginId: "", password: "" });
+    }, 5000);
+    setIsLoading(false);
+    return;
+  }
 
   try {
     const data = await apiFetch("api/auth/login", {
@@ -77,6 +99,12 @@ export default function Login() {
 const handleVerifyOtp = async () => {
   setIsLoading(true);
 
+  if (!otp) {
+    toast.error("OTP is required");
+    setIsLoading(false);
+    return;
+  }
+
   try {
     const data = await apiFetch("api/verify-device-otp", {
       method: "POST",
@@ -105,9 +133,7 @@ const handleVerifyOtp = async () => {
   }
 };
 
- useEffect(()=>{
-    console.log(deviceId,email,otp)
-  },[handleVerifyOtp])
+
 
   const showHide = () => setIsPassword((prev) => !prev);
 
@@ -128,6 +154,7 @@ const handleVerifyOtp = async () => {
           placeholder="Username, Email, or Mobile"
           required
           name="loginId"
+          onKeyDown={handleEnterKey}
           onChange={handleInput}
           value={user.loginId}
           className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500"
@@ -140,6 +167,7 @@ const handleVerifyOtp = async () => {
             placeholder="Password"
             maxLength={16}
             onChange={handleInput}
+            onKeyDown={handleEnterKey}
             required
             name="password"
             value={user.password}
@@ -184,17 +212,7 @@ const handleVerifyOtp = async () => {
         </div>
 
         {/* Message */}
-        {message?.text && (
-          <p
-            className={`text-center text-sm ${
-              message.type === "error"
-                ? "text-red-500"
-                : "text-green-600"
-            }`}
-          >
-            {message.text}
-          </p>
-        )}
+        <ToastContainer position="top-right" autoClose={3000} />
       </form>
     ) : (
       /* OTP FORM */
@@ -208,6 +226,7 @@ const handleVerifyOtp = async () => {
           placeholder="Enter OTP"
           required
           value={otp}
+          onKeyDown={handleEnterKey}
           onChange={(e) => setOtp(e.target.value)}
           className="w-full px-4 py-3 rounded-lg border border-gray-300 text-center tracking-widest text-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
         />
