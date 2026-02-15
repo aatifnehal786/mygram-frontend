@@ -1,11 +1,12 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 import { apiFetch } from "../api/apiFetch";
 export default function EmailOtp() {
     const [otp, setOtp] = useState("");
     const [email, setEmail] = useState("");
-    const [message, setMessage] = useState({ type: "", text: "" });
     const [isLoading1, setIsLoading1] = useState(false);
     const [isLoading2, setIsLoading2] = useState(false);
 
@@ -14,8 +15,8 @@ export default function EmailOtp() {
         e.preventDefault();
 
         if (!email) {
-            setMessage({ type: "error", text: "Email is required" });
-            setTimeout(() => {setMessage({ type: "", text: "" }),setEmail("")}, 5000);
+            toast.error("Email is required");
+            setEmail("");
             return;
         }
 
@@ -27,11 +28,10 @@ export default function EmailOtp() {
                 body: JSON.stringify({ email }),
             });
 
-            setMessage({ type: "success", text: data.message });
-            setTimeout(() => setMessage({ type: "", text: "" }), 5000);
+            toast.success(data.message);
         } catch (err) {
             console.error("Send OTP error:", err);
-            setMessage({ type: "error", text: "Failed to send OTP" });
+            toast.error(data.error || "Failed to send OTP");
         } finally {
             setIsLoading1(false);
         }
@@ -41,12 +41,9 @@ export default function EmailOtp() {
         e.preventDefault();
 
         if (!email || !otp) {
-            setMessage({ type: "error", text: "Email and OTP are required" });
-            setTimeout(() => {
-                setMessage({ type: "", text: "" });
-                setEmail("");
-                setOtp("");
-            }, 5000);
+            toast.error("Email and OTP are required");
+              setEmail("");
+              setOtp("");
             return;
         }
 
@@ -58,15 +55,15 @@ export default function EmailOtp() {
                 body: JSON.stringify({ email, otp }),
             });
 
-            setMessage({ type: "success", text:data.message });
+           toast.success(data.message);
              setTimeout(() => {
-                setMessage({ type: "", text: "" });
+               
                 setEmail("");
                 setOtp("");
             }, 5000);
         } catch (err) {
             console.error("Verify OTP error:", err);
-            setMessage({ type: "error", text: err.message || "Failed to verify OTP" });
+            toast.error(data.error || "Failed to verify OTP");
         } finally {
             setIsLoading2(false);
         }
