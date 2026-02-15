@@ -133,18 +133,7 @@ export default function EmailOtp() {
       </button>
 
       {/* Message */}
-      {message.text && (
-        <p
-          className={`
-            text-center text-sm mt-2
-            ${message.type === "success"
-              ? "text-green-600"
-              : "text-red-600"}
-          `}
-        >
-          {message.text}
-        </p>
-      )}
+      <ToastContainer position="top-right" autoClose={3000} />
 
       {/* Link */}
       <p className="text-center text-sm text-gray-500">
