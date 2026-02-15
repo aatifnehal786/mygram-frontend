@@ -9,6 +9,8 @@ export default function EmailOtp() {
     const [email, setEmail] = useState("");
     const [isLoading1, setIsLoading1] = useState(false);
     const [isLoading2, setIsLoading2] = useState(false);
+    const buttonRef1 = useRef();
+    const buttonRef2 = useRef();
 
 
     
@@ -109,6 +111,7 @@ export default function EmailOtp() {
         type="button"
         onClick={sendOtp}
         disabled={isLoading1}
+        ref={buttonRef1}
         className="
           w-full bg-blue-600 text-white py-2 rounded-lg text-sm
           hover:bg-blue-700 transition
@@ -137,6 +140,7 @@ export default function EmailOtp() {
         type="button"
         onClick={verifyOtp}
         disabled={isLoading2}
+        ref={buttonRef2}
         className="
           w-full bg-green-600 text-white py-2 rounded-lg text-sm
           hover:bg-green-700 transition
