@@ -11,6 +11,18 @@ export default function EmailOtp() {
     const [isLoading2, setIsLoading2] = useState(false);
 
 
+    
+  // Handle Enter key dynamically based on filled fields
+ const handleDynamicEnter = (e) => {
+  if (e.key === 'Enter') {
+    if (document.activeElement.name === 'otp') {
+      buttonRef2.current.click(); // Verify OTP
+    } else if (document.activeElement.name === 'email') {
+      buttonRef1.current.click(); // Send OTP
+    }
+  }
+};
+
     const sendOtp = async (e) => {
         e.preventDefault();
 
@@ -84,6 +96,7 @@ export default function EmailOtp() {
         required
         name="email"
         value={email}
+        onKeyDown={handleDynamicEnter}
         onChange={(e) => setEmail(e.target.value)}
         className="
           w-full px-4 py-2 rounded-lg border
@@ -111,6 +124,7 @@ export default function EmailOtp() {
         placeholder="Enter OTP"
         name="otp"
         value={otp}
+        onKeyDown={handleDynamicEnter}
         onChange={(e) => setOtp(e.target.value)}
         className="
           w-full px-4 py-2 rounded-lg border

@@ -3,10 +3,11 @@ import { Link } from "react-router-dom";
 import hide from '../assets/hide.png';
 import show from '../assets/show.png';
 import { apiFetch } from "../api/apiFetch";
+import { toast,ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 export default function ForgotPassword() {
   const [email, setEmail] = useState("");
-  const [message, setMessage] = useState({ type: "", text: "" });
   const [otp, setOtp] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -73,8 +74,8 @@ useEffect(() => {
 
   const Forgotpassword = async () => {
     if (!email) {
-      setMessage({ type: "error", text: "Email is required" });
-      setTimeout(() => setMessage({ type: "", text: "" }), 3000);
+      toast.error("Email is required");
+      setEmail("");
       return;
     }
 
@@ -92,17 +93,17 @@ useEffect(() => {
       
 
       if (data?.error) {
-        setMessage({ type: "error", text: data.error });
+        toast.error(data.error || "Failed to send OTP");
       } else {
-        setMessage({ type: "success", text: data.message || "OTP sent!" });
+        toast.success(data.message || "OTP sent!");
       }
 
       // Clear message after 3 seconds setTimeout(() => setMessage({ type: "", text: "" }), 5000);
 
     } catch (err) {
       console.error("Forgot password error:", err);
-      setMessage({ type: "error", text: "Failed to send OTP. Try again." });
-      setTimeout(() => setMessage({ type: "", text: "" }), 3000);
+      toast.error("Failed to send OTP. Try again.");
+
     } finally {
       setIsLoading(false); // ✅ ensures button always resets
     }
@@ -115,10 +116,7 @@ useEffect(() => {
 
 const handleResetPassword = async () => {
   if (!newPassword) {
-    setMessage({ type: "error", text: "Password cannot be empty." });
-    setTimeout(() => {
-      setMessage({ type: "", text: "" });
-    }, 3000);
+    toast.error("New password is required");
     return;
   }
 
@@ -133,19 +131,17 @@ const handleResetPassword = async () => {
     setIsLoading2(false);
 
     if (data.error) {
-      setMessage({ type: "error", text: data.error });
+      toast.error(data.error || "Failed to reset password");
     } else {
-      setMessage({ type: "success", text: data.message });
-      setTimeout(() => {
-        setMessage({ type: "", text: "" });
+      toast.success(data.message || "Password reset successfully!");
         setEmail("");
         setNewPassword("");
         setOtp("");
-      }, 8000);
+      
     }
   } catch (err) {
     console.error("Error resetting password:", err);
-    setMessage({ type: "error", text: "Failed to reset password." });
+    toast.error("Failed to reset password.");
     setIsLoading2(false);
   }
 };
@@ -260,18 +256,7 @@ const handleResetPassword = async () => {
       </button>
 
       {/* Message */}
-      {message?.text && (
-        <p
-          className={`
-            text-center text-sm
-            ${message.type === "success"
-              ? "text-green-600"
-              : "text-red-600"}
-          `}
-        >
-          {message.text}
-        </p>
-      )}
+      <ToastContainer position="top-right" autoClose={3000} />
 
       {/* Link */}
       <p className="text-center text-sm text-gray-500">
