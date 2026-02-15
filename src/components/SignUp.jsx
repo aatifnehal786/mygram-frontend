@@ -3,7 +3,8 @@ import { Link } from "react-router-dom";
 import hide from '../assets/hide.png'
 import show from '../assets/show.png'
 import { apiFetch } from "../api/apiFetch";
-import { toast } from "react-toastify";
+import { toast,ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 export default function SignUp(){
 
