@@ -17,6 +17,7 @@ export default function SignUp(){
     })
     const [isLoading, setIsLoading] = useState(false);
     const [isPassword,setIsPassword] = useState(false)
+    const [isConfirmPassword,setIsConfirmPassword] = useState(false)
     const [strength, setStrength] = useState("");
     const [typingTimeout, setTypingTimeout] = useState(null);
     const [passwordError, setPasswordError] = useState("");
@@ -108,6 +109,9 @@ export default function SignUp(){
     const showHide = ()=>{
         setIsPassword((prev)=>!prev)
     }
+    const showHide2 = ()=>{
+        setIsConfirmPassword((prev)=>!prev)
+    }
 
   
 const handleSubmit = async (e) => {
@@ -154,10 +158,20 @@ const handleSubmit = async (e) => {
   }
 };
 
+const strongRegex =
+  /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).{8,}$/;
+
+const isStrongPassword = strongRegex.test(userDetails.password);
 
 const isFormValid =
-    strength === "strong" &&
-    userDetails.password === userDetails.confirmPassword;
+  isStrongPassword &&
+  userDetails.password === userDetails.confirmPassword &&
+  userDetails.username.trim() !== "" &&
+  userDetails.email.trim() !== "" &&
+  userDetails.mobile.trim() !== "";
+
+
+    console.log(isFormValid)
 
 
   return (
@@ -170,7 +184,7 @@ const isFormValid =
 
       {/* Username */}
       <input
-        className="w-full border rounded-md px-4 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-gray-400"
+        className="w-full px-4 py-2 mt-1 border rounded-xl outline-none focus:ring-2  focus:ring-gray-400"
         type="text"
         placeholder="Username"
         required
@@ -182,7 +196,7 @@ const isFormValid =
 
       {/* Email */}
       <input
-        className="w-full border rounded-md px-4 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-gray-400"
+        className="w-full px-4 py-2 mt-1 border rounded-xl outline-none focus:ring-2  focus:ring-gray-400"
         type="email"
         placeholder="Email"
         required
@@ -193,9 +207,9 @@ const isFormValid =
       />
 
       {/* Password */}
-      <div className="relative">
+      <div className="relative w-full">
         <input
-          className="w-full border rounded-md px-4 py-2 text-sm pr-12 focus:outline-none focus:ring-1 focus:ring-gray-400"
+          className="w-full px-4 py-2 mt-1 border rounded-xl outline-none focus:ring-2 focus:ring-gray-400"
           type={isPassword ? "text" : "password"}
           placeholder="Password"
           maxLength={16}
@@ -210,11 +224,14 @@ const isFormValid =
           onClick={showHide}
           src={isPassword ? show : hide}
           alt="toggle"
-          className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 cursor-pointer opacity-70 hover:opacity-100"
+          className="absolute right-2 top-1/2 -translate-y-1/2 w-5 h-5 cursor-pointer opacity-70 hover:opacity-100"
         />
 
         {/* Strength Bar */}
-        {strength && (
+        
+        
+      </div>
+      {strength && (
         <div className="mt-4">
           <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
             <div
@@ -241,34 +258,35 @@ const isFormValid =
           </p>
           </div>
         )}
-        <input
-        type="password"
+      <div className="relative">
+          <input
+        type={isConfirmPassword ? "text" : "password"}
         name="confirmPassword"
         placeholder="Confirm password"
         value={userDetails.confirmPassword}
         onChange={handleInput}
-        className={`w-full px-4 py-2 mt-4 border rounded-xl outline-none focus:ring-2 ${
+        className={`w-full px-4 py-2 mt-1 border rounded-xl outline-none focus:ring-2 ${
           passwordError
             ? "border-red-500 focus:ring-red-400"
             : "focus:ring-green-400"
          }`}
         />
         <img
-          onClick={showHide}
-          src={isPassword ? show : hide}
+          onClick={showHide2}
+          src={isConfirmPassword ? show : hide}
           alt="toggle"
           className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 cursor-pointer opacity-70 hover:opacity-100"
         />
+        </div>
 
         {/* Error Message */}
         {passwordError && (
         <p className="text-red-500 text-sm mt-2">{passwordError}</p>
         )}
-      </div>
 
       {/* Mobile */}
       <input
-        className="w-full border rounded-md px-4 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-gray-400"
+        className="w-full px-4 py-2 mt-1 border rounded-xl outline-none focus:ring-2  focus:ring-gray-400"
         type="text"
         placeholder="Mobile number"
         minLength={12}
