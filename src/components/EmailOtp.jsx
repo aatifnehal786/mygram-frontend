@@ -4,6 +4,7 @@ import { toast,ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 import { apiFetch } from "../api/apiFetch";
+import Spinner from "../Spinner";
 export default function EmailOtp() {
     const [otp, setOtp] = useState("");
     const [email, setEmail] = useState("");
@@ -47,7 +48,7 @@ export default function EmailOtp() {
             toast.success(data.message);
         } catch (err) {
             console.error("Send OTP error:", err);
-            toast.error(data.error || "Failed to send OTP");
+            toast.error("Failed to send OTP");
         } finally {
             setIsLoading1(false);
         }
@@ -81,7 +82,7 @@ export default function EmailOtp() {
             }, 5000);
         } catch (err) {
             console.error("Verify OTP error:", err);
-            toast.error(data.error || "Failed to verify OTP");
+            toast.error("Failed to verify OTP");
         } finally {
             setIsLoading2(false);
         }
@@ -122,7 +123,7 @@ export default function EmailOtp() {
           disabled:opacity-50 disabled:cursor-not-allowed
         "
       >
-        {isLoading1 ? "Sending OTP..." : "Send OTP"}
+        {isLoading1 ? <Spinner/> : "Send OTP"}
       </button>
 
       {/* OTP */}
@@ -151,7 +152,7 @@ export default function EmailOtp() {
           disabled:opacity-50 disabled:cursor-not-allowed
         "
       >
-        {isLoading2 ? "Verifying..." : "Verify OTP"}
+        {isLoading2 ? <Spinner/> : "Verify OTP"}
       </button>
 
       {/* Message */}

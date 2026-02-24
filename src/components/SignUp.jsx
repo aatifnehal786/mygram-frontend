@@ -5,6 +5,7 @@ import show from '../assets/show.png'
 import { apiFetch } from "../api/apiFetch";
 import { toast,ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import Spinner from "../Spinner";
 
 export default function SignUp(){
 
@@ -117,7 +118,7 @@ export default function SignUp(){
 const handleSubmit = async (e) => {
   e.preventDefault();
 
-  if (!userDetails.username || !userDetails.email || !userDetails.password || !userDetails.mobile) {
+  if (!userDetails.username || !userDetails.email || !userDetails.password || !userDetails.mobile || userDetails.confirmPassword) {
     toast.error("All fields are required");
      setTimeout(() => {
       setUserDetails({
@@ -125,6 +126,7 @@ const handleSubmit = async (e) => {
         email: "",
         password: "",
         mobile: "",
+        confirmPassword: ""
       });
     }, 5000);
     return;
@@ -152,8 +154,8 @@ const handleSubmit = async (e) => {
         mobile: "",
       });
     },5000);
-  } catch (err) {
-    toast.error(data.error || "An error occurred. Please try again.");
+  } catch (error) {
+    toast.error(error, "An error occurred. Please try again.");
     setIsLoading(false);
   }
 };
@@ -303,7 +305,7 @@ const isFormValid =
         disabled={isLoading || !isFormValid}
         className="w-full bg-indigo-600 text-white py-2 rounded-md font-medium hover:bg-indigo-700 transition disabled:opacity-60"
       >
-        {isLoading ? "Creating account..." : "Join"}
+        {isLoading ? <Spinner/> : "Join"}
       </button>
 
       {/* Login link */}

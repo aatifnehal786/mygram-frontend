@@ -7,12 +7,12 @@ import { v4 as uuidv4 } from "uuid";
 import {apiFetch} from '../api/apiFetch'
 import { toast,ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import Spinner from "../Spinner";
 
 export default function Login() {
   const loggedData = useContext(UserContext);
   const [user, setUser] = useState({ loginId: "", password: "" });
   const [deviceId, setDeviceId] = useState("");
-  const [message, setMessage] = useState({ type: "", text: "" });
   const [isLoading, setIsLoading] = useState(false);
   const [isPassword, setIsPassword] = useState(false);
   const [otpRequired, setOtpRequired] = useState(false);
@@ -76,20 +76,18 @@ export default function Login() {
       loggedData.setLoggedUser(data);
       localStorage.setItem("token-auth", JSON.stringify(data));
       navigate("/home");
+      toast.success("Login Successfull")
     } else if (data.otpRequired) {
       setOtpRequired(true);
       setEmail(data.email);
-      setMessage({
-        type: "info",
-        text: "OTP sent to your email. Please verify.",
-      });
+      
     } else {
-      setMessage({ type: "error", text: data.message || "Login failed" });
+      toast.error("Login Failer")
     }
   } catch (err) {
     console.error(err);
     setIsLoading(false);
-    setMessage({ type: "error", text: "An error occurred" });
+    toast.error("Server error occured")
   }
 };
 
@@ -118,18 +116,13 @@ const handleVerifyOtp = async () => {
       localStorage.setItem("token-auth", JSON.stringify(data));
       navigate("/home");
     } else {
-      setMessage({
-        type: "error",
-        text: data.message || "OTP verification failed",
-      });
+      toast.error(data.error)
     }
   } catch (err) {
     console.error(err);
+    toast.error(err,"Server error occured")
     setIsLoading(false);
-    setMessage({
-      type: "error",
-      text: "An error occurred during OTP verification",
-    });
+    
   }
 };
 
@@ -188,7 +181,7 @@ const handleVerifyOtp = async () => {
           disabled={isLoading}
           className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 rounded-lg transition disabled:opacity-60"
         >
-          {isLoading ? "Logging in..." : "Login"}
+          {isLoading ? <Spinner/> : "Login"}
         </button>
 
         {/* Links */}
@@ -237,9 +230,11 @@ const handleVerifyOtp = async () => {
           disabled={isLoading}
           className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 rounded-lg transition disabled:opacity-60"
         >
-          {isLoading ? "Verifying..." : "Verify OTP"}
+          {isLoading ? <Spinner/> : "Verify OTP"}
         </button>
+      <ToastContainer position="top-right" autoClose={3000} />
       </form>
+      
     )}
   </section>
 );

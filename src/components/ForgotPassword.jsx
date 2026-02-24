@@ -5,6 +5,7 @@ import show from '../assets/show.png';
 import { apiFetch } from "../api/apiFetch";
 import { toast,ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import Spinner from "../Spinner";
 
 export default function ForgotPassword() {
   const [email, setEmail] = useState("");
@@ -190,7 +191,7 @@ const handleResetPassword = async () => {
           disabled:opacity-50 disabled:cursor-not-allowed
         "
       >
-        {isLoading ? "Sending OTP..." : "Send OTP"}
+        {isLoading ? <Spinner/> : "Send OTP"}
       </button>
 
       {/* OTP */}
@@ -254,7 +255,7 @@ const handleResetPassword = async () => {
           disabled:opacity-50 disabled:cursor-not-allowed
         "
       >
-        {isLoading2 ? "Resetting..." : "Reset Password"}
+        {isLoading2 ? <Spinner/> : "Reset Password"}
       </button>
 
       {/* Message */}
