@@ -74,7 +74,7 @@ export default function Login() {
 
     if ( data.token!=null) {
       loggedData.setLoggedUser(data);
-      localStorage.setItem("token-auth", JSON.stringify(data));
+      localStorage.setItem("token-auth", JSON.stringify(data.token));
       navigate("/home");
       toast.success("Login Successfull")
     } else if (data.otpRequired) {
