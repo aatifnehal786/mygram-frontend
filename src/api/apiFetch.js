@@ -2,14 +2,18 @@ export const apiFetch = async (endpoint, options = {}) => {
   const token = JSON.parse(localStorage.getItem("token-auth"))?.token;
   const deviceId = localStorage.getItem("deviceId");
 
-  // ✅ Check if body is FormData (don't set Content-Type manually)
   const isFormData = options.body instanceof FormData;
+
   const headers = {
     ...(isFormData ? {} : { "Content-Type": "application/json" }),
-    ...(token ? { Authorization: `Bearer ${token}` } : {}),
-    ...(deviceId ? { "x-device-id": deviceId } : {}),
+    ...(token && { Authorization: `Bearer ${token}` }),
+    ...(deviceId && { "x-device-id": deviceId }),
     ...options.headers,
   };
+
+  const isPublicRoute =
+    endpoint.includes("login") ||
+    endpoint.includes("verify-device-otp");
 
   let response;
   try {
@@ -18,12 +22,10 @@ export const apiFetch = async (endpoint, options = {}) => {
       headers,
     });
   } catch (err) {
-    // ⚠️ Handle network errors (no server response)
     console.error("Network error:", err);
     return { error: "Network error. Please check your connection." };
   }
 
-  // ✅ Parse JSON safely (fallback to text if not valid JSON)
   let data;
   const text = await response.text();
   try {
@@ -32,21 +34,19 @@ export const apiFetch = async (endpoint, options = {}) => {
     data = { raw: text };
   }
 
-  // ⚠️ Handle unauthorized / device removal
-  if (data?.error?.includes("Device removed")) {
-    alert("This device has been removed. Redirecting to login...");
-    localStorage.removeItem("token-auth");
-    localStorage.removeItem("deviceId");
-    window.location.href = "/login";
-    return;
-  }
+  // ✅ Skip auth handling for login/OTP
+  if (!isPublicRoute) {
+    if (response.status === 401) {
+      alert("Session expired. Please log in again.");
+      localStorage.removeItem("token-auth");
+      localStorage.removeItem("deviceId");
+      window.location.href = "/login";
+      return;
+    }
 
-  // ⚠️ Handle expired/invalid token (common case)
-  if (response.status === 401 || data?.error?.includes("Invalid token")) {
-    alert("Session expired. Please log in again.");
-    localStorage.removeItem("token-auth");
-    window.location.href = "/login";
-    return;
+    if (response.status === 403) {
+      return data; // let UI handle
+    }
   }
 
   return data;

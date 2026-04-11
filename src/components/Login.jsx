@@ -56,9 +56,6 @@ export default function Login() {
 
   if (!user.loginId || !user.password) {
     toast.error("All fields are required");
-     setTimeout(() => {
-      setUser({ loginId: "", password: "" });
-    }, 5000);
     setIsLoading(false);
     return;
   }
@@ -70,30 +67,45 @@ export default function Login() {
     });
 
     setIsLoading(false);
-    console.log(data)
+    console.log("Login response:", data);
 
-    if ( data.token!=null) {
+    // ❗ IMPORTANT: check if data exists
+    if (!data) return;
+
+    // ✅ CASE 1: Login success
+    if (data.token) {
       loggedData.setLoggedUser(data);
-      localStorage.setItem("token-auth", JSON.stringify(data.token));
+
+      localStorage.setItem(
+        "token-auth",
+        JSON.stringify({ token: data.token }) // ✅ FIXED
+      );
+
       navigate("/home");
-      toast.success("Login Successfull")
-    } else if (data.otpRequired) {
+      toast.success("Login Successful");
+    }
+
+    // ✅ CASE 2: OTP required
+    else if (data.otpRequired) {
       setOtpRequired(true);
       setEmail(data.email);
-      
-    } else {
-      toast.error("Login Failer")
+      toast.info("OTP sent to your email");
     }
+
+    // ❌ CASE 3: Error
+    else {
+      toast.error(data.message || "Login failed");
+    }
+
   } catch (err) {
     console.error(err);
     setIsLoading(false);
-    toast.error("Server error occured")
+    toast.error("Server error occurred");
   }
 };
 
 
 // HANDLE NEW DEVICE VERIFY LOGIN VIA OTP
-
 const handleVerifyOtp = async () => {
   setIsLoading(true);
 
@@ -111,22 +123,29 @@ const handleVerifyOtp = async () => {
 
     setIsLoading(false);
 
+    if (!data) return;
+
+    // ✅ SUCCESS
     if (data.token) {
       loggedData.setLoggedUser(data);
-      localStorage.setItem("token-auth", JSON.stringify(data));
+
+      localStorage.setItem(
+        "token-auth",
+        JSON.stringify({ token: data.token }) // ✅ FIXED
+      );
+
       navigate("/home");
+      toast.success("Device verified & login successful");
     } else {
-      toast.error(data.error)
+      toast.error(data.error || "OTP verification failed");
     }
+
   } catch (err) {
     console.error(err);
-    toast.error(err,"Server error occured")
+    toast.error("Server error occurred");
     setIsLoading(false);
-    
   }
 };
-
-
 
   const showHide = () => setIsPassword((prev) => !prev);
 
