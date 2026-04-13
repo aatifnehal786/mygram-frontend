@@ -110,7 +110,7 @@ const handleSearch = async (q) => {
             {/* Profile */}
             <div className="relative">
               <img
-                src={user.profilePic}
+                src={user.profilePic || null}
                 alt={user.username}
                 className="w-10 h-10 rounded-full object-cover"
               />

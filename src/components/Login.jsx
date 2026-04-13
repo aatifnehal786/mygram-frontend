@@ -78,7 +78,7 @@ export default function Login() {
 
       localStorage.setItem(
         "token-auth",
-        JSON.stringify({ token: data.token }) // ✅ FIXED
+        JSON.stringify(data) // ✅ FIXED
       );
 
       navigate("/home");
