@@ -76,7 +76,7 @@ useEffect(() => {
 const handleFollowToggle = async (targetUserId) => {
   if (loadingUserId === targetUserId) return;
 
-  const currentStatus = followStatus?.[targetUserId]; // "follow" | "following"
+  const currentStatus = followStatus[targetUserId]; // "follow" | "following"
 
   try {
     setLoadingUserId(targetUserId);
