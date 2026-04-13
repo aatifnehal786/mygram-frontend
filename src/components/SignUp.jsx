@@ -118,7 +118,7 @@ export default function SignUp(){
 const handleSubmit = async (e) => {
   e.preventDefault();
 
-  if (!userDetails.username || !userDetails.email || !userDetails.password || !userDetails.mobile || userDetails.confirmPassword) {
+  if (!userDetails.username || !userDetails.email || !userDetails.password || !userDetails.mobile || !userDetails.confirmPassword) {
     toast.error("All fields are required");
      setTimeout(() => {
       setUserDetails({
@@ -152,6 +152,7 @@ const handleSubmit = async (e) => {
         email: "",
         password: "",
         mobile: "",
+        confirmPassword: ""
       });
     },5000);
   } catch (error) {
