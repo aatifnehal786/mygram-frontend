@@ -80,19 +80,16 @@ useEffect(() => {
 
 
 
+useEffect(() => {
+  if (selectedUser?._id) {
+    dispatch(setActiveChat(selectedUser._id));
+    dispatch(clearUnread(selectedUser._id));
+  }
 
-
-
-
-  useEffect(() => {
-    if (selectedUser?._id) {
-      dispatch(setActiveChat(selectedUser._id));
-    }
-
-    return () => {
-      dispatch(clearActiveChat()); // chat closed
-    };
-  }, [selectedUser, dispatch]);
+  return () => {
+    dispatch(clearActiveChat());
+  };
+}, [selectedUser, dispatch]);
 
   useEffect(() => {
     if (toastMessage) {
@@ -273,19 +270,13 @@ const handleStopTyping = (senderId) => {
       socket.off("typing", handleTyping);
       socket.off("stopTyping", handleStopTyping);
     };
-  }, [socket, selectedUser, input]);
+  }, [socket, selectedUser,input]);
 
 
   useEffect(() => {
     setIsTyping(false); // reset typing when switching users
   }, [selectedUser]);
 
-  useEffect(() => {
-    if (selectedUser?._id) {
-      dispatch(setActiveChat(selectedUser._id));
-      dispatch(clearUnread(selectedUser._id));
-    }
-  }, [selectedUser]);
 
 useEffect(() => {
     if (!socket || !selectedUser) return;
@@ -362,51 +353,55 @@ const renderMessageWithLinks = (text) => {
 
     return date.toLocaleDateString();
   }
-
 const loadMessages = async (initial = false) => {
-    if (loadingMore || !hasMore || !selectedUser) return;
+  if (loadingMore || !hasMore || !selectedUser) return;
 
-    setLoadingMore(true);
+  setLoadingMore(true);
 
-    const prevScrollHeight = chatContainerRef.current?.scrollHeight || 0;
+  const prevScrollHeight = chatContainerRef.current?.scrollHeight || 0;
 
-    try {
-      const data = await apiFetch(
-        `api/chats/chat/${selectedUser._id}?limit=${limit}&skip=${initial ? 0 : skip}`
-      );
+  try {
+    const currentSkip = initial ? 0 : skip;
 
-      if (data.length < limit) setHasMore(false);
+    const data = await apiFetch(
+      `api/chats/chat/${selectedUser._id}?limit=${limit}&skip=${currentSkip}`
+    );
 
-      setMessages(prev =>
-        initial ? data : [...data, ...prev]
-      );
+    if (data.length < limit) setHasMore(false);
 
-      setSkip(prev => prev + limit);
+    setMessages(prev =>
+      initial ? data : [...data, ...prev]
+    );
 
-      // 🔒 preserve scroll position
-      requestAnimationFrame(() => {
-        if (!initial && chatContainerRef.current) {
-          const newHeight = chatContainerRef.current.scrollHeight;
-          chatContainerRef.current.scrollTop =
-            newHeight - prevScrollHeight;
-        }
-      });
+    // ✅ FIX: correct skip update
+    setSkip(prev => (initial ? data.length : prev + data.length));
 
-    } catch (err) {
-      console.error("Failed to load messages", err);
-    } finally {
-      setLoadingMore(false);
-    }
-  };
+    // 🔒 preserve scroll position
+    requestAnimationFrame(() => {
+      if (!initial && chatContainerRef.current) {
+        const newHeight = chatContainerRef.current.scrollHeight;
+        chatContainerRef.current.scrollTop =
+          newHeight - prevScrollHeight;
+      }
+    });
 
+  } catch (err) {
+    console.error("Failed to load messages", err);
+  } finally {
+    setLoadingMore(false);
+  }
+};
 
 useEffect(() => {
-    if (!selectedUser) return;
+  if (!selectedUser) return;
 
-    setSkip(0);
-    setHasMore(true);
-    loadMessages(true);
-  }, [selectedUser, limit]);
+  // reset state properly
+  setSkip(0);
+  setHasMore(true);
+  setMessages([]); // ✅ important to avoid mixing chats
+
+  loadMessages(true);
+}, [selectedUser]);
 
 
 const handleScroll = () => {
@@ -479,24 +474,31 @@ const handleDynamicEnter = (e) => {
     }
 
   }
-
 useEffect(() => {
-    if (!socket) return;
+  if (!socket) return;
 
-    const handler = ({ userId }) => {
-      setMessages(prev =>
-        prev.map(m =>
-          m.sender === currentUserId ? { ...m, isSeen: true } : m
-        )
-      );
-    };
+  const handler = ({ userId }) => {
+    setMessages((prev) =>
+      prev.map((m) => {
+        const senderId = m.sender?._id || m.sender;
 
-    socket.on("messagesSeen", handler);
+        // ✅ mark only messages sent by current user
+        // AND only when seen by the correct receiver
+        if (senderId === currentUserId && m.receiver === userId) {
+          return { ...m, isSeen: true };
+        }
 
-    return () => {
-      socket.off("messagesSeen", handler);
-    };
-  }, [socket]);
+        return m;
+      })
+    );
+  };
+
+  socket.on("messagesSeen", handler);
+
+  return () => {
+    socket.off("messagesSeen", handler);
+  };
+}, [socket, currentUserId, setMessages]);
 
   useEffect(() => {
     if (!socket || !selectedUser) return;

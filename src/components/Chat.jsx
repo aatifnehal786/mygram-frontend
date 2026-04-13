@@ -1,25 +1,19 @@
 // ✅ Chat.js
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import ChatSidebar from './ChatSideBar';
 import ChatWindow from './ChatWindow';
-import io from 'socket.io-client';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { apiFetch } from '../api/apiFetch';
 import './chat.css';
 import { useSocket } from '../contexts/SocketContext';
+import { UserContext } from '../contexts/UserContext';
 
 const Chat = () => {
   const [selectedUser, setSelectedUser] = useState(null);
-   const { setUnreadCounts, socket,unreadCounts} = useSocket();
-  const [chatList, setChatList] = useState([]);
+   const {socket} = useSocket();
   const [messages, setMessages] = useState([]);
-  const [message, setMessage] = useState("");
-  const [loading, setLoading] = useState(false);
- 
-  const [loggedUser, setLoggedUser] = useState(
-    JSON.parse(localStorage.getItem('token-auth'))
-  );
+  const {loggedUser} = useContext(UserContext)
   const [isForwarding, setIsForwarding] = useState(false);
   const [messageToForward, setMessageToForward] = useState(null);
  
@@ -169,7 +163,6 @@ const forwardMessageToUsers = async (msg, receiverIds) => {
     {selectedUser ? (
       <ChatWindow
         selectedUser={selectedUser}
-        chatList={chatList}
         messages={messages}
         setMessages={setMessages}
         triggerForwardMode={triggerForwardMode}
@@ -185,12 +178,8 @@ const forwardMessageToUsers = async (msg, receiverIds) => {
   {/* Toast */}
   <ToastContainer position="bottom-right" autoClose={3000} />
 
-  {/* Optional message */}
-  {message && (
-    <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-black text-white px-4 py-2 rounded-md shadow">
-      {message}
-    </div>
-  )}
+ 
+  
 </div>
 
 
