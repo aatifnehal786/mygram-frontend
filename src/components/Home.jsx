@@ -139,7 +139,7 @@ const handleFollowToggle = async (targetUserId) => {
      {Array.isArray(users) &&
   users.map(
     (user) => {
-      if (user._id === loggedUser._id) return null;
+      if (user._id === loggedUser.userid) return null;
 
     
 
@@ -149,7 +149,7 @@ const handleFollowToggle = async (targetUserId) => {
           className="bg-white rounded-xl shadow-sm p-4 flex flex-col items-center text-center"
         >
           <img
-            src={user.profilePic || ""}
+            src={user.profilePic}
             alt={user.username}
             className="w-20 h-20 rounded-full object-cover mb-3"
           />
