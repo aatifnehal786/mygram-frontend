@@ -10,7 +10,7 @@ export default function Home() {
  
   const [showVerifyMessage, setShowVerifyMessage] = useState(false); // Renamed for clarity
   const { loggedUser } = useContext(UserContext);
-  const [followStatus, setFollowStatus] = useState(null);
+  const [followStatus, setFollowStatus] = useState({});
   const [loadingUserId, setLoadingUserId] = useState(null);
 
 
@@ -54,7 +54,7 @@ useEffect(() => {
   };
 
   fetchStatuses();
-}, [users, loggedUser]);
+}, [users, loggedUser.userid]);
 
 
 
@@ -76,7 +76,7 @@ useEffect(() => {
 const handleFollowToggle = async (targetUserId) => {
   if (loadingUserId === targetUserId) return;
 
-  const currentStatus = followStatus[targetUserId]; // "follow" | "following"
+  const currentStatus = followStatus?.[targetUserId]; // "follow" | "following"
 
   try {
     setLoadingUserId(targetUserId);
