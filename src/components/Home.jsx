@@ -146,10 +146,9 @@ const handleFollowToggle = async (targetUserId) => {
       return (
         <div
           key={user._id}
-          className="bg-white rounded-xl shadow-sm p-4 flex flex-col items-center text-center"
-        >
+          className="bg-white rounded-xl shadow-sm p-4 flex flex-col items-center text-center">
           <img
-            src={user.profilePic}
+            src={user.profilePic || null}
             alt={user.username}
             className="w-20 h-20 rounded-full object-cover mb-3"
           />

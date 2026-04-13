@@ -6,7 +6,7 @@ import './chat.css';
 import { useSelector } from "react-redux";
 
 
-const ChatSidebar = ({onSelectUser,selectedUserId,onSelectForwardUser,isForwarding = false,onBack}) => {
+const ChatSidebar = ({onSelectUser,selectedUserId,onSelectForwardUser,isForwarding = false}) => {
   const { loggedUser } = useContext(UserContext);
   const unreadCounts = useSelector(state => state.notifications.unreadCounts);
   const [searchQuery, setSearchQuery] = useState('');
@@ -19,8 +19,9 @@ const ChatSidebar = ({onSelectUser,selectedUserId,onSelectForwardUser,isForwardi
   if (!loggedUser?.token) return;
 
   const fetchFollowedUsers = async () => {
+   
     try {
-      const data = await apiFetch(`api/followers/${loggedUser.userid}`);
+      const data = await apiFetch(`api/followers/${loggedUser?.userid}`);
       setFollowedUsers(data.followers || []);
     } catch (err) {
       console.error("Error fetching followed users:", err.message);

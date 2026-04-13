@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import {useEffect } from 'react';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import { UserProvider } from './contexts/UserContext';
 import Login from './components/Login';
@@ -29,9 +29,7 @@ import "react-toastify/dist/ReactToastify.css";
 
 
 function App() {
-  const [loggedUser, setLoggedUser] = useState(
-  JSON.parse(localStorage.getItem('token-auth'))
-);
+
 
 
 
