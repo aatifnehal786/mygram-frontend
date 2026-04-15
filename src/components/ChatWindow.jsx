@@ -291,11 +291,7 @@ useEffect(() => {
 
 
 
-  const confirmDelete = (msgId) => {
-    
-    setMessageToDelete(msgId);
-    setShowConfirmModal(true);
-  };
+
 
   // Utility function to detect and render links
  const urlRegex = /(https?:\/\/[^\s]+)/g;
@@ -541,6 +537,90 @@ useEffect(() => {
   }, 1000);
 };
 
+
+
+// delete message for me only (soft delete)
+const deleteMessageForMe = async (messageId) => {
+  try {
+    await apiFetch(`api/chats/chat/deleteForMe/${messageId}`, {
+      method: "DELETE",
+    });
+
+    // 🔥 REMOVE instantly from UI
+    setMessages((prev) =>
+      prev.filter((msg) => msg._id !== messageId)
+    );
+
+    setOpenDropdownId(null);
+    setToastMessage("Message deleted for you.");
+
+  } catch (err) {
+    console.error(err);
+    setToastMessage("Failed to delete message.");
+  }
+};
+
+// delete message for everyone (hard delete)
+const deleteMessageForEveryone = async (messageId) => {
+  try {
+    await apiFetch(`api/chats/chat/deleteForEveryone/${messageId}`, {
+      method: "DELETE",
+    });
+
+    // 🔥 UPDATE instantly
+    setMessages((prev) =>
+      prev.map((msg) =>
+        msg._id === messageId
+          ? { ...msg, isDeleted: true, message: "" }
+          : msg
+      )
+    );
+
+    setOpenDropdownId(null);
+    setToastMessage("Message deleted for everyone.");
+
+  } catch (err) {
+    console.error(err);
+    setToastMessage("Failed to delete message.");
+  }
+};
+  // Socket event for message deletion by other party
+  useEffect(() => {
+  if (!socket) return;
+
+  const handleDeleteEveryone = ({ messageId }) => {
+    setMessages((prev) =>
+      prev.map((msg) => 
+        msg._id === messageId
+          ? { ...msg, isDeleted: true }
+          : msg
+      )
+    );
+  };
+  
+
+  const handleDeleteForMe = ({ messageId }) => {
+    setMessages((prev) =>
+      prev.map((msg) =>
+        msg._id === messageId
+          ? {
+              ...msg,
+              deletedFor: [...(msg.deletedFor || []), currentUserId],
+              
+            }
+          : msg
+      )
+    );
+  };
+
+  socket.on("messageDeleted", handleDeleteEveryone);
+  socket.on("messageDeletedForMe", handleDeleteForMe);
+
+  return () => {
+    socket.off("messageDeleted", handleDeleteEveryone);
+    socket.off("messageDeletedForMe", handleDeleteForMe);
+  };
+}, [socket, currentUserId]);
   
   const handleVideoCall = () => {
     if (selectedUser && onlineMap[selectedUser._id]?.isOnline) {
@@ -623,9 +703,21 @@ return (
       className="flex-1 overflow-y-auto px-4 py-3 space-y-3 w-full"
     >
       {sortedMessages.map((msg, idx) => {
+        console.log("DeletedFor:", msg.deletedFor, "CurrentUser:", currentUserId);
+
+        
+        
         const senderId = msg.sender?._id || msg.sender;
-        const isOwnMessage = senderId === currentUserId;
-        const isDropdownOpen = openDropdownId === msg._id;
+  const isOwnMessage = senderId === currentUserId;
+
+  // ✅ FIX: completely remove message
+  const isDeletedForMe = msg.deletedFor?.some(
+    (id) => id.toString() === currentUserId
+  );
+
+  if (isDeletedForMe) return null; // 🔥 FULL REMOVE
+
+  const isDropdownOpen = openDropdownId === msg._id;
         
         return (
           <div
@@ -650,80 +742,106 @@ return (
                  <FaEllipsisV className="h-3 w-3" />
               </button>
 
-              {/* Message */}
-              <p className="whitespace-pre-wrap break-words min-h-[1rem]">
-  {renderMessageWithLinks(msg.message)}
-</p>
+   {/* ❌ Hide completely if deleted for me */}
+{msg.deletedFor?.includes(currentUserId)  ? null : (
 
-              
-               {/* REACTIONS DISPLAY */}
-                {msg.reactions?.length > 0 && (
-                  <div className="flex gap-1 mt-1">
-                    {msg.reactions.map((r, i) => (
-                      <span key={i} className="text-xs">{r.emoji}</span>
-                    ))}
-                  </div>
-                )}
+  <>
+    {/* ✅ DELETED MESSAGE */}
+    {msg.isDeleted ? (
+      <p className="italic text-gray-400 text-sm">
+        🗑️ {isOwnMessage
+          ? "You deleted this message"
+          : "This message was deleted"}
+      </p>
+    ) : (
+      <>
+        {/* ✅ TEXT MESSAGE */}
+        {msg.message && (
+          <p className="whitespace-pre-wrap break-words min-h-[1rem]">
+            {renderMessageWithLinks(msg.message)}
+          </p>
+        )}
 
-                {/* REACTION BUTTON */}
-                <button
-                  className="absolute -left-2 -top-4 text-sm p-1 m-t-0"
-                  onClick={() =>
-                    setReactionPickerFor(
-                      reactionPickerFor === msg._id ? null : msg._id
-                    )
-                  }
-                >
-                  <VscReactions className="h-4 w-4 text-gray-400 hover:text-gray-700" />
-                </button>
+        {/* ✅ ATTACHMENTS */}
+        {msg.fileType?.includes("image") && (
+          <img
+            src={msg.fileUrl}
+            className="mt-2 rounded-lg max-h-60"
+            alt="chat"
+          />
+        )}
 
-                {/* REACTION PICKER */}
-                {reactionPickerFor === msg._id && (
-                  <div ref={handleReactionRef} className={`absolute top-6 ${isOwnMessage ? "right-0" : "left-0"} bg-white border rounded-lg shadow p-2 flex gap-2 z-50`}>
-                    {REACTIONS.map((emoji) => (
-                      <button
-                        key={emoji}
-                        onClick={() => handleReaction(msg._id, emoji)}
-                        className="hover:scale-125 transition"
-                      >
-                        {emoji}
-                      </button>
-                    ))}
-                  </div>
-                )}
+        {msg.fileType?.includes("video") && (
+          <video
+            src={msg.fileUrl}
+            controls
+            className="mt-2 rounded-lg max-h-60"
+          />
+        )}
 
+        {msg.fileType?.includes("audio") && (
+          <audio
+            src={msg.fileUrl}
+            controls
+            className="mt-2 w-full"
+          />
+        )}
 
-              {/* Attachments */}
-              {msg.fileType?.includes("image") && (
-                <img
-                  src={msg.fileUrl}
-                  className="mt-2 rounded-lg max-h-60"
-                  alt="chat"
-                />
-              )}
+        {msg.fileType?.includes("pdf") && (
+          <a
+            href={msg.fileUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="block mt-2 text-blue-500 underline text-xs"
+          >
+            View PDF
+          </a>
+        )}
 
-              {msg.fileType?.includes("video") && (
-                <video
-                  src={msg.fileUrl}
-                  controls
-                  className="mt-2 rounded-lg max-h-60"
-                />
-              )}
+        {/* ✅ REACTIONS DISPLAY */}
+        {msg.reactions?.length > 0 && (
+          <div className="flex gap-1 mt-1">
+            {msg.reactions.map((r, i) => (
+              <span key={i} className="text-xs">{r.emoji}</span>
+            ))}
+          </div>
+        )}
 
-              {msg.fileType?.includes("audio") && (
-                <audio src={msg.fileUrl} controls className="mt-2 w-full" />
-              )}
+        {/* ✅ REACTION BUTTON */}
+        <button
+          className="absolute -left-2 -top-4 text-sm p-1"
+          onClick={() =>
+            setReactionPickerFor(
+              reactionPickerFor === msg._id ? null : msg._id
+            )
+          }
+        >
+          <VscReactions className="h-4 w-4 text-gray-400 hover:text-gray-700" />
+        </button>
 
-              {msg.fileType?.includes("pdf") && (
-                <a
-                  href={msg.fileUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="block mt-2 text-blue-500 underline text-xs"
-                >
-                  View PDF
-                </a>
-              )}
+        {/* ✅ REACTION PICKER */}
+        {reactionPickerFor === msg._id && (
+          <div
+            ref={handleReactionRef}
+            className={`absolute top-6 ${
+              isOwnMessage ? "right-0" : "left-0"
+            } bg-white border rounded-lg shadow p-2 flex gap-2 z-50`}
+          >
+            {REACTIONS.map((emoji) => (
+              <button
+                key={emoji}
+                onClick={() => handleReaction(msg._id, emoji)}
+                className="hover:scale-125 transition"
+              >
+                {emoji}
+              </button>
+            ))}
+          </div>
+        )}
+      </>
+    )}
+  </>
+)}
 
               {/* Timestamp */}
               <div className="text-[10px] text-right mt-1 opacity-70">
@@ -756,10 +874,16 @@ return (
                     Forward
                   </button>
                   <button
-                    onClick={() => confirmDelete(msg._id)}
-                    className="block px-3 py-2 w-full text-left text-blue-800 hover:bg-gray-100"
+                    onClick={() => deleteMessageForMe(msg._id)}
+                    className="block px-3 py-2 text-blue-800 w-full text-left hover:bg-gray-100"
                   >
-                    Delete
+                    Delete For me
+                  </button>
+                  <button
+                    onClick={() => deleteMessageForEveryone(msg._id)}
+                    className="block px-3 py-2 text-blue-800 w-full text-left hover:bg-gray-100"
+                  >
+                    Delete For everyone
                   </button>
                   {msg.fileUrl && (
                     <a
