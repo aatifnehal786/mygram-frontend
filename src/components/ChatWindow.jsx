@@ -563,11 +563,13 @@ const deleteMessageForMe = async (messageId) => {
 // delete message for everyone (hard delete)
 const deleteMessageForEveryone = async (messageId) => {
   try {
-    await apiFetch(`api/chats/chat/deleteForEveryone/${messageId}`, {
-      method: "DELETE",
-    });
+  await apiFetch(`api/chats/chat/deleteForEveryone/${messageId}`,
+      {
+        method: "DELETE",
+      }
+    );
 
-    // 🔥 UPDATE instantly
+    // ✅ optimistic UI update
     setMessages((prev) =>
       prev.map((msg) =>
         msg._id === messageId
@@ -581,7 +583,8 @@ const deleteMessageForEveryone = async (messageId) => {
 
   } catch (err) {
     console.error(err);
-    setToastMessage("Failed to delete message.");
+
+   
   }
 };
   // Socket event for message deletion by other party
@@ -709,6 +712,7 @@ return (
         
         const senderId = msg.sender?._id || msg.sender;
   const isOwnMessage = senderId === currentUserId;
+  console.log(isOwnMessage)
 
   // ✅ FIX: completely remove message
   const isDeletedForMe = msg.deletedFor?.some(
