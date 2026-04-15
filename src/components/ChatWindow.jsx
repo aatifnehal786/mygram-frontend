@@ -879,12 +879,14 @@ return (
                   >
                     Delete For me
                   </button>
-                  <button
-                    onClick={() => deleteMessageForEveryone(msg._id)}
-                    className="block px-3 py-2 text-blue-800 w-full text-left hover:bg-gray-100"
-                  >
-                    Delete For everyone
-                  </button>
+                  {isOwnMessage && (
+                    <button
+                      onClick={() => deleteMessageForEveryone(msg._id)}
+                      className="block px-3 py-2 text-blue-800 w-full text-left hover:bg-gray-100"
+                    >
+                      Delete For everyone
+                    </button>
+                  )}
                   {msg.fileUrl && (
                     <a
                       href={msg.fileUrl}
