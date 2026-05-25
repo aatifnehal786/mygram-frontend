@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 import { apiFetch } from "../api/apiFetch";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-
+import { useTheme } from "../contexts/ThemeContext";
 export default function Home() {
   const [users, setUsers] = useState([]);
  
@@ -13,6 +13,7 @@ export default function Home() {
   const { loggedUser } = useContext(UserContext);
   const [followStatus, setFollowStatus] = useState({});
   const [loadingUserId, setLoadingUserId] = useState(null);
+  const { theme } = useTheme();
 
 
   console.log(loggedUser);
@@ -119,7 +120,7 @@ const handleFollowToggle = async (targetUserId) => {
 
 
  return (
-  <div className="min-h-screen bg-gray-100 px-4 py-6">
+  <div className={`min-h-800 bg-red-100 px-4 py-6 ${theme === "dark" ? "bg-green-900 text-white" : "bg-red-400 text-black"} rounded-lg`}>
 
     {/* Verification Banner */}
     <div className="max-w-5xl mx-auto mb-4">
@@ -136,7 +137,7 @@ const handleFollowToggle = async (targetUserId) => {
     </div>
 
     {/* Users Grid */}
-    <div className="max-w-5xl mx-auto grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+    <div className={`max-w-5xl mx-auto grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 ${theme === "dark" ? "text-blue-800" : "text-black"}`}>
      {Array.isArray(users) &&
   users.map(
     (user) => {
@@ -147,14 +148,16 @@ const handleFollowToggle = async (targetUserId) => {
       return (
         <div
           key={user._id}
-          className="bg-white rounded-xl shadow-sm p-4 flex flex-col items-center text-center">
+          className={`bg-${theme === "dark" ? "gray-800" : "white"} rounded-xl shadow-sm p-4 flex flex-col items-center text-center`}>
           <img
             src={user.profilePic || null}
             alt={user.username}
             className="w-20 h-20 rounded-full object-cover mb-3"
           />
 
-          <h5 className="font-medium text-sm mb-2">
+          <h5 className={`font-medium text-sm mb-2 ${
+            theme === "dark" ? "text-green-400" : "text-black"
+          }`}>
             {user.username}
           </h5>
 

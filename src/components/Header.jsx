@@ -4,7 +4,7 @@ import { UserContext } from "../contexts/UserContext";
 import { useNavigate, Link } from "react-router-dom";
 import { FaBars } from "react-icons/fa";
 import { RxCross1 } from "react-icons/rx";
-
+import { useTheme } from "../contexts/ThemeContext";
 
 
 export default function Header() {
@@ -14,6 +14,7 @@ export default function Header() {
   
   const [menuOpen, setMenuOpen] = useState(false);
   const navigate = useNavigate();
+  const { theme } = useTheme();
 
 
 
@@ -43,7 +44,11 @@ export default function Header() {
   }
 
   return (
-  <header className="bg-white border-b shadow-sm relative z-50">
+  <header className= {`bg-white border-b shadow-sm relative z-50 ${
+        theme === "dark"
+          ? "bg-black text-white"
+          : "bg-gray-100 text-black"
+      }`}>
     <nav className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
 
       {/* Logo */}
@@ -52,7 +57,11 @@ export default function Header() {
       </h1>
 
       {/* Desktop Links */}
-      <ul className="hidden md:flex items-center gap-6 text-sm font-medium">
+      <ul className={`hidden md:flex items-center gap-6 text-sm font-medium ${
+        theme === "dark"
+          ? "text-red-400"
+          : "text-black"
+      }`}>
         <li><Link to="/home" className="hover:text-blue-600">Home</Link></li>
         <li><Link to="/profile" className="hover:text-blue-600">Profile</Link></li>
         <li><Link to="/createpost" className="hover:text-blue-600">Create Post</Link></li>
@@ -63,10 +72,9 @@ export default function Header() {
       {/* Desktop Logout */}
       <button
         onClick={logOut}
-        className="
-          hidden md:block bg-red-500 text-white px-4 py-2 rounded-md text-sm
-          hover:bg-red-600 transition
-        "
+        className={`hidden md:block px-4 py-2 rounded-md text-sm
+        ${theme === "dark" ? "bg-red-600 text-white" : "bg-red-600 text-black"}
+        `}
       >
         Log Out
       </button>
@@ -74,7 +82,9 @@ export default function Header() {
       {/* Mobile Menu Button */}
       <button
         onClick={toggleMenu}
-        className="md:hidden text-2xl text-gray-700"
+        className={`md:hidden text-2xl
+          ${theme === "dark" ? "text-white" : "text-gray-700"}
+        `}
       >
         {menuOpen ? <RxCross1 /> : <FaBars />}
       </button>
@@ -82,7 +92,11 @@ export default function Header() {
 
     {/* Mobile Menu */}
     {menuOpen && (
-      <div className="md:hidden bg-white border-t shadow-md">
+      <div className={`md:hidden ${
+        theme === "dark"
+          ? "bg-black text-white"
+          : "bg-gray-100 text-black"
+      } border-t shadow-md`}>
         <ul className="flex flex-col divide-y text-sm">
           <li>
             <Link onClick={removeMenu} to="/home" className="block px-4 py-3">
@@ -110,14 +124,10 @@ export default function Header() {
             </Link>
           </li>
           <li className="px-4 py-3">
-            <button
-              onClick={logOut}
-              className="w-full bg-red-500 text-white py-2 rounded-md"
-            >
-              Log Out
-            </button>
+            
           </li>
         </ul>
+        
       </div>
     )}
   </header>

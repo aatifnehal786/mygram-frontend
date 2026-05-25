@@ -1,6 +1,7 @@
 import {useEffect } from 'react';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import { UserProvider } from './contexts/UserContext';
+import { ThemeProvider } from './contexts/ThemeContext';
 import Login from './components/Login';
 import './App.css'
 import SignUp from './components/SignUp';
@@ -156,13 +157,18 @@ const router = createBrowserRouter(
 
   return (
   <Provider store={store}>
-  <UserProvider>
-    <SocketProvider>
-      <ToastContainer position="top-right" autoClose={3000} />
-      <RouterProvider router={router} />
-    </SocketProvider>
-  </UserProvider>
-</Provider>
+      <UserProvider>
+        <SocketProvider>
+          <ThemeProvider>
+
+            <ToastContainer position="top-right" autoClose={3000} />
+
+            <RouterProvider router={router} />
+
+          </ThemeProvider>
+        </SocketProvider>
+      </UserProvider>
+    </Provider>
   );
 }
 

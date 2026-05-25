@@ -3,7 +3,7 @@ import { useContext, useEffect, useState, useRef } from "react";
 import { UserContext } from "../contexts/UserContext";
 import ImagePostWithMusic from "./ImagePostWithMusic";
 import { apiFetch } from "../api/apiFetch"; // 👈 adjust path as needed
-import './Profile.css'
+import { useTheme } from "../contexts/ThemeContext";
 export default function Profile() {
   const { id } = useParams();
   const { loggedUser } = useContext(UserContext);
@@ -11,7 +11,7 @@ export default function Profile() {
   const videoRef = useRef(null);
   const [stats, setStats] = useState(null);
   const [posts, setPosts] = useState([]);
-  const [isFollowing, setIsFollowing] = useState(false);
+  // const [isFollowing, setIsFollowing] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef();
   const [message,setMessage] = useState({text:"",data:""})
@@ -21,12 +21,13 @@ export default function Profile() {
   const [loadingFollowers, setLoadingFollowers] = useState(true);
   const [showFollowModal, setShowFollowModal] = useState(false);
   const [activeTab, setActiveTab] = useState("followers"); // or "following"
-  const [requests, setRequests] = useState([]);
+  // const [requests, setRequests] = useState([]);
 
 
   const isOwnProfile = loggedUser && (!id || id === loggedUser.userid);
   const targetUserId =  loggedUser?.userid;
-  const [followStatus, setFollowStatus] = useState({});
+  // const [followStatus, setFollowStatus] = useState({});
+  const { theme } = useTheme();
   // console.log(loggedUser)
   
 
@@ -50,9 +51,7 @@ useEffect(() => {
       );
       setPosts(userPosts);
 
-      if (!isOwnProfile) {
-        setIsFollowing(statsData.followers.some((f) => f._id === loggedUser._id));
-      }
+     
     } catch (err) {
       console.error("Failed to fetch data:", err);
     }
@@ -89,24 +88,6 @@ useEffect(() => {
   fetchFollowersAndFollowing();
 }, [stats, targetUserId]);
 
-// CHECK FOLLOW STATUS
-
-useEffect(() => {
-  const checkFollowStatus = async () => {
-    if (!targetUserId || isOwnProfile) return;
-
-    try {
-      const data = await apiFetch(`api/follow-status/${targetUserId}`);
-
-      // EXPECTED: { status: "following" | "requested" | "follow" }
-      setFollowStatus(data.status);
-    } catch (err) {
-      console.error("Error checking follow status:", err);
-    }
-  };
-
-  checkFollowStatus();
-}, [targetUserId, loggedUser]);
 
 
 // HANDLE FILE CHANGE
@@ -307,7 +288,7 @@ const handleChangeUserName = async (newUsername) => {
               <>
                 <button
                   onClick={() => fileInputRef.current.click()}
-                  className="absolute bottom-2 right-2 bg-white text-sm px-3 py-1 rounded-full shadow hover:bg-gray-100"
+                  className={`absolute bottom-2 right-2 ${theme === "dark" ? "bg-gray-800 text-white" : "bg-white text-black"} text-sm px-3 py-1 rounded-full shadow`}
                 >
                   Edit
                 </button>
@@ -331,7 +312,9 @@ const handleChangeUserName = async (newUsername) => {
               {isOwnProfile && (
                 <button
                   onClick={() => setIsUsernameModalOpen(true)}
-                  className="text-sm px-2 py-1 rounded-md border bg-white hover:bg-gray-100"
+                  className={`text-sm px-2 py-1 rounded-md border ${
+                    theme === "dark" ? "bg-gray-800 text-white" : "bg-white text-black"
+                  }`}
                 >
                   Edit
                 </button>
@@ -409,13 +392,17 @@ const handleChangeUserName = async (newUsername) => {
 
                 {/* Content */}
                 <div className="p-4 space-y-3">
-                  <p className="font-medium">{post.caption}</p>
+                  <p className={`font-medium ${theme === "dark" ? "text-red-400" : "text-black"}`}>
+                    {post.caption}
+                  </p>
 
                   <div className="flex justify-between text-sm">
                     <span>❤️ {post.likes.length}</span>
                     <button
                       onClick={() => handleLike(post._id)}
-                      className="text-indigo-600 hover:underline"
+                      className={`hover:underline ${
+                        theme === "dark" ? "text-indigo-400" : "text-indigo-600"
+                      }`}
                     >
                       Like
                     </button>

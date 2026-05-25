@@ -1,26 +1,32 @@
-import React, { useContext,useEffect,useState } from 'react';
+import React, { useState } from 'react';
 import './Post.css'
 import { apiFetch } from "../api/apiFetch";
 // import './App.css';
 import { UserContext } from '../contexts/UserContext';
+import {useTheme} from '../contexts/ThemeContext';
+import Spinner from "../Spinner";
 const CreatePost = () => {
   const [caption, setCaption] = useState('');
   const [mediaType, setMediaType] = useState('image');
   const [musicFile,setMusicFile] = useState('')
   const [mediaFile, setMediaFile] = useState(null);
   const [status, setStatus] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const {theme} = useTheme();
  
 const handleCreatePost = async (e) => {
-  e.preventDefault()
+  e.preventDefault();
+  setIsLoading(true);
   if (!mediaFile) {
     setStatus("Please select a media file before posting.");
+    setIsLoading(false);
     return;
   }
 
   const formData = new FormData();
   formData.append("caption", caption);
   formData.append("mediaType", mediaType);
-  formData.append("image", mediaFile); // ✅ must match backend field name
+  formData.append("media", mediaFile); // ✅ must match backend field name
 
   if (mediaType === "image" && musicFile) {
     formData.append("backgroundMusic", musicFile); // ✅ must match backend
@@ -31,24 +37,23 @@ const handleCreatePost = async (e) => {
       method: "POST",
       body: formData,
     });
-
+    console.log("Create post response:", data);
     setStatus(data.message);
 
-   
+    setIsLoading(false);
   } catch (err) {
     console.error("Create post failed:", err);
     setStatus("Failed to create post. Please try again.");
+    setIsLoading(false);
   }
 };
 
 
 
-useEffect(()=>{
-  console.log("Post Created")
-},[handleCreatePost])
+
 
   return (
-  <div className="min-h-screen bg-gray-100 flex flex-col">
+  <div className={`min-h-800 bg-red-100 flex flex-col rounded-lg ring-4 ${theme === "dark" ? "bg-green-900 text-white ring-green-300" : "bg-red-400 text-black ring-gray-300"} shadow-lg`}>
 
     {/* Navbar */}
     <nav className="bg-white border-b px-6 py-4 flex items-center justify-between">
@@ -58,10 +63,10 @@ useEffect(()=>{
     </nav>
 
     {/* Main */}
-    <main className="flex-1 flex items-center justify-center px-4">
+    <main className="flex-1 flex items-center justify-center px-4 py-4">
       <div className="w-full max-w-md bg-white rounded-xl shadow-md p-6">
 
-        <h2 className="text-lg font-semibold mb-5 text-center">
+        <h2 className={`text-lg font-semibold mb-5 text-center ${theme === 'dark' ? 'text-green-500' : 'text-gray-800'}`}>
           Create Post
         </h2>
 
@@ -74,22 +79,20 @@ useEffect(()=>{
             value={caption}
             onChange={(e) => setCaption(e.target.value)}
             required
-            className="
-              w-full px-4 py-2 rounded-lg border
+            className={`w-full px-4 py-2 rounded-lg border
               focus:outline-none focus:ring-2 focus:ring-blue-500
-              text-sm
-            "
+              text-sm bg-white ${theme === 'dark' ? 'text-blue-800' : 'text-gray-700'}`}
           />
 
           {/* Media Type */}
           <select
             value={mediaType}
             onChange={(e) => setMediaType(e.target.value)}
-            className="
-              w-full px-4 py-2 rounded-lg border
+            className=
+              {`w-full px-4 py-2 rounded-lg border
               focus:outline-none focus:ring-2 focus:ring-blue-500
-              text-sm bg-white
-            "
+              text-sm bg-white ${theme === 'dark' ? 'text-blue-800' : 'text-gray-700'}`}
+            
           >
             <option value="image">Image</option>
             <option value="video">Video</option>
@@ -116,16 +119,29 @@ useEffect(()=>{
             <p className="text-xs text-gray-500">
               Choose image or video
             </p>
-            <input
-              type="file"
-              accept="image/*,video/*"
-              onChange={(e) => setMediaFile(e.target.files[0])}
-              required
-              className="w-full text-sm file:mr-4 file:py-2 file:px-4
-                         file:rounded-lg file:border-0
-                         file:bg-blue-50 file:text-blue-600
-                         hover:file:bg-blue-100"
-            />
+              <input
+                type="file"
+                accept="image/*,video/*"
+                onChange={(e) => {
+                  const file = e.target.files[0];
+
+                  if (!file) return;
+
+                  setMediaFile(file);
+
+                  // auto detect media type
+                  if (file.type.startsWith("video")) {
+                    setMediaType("video");
+                  } else {
+                    setMediaType("image");
+                  }
+                }}
+                required
+                className="w-full text-sm file:mr-4 file:py-2 file:px-4
+             file:rounded-lg file:border-0
+             file:bg-blue-50 file:text-blue-600
+             hover:file:bg-blue-100"
+              />
           </div>
 
           {/* Submit */}
@@ -136,7 +152,7 @@ useEffect(()=>{
               font-medium hover:bg-blue-700 transition
             "
           >
-            Upload Post
+           {isLoading ? <Spinner/> : "Create Post"}
           </button>
         </form>
 

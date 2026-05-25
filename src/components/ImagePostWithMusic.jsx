@@ -41,7 +41,7 @@ export default function ImagePostWithMusic({ post, currentlyPlayingId, setCurren
         src={post.mediaUrl}
         alt="Post"
         onClick={handlePlay}
-        className="w-full h-auto object-cover cursor-pointer 
+        className="w-full h-64 object-cover cursor-pointer 
                    transition-transform duration-300 group-hover:scale-[1.01]"
       />
 
