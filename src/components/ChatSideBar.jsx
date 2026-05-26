@@ -68,7 +68,7 @@ const handleSearch = async (q) => {
 
  
   return (
-    <div className={`flex flex-col h-full ${theme === 'dark' ? 'bg-gray-800' : 'bg-white'}`}>
+    <div className={`flex flex-col h-600 ${theme === 'dark' ? 'bg-gray-800' : 'bg-white'}`}>
       {/* Search */}
       <div className="p-3 border-b">
         <div className="relative">

@@ -124,7 +124,14 @@ export default function Header() {
             </Link>
           </li>
           <li className="px-4 py-3">
-            
+             <button
+        onClick={logOut}
+        className={`md:block px-4 py-2 rounded-md text-sm
+        ${theme === "dark" ? "bg-red-600 text-white" : "bg-red-600 text-black"}
+        `}
+      >
+        Log Out
+      </button>
           </li>
         </ul>
         
