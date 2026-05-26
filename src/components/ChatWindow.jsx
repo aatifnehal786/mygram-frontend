@@ -11,11 +11,13 @@ import VideoCallManager from './VideoCallManager';
 import useVideoCallStore from "../store/VideoCallStore"
 import EmojiPicker from "emoji-picker-react";
 import { VscReactions } from "react-icons/vsc";
+import { useTheme } from '../contexts/ThemeContext';
 
 const REACTIONS = ["❤️", "😂", "😮", "😢", "👍", "👎"];
 
 const ChatWindow = ({ selectedUser, triggerForwardMode, messages, setMessages, onBack }) => {
   const { loggedUser } = useContext(UserContext);
+  const { theme } = useTheme();
   const { socket } = useSocket()
   const currentUserId = loggedUser?.userid;
   const [input, setInput] = useState('');
@@ -657,10 +659,10 @@ const deleteMessageForEveryone = async (messageId) => {
 
 return (
   
-<div className="flex-1 w-full flex flex-col h-full bg-gray-50">
+<div className={`flex-1 w-full flex flex-col h-full bg-gray-50 ${theme === 'dark' ? 'bg-gray-800 text-white' : 'bg-gray-50 text-gray-900'}`}>
 
     {/* Header */}
-    <div className="flex gap-3 px-4 py-3 border-b bg-white sticky top-0 z-10">
+    <div className={`flex gap-3 px-4 py-3 border-b ${theme === 'dark' ? 'bg-gray-700' : 'bg-white'} sticky top-0 z-10`}>
       {/* Back (mobile only) */}
       <button
         onClick={onBack}
@@ -670,7 +672,7 @@ return (
       </button>
 
       <div className="ml-3 flex-grow">
-        <h3 className="font-semibold text-sm">
+        <h3 className={`text-sm font-medium ${theme === 'dark' ? 'text-red-500' : 'text-gray-800'}`}>
           {selectedUser.username}
         </h3>
         <p className="text-xs text-gray-500">

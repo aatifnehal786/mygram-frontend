@@ -1,8 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { UserContext } from '../contexts/UserContext';
 import { apiFetch } from "../api/apiFetch";
-import './chat.css';
-
+import {useTheme} from '../contexts/ThemeContext';
 import { useSelector } from "react-redux";
 
 
@@ -13,6 +12,7 @@ const ChatSidebar = ({onSelectUser,selectedUserId,onSelectForwardUser,isForwardi
   const [results, setResults] = useState([]);
   const [followedUsers, setFollowedUsers] = useState([]);
   const [selectedForwardUsers, setSelectedForwardUsers] = useState([]);
+  const {theme} = useTheme();
  
 
  useEffect(() => {
@@ -68,7 +68,7 @@ const handleSearch = async (q) => {
 
  
   return (
-    <div className="flex flex-col h-full bg-white">
+    <div className={`flex flex-col h-full ${theme === 'dark' ? 'bg-gray-800' : 'bg-white'}`}>
       {/* Search */}
       <div className="p-3 border-b">
         <div className="relative">
@@ -125,12 +125,12 @@ const handleSearch = async (q) => {
             {/* User Info */}
             <div className="flex-1 min-w-0">
               <div className="flex justify-between items-center">
-                <h1 className="text-sm font-medium truncate">
+                <h1 className={`text-sm font-medium truncate ${theme === 'dark' ? 'text-red-500' : 'text-gray-800'}`}>
                   {user.username}
                 </h1>
 
                 {unreadCounts?.[user._id] > 0 && (
-                  <span className="ml-2 bg-blue-500 text-white text-xs px-2 py-0.5 rounded-full">
+                  <span className={`ml-2 bg-blue-500 text-white text-xs px-2 py-0.5 rounded-full ${theme === 'dark' ? 'bg-blue-600' : 'bg-blue-500'}`}>
                     {unreadCounts[user._id]}
                   </span>
                 )}
