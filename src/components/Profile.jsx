@@ -375,11 +375,12 @@ const handleChangeUserName = async (newUsername) => {
                 className="bg-white border rounded-lg shadow-sm overflow-hidden"
               >
                 {/* Media */}
-                {post.mediaUrl.endsWith(".mp4") ? (
-                  <video
-                    controls
-                    className="w-full h-64 object-cover"
-                    src={post.mediaUrl}
+                {/\.(mp4|webm|ogg)$/i.test(post.mediaUrl) ? (
+                  <VideoPost
+                    post={post}
+                    currentlyPlayingId={currentlyPlayingId}
+                    setCurrentlyPlayingId={setCurrentlyPlayingId}
+                    videoRef={videoRef}
                   />
                 ) : (
                   <ImagePostWithMusic

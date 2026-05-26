@@ -83,7 +83,7 @@ export default function Header() {
       <button
         onClick={toggleMenu}
         className={`md:hidden text-2xl
-          ${theme === "dark" ? "text-white" : "text-gray-700"}
+          ${theme === "dark" ? "text-red-500" : "text-gray-700"}
         `}
       >
         {menuOpen ? <RxCross1 /> : <FaBars />}
