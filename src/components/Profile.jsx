@@ -4,6 +4,7 @@ import { UserContext } from "../contexts/UserContext";
 import ImagePostWithMusic from "./ImagePostWithMusic";
 import { apiFetch } from "../api/apiFetch"; // 👈 adjust path as needed
 import { useTheme } from "../contexts/ThemeContext";
+import VideoPost from "./VideoPost";
 export default function Profile() {
   const { id } = useParams();
   const { loggedUser } = useContext(UserContext);
