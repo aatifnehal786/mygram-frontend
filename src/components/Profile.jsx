@@ -58,7 +58,7 @@ useEffect(() => {
   }
 
   fetchStatsAndPosts();
-}, [id, loggedUser]);
+}, [targetUserId, loggedUser]);
 
  const [newUsername, setNewUsername] = useState(stats?.username || "");
 
