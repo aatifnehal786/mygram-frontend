@@ -33,7 +33,7 @@ export default function Layout() {
       </button>
 
       {/* Main Content */}
-      <main className="flex-1 pt-16 px-4 sm:px-6 lg:px-8">
+      <main className="flex-1 pt-20 px-4 sm:px-6 lg:px-8">
         <div className="max-w-5xl mx-h-screen-lg mx-auto">
           <Outlet />
         </div>

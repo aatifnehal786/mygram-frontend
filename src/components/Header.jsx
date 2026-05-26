@@ -44,7 +44,7 @@ export default function Header() {
   }
 
   return (
-  <header className= {`bg-white border-b shadow-sm relative z-50 ${
+  <header className= {`fixed top-0 left-0 w-full bg-white border-b shadow-sm z-50 ${
         theme === "dark"
           ? "bg-black text-white"
           : "bg-gray-100 text-black"
