@@ -22,7 +22,7 @@ export default function Layout() {
       {/* Theme Toggle Button */}
       <button
         onClick={toggleTheme}
-        className={`fixed bottom-5 right-5 px-4 py-2 rounded-full shadow-lg z-50
+        className={`absolute top-2 right-12 px-4 py-2 rounded-full shadow-lg z-50
         ${
           theme === "dark"
             ? "bg-white text-black"
