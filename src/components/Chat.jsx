@@ -19,26 +19,17 @@ const Chat = () => {
   const [messageToForward, setMessageToForward] = useState(null);
   const {theme} = useTheme();
  
- 
-
-
-
- 
-
-
-
-
-
-  
 useEffect(() => {
   if (!selectedUser || !loggedUser?.token) return;
 
-  // Clear existing messages when switching users
   setMessages([]);
 
   const fetchChat = async () => {
     try {
-      const data = await apiFetch(`api/chats/chat/${selectedUser._id}`);
+      const data = await apiFetch(
+        `api/chats/chat/${selectedUser._id}`
+      );
+
       setMessages(Array.isArray(data) ? data : []);
     } catch (err) {
       console.error("Fetch chat error:", err);
@@ -48,30 +39,31 @@ useEffect(() => {
 
   fetchChat();
 
- if (loggedUser?.userid) {
-        socket.emit("join", loggedUser.userid);
-      }
+  if (loggedUser?.userid) {
+    socket.emit("join", loggedUser.userid);
+  }
 
   const handleReceiveMessage = (msg) => {
     const senderId = msg.sender?._id || msg.sender;
     const receiverId = msg.receiver?._id || msg.receiver;
 
     const isCurrentChat =
-      (senderId === loggedUser.userid && receiverId === selectedUser._id) ||
-      (receiverId === loggedUser.userid && senderId === selectedUser._id);
+      (senderId === loggedUser.userid &&
+        receiverId === selectedUser._id) ||
+      (receiverId === loggedUser.userid &&
+        senderId === selectedUser._id);
 
     if (isCurrentChat) {
-      setMessages((prev) => [...prev, msg]);
+      setMessages(prev => [...prev, msg]);
     }
   };
 
-  if (socket) {
-    socket.on("receiveMessage", handleReceiveMessage);
-  }
+  socket.on("receiveMessage", handleReceiveMessage);
 
   return () => {
-    if (socket) socket.off("receiveMessage", handleReceiveMessage);
+    socket.off("receiveMessage", handleReceiveMessage);
   };
+
 }, [selectedUser, loggedUser, socket]);
 
 

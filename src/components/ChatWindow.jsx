@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState, useContext, useCallback } from 'react';
+import React, { useEffect, useRef, useState, useContext } from 'react';
 import { UserContext } from '../contexts/UserContext';
 import { apiFetch } from "../api/apiFetch";
 import './chat.css';
@@ -75,7 +75,7 @@ useEffect(() => {
   return () => {
     socket.off("message-reaction", handleReaction);
   };
-}, [setMessages, socket]);
+}, [socket]);
 
 
 
@@ -350,54 +350,44 @@ const renderMessageWithLinks = (text) => {
 
     return date.toLocaleDateString();
   }
+const loadMessages = async (initial = false) => {
+  if (loadingMore || !hasMore || !selectedUser) return;
 
+  setLoadingMore(true);
 
+  const prevScrollHeight = chatContainerRef.current?.scrollHeight || 0;
 
-const loadMessages = useCallback(
-  async (initial = false) => {
-    if (loadingMore || !hasMore || !selectedUser) return;
+  try {
+    const currentSkip = initial ? 0 : skip;
 
-    setLoadingMore(true);
+    const data = await apiFetch(
+      `api/chats/chat/${selectedUser._id}?limit=${limit}&skip=${currentSkip}`
+    );
 
-    const prevScrollHeight =
-      chatContainerRef.current?.scrollHeight || 0;
+    if (data.length < limit) setHasMore(false);
 
-    try {
-      const currentSkip = initial ? 0 : skip;
+    setMessages(prev =>
+      initial ? data : [...data, ...prev]
+    );
 
-      const data = await apiFetch(
-        `api/chats/chat/${selectedUser._id}?limit=${limit}&skip=${currentSkip}`
-      );
+    // ✅ FIX: correct skip update
+    setSkip(prev => (initial ? data.length : prev + data.length));
 
-      if (data.length < limit) setHasMore(false);
+    // 🔒 preserve scroll position
+    requestAnimationFrame(() => {
+      if (!initial && chatContainerRef.current) {
+        const newHeight = chatContainerRef.current.scrollHeight;
+        chatContainerRef.current.scrollTop =
+          newHeight - prevScrollHeight;
+      }
+    });
 
-      setMessages(prev =>
-        initial ? data : [...data, ...prev]
-      );
-
-      // ✅ correct skip update
-      setSkip(prev =>
-        initial ? data.length : prev + data.length
-      );
-
-      // 🔒 preserve scroll position
-      requestAnimationFrame(() => {
-        if (!initial && chatContainerRef.current) {
-          const newHeight =
-            chatContainerRef.current.scrollHeight;
-
-          chatContainerRef.current.scrollTop =
-            newHeight - prevScrollHeight;
-        }
-      });
-    } catch (err) {
-      console.error("Failed to load messages", err);
-    } finally {
-      setLoadingMore(false);
-    }
-  },
-  [loadingMore, hasMore, selectedUser, skip, limit, setMessages]
-);
+  } catch (err) {
+    console.error("Failed to load messages", err);
+  } finally {
+    setLoadingMore(false);
+  }
+};
 
 useEffect(() => {
   if (!selectedUser) return;
@@ -405,10 +395,10 @@ useEffect(() => {
   // reset state properly
   setSkip(0);
   setHasMore(true);
-  setMessages([]);
+  setMessages([]); // ✅ important to avoid mixing chats
 
   loadMessages(true);
-}, [selectedUser, loadMessages, setMessages]);
+}, [selectedUser]);
 
 
 const handleScroll = () => {
@@ -524,7 +514,7 @@ useEffect(() => {
         chattingWith: selectedUser._id
       });
     };
-  }, [currentUserId, selectedUser, socket]);
+  }, [selectedUser, socket]);
 
   const handleTypingLogic = (text) => {
   setInput(text);
@@ -634,7 +624,7 @@ const deleteMessageForEveryone = async (messageId) => {
     socket.off("messageDeleted", handleDeleteEveryone);
     socket.off("messageDeletedForMe", handleDeleteForMe);
   };
-}, [socket, currentUserId, setMessages]);
+}, [socket, currentUserId]);
   
   const handleVideoCall = () => {
     if (selectedUser && onlineMap[selectedUser._id]?.isOnline) {
@@ -991,7 +981,7 @@ return (
     onChange={(e) => handleTypingLogic(e.target.value)}
     onKeyDown={handleDynamicEnter}
     placeholder="Type a message..."
-    className={`flex-1 px-4 py-2 rounded-full border text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${theme === "dark" ? "bg-gray-800 text-white border-gray-600" : "bg-white text-black border-gray-300"}`}
+    className="flex-1 px-4 py-2 rounded-full border text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
   />
 
   <label className="cursor-pointer text-xl">
