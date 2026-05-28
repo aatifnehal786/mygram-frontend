@@ -18,7 +18,7 @@ export const apiFetch = async (endpoint, options = {}) => {
 
   let response;
   try {
-    const apiUrl = import.meta.env.REACT_APP_API_URL;
+    const apiUrl = "https://mygram-mvc.onrender.com";
     response = await fetch(`${apiUrl}/${endpoint}`, {
       ...options,
       headers,
