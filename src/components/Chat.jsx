@@ -8,6 +8,7 @@ import { apiFetch } from '../api/apiFetch';
 import './chat.css';
 import { useSocket } from '../contexts/SocketContext';
 import { UserContext } from '../contexts/UserContext';
+import { useTheme } from '../contexts/ThemeContext';  
 
 const Chat = () => {
   const [selectedUser, setSelectedUser] = useState(null);
@@ -16,6 +17,7 @@ const Chat = () => {
   const {loggedUser} = useContext(UserContext)
   const [isForwarding, setIsForwarding] = useState(false);
   const [messageToForward, setMessageToForward] = useState(null);
+  const {theme} = useTheme();
  
  
 
@@ -149,6 +151,7 @@ const forwardMessageToUsers = async (msg, receiverIds) => {
           forwardMessageToUsers(messageToForward, userIds);
         }
       }}
+      theme={theme}
     />
   </div>
 
@@ -167,6 +170,7 @@ const forwardMessageToUsers = async (msg, receiverIds) => {
         setMessages={setMessages}
         triggerForwardMode={triggerForwardMode}
         onBack={() => setSelectedUser(null)} // mobile back
+        theme={theme}
       />
     ) : (
       <div className="hidden md:flex h-full items-center justify-center text-gray-400">

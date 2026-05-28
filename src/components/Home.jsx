@@ -120,10 +120,10 @@ const handleFollowToggle = async (targetUserId) => {
 
 
  return (
-  <div className={`min-h-800 bg-red-100 px-4 py-6 ${theme === "dark" ? "bg-green-900 text-white" : "bg-red-400 text-black"} rounded-lg`}>
+  <div className={`min-h-800 px-2 py-6 ${theme === "dark" ? "bg-green-900 text-white" : "bg-red-400 text-black"} rounded-lg`}>
 
     {/* Verification Banner */}
-    <div className="max-w-5xl mx-auto mb-4">
+    <div className="max-w-4xl mx-auto mb-4">
       {showVerifyMessage ? (
         <div className="bg-green-100 text-green-700 px-4 py-2 rounded-md text-sm">
           ✅ Mobile verified
@@ -137,7 +137,7 @@ const handleFollowToggle = async (targetUserId) => {
     </div>
 
     {/* Users Grid */}
-    <div className={`max-w-5xl mx-auto grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 ${theme === "dark" ? "text-blue-800" : "text-black"}`}>
+    <div className={`max-w-4xl mx-auto grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 ${theme === "dark" ? "text-blue-800" : "text-black"}`}>
      {Array.isArray(users) &&
   users.map(
     (user) => {
