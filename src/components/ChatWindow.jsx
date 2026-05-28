@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState, useContext } from 'react';
+import React, { useEffect, useRef, useState, useContext, useCallback } from 'react';
 import { UserContext } from '../contexts/UserContext';
 import { apiFetch } from "../api/apiFetch";
 import './chat.css';
@@ -75,7 +75,7 @@ useEffect(() => {
   return () => {
     socket.off("message-reaction", handleReaction);
   };
-}, [socket]);
+}, [setMessages, socket]);
 
 
 
@@ -350,44 +350,54 @@ const renderMessageWithLinks = (text) => {
 
     return date.toLocaleDateString();
   }
-const loadMessages = async (initial = false) => {
-  if (loadingMore || !hasMore || !selectedUser) return;
 
-  setLoadingMore(true);
 
-  const prevScrollHeight = chatContainerRef.current?.scrollHeight || 0;
 
-  try {
-    const currentSkip = initial ? 0 : skip;
+const loadMessages = useCallback(
+  async (initial = false) => {
+    if (loadingMore || !hasMore || !selectedUser) return;
 
-    const data = await apiFetch(
-      `api/chats/chat/${selectedUser._id}?limit=${limit}&skip=${currentSkip}`
-    );
+    setLoadingMore(true);
 
-    if (data.length < limit) setHasMore(false);
+    const prevScrollHeight =
+      chatContainerRef.current?.scrollHeight || 0;
 
-    setMessages(prev =>
-      initial ? data : [...data, ...prev]
-    );
+    try {
+      const currentSkip = initial ? 0 : skip;
 
-    // ✅ FIX: correct skip update
-    setSkip(prev => (initial ? data.length : prev + data.length));
+      const data = await apiFetch(
+        `api/chats/chat/${selectedUser._id}?limit=${limit}&skip=${currentSkip}`
+      );
 
-    // 🔒 preserve scroll position
-    requestAnimationFrame(() => {
-      if (!initial && chatContainerRef.current) {
-        const newHeight = chatContainerRef.current.scrollHeight;
-        chatContainerRef.current.scrollTop =
-          newHeight - prevScrollHeight;
-      }
-    });
+      if (data.length < limit) setHasMore(false);
 
-  } catch (err) {
-    console.error("Failed to load messages", err);
-  } finally {
-    setLoadingMore(false);
-  }
-};
+      setMessages(prev =>
+        initial ? data : [...data, ...prev]
+      );
+
+      // ✅ correct skip update
+      setSkip(prev =>
+        initial ? data.length : prev + data.length
+      );
+
+      // 🔒 preserve scroll position
+      requestAnimationFrame(() => {
+        if (!initial && chatContainerRef.current) {
+          const newHeight =
+            chatContainerRef.current.scrollHeight;
+
+          chatContainerRef.current.scrollTop =
+            newHeight - prevScrollHeight;
+        }
+      });
+    } catch (err) {
+      console.error("Failed to load messages", err);
+    } finally {
+      setLoadingMore(false);
+    }
+  },
+  [loadingMore, hasMore, selectedUser, skip, limit, setMessages]
+);
 
 useEffect(() => {
   if (!selectedUser) return;
@@ -395,10 +405,10 @@ useEffect(() => {
   // reset state properly
   setSkip(0);
   setHasMore(true);
-  setMessages([]); // ✅ important to avoid mixing chats
+  setMessages([]);
 
   loadMessages(true);
-}, [selectedUser]);
+}, [selectedUser, loadMessages, setMessages]);
 
 
 const handleScroll = () => {
@@ -514,7 +524,7 @@ useEffect(() => {
         chattingWith: selectedUser._id
       });
     };
-  }, [selectedUser, socket]);
+  }, [currentUserId, selectedUser, socket]);
 
   const handleTypingLogic = (text) => {
   setInput(text);
@@ -624,7 +634,7 @@ const deleteMessageForEveryone = async (messageId) => {
     socket.off("messageDeleted", handleDeleteEveryone);
     socket.off("messageDeletedForMe", handleDeleteForMe);
   };
-}, [socket, currentUserId]);
+}, [socket, currentUserId, setMessages]);
   
   const handleVideoCall = () => {
     if (selectedUser && onlineMap[selectedUser._id]?.isOnline) {
