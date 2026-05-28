@@ -1,3 +1,4 @@
+
 export const apiFetch = async (endpoint, options = {}) => {
   const token = JSON.parse(localStorage.getItem("token-auth"))?.token;
   const deviceId = localStorage.getItem("deviceId");
@@ -17,7 +18,8 @@ export const apiFetch = async (endpoint, options = {}) => {
 
   let response;
   try {
-    response = await fetch(`http://localhost:8000/${endpoint}`, {
+    const apiUrl = import.meta.env.REACT_APP_API_URL;
+    response = await fetch(`${apiUrl}/${endpoint}`, {
       ...options,
       headers,
     });
