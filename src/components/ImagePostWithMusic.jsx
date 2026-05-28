@@ -1,59 +1,63 @@
 import { useEffect, useRef, useState } from "react";
 
-export default function ImagePostWithMusic({ post, currentlyPlayingId, setCurrentlyPlayingId, videoRef }) {
+export default function ImagePostWithMusic({ post, currentlyPlayingId, setCurrentlyPlayingId }) {
   const audioRef = useRef();
   const [isMuted, setIsMuted] = useState(false);
 
   const isCurrent = currentlyPlayingId === post._id;
 
-  useEffect(() => {
-    if (!audioRef.current) return;
+useEffect(() => {
+  const audio = audioRef.current;
 
-    if (isCurrent) {
-      audioRef.current.play();
-      audioRef.current.muted = isMuted;
-      if (videoRef?.current) {
-        videoRef.current.pause();
-      }
-    } else {
-      audioRef.current.pause();
-      audioRef.current.currentTime = 0;
-    }
-  }, [isCurrent, isMuted, videoRef]);
+  if (!audio) return;
 
-  const handlePlay = () => {
-    if (!isCurrent) {
-      setCurrentlyPlayingId(post._id);
-    } else {
-      setCurrentlyPlayingId(null);
-    }
+  if (isCurrent) {
+    audio.muted = isMuted;
+
+    audio.play().catch((err) => {
+      console.log(err);
+    });
+  } else {
+    audio.pause();
+    audio.currentTime = 0;
+  }
+
+  return () => {
+    audio.pause();
   };
+}, [isCurrent, isMuted]);
+
+const handlePlay = async () => {
+  if (!audioRef.current || !post.backgroundMusic) return;
+
+  try {
+    setCurrentlyPlayingId(post._id);
+
+    audioRef.current.muted = false;
+
+    await audioRef.current.play();
+  } catch (err) {
+    console.log("Playback error:", err);
+  }
+};
 
  return (
-  <div className="w-full max-w-md mx-auto bg-black rounded-xl overflow-hidden shadow-lg">
-    {post.backgroundMusic && (
-      <audio ref={audioRef} src={post.backgroundMusic} />
-    )}
+  <div className="w-200 max-w-md mx-auto bg-black rounded-xl overflow-hidden shadow-lg">
+   
 
     <div className="relative group">
       {/* Image */}
       <img
-        src={post.mediaUrl}
-        alt="Post"
-        onClick={handlePlay}
-        className="w-full h-64 object-cover cursor-pointer 
-                   transition-transform duration-300 group-hover:scale-[1.01]"
-      />
+  src={post.mediaUrl}
+  alt="Post"
+  onClick={handlePlay}
+  className="w-full h-64 object-cover cursor-pointer"
+/>
+       {post.backgroundMusic && (
+      <audio ref={audioRef} src={post.backgroundMusic} loop preload="auto"/>
+    )}
 
-      {/* Play overlay (optional but 🔥) */}
-      {!isCurrent && post.backgroundMusic && (
-        <div className="absolute inset-0 flex items-center justify-center
-                        bg-black/30 opacity-0 group-hover:opacity-100
-                        transition-opacity duration-300">
-          <div className="text-white text-5xl">▶</div>
-        </div>
-      )}
-
+      
       {/* Mute / Unmute Button */}
       {isCurrent && post.backgroundMusic && (
         <button

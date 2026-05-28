@@ -5,45 +5,74 @@ export default function VideoPost({
   currentlyPlayingId,
   setCurrentlyPlayingId,
 }) {
-  const videoRef = useRef();
+  const videoRef = useRef(null);
+
   const [isMuted, setIsMuted] = useState(false);
 
   const isCurrent = currentlyPlayingId === post._id;
 
   useEffect(() => {
-    if (!videoRef.current) return;
+    const video = videoRef.current;
+
+    if (!video) return;
 
     if (isCurrent) {
-      videoRef.current.play();
-      videoRef.current.muted = isMuted;
+      video.muted = isMuted;
+
+      const playVideo = async () => {
+        try {
+          await video.play();
+        } catch (err) {
+          console.log("Video play error:", err);
+        }
+      };
+
+      playVideo();
     } else {
-      videoRef.current.pause();
-      videoRef.current.currentTime = 0;
+      video.pause();
+      video.currentTime = 0;
     }
+
+    return () => {
+      video.pause();
+    };
   }, [isCurrent, isMuted]);
 
-  const handlePlay = () => {
-    if (!isCurrent) {
-      setCurrentlyPlayingId(post._id);
-    } else {
-      setCurrentlyPlayingId(null);
+  const handlePlay = async () => {
+    const video = videoRef.current;
+
+    if (!video) return;
+
+    try {
+      if (!isCurrent) {
+        setCurrentlyPlayingId(post._id);
+
+        await video.play();
+      } else {
+        video.pause();
+
+        setCurrentlyPlayingId(null);
+      }
+    } catch (err) {
+      console.log(err);
     }
   };
 
   return (
     <div className="w-full max-w-md mx-auto bg-black rounded-xl overflow-hidden shadow-lg">
       <div className="relative group">
-        {/* Video */}
+        
         <video
           ref={videoRef}
           src={post.mediaUrl}
-          controls
+          loop
+          playsInline
           muted={isMuted}
           onClick={handlePlay}
           className="w-full h-64 object-cover cursor-pointer"
         />
 
-        {/* Mute / Unmute Button */}
+        {/* Mute / Unmute */}
         {isCurrent && (
           <button
             onClick={() => setIsMuted(!isMuted)}
