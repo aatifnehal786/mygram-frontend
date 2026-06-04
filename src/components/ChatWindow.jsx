@@ -350,6 +350,7 @@ const renderMessageWithLinks = (text) => {
 
     return date.toLocaleDateString();
   }
+
 const loadMessages = async (initial = false) => {
   if (loadingMore || !hasMore || !selectedUser) return;
 
@@ -495,7 +496,7 @@ useEffect(() => {
   return () => {
     socket.off("messagesSeen", handler);
   };
-}, [socket, currentUserId, setMessages]);
+}, [socket, currentUserId]);
 
   useEffect(() => {
     if (!socket || !selectedUser) return;
