@@ -3,9 +3,6 @@ import { UserContext } from '../contexts/UserContext';
 import { apiFetch } from "../api/apiFetch";
 import './chat.css';
 import { SocketProvider, useSocket } from '../contexts/SocketContext';
-import { useDispatch } from "react-redux";
-import { clearUnread } from "../redux/slices/notificationSlice";
-import { setActiveChat, clearActiveChat } from "../redux/slices/chatSlice";
 import { FaVideo, FaEllipsisV, FaArrowLeft} from 'react-icons/fa';
 import VideoCallManager from './VideoCallManager';
 import useVideoCallStore from "../store/VideoCallStore"
@@ -30,7 +27,6 @@ const ChatWindow = ({ selectedUser, triggerForwardMode, messages, setMessages, o
   const [isTyping, setIsTyping] = useState(false);
   const typingTimeout = useRef(null);
   const [onlineMap, setOnlineMap] = useState({});
-  const dispatch = useDispatch();
   const chatContainerRef = useRef(null);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const inputRef = useRef(null);
@@ -81,16 +77,7 @@ useEffect(() => {
 
 
 
-useEffect(() => {
-  if (selectedUser?._id) {
-    dispatch(setActiveChat(selectedUser._id));
-    dispatch(clearUnread(selectedUser._id));
-  }
 
-  return () => {
-    dispatch(clearActiveChat());
-  };
-}, [selectedUser, dispatch]);
 
   useEffect(() => {
     if (toastMessage) {

@@ -1,4 +1,4 @@
-import {useEffect } from 'react';
+
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import { UserProvider } from './contexts/UserContext';
 import { ThemeProvider } from './contexts/ThemeContext';
@@ -19,8 +19,6 @@ import ChatSidebar from './components/ChatSideBar';
 import PublicRoute from './components/PublicRoute';
 import Devices from './components/Devices';
 import { SocketProvider } from './contexts/SocketContext';
-import { Provider } from "react-redux";
-import { store } from "./redux/store";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -34,12 +32,6 @@ function App() {
 
 
 
-
-useEffect(() => {
-  if (Notification.permission !== "granted") {
-    Notification.requestPermission();
-  }
-}, []);
 
 
 
@@ -156,7 +148,7 @@ const router = createBrowserRouter(
 
 
   return (
-  <Provider store={store}>
+  
       <UserProvider>
         <SocketProvider>
           <ThemeProvider>
@@ -168,7 +160,7 @@ const router = createBrowserRouter(
           </ThemeProvider>
         </SocketProvider>
       </UserProvider>
-    </Provider>
+    
   );
 }
 

@@ -1,13 +1,13 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { UserContext } from '../contexts/UserContext';
 import { apiFetch } from "../api/apiFetch";
+import { useSocket } from '../contexts/SocketContext';
 
-import { useSelector } from "react-redux";
 
 
 const ChatSidebar = ({onSelectUser,selectedUserId,onSelectForwardUser,isForwarding = false, theme}) => {
   const { loggedUser } = useContext(UserContext);
-  const unreadCounts = useSelector(state => state.notifications.unreadCounts);
+ const {socket} = useSocket();
   const [searchQuery, setSearchQuery] = useState('');
   const [results, setResults] = useState([]);
   const [followedUsers, setFollowedUsers] = useState([]);
@@ -30,6 +30,30 @@ const ChatSidebar = ({onSelectUser,selectedUserId,onSelectForwardUser,isForwardi
 
   fetchFollowedUsers();
 }, [loggedUser]);
+
+
+useEffect(() => {
+  if (!socket) return;
+
+  const handleUnreadUpdate = (data) => {
+    setFollowedUsers((prev) =>
+      prev.map((user) =>
+        user._id === data.senderId
+          ? {
+              ...user,
+              unreadCount: data.unreadCount,
+            }
+          : user
+      )
+    );
+  };
+
+  socket.on("unreadCountUpdated", handleUnreadUpdate);
+
+  return () => {
+    socket.off("unreadCountUpdated", handleUnreadUpdate);
+  };
+}, [socket]);
 
 const handleSearch = async (q) => {
   setSearchQuery(q);
@@ -129,10 +153,10 @@ const handleSearch = async (q) => {
                   {user.username}
                 </h1>
 
-                {unreadCounts?.[user._id] > 0 && (
-                  <span className={`ml-2 bg-blue-500 text-white text-xs px-2 py-0.5 rounded-full ${theme === 'dark' ? 'bg-blue-600' : 'bg-blue-500'}`}>
-                    {unreadCounts[user._id]}
-                  </span>
+                {user.unreadCount > 0 && (
+                  <div className="bg-green-500 text-white text-xs rounded-full min-w-[20px] h-5 flex items-center justify-center px-1">
+                    {user.unreadCount}
+                  </div>
                 )}
               </div>
             </div>

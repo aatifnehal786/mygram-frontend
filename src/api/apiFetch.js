@@ -18,7 +18,7 @@ export const apiFetch = async (endpoint, options = {}) => {
 
   let response;
   try {
-    const apiUrl = "https://mygram-mvc.onrender.com";
+    const apiUrl = "http://localhost:8000";
     response = await fetch(`${apiUrl}/${endpoint}`, {
       ...options,
       headers,
