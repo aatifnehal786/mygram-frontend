@@ -1,16 +1,17 @@
 "use client"
 
-import { useEffect, useRef,useContext } from "react"
+import { useEffect, useRef, useMemo, useContext } from "react"
 import { FaVideo, FaVideoSlash, FaMicrophone, FaMicrophoneSlash, FaPhoneSlash, FaTimes } from "react-icons/fa"
 import useVideoCallStore from "../store/VideoCallStore"
-import {useTheme} from "../contexts/ThemeContext";
-import { UserContext } from "../contexts/UserContext";
-import { SocketContext } from "../contexts/SocketContext";
+import { UserContext } from "../contexts/UserContext"
+import { useTheme } from "../contexts/ThemeContext"
+// import { SocketContext } from "../contexts/SocketContext";
 
-const VideoCallModal = ({ selectedUser }) => {
+const VideoCallModal = ({ socket }) => {
   const localVideoRef = useRef(null)
   const remoteVideoRef = useRef(null)
-  const socket = useContext(SocketContext);
+  
+const {theme} = useTheme()
   const {
     currentCall,
     incomingCall,
@@ -37,8 +38,7 @@ const VideoCallModal = ({ selectedUser }) => {
     processQueuedIceCandidates,
   } = useVideoCallStore()
 
-const {theme} = useTheme();
-const {loggedUser} = useContext(UserContext);
+const {loggedUser} = useContext(UserContext)
 
   // The rtcConfiguration object you posted is used to configure a WebRTC peer-to-peer connection. 
   // Specifically, it helps define how two browsers can discover and connect to each other, 
@@ -52,20 +52,20 @@ const {loggedUser} = useContext(UserContext);
   }
 
   // Memoize display info to prevent unnecessary re-renders
-  // const displayInfo = useMemo(() => {
-  //   if (incomingCall && !isCallActive) {
-  //     return {
-  //       name: incomingCall.callerName,
-  //       avatar: incomingCall.callerAvatar,
-  //     }
-  //   } else if (currentCall) {
-  //     return {
-  //       name: currentCall.participantName,
-  //       avatar: currentCall.participantAvatar,
-  //     }
-  //   }
-  //   return null
-  // }, [incomingCall, currentCall, isCallActive])
+  const displayInfo = useMemo(() => {
+    if (incomingCall && !isCallActive) {
+      return {
+        name: incomingCall.callerName,
+        avatar: incomingCall.callerAvatar,
+      }
+    } else if (currentCall) {
+      return {
+        name: currentCall.participantName,
+        avatar: currentCall.participantAvatar,
+      }
+    }
+    return null
+  }, [incomingCall, currentCall, isCallActive])
 
   // Connection detection
   useEffect(() => {
@@ -329,7 +329,7 @@ const {loggedUser} = useContext(UserContext);
     }
 
     // Receive answer (CALLER) - CRITICAL FIX
-    const handleWebRTCAnswer = async ({ answer}) => {
+    const handleWebRTCAnswer = async ({ answer }) => {
 
       if (!peerConnection) {
         console.error(" CALLER: No peer connection!")
@@ -433,8 +433,8 @@ const {loggedUser} = useContext(UserContext);
             <div className="text-center mb-8">
               <div className="w-32 h-32 rounded-full bg-gray-300 mx-auto mb-4 overflow-hidden">
                 <img
-                  src={loggedUser?.profilePicture || "/placeholder.svg?height=128&width=128"}
-                  alt={loggedUser?.username || "Unknown"}
+                  src={displayInfo?.avatar || "/placeholder.svg?height=128&width=128"}
+                  alt={displayInfo?.name || "Unknown"}
                   className="w-full h-full object-cover"
                   onError={(e) => {
                     e.target.src = "/placeholder.svg?height=128&width=128"
@@ -442,7 +442,7 @@ const {loggedUser} = useContext(UserContext);
                 />
               </div>
               <h2 className={`text-2xl font-semibold mb-2 ${theme === "dark" ? "text-white" : "text-gray-900"}`}>
-                {loggedUser?.username || "Unknown"}
+                {displayInfo?.name || "Unknown"}
               </h2>
               <p className={`text-lg ${theme === "dark" ? "text-gray-300" : "text-gray-600"}`}>
                 Incoming {callType} call...
@@ -485,8 +485,8 @@ const {loggedUser} = useContext(UserContext);
                 <div className="text-center">
                   <div className="w-32 h-32 rounded-full bg-gray-600 mx-auto mb-4 overflow-hidden">
                     <img
-                      src={selectedUser?.profilePicture || "/placeholder.svg?height=128&width=128"}
-                      alt={selectedUser?.username || "Unknown"}
+                      src={displayInfo?.avatar || "/placeholder.svg?height=128&width=128"}
+                      alt={displayInfo?.name || "Unknown"}
                       className="w-full h-full object-cover"
                       onError={(e) => {
                         e.target.src = "/placeholder.svg?height=128&width=128"
@@ -495,14 +495,14 @@ const {loggedUser} = useContext(UserContext);
                   </div>
                   <p className="text-white text-xl">
                     {callStatus === "calling"
-                      ? `Calling ${selectedUser?.username || "User"}...`
+                      ? `Calling ${displayInfo?.name || "User"}...`
                       : callStatus === "connecting"
                         ? "Connecting..."
                         : callStatus === "connected"
-                          ? selectedUser?.username || "Connected"
+                          ? displayInfo?.name || "Connected"
                           : callStatus === "failed"
                             ? "Connection failed"
-                            : selectedUser?.username || "Unknown"}
+                            : displayInfo?.name || "Unknown"}
                   </p>
                 </div>
               </div>

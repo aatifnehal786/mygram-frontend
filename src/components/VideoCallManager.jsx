@@ -4,13 +4,10 @@ import { useEffect, useCallback, useContext } from "react"
 import useVideoCallStore from "../store/VideoCallStore"
 import VideoCallModal from "./VideoCallModal"
 import {UserContext} from "../contexts/UserContext"
-
-
-const VideoCallManager = ({ socket , selectedUser}) => {
+const VideoCallManager = ({ socket }) => {
   const { setIncomingCall, setCurrentCall, setCallType, setCallModalOpen, setCallStatus, endCall } = useVideoCallStore()
 
   const {loggedUser} = useContext(UserContext)
-  
 
   useEffect(() => {
     if (!socket) return
@@ -51,7 +48,7 @@ const VideoCallManager = ({ socket , selectedUser}) => {
   // Memoized function to initiate a call
   const initiateCall = useCallback(
     (receiverId, receiverName, receiverAvatar, callType = "video") => {
-      const callId = `${loggedUser?.userid}-${receiverId}-${Date.now()}`
+      const callId = `${loggedUser._id}-${receiverId}-${Date.now()}`
 
       console.log("Initiating call with:", {
         receiverId,
@@ -80,21 +77,21 @@ const VideoCallManager = ({ socket , selectedUser}) => {
 
       // Emit the call initiation
       socket.emit("initiate_call", {
-        callerId: loggedUser?.userid,
+        callerId: loggedUser._id,
         receiverId,
         callType,
         callerInfo: {
-          username: loggedUser?.username,
-          profilePicture: loggedUser?.profilePicture,
+          username: loggedUser.username,
+          profilePicture: loggedUser.profilePicture,
         },
       })
 
       console.log("Call initiated, currentCall set to:", callData)
     },
     [
-      loggedUser?.userid,
-      loggedUser?.username,
-      loggedUser?.profilePicture,
+      loggedUser._id,
+      loggedUser.username,
+      loggedUser.profilePicture,
       socket,
       setCurrentCall,
       setCallType,
@@ -108,7 +105,7 @@ const VideoCallManager = ({ socket , selectedUser}) => {
     useVideoCallStore.getState().initiateCall = initiateCall
   }, [initiateCall])
 
-  return <VideoCallModal socket={socket,selectedUser} />
+  return <VideoCallModal socket={socket} />
 }
 
 export default VideoCallManager
