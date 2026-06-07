@@ -161,6 +161,19 @@ useEffect(() => {
   }
 }, [remoteStream]);
 
+useEffect(() => {
+  if (
+    remoteVideoRef.current &&
+    remoteStream
+  ) {
+    remoteVideoRef.current.srcObject =
+      remoteStream;
+
+    remoteVideoRef.current
+      .play()
+      .catch(console.error);
+  }
+}, [remoteStream]);
 
   // useEffect to track call duration
  useEffect(() => {
@@ -226,6 +239,17 @@ useEffect(() => {
         }
       }
     }
+
+    pc.ontrack = (event) => {
+  console.log("ONTRACK");
+  console.log("Track kind:", event.track.kind);
+  console.log("Track state:", event.track.readyState);
+  console.log("Streams:", event.streams);
+
+  if (event.streams?.[0]) {
+    setRemoteStream(event.streams[0]);
+  }
+};
    
 
     // Handle remote stream - CRITICAL FIX
@@ -588,11 +612,12 @@ useEffect(() => {
             {/* Remote Video */}
             {callType === "video" && (
               <video
-                ref={remoteVideoRef}
-                autoPlay
-                playsInline
-                className={`w-full h-full object-cover bg-gray-800 `}
-              />
+  ref={remoteVideoRef}
+  autoPlay
+  playsInline
+  controls
+  className="w-full h-full bg-red-500"
+/>
               
               
             )}
