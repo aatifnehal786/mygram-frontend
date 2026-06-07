@@ -166,7 +166,15 @@ useEffect(() => {
         video: video ? { width: 640, height: 480 } : false,
         audio: true,
       })
+console.log(
+  "Video tracks:",
+  stream.getVideoTracks()
+);
 
+console.log(
+  "Audio tracks:",
+  stream.getAudioTracks()
+);
       console.log(
         " Media obtained:",
         stream.getTracks().map((t) => `${t.kind}:${t.id.slice(0, 8)}`),
