@@ -1,9 +1,10 @@
 "use client"
 
-import { useEffect, useRef, useMemo, useContext } from "react"
+import { useEffect, useRef, useMemo , useContext} from "react"
 import { FaVideo, FaVideoSlash, FaMicrophone, FaMicrophoneSlash, FaPhoneSlash, FaTimes } from "react-icons/fa"
 import useVideoCallStore from "../../store/videoCallStore"
-import { UserContext } from "../../contexts/UserContext"
+import { userContext } from "../contexts/UserContext"
+import { useTheme } from "../contexts/ThemeContext"
 
 const VideoCallModal = ({ socket }) => {
   const localVideoRef = useRef(null)
@@ -33,12 +34,10 @@ const VideoCallModal = ({ socket }) => {
     setCurrentCall,
     addIceCandidate,
     processQueuedIceCandidates,
-  } = useVideoCallStore();
+  } = useVideoCallStore()
 
-  const {loggedUser} = useContext(UserContext);
-  // const callerAvatar = loggedUser.profilePic;
-
-
+ const {loggedUser} = useContext(UserContext);
+ const {theme} = useTheme();
 
   // The rtcConfiguration object you posted is used to configure a WebRTC peer-to-peer connection. 
   // Specifically, it helps define how two browsers can discover and connect to each other, 
@@ -404,7 +403,7 @@ const VideoCallModal = ({ socket }) => {
       socket.off("webrtc_answer", handleWebRTCAnswer)
       socket.off("webrtc_ice_candidate", handleWebRTCIceCandidate)
     }
-  }, [socket, peerConnection, currentCall, incomingCall, user.username, user.profilePicture])
+  }, [socket, peerConnection, currentCall, incomingCall, loggedUser.username, loggedUser.profilePicture])
 
   // Don't render if modal should not be open
   if (!isCallModalOpen && !incomingCall) {
