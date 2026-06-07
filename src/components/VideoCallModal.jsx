@@ -433,7 +433,7 @@ const {loggedUser} = useContext(UserContext)
             <div className="text-center mb-8">
               <div className="w-32 h-32 rounded-full bg-gray-300 mx-auto mb-4 overflow-hidden">
                 <img
-                  src={displayInfo?.avatar || "/placeholder.svg?height=128&width=128"}
+                  src={selectedUser?.profilePicture || "/placeholder.svg?height=128&width=128"}
                   alt={displayInfo?.name || "Unknown"}
                   className="w-full h-full object-cover"
                   onError={(e) => {
@@ -442,7 +442,7 @@ const {loggedUser} = useContext(UserContext)
                 />
               </div>
               <h2 className={`text-2xl font-semibold mb-2 ${theme === "dark" ? "text-white" : "text-gray-900"}`}>
-                {displayInfo?.name || "Unknown"}
+                {selectedUser?.username || "Unknown"}
               </h2>
               <p className={`text-lg ${theme === "dark" ? "text-gray-300" : "text-gray-600"}`}>
                 Incoming {callType} call...
@@ -485,7 +485,7 @@ const {loggedUser} = useContext(UserContext)
                 <div className="text-center">
                   <div className="w-32 h-32 rounded-full bg-gray-600 mx-auto mb-4 overflow-hidden">
                     <img
-                      src={displayInfo?.avatar || "/placeholder.svg?height=128&width=128"}
+                      src={selectedUser?.profilePicture || "/placeholder.svg?height=128&width=128"}
                       alt={displayInfo?.name || "Unknown"}
                       className="w-full h-full object-cover"
                       onError={(e) => {
@@ -495,14 +495,14 @@ const {loggedUser} = useContext(UserContext)
                   </div>
                   <p className="text-white text-xl">
                     {callStatus === "calling"
-                      ? `Calling ${displayInfo?.name || "User"}...`
+                      ? `Calling ${selectedUser?.username || "User"}...`
                       : callStatus === "connecting"
                         ? "Connecting..."
                         : callStatus === "connected"
-                          ? displayInfo?.name || "Connected"
+                          ?selectedUser?.username  || "Connected"
                           : callStatus === "failed"
                             ? "Connection failed"
-                            : displayInfo?.name || "Unknown"}
+                            : selectedUser?.username  || "Unknown"}
                   </p>
                 </div>
               </div>
