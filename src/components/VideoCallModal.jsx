@@ -10,7 +10,7 @@ import {useTheme} from "../contexts/ThemeContext"
 
 
 
-const VideoCallModal = ({ socket, selectedUser }) => {
+const VideoCallModal = ({ socket }) => {
   const localVideoRef = useRef(null)
   const remoteVideoRef = useRef(null);
 
@@ -47,41 +47,13 @@ const VideoCallModal = ({ socket, selectedUser }) => {
 const peerRef = useRef(null);
   
 
-
-  // The rtcConfiguration object you posted is used to configure a WebRTC peer-to-peer connection. 
-  // Specifically, it helps define how two browsers can discover and connect to each other, 
-  // even when they're behind firewalls or NATs.
-const rtcConfiguration = {
-  iceServers: [
-    { urls: "stun:stun.l.google.com:19302" },
-
-    {
-      urls: "turn:openrelay.metered.ca:80",
-      username: "openrelayproject",
-      credential: "openrelayproject",
-    },
-    {
-      urls: "turn:openrelay.metered.ca:443",
-      username: "openrelayproject",
-      credential: "openrelayproject",
-    },
-  ],
-};
-
-  // format time duration in mm:ss
-//   const formatTime = (seconds) => {
-//   const hrs = Math.floor(seconds / 3600)
-//   const mins = Math.floor((seconds % 3600) / 60)
-//   const secs = seconds % 60
-
-//   return [
-//     hrs > 0 ? String(hrs).padStart(2, "0") : null,
-//     String(mins).padStart(2, "0"),
-//     String(secs).padStart(2, "0"),
-//   ]
-//     .filter(Boolean)
-//     .join(":")
-// }
+  const rtcConfiguration = {
+    iceServers: [
+      { urls: "stun:stun.l.google.com:19302" },
+      { urls: "stun:stun1.l.google.com:19302" },
+      { urls: "stun:stun2.l.google.com:19302" },
+    ],
+  }
 
 
 //   // Memoize display info to prevent unnecessary re-renders
@@ -390,8 +362,8 @@ const handleCallAccepted = async () => {
             <div className="text-center mb-8">
               <div className="w-32 h-32 rounded-full bg-gray-300 mx-auto mb-4 overflow-hidden">
                 <img
-                  src={selectedUser?.avatar || "/placeholder.svg?height=128&width=128"}
-                  alt={selectedUser?.name || "Unknown"}
+                  src={displayInfo?.avatar || "/placeholder.svg?height=128&width=128"}
+                  alt={displayInfo?.name || "Unknown"}
                   className="w-full h-full object-cover"
                   onError={(e) => {
                     e.target.src = "/placeholder.svg?height=128&width=128"
@@ -399,7 +371,7 @@ const handleCallAccepted = async () => {
                 />
               </div>
               <h2 className={`text-2xl font-semibold mb-2 ${theme === "dark" ? "text-white" : "text-gray-900"}`}>
-                {selectedUser?.name || "Unknown"}
+                {displayInfo?.name || "Unknown"}
               </h2>
               <p className={`text-lg ${theme === "dark" ? "text-gray-300" : "text-gray-600"}`}>
                 Incoming {callType} call...
@@ -442,8 +414,8 @@ const handleCallAccepted = async () => {
                 <div className="text-center">
                   <div className="w-32 h-32 rounded-full bg-gray-600 mx-auto mb-4 overflow-hidden">
                     <img
-                      src={selectedUser?.avatar || "/placeholder.svg?height=128&width=128"}
-                      alt={selectedUser?.name || "Unknown"}
+                      src={displayInfo?.avatar || "/placeholder.svg?height=128&width=128"}
+                      alt={displayInfo?.name || "Unknown"}
                       className="w-full h-full object-cover"
                       onError={(e) => {
                         e.target.src = "/placeholder.svg?height=128&width=128"
@@ -452,14 +424,14 @@ const handleCallAccepted = async () => {
                   </div>
                   <p className="text-white text-xl">
                     {callStatus === "calling"
-                      ? `Calling ${selectedUser?.name || "User"}...`
+                      ? `Calling ${displayInfo?.name || "User"}...`
                       : callStatus === "connecting"
                         ? "Connecting..."
                         : callStatus === "connected"
-                          ? selectedUser?.name || "Connected"
+                          ? displayInfo?.name || "Connected"
                           : callStatus === "failed"
                             ? "Connection failed"
-                            : selectedUser?.name || "Unknown"}
+                            : displayInfo?.name || "Unknown"}
                   </p>
                 </div>
               </div>

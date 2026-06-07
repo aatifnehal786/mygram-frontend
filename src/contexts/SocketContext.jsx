@@ -12,12 +12,16 @@ export const SocketProvider = ({ children }) => {
 
   // 🔹 Create socket connection ONCE
   useEffect(() => {
-    const newSocket = io("https://mygram-mvc.onrender.com", {
-      transports: ["websocket","polling"],
-      withCredentials: true
-    });
+    if(!socket){const newSocket = io("https://mygram-mvc.onrender.com", {
+  transports: ["polling"],
+  withCredentials: true,
+  reconnection: true,
+  reconnectionAttempts: Infinity,
+  reconnectionDelay: 1000,
+});
 
     setSocket(newSocket);
+
 
     // 🔥 JOIN USER ROOM IMMEDIATELY
      newSocket.on("connect_error", (err) => {
@@ -31,7 +35,7 @@ newSocket.on("disconnect", (reason) => {
     return () => {
       newSocket.disconnect();
     };
-  }, []);
+  }}, []);
 
   useEffect(() => {
   if (!socket || !loggedUser?.userid) return;
