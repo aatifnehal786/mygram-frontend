@@ -327,7 +327,7 @@ const VideoCallModal = ({ socket, selectedUser }) => {
     }
 
     // Receive answer (CALLER) - CRITICAL FIX
-    const handleWebRTCAnswer = async ({ answer }) => {
+   const handleWebRTCAnswer = async ({ answer }) => {
 
       if (!peerConnection) {
         console.error(" CALLER: No peer connection!")
@@ -364,7 +364,6 @@ const VideoCallModal = ({ socket, selectedUser }) => {
         console.error("CALLER answer error:", error)
       }
     }
-
     // Receive ICE candidate
     const handleWebRTCIceCandidate = async ({ candidate, senderId }) => {
       console.log("🧊 Received ICE candidate from", senderId)
