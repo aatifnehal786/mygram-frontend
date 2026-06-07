@@ -1,4 +1,5 @@
 
+import React, { useEffect } from 'react';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import { UserProvider } from './contexts/UserContext';
 import { ThemeProvider } from './contexts/ThemeContext';
@@ -21,6 +22,10 @@ import Devices from './components/Devices';
 import { SocketProvider } from './contexts/SocketContext';
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { useSocket } from './contexts/SocketContext';
+
+
+
 
 
 
@@ -32,7 +37,56 @@ function App() {
 
 
 
+useEffect(() => {
+  if ("Notification" in window) {
+    Notification.requestPermission();
+  }
+}, []);
 
+function NotificationListener() {
+  const { socket } = useSocket();
+
+  useEffect(() => {
+    if (!socket) return;
+
+    const handleNotification = (data) => {
+      const isChatRoute =
+        window.location.pathname === "/chat";
+
+      const browserHidden =
+        document.visibilityState === "hidden";
+
+      if (!isChatRoute || browserHidden) {
+        if (Notification.permission === "granted") {
+          const notification =
+            new Notification(data.senderName, {
+              body: data.text,
+              icon: data.senderProfilePic,
+            });
+
+          notification.onclick = () => {
+            window.focus();
+            window.location.href = "/chat";
+          };
+        }
+      }
+    };
+
+    socket.on(
+      "newNotification",
+      handleNotification
+    );
+
+    return () => {
+      socket.off(
+        "newNotification",
+        handleNotification
+      );
+    };
+  }, [socket]);
+
+  return null;
+}
 
 
  
@@ -147,21 +201,15 @@ const router = createBrowserRouter(
 
 
 
-  return (
-  
-      <UserProvider>
-        <SocketProvider>
-          <ThemeProvider>
+ return (
+  <ThemeProvider>
+    <ToastContainer position="top-right" autoClose={3000} />
 
-            <ToastContainer position="top-right" autoClose={3000} />
+    <NotificationListener />
 
-            <RouterProvider router={router} />
-
-          </ThemeProvider>
-        </SocketProvider>
-      </UserProvider>
-    
-  );
+    <RouterProvider router={router} />
+  </ThemeProvider>
+);
 }
 
 export default App;

@@ -1,59 +1,21 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState } from 'react';
 import { UserContext } from '../contexts/UserContext';
 import { apiFetch } from "../api/apiFetch";
-import { useSocket } from '../contexts/SocketContext';
+// import { useSocket } from '../contexts/SocketContext';
 
 
 
-const ChatSidebar = ({onSelectUser,selectedUserId,onSelectForwardUser,isForwarding = false, theme}) => {
-  const { loggedUser } = useContext(UserContext);
- const {socket} = useSocket();
+const ChatSidebar = ({followedUsers, onSelectUser, selectedUserId, onSelectForwardUser, isForwarding = false, theme}) => {
+//   const { loggedUser } = useContext(UserContext);
+//  const {socket} = useSocket();
   const [searchQuery, setSearchQuery] = useState('');
   const [results, setResults] = useState([]);
-  const [followedUsers, setFollowedUsers] = useState([]);
+  // const [followedUsers, setFollowedUsers] = useState([]);
   const [selectedForwardUsers, setSelectedForwardUsers] = useState([]);
   
  
 
- useEffect(() => {
-  if (!loggedUser?.token) return;
 
-  const fetchFollowedUsers = async () => {
-   
-    try {
-      const data = await apiFetch(`api/followers/${loggedUser?.userid}`);
-      setFollowedUsers(data.followers || []);
-    } catch (err) {
-      console.error("Error fetching followed users:", err.message);
-    }
-  };
-
-  fetchFollowedUsers();
-}, [loggedUser]);
-
-
-useEffect(() => {
-  if (!socket) return;
-
-  const handleUnreadUpdate = (data) => {
-    setFollowedUsers((prev) =>
-      prev.map((user) =>
-        user._id === data.senderId
-          ? {
-              ...user,
-              unreadCount: data.unreadCount,
-            }
-          : user
-      )
-    );
-  };
-
-  socket.on("unreadCountUpdated", handleUnreadUpdate);
-
-  return () => {
-    socket.off("unreadCountUpdated", handleUnreadUpdate);
-  };
-}, [socket]);
 
 const handleSearch = async (q) => {
   setSearchQuery(q);

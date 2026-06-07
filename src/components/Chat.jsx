@@ -18,6 +18,7 @@ const Chat = () => {
   const [isForwarding, setIsForwarding] = useState(false);
   const [messageToForward, setMessageToForward] = useState(null);
   const {theme} = useTheme();
+   const [followedUsers, setFollowedUsers] = useState([]);
  
 useEffect(() => {
   if (!selectedUser || !loggedUser?.token) return;
@@ -43,20 +44,53 @@ useEffect(() => {
     socket.emit("join", loggedUser.userid);
   }
 
-  const handleReceiveMessage = (msg) => {
-    const senderId = msg.sender?._id || msg.sender;
-    const receiverId = msg.receiver?._id || msg.receiver;
+const handleReceiveMessage = (msg) => {
+  const senderId = msg.sender?._id || msg.sender;
+  const receiverId = msg.receiver?._id || msg.receiver;
 
-    const isCurrentChat =
+  const otherUserId =
+    senderId === loggedUser.userid
+      ? receiverId
+      : senderId;
+
+  // Update chat window
+  const isCurrentChat =
+    selectedUser &&
+    (
       (senderId === loggedUser.userid &&
         receiverId === selectedUser._id) ||
       (receiverId === loggedUser.userid &&
-        senderId === selectedUser._id);
+        senderId === selectedUser._id)
+    );
 
-    if (isCurrentChat) {
-      setMessages(prev => [...prev, msg]);
-    }
-  };
+  if (isCurrentChat) {
+    setMessages(prev => [...prev, msg]);
+  }
+
+  // Update sidebar and move chat to top
+  setFollowedUsers(prev => {
+    const updated = prev.map(user =>
+      user._id === otherUserId
+        ? {
+            ...user,
+            lastMessage: msg,
+          }
+        : user
+    );
+
+    updated.sort((a, b) => {
+      if (!a.lastMessage) return 1;
+      if (!b.lastMessage) return -1;
+
+      return (
+        new Date(b.lastMessage.createdAt) -
+        new Date(a.lastMessage.createdAt)
+      );
+    });
+
+    return [...updated];
+  });
+};
 
   socket.on("receiveMessage", handleReceiveMessage);
 
@@ -68,6 +102,46 @@ useEffect(() => {
 
 
 
+ useEffect(() => {
+  if (!loggedUser?.token) return;
+
+  const fetchFollowedUsers = async () => {
+   
+    try {
+      const data = await apiFetch(`api/followers/${loggedUser?.userid}`);
+      setFollowedUsers(data.followers || []);
+    } catch (err) {
+      console.error("Error fetching followed users:", err.message);
+    }
+  };
+
+  fetchFollowedUsers();
+}, [loggedUser]);
+
+
+
+useEffect(() => {
+  if (!socket) return;
+
+  const handleUnreadUpdate = (data) => {
+    setFollowedUsers((prev) =>
+      prev.map((user) =>
+        user._id === data.senderId
+          ? {
+              ...user,
+              unreadCount: data.unreadCount,
+            }
+          : user
+      )
+    );
+  };
+
+  socket.on("unreadCountUpdated", handleUnreadUpdate);
+
+  return () => {
+    socket.off("unreadCountUpdated", handleUnreadUpdate);
+  };
+}, [socket]);
 // Forward message to multiple users
 const forwardMessageToUsers = async (msg, receiverIds) => {
   const receivers = Array.isArray(receiverIds) ? receiverIds : [receiverIds];
@@ -133,6 +207,7 @@ const forwardMessageToUsers = async (msg, receiverIds) => {
           setSelectedUser(user);
         }
       }}
+      followedUsers={followedUsers}
       selectedUserId={selectedUser?._id}
       isForwarding={isForwarding}
       onSelectForwardUser={(userIds) => {
