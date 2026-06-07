@@ -297,10 +297,7 @@ pc.ontrack = (event) => {
 
       // 3. Create and send offer
       console.log("CALLER: Creating offer...")
-      const offer = await pc.createOffer({
-        offerToReceiveAudio: true,
-        offerToReceiveVideo: callType === "video",
-      })
+      const offer = await pc.createOffer();
 
       await pc.setLocalDescription(offer)
 
