@@ -22,7 +22,7 @@ import Devices from './components/Devices';
 import { SocketProvider } from './contexts/SocketContext';
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { useSocket } from './contexts/SocketContext';
+import { useSocket } from '../Socket';
 
 
 
