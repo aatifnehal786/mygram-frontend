@@ -19,14 +19,12 @@ const VideoCallModal = ({ socket,selectedUser }) => {
     remoteStream,
     isVideoEnabled,
     isAudioEnabled,
-    peerConnection,
     callStatus,
     isCallModalOpen,
     toggleVideo,
     toggleAudio,
     endCall,
     setLocalStream,
-    setPeerConnection,
     setCallStatus,
     setCallActive,
     clearIncomingCall,
@@ -37,6 +35,7 @@ const VideoCallModal = ({ socket,selectedUser }) => {
   const {loggedUser} = useContext(UserContext)
   const user = loggedUser || {}
   const {theme} = useTheme()
+  const peerRef = useRef(null);
 
   // The rtcConfiguration object you posted is used to configure a WebRTC peer-to-peer connection. 
   // Specifically, it helps define how two browsers can discover and connect to each other, 
@@ -50,47 +49,47 @@ const VideoCallModal = ({ socket,selectedUser }) => {
   }
 
   // Memoize display info to prevent unnecessary re-renders
-  const displayInfo = useMemo(() => {
-    if (incomingCall && !isCallActive) {
-      return {
-        name: incomingCall.callerName,
-        avatar: incomingCall.callerAvatar,
-      }
-    } else if (currentCall) {
-      return {
-        name: currentCall.participantName,
-        avatar: currentCall.participantAvatar,
-      }
-    }
-    return null
-  }, [incomingCall, currentCall, isCallActive])
+  // const displayInfo = useMemo(() => {
+  //   if (incomingCall && !isCallActive) {
+  //     return {
+  //       name: incomingCall.callerName,
+  //       avatar: incomingCall.callerAvatar,
+  //     }
+  //   } else if (currentCall) {
+  //     return {
+  //       name: currentCall.participantName,
+  //       avatar: currentCall.participantAvatar,
+  //     }
+  //   }
+  //   return null
+  // }, [incomingCall, currentCall, isCallActive])
 
   // Connection detection
-useEffect(() => {
-  if (!peerConnection) return;
+// useEffect(() => {
+//   if (!peerRef.current) return;
 
-  const handleStateChange = () => {
-    console.log("STATE:", peerConnection.connectionState);
+//   const handleStateChange = () => {
+//     console.log("STATE:", peerRef.current.connectionState);
 
-    if (peerConnection.connectionState === "connected") {
-      setCallStatus("connected");
-      setCallActive(true);
-    }
+//     if (peerRef.current.connectionState === "connected") {
+//       setCallStatus("connected");
+//       setCallActive(true);
+//     }
 
-    if (
-      peerConnection.connectionState === "failed" ||
-      peerConnection.connectionState === "disconnected"
-    ) {
-      setCallStatus("failed");
-    }
-  };
+//     if (
+//       peerRef.current.connectionState === "failed" ||
+//       peerRef.current.connectionState === "disconnected"
+//     ) {
+//       setCallStatus("failed");
+//     }
+//   };
 
-  peerConnection.addEventListener("connectionstatechange", handleStateChange);
+//   peerRef.current.addEventListener("connectionstatechange", handleStateChange);
 
-  return () => {
-    peerConnection.removeEventListener("connectionstatechange", handleStateChange);
-  };
-}, [peerConnection]);
+//   return () => {
+//     peerRef.current.removeEventListener("connectionstatechange", handleStateChange);
+//   };
+// }, [peerRef.current]);
 
   // Set up local video when localStream changes
  useEffect(() => {
@@ -168,9 +167,9 @@ useEffect(() => {
   const pc = new RTCPeerConnection(rtcConfiguration);
 
   // STORE globally in ref-like way (IMPORTANT)
-  setPeerConnection(pc);
 
-  // Add tracks
+    peerRef.current = pc;
+    // Add tracks
   stream.getTracks().forEach(track => {
     pc.addTrack(track, stream);
   });
@@ -213,7 +212,8 @@ useEffect(() => {
     }
   };
 
-  return pc;
+    
+    return pc;
 };
 
   // CALLER: Initialize call after acceptance
@@ -308,7 +308,7 @@ const handleAnswerCall = async () => {
 };
 
   // Handle end call
-  const handleEndCall = () => {
+ const handleEndCall = () => {
   try {
     const participantId =
       currentCall?.participantId || incomingCall?.callerId;
@@ -316,6 +316,7 @@ const handleAnswerCall = async () => {
     const callId =
       currentCall?.callId || incomingCall?.callId;
 
+    // 1. Notify backend
     if (participantId && callId) {
       socket.emit("end_call", {
         callId,
@@ -323,11 +324,30 @@ const handleAnswerCall = async () => {
       });
     }
 
+    // 2. reset call flag
     callStartedRef.current = false;
+
+    // 3. END CALL (UI + streams)
     endCall();
 
+    // 4. IMPORTANT: close peer manually (if not inside store)
+    if (peerRef?.current) {
+      peerRef.current.getSenders?.().forEach(sender => {
+        try {
+          sender.track?.stop();
+        } catch(err) {console.log(err)}
+      });
+
+      peerRef.current.close();
+      peerRef.current = null;
+    }
+
+    // 5. cleanup video tags (safe fallback)
+    if (localVideoRef?.current) localVideoRef.current.srcObject = null;
+    if (remoteVideoRef?.current) remoteVideoRef.current.srcObject = null;
+
   } catch (err) {
-    console.error(err);
+    console.error("End call error:", err);
   }
 };
 
@@ -340,7 +360,7 @@ const handleAnswerCall = async () => {
     const handleCallAccepted = ({ receiverName }) => {
       console.log("CALL ACCEPTED BY:", receiverName);
 
-      if (!currentCall && !incomingCall) return;
+      if (!peerRef.current) return;
 
       setTimeout(() => {
         initializeCallerCall();
@@ -368,14 +388,16 @@ const handleAnswerCall = async () => {
     // Receive offer (RECEIVER)
    const handleWebRTCOffer = async ({ offer, senderId, callId }) => {
   try {
-    const pc = peerConnection;
+    if (!peerRef.current) return;
 
-    await pc.setRemoteDescription(offer);
+    await peerRef.current.setRemoteDescription(
+      new RTCSessionDescription(offer)
+    );
 
     await processQueuedIceCandidates();
 
-    const answer = await pc.createAnswer();
-    await pc.setLocalDescription(answer);
+    const answer = await peerRef.current.createAnswer();
+    await peerRef.current.setLocalDescription(answer);
 
     socket.emit("webrtc_answer", {
       answer,
@@ -390,7 +412,9 @@ const handleAnswerCall = async () => {
     // Receive answer (CALLER) - CRITICAL FIX
    const handleWebRTCAnswer = async ({ answer }) => {
   try {
-    await peerConnection.setRemoteDescription(answer);
+   await peerRef.current.setRemoteDescription(
+  new RTCSessionDescription(answer)
+);
     await processQueuedIceCandidates();
 
     console.log("CALL CONNECTING...");
@@ -400,11 +424,14 @@ const handleAnswerCall = async () => {
 };
 
     // Receive ICE candidate
-   const handleWebRTCIceCandidate = async ({ candidate }) => {
+ const handleWebRTCIceCandidate = async ({ candidate }) => {
   try {
-    if (!peerConnection) return;
+    if (!peerRef.current) return;
 
-    await peerConnection.addIceCandidate(candidate);
+    await peerRef.current.addIceCandidate(
+      new RTCIceCandidate(candidate)
+    );
+
   } catch (err) {
     console.error("ICE error", err);
   }
@@ -429,7 +456,7 @@ const handleAnswerCall = async () => {
       socket.off("webrtc_answer", handleWebRTCAnswer)
       socket.off("webrtc_ice_candidate", handleWebRTCIceCandidate)
     }
-  }, [socket, peerConnection, currentCall, incomingCall, user.username, user.profilePicture])
+  }, [socket, peerRef.current, currentCall, incomingCall, user.username, user.profilePicture])
 
   // Don't render if modal should not be open
   if (!isCallModalOpen && !incomingCall) {

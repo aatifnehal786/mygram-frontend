@@ -16,7 +16,7 @@ const useVideoCallStore = create(
     isAudioEnabled: true,
 
     // WebRTC
-    peerConnection: null,
+   
     iceCandidatesQueue: [], // Queue for ICE candidates
     // ICE (Interactive Connectivity Establishment) is a protocol used in WebRTC to find the best path (like IP and port) between peers to establish a connection.
 
@@ -52,10 +52,7 @@ const useVideoCallStore = create(
       set({ remoteStream: stream });
     },
 
-    setPeerConnection: (pc) => {
-      console.log("🔗 Peer connection:", !!pc);
-      set({ peerConnection: pc });
-    },
+   
 
     setCallModalOpen: (open) => set({ isCallModalOpen: open }),
 
@@ -73,29 +70,20 @@ const useVideoCallStore = create(
     // Process queued ICE candidates
     processQueuedIceCandidates: async () => {
       const { peerConnection, iceCandidatesQueue } = get();
-      if (
-        peerConnection &&
-        peerConnection.remoteDescription &&
-        iceCandidatesQueue.length > 0
-      ) {
-        console.log(
-          "🧊 Processing",
-          iceCandidatesQueue.length,
-          "ICE candidates"
-        );
-        for (const candidate of iceCandidatesQueue) {
-          try {
-            await peerConnection.addIceCandidate(
-              new RTCIceCandidate(candidate)
-            );
-          } catch (error) {
-            console.error("❌ ICE candidate error:", error);
-          }
+
+      if (!peerConnection || !peerConnection.remoteDescription) return;
+
+      const queue = [...iceCandidatesQueue];
+      set({ iceCandidatesQueue: [] });
+
+      for (const candidate of queue) {
+        try {
+          await peerConnection.addIceCandidate(new RTCIceCandidate(candidate));
+        } catch (e) {
+          console.error("ICE error", e);
         }
-        set({ iceCandidatesQueue: [] });
       }
     },
-
     toggleVideo: () => {
       const { localStream, isVideoEnabled } = get();
       if (localStream) {
@@ -118,37 +106,35 @@ const useVideoCallStore = create(
       }
     },
 
-    endCall: () => {
-      const { localStream, peerConnection } = get();
+   endCall: () => {
+  const { localStream, remoteStream } = get();
 
-      console.log("📞 Ending call");
+  console.log("📞 Ending call");
 
-      // Stop all tracks
-      if (localStream) {
-        localStream.getTracks().forEach((track) => track.stop());
-      }
+  if (localStream) {
+    localStream.getTracks().forEach(t => t.stop());
+  }
 
-      // Close peer connection
-      if (peerConnection) {
-        peerConnection.close();
-      }
+  if (remoteStream) {
+    remoteStream.getTracks().forEach(t => t.stop());
+  }
 
-      // Reset state
-      set({
-        currentCall: null,
-        incomingCall: null,
-        isCallActive: false,
-        callType: null,
-        localStream: null,
-        remoteStream: null,
-        peerConnection: null,
-        isCallModalOpen: false,
-        callStatus: "idle",
-        isVideoEnabled: true,
-        isAudioEnabled: true,
-        iceCandidatesQueue: [],
-      });
-    },
+  
+
+  set({
+    currentCall: null,
+    incomingCall: null,
+    isCallActive: false,
+    callType: null,
+    localStream: null,
+    remoteStream: null,
+    isCallModalOpen: false,
+    callStatus: "idle",
+    isVideoEnabled: true,
+    isAudioEnabled: true,
+    iceCandidatesQueue: [],
+  });
+},
 
     clearIncomingCall: () => {
       console.log("🗑️ Clearing incoming call");
