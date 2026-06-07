@@ -6,7 +6,7 @@ import VideoCallModal from "./VideoCallModal"
 import {UserContext} from "../contexts/UserContext"
 
 
-const VideoCallManager = ({ socket }) => {
+const VideoCallManager = ({ socket , selectedUser}) => {
   const { setIncomingCall, setCurrentCall, setCallType, setCallModalOpen, setCallStatus, endCall } = useVideoCallStore()
 
   const {loggedUser} = useContext(UserContext)
@@ -80,21 +80,21 @@ const VideoCallManager = ({ socket }) => {
 
       // Emit the call initiation
       socket.emit("initiate_call", {
-        callerId: loggedUser._id,
+        callerId: selectedUser?._id,
         receiverId,
         callType,
         callerInfo: {
-          username: loggedUser.username,
-          profilePicture: loggedUser.profilePicture,
+          username: selectedUser?.username,
+          profilePicture: selectedUser?.profilePicture,
         },
       })
 
       console.log("Call initiated, currentCall set to:", callData)
     },
     [
-      loggedUser._id,
-      loggedUser.username,
-      loggedUser.profilePicture,
+      selectedUser?._id,
+      selectedUser?.username,
+      selectedUser?.profilePicture,
       socket,
       setCurrentCall,
       setCallType,
