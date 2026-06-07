@@ -1,12 +1,12 @@
 "use client"
 
-import { useEffect, useRef, useMemo, useContext } from "react"
+import { useEffect, useRef, useMemo,useContext } from "react"
 import { FaVideo, FaVideoSlash, FaMicrophone, FaMicrophoneSlash, FaPhoneSlash, FaTimes } from "react-icons/fa"
 import useVideoCallStore from "../store/VideoCallStore"
-import {UserContext} from "../contexts/UserContext"
-import {useTheme} from "../contexts/ThemeContext"
+import {useTheme} from "../contexts/ThemeContext";
+import { UserContext } from "../contexts/UserContext";
 
-const VideoCallModal = ({ socket,selectedUser }) => {
+const VideoCallModal = ({ socket }) => {
   const localVideoRef = useRef(null)
   const remoteVideoRef = useRef(null)
 
@@ -19,24 +19,26 @@ const VideoCallModal = ({ socket,selectedUser }) => {
     remoteStream,
     isVideoEnabled,
     isAudioEnabled,
+    peerConnection,
     callStatus,
     isCallModalOpen,
     toggleVideo,
     toggleAudio,
     endCall,
     setLocalStream,
+    setRemoteStream,
+    setPeerConnection,
     setCallStatus,
     setCallActive,
     clearIncomingCall,
     setCurrentCall,
+    addIceCandidate,
     processQueuedIceCandidates,
   } = useVideoCallStore()
 
-  const {loggedUser} = useContext(UserContext)
-  const user = loggedUser || {}
-  const {theme} = useTheme()
-  const peerRef = useRef(null);
-
+const {theme} = useTheme();
+const {loggedUser} = useContext(UserContext);
+const user = loggedUser || {}
   // The rtcConfiguration object you posted is used to configure a WebRTC peer-to-peer connection. 
   // Specifically, it helps define how two browsers can discover and connect to each other, 
   // even when they're behind firewalls or NATs.
@@ -49,307 +51,220 @@ const VideoCallModal = ({ socket,selectedUser }) => {
   }
 
   // Memoize display info to prevent unnecessary re-renders
-  // const displayInfo = useMemo(() => {
-  //   if (incomingCall && !isCallActive) {
-  //     return {
-  //       name: incomingCall.callerName,
-  //       avatar: incomingCall.callerAvatar,
-  //     }
-  //   } else if (currentCall) {
-  //     return {
-  //       name: currentCall.participantName,
-  //       avatar: currentCall.participantAvatar,
-  //     }
-  //   }
-  //   return null
-  // }, [incomingCall, currentCall, isCallActive])
+  const displayInfo = useMemo(() => {
+    if (incomingCall && !isCallActive) {
+      return {
+        name: incomingCall.callerName,
+        avatar: incomingCall.callerAvatar,
+      }
+    } else if (currentCall) {
+      return {
+        name: currentCall.participantName,
+        avatar: currentCall.participantAvatar,
+      }
+    }
+    return null
+  }, [incomingCall, currentCall, isCallActive])
 
   // Connection detection
-// useEffect(() => {
-//   if (!peerRef.current) return;
-
-//   const handleStateChange = () => {
-//     console.log("STATE:", peerRef.current.connectionState);
-
-//     if (peerRef.current.connectionState === "connected") {
-//       setCallStatus("connected");
-//       setCallActive(true);
-//     }
-
-//     if (
-//       peerRef.current.connectionState === "failed" ||
-//       peerRef.current.connectionState === "disconnected"
-//     ) {
-//       setCallStatus("failed");
-//     }
-//   };
-
-//   peerRef.current.addEventListener("connectionstatechange", handleStateChange);
-
-//   return () => {
-//     peerRef.current.removeEventListener("connectionstatechange", handleStateChange);
-//   };
-// }, [peerRef.current]);
+  useEffect(() => {
+    if (peerConnection && remoteStream) {
+      console.log("Both peer connection and remote stream available - marking as connected")
+      setCallStatus("connected")
+      setCallActive(true)
+    }
+  }, [peerConnection, remoteStream, setCallStatus, setCallActive])
 
   // Set up local video when localStream changes
- useEffect(() => {
-  const video = localVideoRef.current;
-  if (!video || !localStream) return;
-
-  video.srcObject = localStream;
-  video.muted = true;
-  video.playsInline = true;
-  video.autoplay = true;
-
-  video.play().catch(() => {
-    console.log("Local video play blocked (mobile safe)");
-  });
-}, [localStream]);
+  useEffect(() => {
+    if (localStream && localVideoRef.current) {
+      localVideoRef.current.srcObject = localStream
+    }
+  }, [localStream])
 
   // Set up remote video when remoteStream changes
-useEffect(() => {
-  const video = remoteVideoRef.current;
-  if (!video || !remoteStream) return;
-
-  video.srcObject = remoteStream;
-  video.play().catch(() => {});
-}, [remoteStream]);
+  useEffect(() => {
+    if (remoteStream && remoteVideoRef.current) {
+      remoteVideoRef.current.srcObject = remoteStream
+    }
+  }, [remoteStream])
 
   // Initialize media stream
- const initializeMedia = async (video = true) => {
-  try {
-    const constraints = {
-      audio: {
-        echoCancellation: true,
-        noiseSuppression: true,
-        autoGainControl: true,
-      },
-      video: video
-        ? {
-            facingMode: "user",
-            width: { ideal: 640 },
-            height: { ideal: 480 },
-          }
-        : false,
-    };
+  const initializeMedia = async (video = true) => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: video ? { width: 640, height: 480 } : false,
+        audio: true,
+      })
 
-    const stream = await navigator.mediaDevices.getUserMedia(constraints);
-
-    // 🔥 STOP OLD STREAM (VERY IMPORTANT)
-    if (localStream) {
-      localStream.getTracks().forEach(track => track.stop());
+      console.log(
+        " Media obtained:",
+        stream.getTracks().map((t) => `${t.kind}:${t.id.slice(0, 8)}`),
+      )
+      setLocalStream(stream)
+      return stream
+    } catch (error) {
+      console.error(" Media error:", error)
+      throw error
     }
-
-    setLocalStream(stream);
-
-    console.log(
-      "Media obtained:",
-      stream.getTracks().map(t => `${t.kind}:${t.id.slice(0, 8)}`)
-    );
-
-    return stream;
-  } catch (error) {
-    console.error("Media error:", error);
-
-    // 🔥 FALLBACK: audio-only retry (WhatsApp behavior)
-    if (video) {
-      console.log("Retrying with audio only...");
-
-      return await initializeMedia(false);
-    }
-
-    throw error;
   }
-};
 
   // Create peer connection
-  const createPeerConnection = (stream) => {
-  const pc = new RTCPeerConnection(rtcConfiguration);
+  const createPeerConnection = (stream, role) => {
+    const pc = new RTCPeerConnection(rtcConfiguration)
 
-  // STORE globally in ref-like way (IMPORTANT)
-
-    peerRef.current = pc;
-    // Add tracks
-  stream.getTracks().forEach(track => {
-    pc.addTrack(track, stream);
-  });
-
-  // ICE candidate
-  pc.onicecandidate = (event) => {
-    if (event.candidate && socket) {
-      const id = currentCall?.participantId || incomingCall?.callerId;
-      const callId = currentCall?.callId || incomingCall?.callId;
-
-      socket.emit("webrtc_ice_candidate", {
-        candidate: event.candidate,
-        receiverId: id,
-        callId
-      });
-    }
-  };
-
-  // ✅ CLEAN ONTRACK (WhatsApp style)
-  pc.ontrack = (event) => {
-    console.log("ONTRACK RECEIVED");
-
-    if (remoteVideoRef.current && event.streams[0]) {
-      remoteVideoRef.current.srcObject = event.streams[0];
-
-      remoteVideoRef.current.play().catch(() => {});
-    }
-  };
-
-  pc.onconnectionstatechange = () => {
-    console.log("STATE:", pc.connectionState);
-
-    if (pc.connectionState === "connected") {
-      setCallStatus("connected");
-      setCallActive(true);
+    // Add local tracks immediately
+    if (stream) {
+      stream.getTracks().forEach((track) => {
+        console.log(`${role}: Adding ${track.kind} track:`, track.id.slice(0, 8))
+        pc.addTrack(track, stream)
+      })
     }
 
-    if (pc.connectionState === "failed") {
-      setCallStatus("failed");
-    }
-  };
+    // Handle ICE candidates
+    pc.onicecandidate = (event) => {
+      if (event.candidate && socket) {
+        const participantId = currentCall?.participantId || incomingCall?.callerId
+        const callId = currentCall?.callId || incomingCall?.callId
 
-    
-    return pc;
-};
+        if (participantId && callId) {
+          console.log(`${role}: Sending ICE candidate`)
+          socket.emit("webrtc_ice_candidate", {
+            candidate: event.candidate,
+            receiverId: participantId,
+            callId: callId,
+          })
+        }
+      }
+    }
+
+    // Handle remote stream - CRITICAL FIX
+    pc.ontrack = (event) => {
+
+      if (event.streams && event.streams[0]) {
+        setRemoteStream(event.streams[0])
+      } else {
+        // Fallback: create stream from track
+        const stream = new MediaStream([event.track])
+        setRemoteStream(stream)
+      }
+    }
+
+    // Connection state monitoring
+    pc.onconnectionstatechange = () => {
+      console.log(` ${role}: Connection state:`, pc.connectionState)
+      if (pc.connectionState === "failed") {
+        setCallStatus("failed")
+        setTimeout(handleEndCall, 2000)
+      }
+    }
+
+    pc.oniceconnectionstatechange = () => {
+      console.log(` ${role}: ICE state:`, pc.iceConnectionState)
+    }
+
+    pc.onsignalingstatechange = () => {
+      console.log(`${role}: Signaling state:`, pc.signalingState)
+    }
+
+    setPeerConnection(pc)
+    return pc
+  }
 
   // CALLER: Initialize call after acceptance
-  const callStartedRef = useRef(false);
+  const initializeCallerCall = async () => {
+    try {
+      setCallStatus("connecting")
 
-const initializeCallerCall = async () => {
-  try {
-    if (callStartedRef.current) return;
-    callStartedRef.current = true;
+      // 1. Get media
+      const stream = await initializeMedia(callType === "video")
 
-    setCallStatus("connecting");
+      // 2. Create peer connection with tracks
+      const pc = createPeerConnection(stream, "CALLER")
 
-    const stream = await initializeMedia(callType === "video");
+      // 3. Create and send offer
+      console.log("CALLER: Creating offer...")
+      const offer = await pc.createOffer({
+        offerToReceiveAudio: true,
+        offerToReceiveVideo: callType === "video",
+      })
 
-    const pc = createPeerConnection(stream, "CALLER");
+      await pc.setLocalDescription(offer)
 
-    const receiverId = currentCall?.participantId || incomingCall?.callerId;
-    const callId = currentCall?.callId || incomingCall?.callId;
+      socket.emit("webrtc_offer", {
+        offer,
+        receiverId: currentCall.participantId,
+        callId: currentCall.callId,
+      })
 
-    console.log("CALLER: Creating offer...");
-
-    const offer = await pc.createOffer({
-      offerToReceiveAudio: true,
-      offerToReceiveVideo: callType === "video",
-    });
-
-    await pc.setLocalDescription(offer);
-
-    socket.emit("webrtc_offer", {
-      offer,
-      receiverId,
-      callId,
-    });
-
-  } catch (error) {
-    console.error("CALLER error:", error);
-    setCallStatus("failed");
-    callStartedRef.current = false;
-    setTimeout(handleEndCall, 2000);
+    } catch (error) {
+      console.error("CALLER error:", error)
+      setCallStatus("failed")
+      setTimeout(handleEndCall, 2000)
+    }
   }
-};
 
   // RECEIVER: Answer call
-const handleAnswerCall = async () => {
-  try {
-    setCallStatus("connecting");
+  const handleAnswerCall = async () => {
+    try {
+      setCallStatus("connecting")
 
-    const stream = await initializeMedia(callType === "video");
+      // 1. Get media
+      const stream = await initializeMedia(callType === "video")
 
-    setCurrentCall({
-      callId: incomingCall.callId,
-      participantId: incomingCall.callerId,
-      participantName: incomingCall.callerName,
-      participantAvatar: incomingCall.callerAvatar,
-    });
+      // 2. Create peer connection with tracks
+      createPeerConnection(stream, "RECEIVER")
 
-    clearIncomingCall();
+      // 3. Send accept signal
+      socket.emit("accept_call", {
+        callerId: incomingCall.callerId,
+        callId: incomingCall.callId,
+        receiverInfo: {
+          username: user.username,
+          profilePicture: user.profilePicture,
+        },
+      })
 
-    const pc = createPeerConnection(stream, "RECEIVER");
+      // 4. Move to current call state
+      setCurrentCall({
+        callId: incomingCall.callId,
+        participantId: incomingCall.callerId,
+        participantName: incomingCall.callerName,
+        participantAvatar: incomingCall.callerAvatar,
+      })
 
-    socket.emit("accept_call", {
-      callerId: incomingCall.callerId,
-      callId: incomingCall.callId,
-      receiverInfo: {
-        username: user.username,
-        profilePicture: user.profilePicture,
-      },
-    });
-
-  } catch (err) {
-    console.error(err);
-    handleEndCall();
-  }
-};
-  // Handle reject call
- const handleRejectCall = () => {
-  try {
-    const callerId = incomingCall?.callerId;
-    const callId = incomingCall?.callId;
-
-    if (callerId && callId) {
-      socket.emit("reject_call", {
-        callerId,
-        callId,
-      });
+      clearIncomingCall()
+      console.log(" RECEIVER: Ready for offer")
+    } catch (error) {
+      console.error(" RECEIVER error:", error)
+      handleEndCall()
     }
-
-    endCall();
-  } catch (err) {
-    console.error(err);
   }
-};
+
+  // Handle reject call
+  const handleRejectCall = () => {
+    if (incomingCall) {
+      socket.emit("reject_call", {
+        callerId: incomingCall.callerId,
+        callId: incomingCall.callId,
+      })
+    }
+    endCall()
+  }
 
   // Handle end call
- const handleEndCall = () => {
-  try {
-    const participantId =
-      currentCall?.participantId || incomingCall?.callerId;
+  const handleEndCall = () => {
+    const participantId = currentCall?.participantId || incomingCall?.callerId
+    const callId = currentCall?.callId || incomingCall?.callId
 
-    const callId =
-      currentCall?.callId || incomingCall?.callId;
-
-    // 1. Notify backend
     if (participantId && callId) {
       socket.emit("end_call", {
-        callId,
-        participantId,
-      });
+        callId: callId,
+        participantId: participantId,
+      })
     }
-
-    // 2. reset call flag
-    callStartedRef.current = false;
-
-    // 3. END CALL (UI + streams)
-    endCall();
-
-    // 4. IMPORTANT: close peer manually (if not inside store)
-    if (peerRef?.current) {
-      peerRef.current.getSenders?.().forEach(sender => {
-        try {
-          sender.track?.stop();
-        } catch(err) {console.log(err)}
-      });
-
-      peerRef.current.close();
-      peerRef.current = null;
-    }
-
-    // 5. cleanup video tags (safe fallback)
-    if (localVideoRef?.current) localVideoRef.current.srcObject = null;
-    if (remoteVideoRef?.current) remoteVideoRef.current.srcObject = null;
-
-  } catch (err) {
-    console.error("End call error:", err);
+    endCall()
   }
-};
 
   // Socket event listeners - FIXED
   useEffect(() => {
@@ -358,84 +273,116 @@ const handleAnswerCall = async () => {
 
     // Call accepted - start caller flow
     const handleCallAccepted = ({ receiverName }) => {
-      console.log("CALL ACCEPTED BY:", receiverName);
-
-      if (!peerRef.current) return;
-
-      setTimeout(() => {
-        initializeCallerCall();
-      }, 800); // important for mobile stability
-    };
+      console.log("✅ CALLER: Call accepted by", receiverName)
+      if (currentCall) {
+        // Small delay to ensure receiver is ready
+        setTimeout(() => {
+          initializeCallerCall()
+        }, 500)
+      }
+    }
 
     // Call rejected
     const handleCallRejected = () => {
-      console.log("CALL REJECTED");
+      console.log(" Call rejected")
+      setCallStatus("rejected")
+      setTimeout(endCall, 2000)
+    }
 
-      setCallStatus("rejected");
-
-      setTimeout(() => {
-        endCall();
-      }, 2000);
-    };
     // Call ended
     const handleCallEnded = () => {
-      console.log("CALL ENDED");
-
-      callStartedRef.current = false;
-      endCall();
-    };
+      console.log(" Call ended")
+      endCall()
+    }
 
     // Receive offer (RECEIVER)
-   const handleWebRTCOffer = async ({ offer, senderId, callId }) => {
-  try {
-    if (!peerRef.current) return;
+    const handleWebRTCOffer = async ({ offer, senderId, callId }) => {
 
-    await peerRef.current.setRemoteDescription(
-      new RTCSessionDescription(offer)
-    );
+      if (!peerConnection) {
+        console.error("RECEIVER: No peer connection!")
+        return
+      }
 
-    await processQueuedIceCandidates();
+      try {
+        await peerConnection.setRemoteDescription(new RTCSessionDescription(offer))
+        console.log(" RECEIVER: Remote description set")
 
-    const answer = await peerRef.current.createAnswer();
-    await peerRef.current.setLocalDescription(answer);
+        // Process queued ICE candidates
+        await processQueuedIceCandidates()
 
-    socket.emit("webrtc_answer", {
-      answer,
-      receiverId: senderId,
-      callId,
-    });
+        // Create answer
+        const answer = await peerConnection.createAnswer()
+        await peerConnection.setLocalDescription(answer)
+        console.log("RECEIVER: Sending answer to", senderId)
 
-  } catch (err) {
-    console.error("Offer error", err);
-  }
-};
+        socket.emit("webrtc_answer", {
+          answer,
+          receiverId: senderId, // This should be the caller's ID
+          callId,
+        })
+
+        console.log("RECEIVER: Answer sent, waiting for ICE connection...")
+      } catch (error) {
+        console.error(" RECEIVER offer error:", error)
+      }
+    }
+
     // Receive answer (CALLER) - CRITICAL FIX
-   const handleWebRTCAnswer = async ({ answer }) => {
-  try {
-   await peerRef.current.setRemoteDescription(
-  new RTCSessionDescription(answer)
-);
-    await processQueuedIceCandidates();
+    const handleWebRTCAnswer = async ({ answer}) => {
 
-    console.log("CALL CONNECTING...");
-  } catch (err) {
-    console.error(err);
-  }
-};
+      if (!peerConnection) {
+        console.error(" CALLER: No peer connection!")
+        return
+      }
+
+      if (peerConnection.signalingState === "closed") {
+        console.error("CALLER: Peer connection is closed!")
+        return
+      }
+
+      try {
+  
+        await peerConnection.setRemoteDescription(new RTCSessionDescription(answer))
+
+
+        // Process queued ICE candidates
+        console.log(" CALLER: Processing queued ICE candidates...")
+        await processQueuedIceCandidates()
+
+        // Check receivers
+        const receivers = peerConnection.getReceivers()
+        receivers.forEach((receiver, index) => {
+          console.log(`CALLER: Receiver ${index + 1}:`, {
+            hasTrack: !!receiver.track,
+            trackKind: receiver.track?.kind,
+            trackId: receiver.track?.id?.slice(0, 8),
+            trackReadyState: receiver.track?.readyState,
+          })
+        })
+
+        console.log("CALLER: Answer processed, waiting for ontrack...")
+      } catch (error) {
+        console.error("CALLER answer error:", error)
+      }
+    }
 
     // Receive ICE candidate
- const handleWebRTCIceCandidate = async ({ candidate }) => {
-  try {
-    if (!peerRef.current) return;
+    const handleWebRTCIceCandidate = async ({ candidate, senderId }) => {
+      console.log("🧊 Received ICE candidate from", senderId)
 
-    await peerRef.current.addIceCandidate(
-      new RTCIceCandidate(candidate)
-    );
-
-  } catch (err) {
-    console.error("ICE error", err);
-  }
-};
+      if (peerConnection && peerConnection.signalingState !== "closed") {
+        if (peerConnection.remoteDescription) {
+          try {
+            await peerConnection.addIceCandidate(new RTCIceCandidate(candidate))
+            console.log("ICE candidate added")
+          } catch (error) {
+            console.error("iCE error:", error)
+          }
+        } else {
+          addIceCandidate(candidate)
+        }
+      }
+    }
 
     // Register all event listeners
     socket.on("call_accepted", handleCallAccepted)
@@ -456,7 +403,7 @@ const handleAnswerCall = async () => {
       socket.off("webrtc_answer", handleWebRTCAnswer)
       socket.off("webrtc_ice_candidate", handleWebRTCIceCandidate)
     }
-  }, [socket, peerRef.current, currentCall, incomingCall, user.username, user.profilePicture])
+  }, [socket, peerConnection, currentCall, incomingCall, user.username, user.profilePicture])
 
   // Don't render if modal should not be open
   if (!isCallModalOpen && !incomingCall) {
@@ -485,8 +432,8 @@ const handleAnswerCall = async () => {
             <div className="text-center mb-8">
               <div className="w-32 h-32 rounded-full bg-gray-300 mx-auto mb-4 overflow-hidden">
                 <img
-                  src={selectedUser?.profilePicture || "/placeholder.svg?height=128&width=128"}
-                  alt={selectedUser?.username || "Unknown"}
+                  src={displayInfo?.avatar || "/placeholder.svg?height=128&width=128"}
+                  alt={displayInfo?.name || "Unknown"}
                   className="w-full h-full object-cover"
                   onError={(e) => {
                     e.target.src = "/placeholder.svg?height=128&width=128"
@@ -494,7 +441,7 @@ const handleAnswerCall = async () => {
                 />
               </div>
               <h2 className={`text-2xl font-semibold mb-2 ${theme === "dark" ? "text-white" : "text-gray-900"}`}>
-                {selectedUser?.username || "Unknown"}
+                {displayInfo?.name || "Unknown"}
               </h2>
               <p className={`text-lg ${theme === "dark" ? "text-gray-300" : "text-gray-600"}`}>
                 Incoming {callType} call...
@@ -537,8 +484,8 @@ const handleAnswerCall = async () => {
                 <div className="text-center">
                   <div className="w-32 h-32 rounded-full bg-gray-600 mx-auto mb-4 overflow-hidden">
                     <img
-                      src={user?.profilePicture || "/placeholder.svg?height=128&width=128"}
-                      alt={user?.username || "Unknown"}
+                      src={displayInfo?.avatar || "/placeholder.svg?height=128&width=128"}
+                      alt={displayInfo?.name || "Unknown"}
                       className="w-full h-full object-cover"
                       onError={(e) => {
                         e.target.src = "/placeholder.svg?height=128&width=128"
@@ -547,14 +494,14 @@ const handleAnswerCall = async () => {
                   </div>
                   <p className="text-white text-xl">
                     {callStatus === "calling"
-                      ? `Calling ${user?.username || "User"}...`
+                      ? `Calling ${displayInfo?.name || "User"}...`
                       : callStatus === "connecting"
                         ? "Connecting..."
                         : callStatus === "connected"
-                          ? user?.username || "Connected"
+                          ? displayInfo?.name || "Connected"
                           : callStatus === "failed"
                             ? "Connection failed"
-                            : user?.username || "Unknown"}
+                            : displayInfo?.name || "Unknown"}
                   </p>
                 </div>
               </div>
