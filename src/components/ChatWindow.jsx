@@ -2,12 +2,13 @@ import React, { useEffect, useRef, useState, useContext } from 'react';
 import { UserContext } from '../contexts/UserContext';
 import { apiFetch } from "../api/apiFetch";
 import './chat.css';
-import { SocketProvider, useSocket } from '../contexts/SocketContext';
+import { SocketProvider } from '../contexts/SocketContext';
 import { FaVideo, FaEllipsisV, FaArrowLeft} from 'react-icons/fa';
 import VideoCallManager from './VideoCallManager';
 import useVideoCallStore from "../store/VideoCallStore"
 import EmojiPicker from "emoji-picker-react";
 import { VscReactions } from "react-icons/vsc";
+import { useSocket } from '../Socket';
 
 
 const REACTIONS = ["❤️", "😂", "😮", "😢", "👍", "👎"];

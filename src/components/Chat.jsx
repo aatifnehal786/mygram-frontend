@@ -6,7 +6,7 @@ import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { apiFetch } from '../api/apiFetch';
 import './chat.css';
-import { useSocket } from '../contexts/SocketContext';
+import { useSocket } from '../Socket';
 import { UserContext } from '../contexts/UserContext';
 import { useTheme } from '../contexts/ThemeContext';  
 
