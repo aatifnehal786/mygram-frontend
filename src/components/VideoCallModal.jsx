@@ -431,8 +431,8 @@ const VideoCallModal = ({ socket, selectedUser }) => {
             <div className="text-center mb-8">
               <div className="w-32 h-32 rounded-full bg-gray-300 mx-auto mb-4 overflow-hidden">
                 <img
-                  src={loggedUser?.profilePic || "/placeholder.svg?height=128&width=128"}
-                  alt={loggedUser?.username || "Unknown"}
+                  src={selectedUser?.profilePic || "/placeholder.svg?height=128&width=128"}
+                  alt={selectedUser?.username || "Unknown"}
                   className="w-full h-full object-cover"
                   onError={(e) => {
                     e.target.src = "/placeholder.svg?height=128&width=128"
@@ -440,7 +440,7 @@ const VideoCallModal = ({ socket, selectedUser }) => {
                 />
               </div>
               <h2 className={`text-2xl font-semibold mb-2 ${theme === "dark" ? "text-white" : "text-gray-900"}`}>
-                {loggedUser?.username || "Unknown"}
+                {selectedUser?.username || "Unknown"}
               </h2>
               <p className={`text-lg ${theme === "dark" ? "text-gray-300" : "text-gray-600"}`}>
                 Incoming {callType} call...
