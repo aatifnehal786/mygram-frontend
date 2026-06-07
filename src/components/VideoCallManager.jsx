@@ -5,7 +5,7 @@ import useVideoCallStore from "../store/VideoCallStore"
 import VideoCallModal from "./VideoCallModal"
 import {UserContext} from "../contexts/UserContext"
 import { SocketContext } from "../contexts/SocketContext";
-const VideoCallManager = () => {
+const VideoCallManager = ({selectedUser}) => {
   const { setIncomingCall, setCurrentCall, setCallType, setCallModalOpen, setCallStatus, endCall } = useVideoCallStore()
  const socket = useContext(SocketContext);
   const {loggedUser} = useContext(UserContext)
@@ -49,7 +49,7 @@ const VideoCallManager = () => {
   // Memoized function to initiate a call
   const initiateCall = useCallback(
     (receiverId, receiverName, receiverAvatar, callType = "video") => {
-      const callId = `${loggedUser._id}-${receiverId}-${Date.now()}`
+      const callId = `${loggedUser?.userid}-${receiverId}-${Date.now()}`
 
       console.log("Initiating call with:", {
         receiverId,
@@ -58,7 +58,7 @@ const VideoCallManager = () => {
         callType,
         callId,
       })
-
+console.log(selectedUser)
       // Validate the avatar URL
       const validatedAvatar =
         receiverAvatar && receiverAvatar !== "video" ? receiverAvatar : "/placeholder.svg?height=128&width=128"
@@ -78,21 +78,21 @@ const VideoCallManager = () => {
 
       // Emit the call initiation
       socket.emit("initiate_call", {
-        callerId: loggedUser.userid,
+        callerId: selectedUser?._id,
         receiverId,
         callType,
         callerInfo: {
-          username: loggedUser.username,
-          profilePicture: loggedUser.profilePicture,
+          username: selectedUser.username,
+          profilePicture: selectedUser.profilePicture,
         },
       })
 
       console.log("Call initiated, currentCall set to:", callData)
     },
     [
-      loggedUser._id,
-      loggedUser.username,
-      loggedUser.profilePicture,
+      selectedUser._id,
+      selectedUser.username,
+      selectedUser.profilePicture,
       socket,
       setCurrentCall,
       setCallType,

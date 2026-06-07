@@ -622,15 +622,15 @@ const deleteMessageForEveryone = async (messageId) => {
       console.log('this is initial call',initiateCall)
 
       console.log("Starting video call with selectedContact:", {
-        id: loggedUser?.userid,
-        name: loggedUser?.username,
-        avatar: loggedUser?.profilePicture, // This should be the URL, not "video"
-        fullContact: loggedUser,
+        id: selectedUser?._id,
+        name: selectedUser?.username,
+        avatar: selectedUser?.profilePicture, // This should be the URL, not "video"
+        fullContact: selectedUser,
       });
 
       // Make sure we're passing the correct profile picture URL
       const avatarUrl =
-        selectedUser.profilePic ||
+        selectedUser?.profilePic ||
         "/placeholder.svg?height=128&width=128";
 
       initiateCall(
