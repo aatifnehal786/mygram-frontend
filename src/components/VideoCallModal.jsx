@@ -55,13 +55,22 @@ const VideoCallModal = ({ socket, selectedUser }) => {
   // The rtcConfiguration object you posted is used to configure a WebRTC peer-to-peer connection. 
   // Specifically, it helps define how two browsers can discover and connect to each other, 
   // even when they're behind firewalls or NATs.
- const rtcConfiguration = {
-    iceServers: [
-      { urls: "stun:stun.l.google.com:19302" },
-      { urls: "stun:stun1.l.google.com:19302" },
-      { urls: "stun:stun2.l.google.com:19302" },
-    ],
-  }
+const rtcConfiguration = {
+  iceServers: [
+    { urls: "stun:stun.l.google.com:19302" },
+
+    {
+      urls: "turn:openrelay.metered.ca:80",
+      username: "openrelayproject",
+      credential: "openrelayproject",
+    },
+    {
+      urls: "turn:openrelay.metered.ca:443",
+      username: "openrelayproject",
+      credential: "openrelayproject",
+    },
+  ],
+};
 
   // format time duration in mm:ss
 //   const formatTime = (seconds) => {
