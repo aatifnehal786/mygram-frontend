@@ -78,14 +78,14 @@ console.log(selectedUser)
 
       // Emit the call initiation
       socket.emit("initiate_call", {
-        callerId: selectedUser?._id,
-        receiverId,
-        callType,
-        callerInfo: {
-          username: selectedUser.username,
-          profilePicture: selectedUser.profilePicture,
-        },
-      })
+  callerId: loggedUser.userid,
+  receiverId,
+  callType,
+  callerInfo: {
+    username: loggedUser.username,
+    profilePicture: loggedUser.profilePicture,
+  },
+});
 
       console.log("Call initiated, currentCall set to:", callData)
     },
@@ -106,7 +106,7 @@ console.log(selectedUser)
     useVideoCallStore.getState().initiateCall = initiateCall
   }, [initiateCall])
 
-  return <VideoCallModal socket={socket} />
+  return <VideoCallModal selectedUser={selectedUser} />
 }
 
 export default VideoCallManager

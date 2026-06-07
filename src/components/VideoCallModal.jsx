@@ -52,20 +52,23 @@ const {loggedUser} = useContext(UserContext)
   }
 
   // Memoize display info to prevent unnecessary re-renders
-  const displayInfo = useMemo(() => {
-    if (incomingCall && !isCallActive) {
-      return {
-        name: selectedUser?.username,
-        avatar: selectedUser?.profilePicture,
-      }
-    } else if (currentCall) {
-      return {
-        name: loggedUser?.username,
-        avatar: loggedUser?.profilePicture,
-      }
-    }
-    return null
-  }, [incomingCall, currentCall, isCallActive])
+ const displayInfo = useMemo(() => {
+  if (incomingCall && !isCallActive) {
+    return {
+      name: incomingCall.callerName,
+      avatar: incomingCall.callerAvatar,
+    };
+  }
+
+  if (currentCall) {
+    return {
+      name: currentCall.participantName,
+      avatar: currentCall.participantAvatar,
+    };
+  }
+
+  return null;
+}, [incomingCall, currentCall, isCallActive]);
 
   // Connection detection
   useEffect(() => {
