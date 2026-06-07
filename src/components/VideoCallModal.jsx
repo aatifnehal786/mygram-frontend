@@ -541,6 +541,8 @@ useEffect(() => {
     remote: !!remoteStream,
   })
 
+  console.log("callType =", callType);
+
   const shouldShowActiveCall = isCallActive || callStatus === "calling" || callStatus === "connecting"
 
   return (
