@@ -1,57 +1,52 @@
-import React, { createContext, useState, useEffect, useContext } from "react";
+import React, { createContext, useEffect, useContext, useRef } from "react";
 import { io } from "socket.io-client";
 import { UserContext } from "./UserContext";
 
 const SocketContext = createContext();
-
 export const useSocket = () => useContext(SocketContext);
 
 export const SocketProvider = ({ children }) => {
-  const [socket, setSocket] = useState(null);
-  const {loggedUser} = useContext(UserContext)
+  const socketRef = useRef(null);
+  const { loggedUser } = useContext(UserContext);
+ 
 
-  // 🔹 Create socket connection ONCE
   useEffect(() => {
-    if(!socket){const newSocket = io("https://mygram-mvc.onrender.com", {
-  transports: ["polling"],
-  withCredentials: true,
-  reconnection: true,
-  reconnectionAttempts: Infinity,
-  reconnectionDelay: 1000,
-});
+    if (socketRef.current) return;
 
-    setSocket(newSocket);
+    const socket = io("https://mygram-mvc.onrender.com", {
+      transports: ["polling", "websocket"],
+      withCredentials: true,
+      reconnection: true,
+      reconnectionAttempts: Infinity,
+      reconnectionDelay: 1000,
+    });
 
+    socketRef.current = socket;
+   
 
-    // 🔥 JOIN USER ROOM IMMEDIATELY
-     newSocket.on("connect_error", (err) => {
-  console.error("Socket connect error:", err.message);
-});
+    socket.on("connect_error", (err) => {
+      console.error("Socket connect error:", err.message);
+    });
 
-newSocket.on("disconnect", (reason) => {
-  console.warn("Socket disconnected:", reason);
-});
+    socket.on("disconnect", (reason) => {
+      console.warn("Socket disconnected:", reason);
+    });
 
     return () => {
-      newSocket.disconnect();
+      socket.disconnect();
+      socketRef.current = null;
     };
-  }}, []);
+  }, []);
 
   useEffect(() => {
-  if (!socket || !loggedUser?.userid) return;
+    if (!socketRef.current || !loggedUser?.userid) return;
 
-  socket.emit("join", loggedUser.userid);
-
-  console.log("🟢 Joined socket room:", loggedUser.userid);
-
-}, [socket, loggedUser]);
-
-
-
-
+    socketRef.current.emit("join", loggedUser.userid);
+    console.log("🟢 Joined socket room:", loggedUser.userid);
+  }, [loggedUser]);
 
   return (
-    <SocketContext.Provider value={{ socket }}>
+    <SocketContext.Provider value={{ socket: socketRef.current }}>
       {children}
     </SocketContext.Provider>
   );
