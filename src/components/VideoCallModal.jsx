@@ -143,6 +143,24 @@ useEffect(() => {
     }
   }, [remoteStream])
 
+  useEffect(() => {
+  if (remoteStream) {
+    console.log(
+      "Remote video tracks:",
+      remoteStream.getVideoTracks()
+    );
+
+    console.log(
+      "Remote audio tracks:",
+      remoteStream.getAudioTracks()
+    );
+
+    if (remoteVideoRef.current) {
+      remoteVideoRef.current.srcObject = remoteStream;
+    }
+  }
+}, [remoteStream]);
+
 
   // useEffect to track call duration
  useEffect(() => {
@@ -207,7 +225,25 @@ useEffect(() => {
         }
       }
     }
+pc.ontrack = (event) => {
+  console.log(
+    role,
+    "Received track:",
+    event.track.kind
+  );
 
+  console.log(
+    role,
+    "Stream tracks:",
+    event.streams[0]
+      ?.getTracks()
+      .map(t => t.kind)
+  );
+
+  if (event.streams[0]) {
+    setRemoteStream(event.streams[0]);
+  }
+};
 
     // Handle remote stream - CRITICAL FIX
     pc.ontrack = (event) => {
