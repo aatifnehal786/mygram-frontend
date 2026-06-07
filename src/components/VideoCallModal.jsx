@@ -73,23 +73,30 @@ useEffect(() => {
     setIncomingCall
   } = useVideoCallStore()
 
-const peerConnectionRef = useRef(null);
-const remoteMediaStreamRef = useRef(
-  new MediaStream()
-);
+
   
 
 
   // The rtcConfiguration object you posted is used to configure a WebRTC peer-to-peer connection. 
   // Specifically, it helps define how two browsers can discover and connect to each other, 
   // even when they're behind firewalls or NATs.
-  const rtcConfiguration = {
-    iceServers: [
-      { urls: "stun:stun.l.google.com:19302" },
-      { urls: "stun:stun1.l.google.com:19302" },
-      { urls: "stun:stun2.l.google.com:19302" },
-    ],
-  }
+const rtcConfiguration = {
+  iceServers: [
+    {
+      urls: "stun:global.stun.twilio.com:3478",
+    },
+    {
+       urls: [
+        "turn:global.relay.metered.ca:80",
+        "turn:global.relay.metered.ca:80?transport=tcp",
+        "turn:global.relay.metered.ca:443",
+        "turns:global.relay.metered.ca:443?transport=tcp",
+      ],
+      username: "5478a7ec3c7f0e7920acf1ae",
+      credential: "V7y9tTE4lsW9tpKo",
+    },
+  ],
+};
 
   // format time duration in mm:ss
   const formatTime = (seconds) => {
@@ -124,13 +131,13 @@ const remoteMediaStreamRef = useRef(
   }, [incomingCall, currentCall, isCallActive])
 
   // Connection detection
-  // useEffect(() => {
-  //   if (peerConnection && remoteStream) {
-  //     console.log("Both peer connection and remote stream available - marking as connected")
-  //     setCallStatus("connected")
-  //     setCallActive(true)
-  //   }
-  // }, [peerConnection, remoteStream, setCallStatus, setCallActive])
+  useEffect(() => {
+    if (peerConnection && remoteStream) {
+      console.log("Both peer connection and remote stream available - marking as connected")
+      setCallStatus("connected")
+      setCallActive(true)
+    }
+  }, [peerConnection, remoteStream, setCallStatus, setCallActive])
 
   // Set up local video when localStream changes
   useEffect(() => {
@@ -233,37 +240,20 @@ const remoteMediaStreamRef = useRef(
 
     // Handle remote stream - CRITICAL FIX
     pc.ontrack = (event) => {
-  console.log(
-    `${role}: Received remote ${event.track.kind} track`
-  );
 
-  remoteMediaStreamRef.current.addTrack(
-    event.track
-  );
-
-  console.log(
-    "Remote video tracks:",
-    remoteMediaStreamRef.current.getVideoTracks()
-      .length
-  );
-
-  console.log(
-    "Remote audio tracks:",
-    remoteMediaStreamRef.current.getAudioTracks()
-      .length
-  );
-
-  setRemoteStream(
-    remoteMediaStreamRef.current
-  );
-
-  setCallStartTime((prev) => {
-    if (prev) return prev;
-
-    setCallActive(true);
-    return Date.now();
-  });
-};
+      if (event.streams && event.streams[0]) {
+        setRemoteStream(event.streams[0])
+      } else {
+        // Fallback: create stream from track
+        const stream = new MediaStream([event.track])
+        setRemoteStream(stream)
+      }
+      setCallStartTime((prev) => {
+        if (prev) return prev   // prevents double start
+        setCallActive(true)
+        return Date.now()
+      })
+    }
 
 
     // Connection state monitoring
@@ -275,36 +265,16 @@ const remoteMediaStreamRef = useRef(
       }
     }
 
- pc.onconnectionstatechange = () => {
-  console.log(
-    `${role}: CONNECTION =>`,
-    pc.connectionState
-  );
+    pc.oniceconnectionstatechange = () => {
+      console.log(` ${role}: ICE state:`, pc.iceConnectionState)
+    }
 
-  if (pc.connectionState === "connected") {
-    setCallStatus("connected");
-    setCallActive(true);
-  }
-
-  if (
-    pc.connectionState === "failed" ||
-    pc.connectionState === "disconnected"
-  ) {
-    setCallStatus("failed");
-
-    setTimeout(() => {
-      handleEndCall();
-    }, 2000);
-  }
-};
     pc.onsignalingstatechange = () => {
       console.log(`${role}: Signaling state:`, pc.signalingState)
     }
 
-    peerConnectionRef.current = pc;
-    setPeerConnection(pc);
-
-    return pc;
+    setPeerConnection(pc)
+    return pc
   }
 
   // CALLER: Initialize call after acceptance
@@ -317,9 +287,6 @@ const remoteMediaStreamRef = useRef(
 
       // 2. Create peer connection with tracks
       const pc = createPeerConnection(stream, "CALLER")
-
-
-      
 
       // 3. Create and send offer
       console.log("CALLER: Creating offer...")
@@ -349,12 +316,8 @@ const remoteMediaStreamRef = useRef(
       const stream = await initializeMedia(callType === "video")
 
       // 2. Create peer connection with tracks
-      const pc = createPeerConnection(
-  stream,
-  "RECEIVER"
-);
+      createPeerConnection(stream, "RECEIVER")
 
-peerConnectionRef.current = pc;
       // 3. Send accept signal
       socket.emit("accept_call", {
         callerId: incomingCall.callerId,
@@ -444,22 +407,22 @@ peerConnectionRef.current = pc;
 
     // Receive offer (RECEIVER)
     const handleWebRTCOffer = async ({ offer, senderId, callId }) => {
-const pc = peerConnectionRef.current;
-      if (!pc) {
+
+      if (!peerConnection) {
         console.error("RECEIVER: No peer connection!")
         return
       }
 
       try {
-        await pc.setRemoteDescription(new RTCSessionDescription(offer))
+        await peerConnection.setRemoteDescription(new RTCSessionDescription(offer))
         console.log(" RECEIVER: Remote description set")
 
         // Process queued ICE candidates
         await processQueuedIceCandidates()
 
         // Create answer
-        const answer = await pc.createAnswer()
-        await pc.setLocalDescription(answer)
+        const answer = await peerConnection.createAnswer()
+        await peerConnection.setLocalDescription(answer)
         console.log("RECEIVER: Sending answer to", senderId)
 
         socket.emit("webrtc_answer", {
@@ -477,18 +440,19 @@ const pc = peerConnectionRef.current;
     // Receive answer (CALLER) - CRITICAL FIX
     const handleWebRTCAnswer = async ({ answer, senderId, callId }) => {
 
-      const pc = peerConnectionRef.current;
-      if (
-        pc &&
-        pc.signalingState !== "closed"
-      ) {
+      if (!peerConnection) {
+        console.error(" CALLER: No peer connection!")
         return
       }
 
+      if (peerConnection.signalingState === "closed") {
+        console.error("CALLER: Peer connection is closed!")
+        return
+      }
 
       try {
   
-        await pc.setRemoteDescription(new RTCSessionDescription(answer))
+        await peerConnection.setRemoteDescription(new RTCSessionDescription(answer))
 
 
         // Process queued ICE candidates
@@ -496,7 +460,7 @@ const pc = peerConnectionRef.current;
         await processQueuedIceCandidates()
 
         // Check receivers
-        const receivers = pc.getReceivers()
+        const receivers = peerConnection.getReceivers()
         receivers.forEach((receiver, index) => {
           console.log(`CALLER: Receiver ${index + 1}:`, {
             hasTrack: !!receiver.track,
@@ -516,11 +480,10 @@ const pc = peerConnectionRef.current;
     const handleWebRTCIceCandidate = async ({ candidate, senderId }) => {
       console.log("🧊 Received ICE candidate from", senderId)
 
-      const pc = peerConnectionRef.current;
-      if (pc && pc.signalingState !== "closed") {
-        if (pc.remoteDescription) {
+      if (peerConnection && peerConnection.signalingState !== "closed") {
+        if (peerConnection.remoteDescription) {
           try {
-            await pc.addIceCandidate(new RTCIceCandidate(candidate))
+            await peerConnection.addIceCandidate(new RTCIceCandidate(candidate))
             console.log("ICE candidate added")
           } catch (error) {
             console.error("iCE error:", error)
@@ -550,7 +513,7 @@ const pc = peerConnectionRef.current;
       socket.off("webrtc_answer", handleWebRTCAnswer)
       socket.off("webrtc_ice_candidate", handleWebRTCIceCandidate)
     }
-  }, [socket, currentCall, incomingCall, selectedUser?.username, selectedUser?.profilePic])
+  }, [socket, peerConnection, currentCall, incomingCall, selectedUser?.username, selectedUser?.profilePic])
 
   // Don't render if modal should not be open
   if (!isCallModalOpen && !incomingCall) {
