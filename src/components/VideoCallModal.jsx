@@ -166,15 +166,7 @@ useEffect(() => {
         video: video ? { width: 640, height: 480 } : false,
         audio: true,
       })
-console.log(
-  "Video tracks:",
-  stream.getVideoTracks()
-);
 
-console.log(
-  "Audio tracks:",
-  stream.getAudioTracks()
-);
       console.log(
         " Media obtained:",
         stream.getTracks().map((t) => `${t.kind}:${t.id.slice(0, 8)}`),
@@ -262,9 +254,7 @@ console.log(
       setCallStatus("connecting")
 
       // 1. Get media
-     const stream = await initializeMedia(
-  incomingCall.callType === "video"
-);
+      const stream = await initializeMedia(callType === "video")
 
       // 2. Create peer connection with tracks
       const pc = createPeerConnection(stream, "CALLER")
@@ -273,7 +263,7 @@ console.log(
       console.log("CALLER: Creating offer...")
       const offer = await pc.createOffer({
         offerToReceiveAudio: true,
-        offerToReceiveVideo: incomingCall.callType === "video",
+        offerToReceiveVideo: callType === "video",
       })
 
       await pc.setLocalDescription(offer)
@@ -297,7 +287,7 @@ console.log(
       setCallStatus("connecting")
 
       // 1. Get media
-      const stream = await initializeMedia(incomingCall.callType === "video")
+      const stream = await initializeMedia(callType === "video")
 
       // 2. Create peer connection with tracks
       createPeerConnection(stream, "RECEIVER")
