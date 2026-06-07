@@ -541,10 +541,7 @@ useEffect(() => {
     remote: !!remoteStream,
   })
 
-  console.log("callType =", callType);
-
   const shouldShowActiveCall = isCallActive || callStatus === "calling" || callStatus === "connecting"
-  console.log("shouldShowActiveCall =", shouldShowActiveCall);
 
   return (
     <div  className={`fixed z-50 bg-black/75 transition-all duration-300 ${isMinimized ? "top-0 right-4 w-[300px] h-[200px] rounded-xl shadow-xl"
@@ -614,23 +611,15 @@ useEffect(() => {
 
             {/* Remote Video */}
             {callType === "video" && (
-  <div
-    style={{
-      width: "100%",
-      height: "100%",
-      background: "red",
-      position: "absolute",
-      top: 0,
-      left: 0,
-      zIndex: 9999,
-    }}
-  >
-    TEST REMOTE VIDEO AREA
-  </div>
-)}
+              <video
+                ref={remoteVideoRef}
+                autoPlay
+                playsInline
+                className={`w-full h-full object-cover `}
+              />
               
               
-            
+            )}
             <div className="absolute bottom-1 right-1 bg-black/60 px-2 py-0.5 rounded text-xs font-mono text-white">
                   {formatTime(callDuration)}
                 </div>
