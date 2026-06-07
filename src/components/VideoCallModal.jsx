@@ -404,7 +404,7 @@ const {loggedUser} = useContext(UserContext)
       socket.off("webrtc_answer", handleWebRTCAnswer)
       socket.off("webrtc_ice_candidate", handleWebRTCIceCandidate)
     }
-  }, [socket, peerConnection, currentCall, incomingCall, loggedUser?.username, loggedUser?.profilePicture])
+  }, [socket])
 
   // Don't render if modal should not be open
   if (!isCallModalOpen && !incomingCall) {
