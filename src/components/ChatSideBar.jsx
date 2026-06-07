@@ -2,12 +2,14 @@ import React, { useState } from 'react';
 import { UserContext } from '../contexts/UserContext';
 import { apiFetch } from "../api/apiFetch";
 // import { useSocket } from '../contexts/SocketContext';
+import { SocketContext } from "../contexts/SocketContext";
+
 
 
 
 const ChatSidebar = ({followedUsers, onSelectUser, selectedUserId, onSelectForwardUser, isForwarding = false, theme}) => {
 //   const { loggedUser } = useContext(UserContext);
-//  const {socket} = useSocket();
+
   const [searchQuery, setSearchQuery] = useState('');
   const [results, setResults] = useState([]);
   // const [followedUsers, setFollowedUsers] = useState([]);

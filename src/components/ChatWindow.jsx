@@ -2,20 +2,20 @@ import React, { useEffect, useRef, useState, useContext } from 'react';
 import { UserContext } from '../contexts/UserContext';
 import { apiFetch } from "../api/apiFetch";
 import './chat.css';
-import { SocketProvider } from '../contexts/SocketContext';
+import { SocketContext } from "../contexts/SocketContext";
 import { FaVideo, FaEllipsisV, FaArrowLeft} from 'react-icons/fa';
 import VideoCallManager from './VideoCallManager';
 import useVideoCallStore from "../store/VideoCallStore"
 import EmojiPicker from "emoji-picker-react";
 import { VscReactions } from "react-icons/vsc";
-import { useSocket } from '../Socket';
+
 
 
 const REACTIONS = ["❤️", "😂", "😮", "😢", "👍", "👎"];
 
 const ChatWindow = ({ selectedUser, triggerForwardMode, messages, setMessages, onBack, theme }) => {
   const { loggedUser } = useContext(UserContext);
-  const { socket } = useSocket()
+  const socket = useContext(SocketContext);
   const currentUserId = loggedUser?.userid;
   const [input, setInput] = useState('');
   const [openDropdownId, setOpenDropdownId] = useState(null);
@@ -989,7 +989,7 @@ return (
     Send
   </button>
 </div>
-    <VideoCallManager selectedUser={selectedUser} socket={socket} />
+    <VideoCallManager selectedUser={selectedUser} />
     
   </div> 
 

@@ -1,5 +1,5 @@
 
-import React, { useEffect } from 'react';
+import React, { useEffect , useContext} from 'react';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import { UserProvider } from './contexts/UserContext';
 import { ThemeProvider } from './contexts/ThemeContext';
@@ -19,10 +19,10 @@ import Layout from './components/Layout'; // 👈 import the layout
 import ChatSidebar from './components/ChatSideBar';
 import PublicRoute from './components/PublicRoute';
 import Devices from './components/Devices';
-import { SocketProvider } from './contexts/SocketContext';
+// import { SocketProvider } from './contexts/SocketContext';
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { useSocket } from '../Socket';
+import { SocketContext } from "./contexts/SocketContext";
 
 
 
@@ -44,7 +44,7 @@ useEffect(() => {
 }, []);
 
 function NotificationListener() {
-  const { socket } = useSocket();
+  const socket = useContext(SocketContext);
 
   useEffect(() => {
     if (!socket) return;

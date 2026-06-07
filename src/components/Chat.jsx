@@ -6,13 +6,15 @@ import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { apiFetch } from '../api/apiFetch';
 import './chat.css';
-import { useSocket } from '../Socket';
 import { UserContext } from '../contexts/UserContext';
 import { useTheme } from '../contexts/ThemeContext';  
+import { SocketContext } from "../contexts/SocketContext";
+
+
 
 const Chat = () => {
   const [selectedUser, setSelectedUser] = useState(null);
-   const {socket} = useSocket();
+   const socket = useContext(SocketContext);
   const [messages, setMessages] = useState([]);
   const {loggedUser} = useContext(UserContext)
   const [isForwarding, setIsForwarding] = useState(false);

@@ -1,6 +1,9 @@
-import { useEffect,useContext,useRef } from "react";
-import {io} from 'socket.io-client'
+import { createContext, useEffect, useContext, useRef } from "react";
+import { io } from "socket.io-client";
 import { UserContext } from "./UserContext";
+
+export const SocketContext = createContext(null);
+
 export const SocketProvider = ({ children }) => {
   const socketRef = useRef(null);
   const { loggedUser } = useContext(UserContext);
@@ -15,10 +18,6 @@ export const SocketProvider = ({ children }) => {
 
     socket.on("connect", () => {
       console.log("Socket connected:", socket.id);
-    });
-
-    socket.on("connect_error", (err) => {
-      console.error("Socket connect error:", err.message);
     });
 
     socket.on("disconnect", (reason) => {
@@ -38,7 +37,7 @@ export const SocketProvider = ({ children }) => {
   }, [loggedUser]);
 
   return (
-    <SocketContext.Provider value={{ socket: socketRef.current }}>
+    <SocketContext.Provider value={socketRef.current}>
       {children}
     </SocketContext.Provider>
   );
