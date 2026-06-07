@@ -77,7 +77,7 @@ const VideoCallManager = ({ socket }) => {
 
       // Emit the call initiation
       socket.emit("initiate_call", {
-        callerId: loggedUser._id,
+        callerId: loggedUser.userid,
         receiverId,
         callType,
         callerInfo: {

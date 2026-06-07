@@ -5,12 +5,12 @@ import { FaVideo, FaVideoSlash, FaMicrophone, FaMicrophoneSlash, FaPhoneSlash, F
 import useVideoCallStore from "../store/VideoCallStore"
 import { UserContext } from "../contexts/UserContext"
 import { useTheme } from "../contexts/ThemeContext"
-// import { SocketContext } from "../contexts/SocketContext";
+import { SocketContext } from "../contexts/SocketContext";
 
-const VideoCallModal = ({ socket }) => {
+const VideoCallModal = () => {
   const localVideoRef = useRef(null)
   const remoteVideoRef = useRef(null)
-  
+    const socket = useContext(SocketContext);
 const {theme} = useTheme()
   const {
     currentCall,

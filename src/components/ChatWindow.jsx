@@ -616,16 +616,16 @@ const deleteMessageForEveryone = async (messageId) => {
 }, [socket, currentUserId]);
   
   const handleVideoCall = () => {
-    if (selectedUser && onlineMap[selectedUser._id]?.isOnline) {
+    if (loggedUser && onlineMap[loggedUser?.userid]?.isOnline) {
       // Get the initiateCall function from the store
       const { initiateCall } = useVideoCallStore.getState();
       console.log('this is initial call',initiateCall)
 
       console.log("Starting video call with selectedContact:", {
-        id: selectedUser._id,
-        name: selectedUser.username,
-        avatar: selectedUser.profilePic, // This should be the URL, not "video"
-        fullContact: selectedUser,
+        id: loggedUser?.userid,
+        name: loggedUser?.username,
+        avatar: loggedUser?.profilePicture, // This should be the URL, not "video"
+        fullContact: loggedUser,
       });
 
       // Make sure we're passing the correct profile picture URL
