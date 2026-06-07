@@ -262,7 +262,9 @@ console.log(
       setCallStatus("connecting")
 
       // 1. Get media
-      const stream = await initializeMedia(callType === "video")
+     const stream = await initializeMedia(
+  incomingCall.callType === "video"
+);
 
       // 2. Create peer connection with tracks
       const pc = createPeerConnection(stream, "CALLER")
@@ -271,7 +273,7 @@ console.log(
       console.log("CALLER: Creating offer...")
       const offer = await pc.createOffer({
         offerToReceiveAudio: true,
-        offerToReceiveVideo: callType === "video",
+        offerToReceiveVideo: incomingCall.callType === "video",
       })
 
       await pc.setLocalDescription(offer)
@@ -295,7 +297,7 @@ console.log(
       setCallStatus("connecting")
 
       // 1. Get media
-      const stream = await initializeMedia(callType === "video")
+      const stream = await initializeMedia(incomingCall.callType === "video")
 
       // 2. Create peer connection with tracks
       createPeerConnection(stream, "RECEIVER")

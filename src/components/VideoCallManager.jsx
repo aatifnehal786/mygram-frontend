@@ -21,11 +21,12 @@ const {loggedUser} = useContext(UserContext);
       console.log("Received incoming call:", { callerId, callerName, callerAvatar, callType, callId })
 
       setIncomingCall({
-        callerId,
-        callerName,
-        callerAvatar,
-        callId,
-      })
+  callerId,
+  callerName,
+  callerAvatar,
+  callId,
+  callType,
+})
       setCallType(callType)
       setCallModalOpen(true)
       setCallStatus("ringing")
