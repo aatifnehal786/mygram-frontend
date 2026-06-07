@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useRef, useMemo, useContext } from "react"
+import { useEffect, useRef, useContext } from "react"
 import { FaVideo, FaVideoSlash, FaMicrophone, FaMicrophoneSlash, FaPhoneSlash, FaTimes } from "react-icons/fa"
 import useVideoCallStore from "../store/VideoCallStore"
 import {UserContext} from "../contexts/UserContext"
@@ -50,20 +50,20 @@ const VideoCallModal = ({ socket, selectedUser }) => {
   }
 
   // Memoize display info to prevent unnecessary re-renders
-  const displayInfo = useMemo(() => {
-    if (incomingCall && !isCallActive) {
-      return {
-        name: incomingCall.callerName,
-        avatar: incomingCall.callerAvatar,
-      }
-    } else if (currentCall) {
-      return {
-        name: currentCall.participantName,
-        avatar: currentCall.participantAvatar,
-      }
-    }
-    return null
-  }, [incomingCall, currentCall, isCallActive])
+  // const displayInfo = useMemo(() => {
+  //   if (incomingCall && !isCallActive) {
+  //     return {
+  //       name: incomingCall.callerName,
+  //       avatar: incomingCall.callerAvatar,
+  //     }
+  //   } else if (currentCall) {
+  //     return {
+  //       name: currentCall.participantName,
+  //       avatar: currentCall.participantAvatar,
+  //     }
+  //   }
+  //   return null
+  // }, [incomingCall, currentCall, isCallActive])
 
   // Connection detection
   useEffect(() => {
@@ -418,7 +418,7 @@ const VideoCallModal = ({ socket, selectedUser }) => {
 
   const shouldShowActiveCall = isCallActive || callStatus === "calling" || callStatus === "connecting"
 
-  return (
+ return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75">
       <div
         className={`relative w-full h-full max-w-4xl max-h-3xl rounded-lg overflow-hidden ${
@@ -431,8 +431,8 @@ const VideoCallModal = ({ socket, selectedUser }) => {
             <div className="text-center mb-8">
               <div className="w-32 h-32 rounded-full bg-gray-300 mx-auto mb-4 overflow-hidden">
                 <img
-                  src={selectedUser?.profilePic || "/placeholder.svg?height=128&width=128"}
-                  alt={selectedUser?.username || "Unknown"}
+                  src={loggedUser?.profilePic || "/placeholder.svg?height=128&width=128"}
+                  alt={loggedUser?.username || "Unknown"}
                   className="w-full h-full object-cover"
                   onError={(e) => {
                     e.target.src = "/placeholder.svg?height=128&width=128"
@@ -440,7 +440,7 @@ const VideoCallModal = ({ socket, selectedUser }) => {
                 />
               </div>
               <h2 className={`text-2xl font-semibold mb-2 ${theme === "dark" ? "text-white" : "text-gray-900"}`}>
-                {selectedUser?.username || "Unknown"}
+                {loggedUser?.username || "Unknown"}
               </h2>
               <p className={`text-lg ${theme === "dark" ? "text-gray-300" : "text-gray-600"}`}>
                 Incoming {callType} call...
@@ -483,8 +483,8 @@ const VideoCallModal = ({ socket, selectedUser }) => {
                 <div className="text-center">
                   <div className="w-32 h-32 rounded-full bg-gray-600 mx-auto mb-4 overflow-hidden">
                     <img
-                      src={loggedUser?.profilePic || "/placeholder.svg?height=128&width=128"}
-                      alt={loggedUser?.username || "Unknown"}
+                      src={selectedUser?.profilePic || "/placeholder.svg?height=128&width=128"}
+                      alt={selectedUser?.username || "Unknown"}
                       className="w-full h-full object-cover"
                       onError={(e) => {
                         e.target.src = "/placeholder.svg?height=128&width=128"
@@ -493,14 +493,14 @@ const VideoCallModal = ({ socket, selectedUser }) => {
                   </div>
                   <p className="text-white text-xl">
                     {callStatus === "calling"
-                      ? `Calling ${loggedUser?.username || "User"}...`
+                      ? `Calling ${selectedUser?.username || "User"}...`
                       : callStatus === "connecting"
                         ? "Connecting..."
                         : callStatus === "connected"
-                          ? loggedUser?.username || "Connected"
+                          ? selectedUser?.username || "Connected"
                           : callStatus === "failed"
                             ? "Connection failed"
-                            : displayInfo?.name || "Unknown"}
+                            : selectedUser?.username || "Unknown"}
                   </p>
                 </div>
               </div>
