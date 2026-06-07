@@ -611,16 +611,23 @@ useEffect(() => {
 
             {/* Remote Video */}
             {callType === "video" && (
-              <video
-  ref={remoteVideoRef}
-  autoPlay
-  playsInline
-  controls
-  className="w-full h-full bg-red-500"
-/>
+  <div
+    style={{
+      width: "100%",
+      height: "100%",
+      background: "red",
+      position: "absolute",
+      top: 0,
+      left: 0,
+      zIndex: 9999,
+    }}
+  >
+    TEST REMOTE VIDEO AREA
+  </div>
+)}
               
               
-            )}
+            
             <div className="absolute bottom-1 right-1 bg-black/60 px-2 py-0.5 rounded text-xs font-mono text-white">
                   {formatTime(callDuration)}
                 </div>
