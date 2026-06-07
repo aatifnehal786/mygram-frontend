@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useRef} from "react"
+import { useEffect, useRef,useMemo} from "react"
 import { FaVideo, FaVideoSlash, FaMicrophone, FaMicrophoneSlash, FaPhoneSlash, FaTimes } from "react-icons/fa"
 import useVideoCallStore from "../store/VideoCallStore"
 import { FaExpand, FaCompress } from "react-icons/fa";
@@ -85,20 +85,20 @@ const rtcConfiguration = {
 
 
 //   // Memoize display info to prevent unnecessary re-renders
-//   const displayInfo = useMemo(() => {
-//     if (incomingCall && !isCallActive) {
-//       return {
-//         name: incomingCall.callerName,
-//         avatar: incomingCall.callerAvatar,
-//       }
-//     } else if (currentCall) {
-//       return {
-//         name: currentCall.participantName,
-//         avatar: currentCall.participantAvatar,
-//       }
-//     }
-//     return null
-//   }, [incomingCall, currentCall, isCallActive]);
+  const displayInfo = useMemo(() => {
+    if (incomingCall && !isCallActive) {
+      return {
+        name: incomingCall.callerName,
+        avatar: incomingCall.callerAvatar,
+      }
+    } else if (currentCall) {
+      return {
+        name: currentCall.participantName,
+        avatar: currentCall.participantAvatar,
+      }
+    }
+    return null
+  }, [incomingCall, currentCall, isCallActive]);
 
   // Connection detection
   useEffect(() => {
@@ -240,13 +240,15 @@ const rtcConfiguration = {
   participantName: incomingCall.callerName,
   participantAvatar: incomingCall.callerAvatar,
 });
-    clearIncomingCall();
+   
 
     // ONLY after everything is ready
     socket.emit("accept_call", {
       callerId: incomingCall.callerId,
       callId: incomingCall.callId,
     });
+
+     clearIncomingCall();
 
   } catch (err) {
     console.error("RECEIVER error:", err);
