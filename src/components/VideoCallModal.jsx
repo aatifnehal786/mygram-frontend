@@ -555,7 +555,7 @@ const pc = peerConnectionRef.current;
       socket.off("webrtc_answer", handleWebRTCAnswer)
       socket.off("webrtc_ice_candidate", handleWebRTCIceCandidate)
     }
-  }, [socket, peerConnection, currentCall, incomingCall, selectedUser?.username, selectedUser?.profilePic])
+  }, [socket, currentCall, incomingCall, selectedUser?.username, selectedUser?.profilePic])
 
   // Don't render if modal should not be open
   if (!isCallModalOpen && !incomingCall) {
