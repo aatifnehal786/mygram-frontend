@@ -87,23 +87,18 @@ useEffect(() => {
   // Set up remote video when remoteStream changes
 useEffect(() => {
   const video = remoteVideoRef.current;
-  if (!video || !remoteStream) return;
+  if (!video) return;
+  if (!(remoteStream instanceof MediaStream)) return;
 
   video.srcObject = remoteStream;
 
-  const playVideo = async () => {
+  video.onloadedmetadata = async () => {
     try {
       await video.play();
-      console.log("Remote video playing");
     } catch (err) {
-      console.log("Play blocked:", err);
+      console.log("Play error:", err);
     }
   };
-
-  video.onloadedmetadata = playVideo;
-
-  // fallback (VERY IMPORTANT for mobile)
-  setTimeout(playVideo, 300);
 }, [remoteStream]);
 
   // Initialize media stream
@@ -156,13 +151,19 @@ useEffect(() => {
     }
 
     // Handle remote stream - CRITICAL FIX
-  pc.ontrack = (event) => {
+pc.ontrack = (event) => {
   console.log("TRACK:", event.track.kind);
 
   setRemoteStream((prevStream) => {
     const stream = prevStream || new MediaStream();
 
-    stream.addTrack(event.track);
+    // avoid duplicate tracks
+    const alreadyExists = stream.getTracks()
+      .some(t => t.id === event.track.id);
+
+    if (!alreadyExists) {
+      stream.addTrack(event.track);
+    }
 
     return stream;
   });
