@@ -83,17 +83,12 @@ useEffect(() => {
 const rtcConfiguration = {
   iceServers: [
     {
-      urls: "stun:stun.l.google.com:19302",
+      urls: "stun:global.stun.twilio.com:3478",
     },
     {
-      urls: "turn:openrelay.metered.ca:80",
-      username: "openrelayproject",
-      credential: "openrelayproject",
-    },
-    {
-      urls: "turn:openrelay.metered.ca:443",
-      username: "openrelayproject",
-      credential: "openrelayproject",
+      urls: "turn:global.relay.metered.ca:80",
+      username: "5478a7ec3c7f0e7920acf1ae",
+      credential: "V7y9tTE4lsW9tpKo",
     },
   ],
 };
