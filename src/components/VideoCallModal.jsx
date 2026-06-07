@@ -7,7 +7,7 @@ import { UserContext } from "../contexts/UserContext"
 import { useTheme } from "../contexts/ThemeContext"
 import { SocketContext } from "../contexts/SocketContext";
 
-const VideoCallModal = () => {
+const VideoCallModal = ({selectedUser}) => {
   const localVideoRef = useRef(null)
   const remoteVideoRef = useRef(null)
     const socket = useContext(SocketContext);
@@ -55,13 +55,13 @@ const {loggedUser} = useContext(UserContext)
   const displayInfo = useMemo(() => {
     if (incomingCall && !isCallActive) {
       return {
-        name: incomingCall.callerName,
-        avatar: incomingCall.callerAvatar,
+        name: selectedUser?.username,
+        avatar: selectedUser?.profilePicture,
       }
     } else if (currentCall) {
       return {
-        name: currentCall.participantName,
-        avatar: currentCall.participantAvatar,
+        name: loggedUser?.username,
+        avatar: loggedUser?.profilePicture,
       }
     }
     return null
@@ -194,7 +194,7 @@ const {loggedUser} = useContext(UserContext)
 
       socket.emit("webrtc_offer", {
         offer,
-        receiverId: currentCall.participantId,
+        receiverId: selectedUser?._id,
         callId: currentCall.callId,
       })
 
@@ -221,8 +221,8 @@ const {loggedUser} = useContext(UserContext)
         callerId: incomingCall.callerId,
         callId: incomingCall.callId,
         receiverInfo: {
-          username: loggedUser?.username,
-          profilePicture: loggedUser?.profilePicture,
+          username: selectedUser?.username,
+          profilePicture: selectedUser?.profilePicture,
         },
       })
 
@@ -230,8 +230,8 @@ const {loggedUser} = useContext(UserContext)
       setCurrentCall({
         callId: incomingCall.callId,
         participantId: incomingCall.callerId,
-        participantName: incomingCall.callerName,
-        participantAvatar: incomingCall.callerAvatar,
+        participantName: selectedUser?.username,
+        participantAvatar: selectedUser?.profilePicture,
       })
 
       clearIncomingCall()
