@@ -407,9 +407,9 @@ const {loggedUser} = useContext(UserContext)
   }, [socket])
 
   // Don't render if modal should not be open
-  if (!isCallModalOpen && !incomingCall) {
-    return null
-  }
+  // if (!isCallModalOpen && !incomingCall) {
+  //   return null
+  // }
 
   console.log("🎬 Render:", {
     status: callStatus,
