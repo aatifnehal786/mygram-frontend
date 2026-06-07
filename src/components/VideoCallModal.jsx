@@ -1,10 +1,11 @@
 "use client"
 
-import { useEffect, useRef, useContext, useMemo } from "react"
+import { useEffect, useRef, useMemo, useContext } from "react"
 import { FaVideo, FaVideoSlash, FaMicrophone, FaMicrophoneSlash, FaPhoneSlash, FaTimes } from "react-icons/fa"
-import useVideoCallStore from "../store/VideoCallStore"
-import {UserContext} from "../contexts/UserContext"
+import useVideoCallStore from "../../store/videoCallStore"
+import UserContext from "../contexts/UserContext"
 import {useTheme} from "../contexts/ThemeContext"
+
 const VideoCallModal = ({ socket }) => {
   const localVideoRef = useRef(null)
   const remoteVideoRef = useRef(null)
@@ -35,8 +36,9 @@ const VideoCallModal = ({ socket }) => {
     processQueuedIceCandidates,
   } = useVideoCallStore()
 
-  const {loggedUser} = useContext(UserContext);
-  const {theme} = useTheme();
+  const {loggedUser} = useContext(UserContext)
+  const user = loggedUser || {}
+  const {theme} = useTheme()
 
   // The rtcConfiguration object you posted is used to configure a WebRTC peer-to-peer connection. 
   // Specifically, it helps define how two browsers can discover and connect to each other, 
@@ -219,8 +221,8 @@ const VideoCallModal = ({ socket }) => {
         callerId: incomingCall.callerId,
         callId: incomingCall.callId,
         receiverInfo: {
-          username: loggedUser.username,
-          profilePicture: loggedUser.profilePicture,
+          username: user.username,
+          profilePicture: user.profilePicture,
         },
       })
 
@@ -327,7 +329,7 @@ const VideoCallModal = ({ socket }) => {
     }
 
     // Receive answer (CALLER) - CRITICAL FIX
-   const handleWebRTCAnswer = async ({ answer }) => {
+    const handleWebRTCAnswer = async ({ answer }) => {
 
       if (!peerConnection) {
         console.error(" CALLER: No peer connection!")
@@ -364,6 +366,7 @@ const VideoCallModal = ({ socket }) => {
         console.error("CALLER answer error:", error)
       }
     }
+
     // Receive ICE candidate
     const handleWebRTCIceCandidate = async ({ candidate, senderId }) => {
       console.log("🧊 Received ICE candidate from", senderId)
@@ -401,7 +404,7 @@ const VideoCallModal = ({ socket }) => {
       socket.off("webrtc_answer", handleWebRTCAnswer)
       socket.off("webrtc_ice_candidate", handleWebRTCIceCandidate)
     }
-  }, [socket, peerConnection, currentCall, incomingCall, loggedUser.username, loggedUser.profilePicture])
+  }, [socket, peerConnection, currentCall, incomingCall, user.username, user.profilePicture])
 
   // Don't render if modal should not be open
   if (!isCallModalOpen && !incomingCall) {
@@ -417,8 +420,7 @@ const VideoCallModal = ({ socket }) => {
 
   const shouldShowActiveCall = isCallActive || callStatus === "calling" || callStatus === "connecting"
 
-
-    return (
+  return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75">
       <div
         className={`relative w-full h-full max-w-4xl max-h-3xl rounded-lg overflow-hidden ${

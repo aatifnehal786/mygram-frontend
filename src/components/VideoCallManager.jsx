@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useCallback,useContext } from "react"
-import useVideoCallStore from "../../store/videoCallStore"
+import useVideoCallStore from "../store/VideoCallStore"
 import VideoCallModal from "./VideoCallModal"
 import {UserContext} from "../contexts/UserContext"
 
