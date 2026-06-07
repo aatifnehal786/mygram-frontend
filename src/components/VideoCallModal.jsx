@@ -1,12 +1,12 @@
 "use client"
 
-import { useEffect, useRef, useMemo,useContext } from "react"
+import { useEffect, useRef,useContext } from "react"
 import { FaVideo, FaVideoSlash, FaMicrophone, FaMicrophoneSlash, FaPhoneSlash, FaTimes } from "react-icons/fa"
 import useVideoCallStore from "../store/VideoCallStore"
 import {useTheme} from "../contexts/ThemeContext";
 import { UserContext } from "../contexts/UserContext";
 
-const VideoCallModal = ({ socket }) => {
+const VideoCallModal = ({ socket, selectedUser }) => {
   const localVideoRef = useRef(null)
   const remoteVideoRef = useRef(null)
 
@@ -38,7 +38,7 @@ const VideoCallModal = ({ socket }) => {
 
 const {theme} = useTheme();
 const {loggedUser} = useContext(UserContext);
-const user = loggedUser || {}
+
   // The rtcConfiguration object you posted is used to configure a WebRTC peer-to-peer connection. 
   // Specifically, it helps define how two browsers can discover and connect to each other, 
   // even when they're behind firewalls or NATs.
@@ -51,20 +51,20 @@ const user = loggedUser || {}
   }
 
   // Memoize display info to prevent unnecessary re-renders
-  const displayInfo = useMemo(() => {
-    if (incomingCall && !isCallActive) {
-      return {
-        name: incomingCall.callerName,
-        avatar: incomingCall.callerAvatar,
-      }
-    } else if (currentCall) {
-      return {
-        name: currentCall.participantName,
-        avatar: currentCall.participantAvatar,
-      }
-    }
-    return null
-  }, [incomingCall, currentCall, isCallActive])
+  // const displayInfo = useMemo(() => {
+  //   if (incomingCall && !isCallActive) {
+  //     return {
+  //       name: incomingCall.callerName,
+  //       avatar: incomingCall.callerAvatar,
+  //     }
+  //   } else if (currentCall) {
+  //     return {
+  //       name: currentCall.participantName,
+  //       avatar: currentCall.participantAvatar,
+  //     }
+  //   }
+  //   return null
+  // }, [incomingCall, currentCall, isCallActive])
 
   // Connection detection
   useEffect(() => {
@@ -220,8 +220,8 @@ const user = loggedUser || {}
         callerId: incomingCall.callerId,
         callId: incomingCall.callId,
         receiverInfo: {
-          username: user.username,
-          profilePicture: user.profilePicture,
+          username: loggedUser?.username,
+          profilePicture: loggedUser?.profilePicture,
         },
       })
 
@@ -403,7 +403,7 @@ const user = loggedUser || {}
       socket.off("webrtc_answer", handleWebRTCAnswer)
       socket.off("webrtc_ice_candidate", handleWebRTCIceCandidate)
     }
-  }, [socket, peerConnection, currentCall, incomingCall, user.username, user.profilePicture])
+  }, [socket, peerConnection, currentCall, incomingCall, loggedUser?.username, loggedUser?.profilePicture])
 
   // Don't render if modal should not be open
   if (!isCallModalOpen && !incomingCall) {
@@ -432,8 +432,8 @@ const user = loggedUser || {}
             <div className="text-center mb-8">
               <div className="w-32 h-32 rounded-full bg-gray-300 mx-auto mb-4 overflow-hidden">
                 <img
-                  src={displayInfo?.avatar || "/placeholder.svg?height=128&width=128"}
-                  alt={displayInfo?.name || "Unknown"}
+                  src={loggedUser?.profilePicture || "/placeholder.svg?height=128&width=128"}
+                  alt={loggedUser?.username || "Unknown"}
                   className="w-full h-full object-cover"
                   onError={(e) => {
                     e.target.src = "/placeholder.svg?height=128&width=128"
@@ -441,7 +441,7 @@ const user = loggedUser || {}
                 />
               </div>
               <h2 className={`text-2xl font-semibold mb-2 ${theme === "dark" ? "text-white" : "text-gray-900"}`}>
-                {displayInfo?.name || "Unknown"}
+                {loggedUser?.username || "Unknown"}
               </h2>
               <p className={`text-lg ${theme === "dark" ? "text-gray-300" : "text-gray-600"}`}>
                 Incoming {callType} call...
@@ -484,8 +484,8 @@ const user = loggedUser || {}
                 <div className="text-center">
                   <div className="w-32 h-32 rounded-full bg-gray-600 mx-auto mb-4 overflow-hidden">
                     <img
-                      src={displayInfo?.avatar || "/placeholder.svg?height=128&width=128"}
-                      alt={displayInfo?.name || "Unknown"}
+                      src={selectedUser?.profilePicture || "/placeholder.svg?height=128&width=128"}
+                      alt={selectedUser?.username || "Unknown"}
                       className="w-full h-full object-cover"
                       onError={(e) => {
                         e.target.src = "/placeholder.svg?height=128&width=128"
@@ -494,14 +494,14 @@ const user = loggedUser || {}
                   </div>
                   <p className="text-white text-xl">
                     {callStatus === "calling"
-                      ? `Calling ${displayInfo?.name || "User"}...`
+                      ? `Calling ${selectedUser?.username || "User"}...`
                       : callStatus === "connecting"
                         ? "Connecting..."
                         : callStatus === "connected"
-                          ? displayInfo?.name || "Connected"
+                          ? selectedUser?.username || "Connected"
                           : callStatus === "failed"
                             ? "Connection failed"
-                            : displayInfo?.name || "Unknown"}
+                            : selectedUser?.username || "Unknown"}
                   </p>
                 </div>
               </div>

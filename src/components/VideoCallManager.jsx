@@ -51,7 +51,7 @@ const VideoCallManager = ({ socket , selectedUser}) => {
   // Memoized function to initiate a call
   const initiateCall = useCallback(
     (receiverId, receiverName, receiverAvatar, callType = "video") => {
-      const callId = `${loggedUser._id}-${receiverId}-${Date.now()}`
+      const callId = `${loggedUser?.userid}-${receiverId}-${Date.now()}`
 
       console.log("Initiating call with:", {
         receiverId,
@@ -80,21 +80,21 @@ const VideoCallManager = ({ socket , selectedUser}) => {
 
       // Emit the call initiation
       socket.emit("initiate_call", {
-        callerId: selectedUser?._id,
+        callerId: loggedUser?.userid,
         receiverId,
         callType,
         callerInfo: {
-          username: selectedUser?.username,
-          profilePicture: selectedUser?.profilePicture,
+          username: loggedUser?.username,
+          profilePicture: loggedUser?.profilePicture,
         },
       })
 
       console.log("Call initiated, currentCall set to:", callData)
     },
     [
-      selectedUser?._id,
-      selectedUser?.username,
-      selectedUser?.profilePicture,
+      loggedUser?.userid,
+      loggedUser?.username,
+      loggedUser?.profilePicture,
       socket,
       setCurrentCall,
       setCallType,
@@ -108,7 +108,7 @@ const VideoCallManager = ({ socket , selectedUser}) => {
     useVideoCallStore.getState().initiateCall = initiateCall
   }, [initiateCall])
 
-  return <VideoCallModal socket={socket} />
+  return <VideoCallModal socket={socket,selectedUser} />
 }
 
 export default VideoCallManager
