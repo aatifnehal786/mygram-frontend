@@ -11,7 +11,7 @@ import useVideoCallStore from "../store/VideoCallStore"
 const VideoCallManager = ({ socket, selectedUser }) => {
   const { setIncomingCall, setCurrentCall, setCallType, setCallModalOpen, setCallStatus, endCall } = useVideoCallStore()
 const {loggedUser} = useContext(UserContext);
-    const callerAvatar = loggedUser.profilePic;
+    
 
   useEffect(() => {
     if (!socket) return
