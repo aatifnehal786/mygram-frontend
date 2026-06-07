@@ -1,50 +1,14 @@
 "use client"
 
-import { useEffect, useRef, useMemo, useState } from "react"
+import { useEffect, useRef, useMemo, useContext } from "react"
 import { FaVideo, FaVideoSlash, FaMicrophone, FaMicrophoneSlash, FaPhoneSlash, FaTimes } from "react-icons/fa"
-import useVideoCallStore from "../store/VideoCallStore"
-import { useContext } from "react"
-import { UserContext } from '../contexts/UserContext';
-import { FaExpand, FaCompress } from "react-icons/fa";
-import { useLocation } from "react-router-dom";
+import useVideoCallStore from "../../store/videoCallStore"
+import UserContext from "../contexts/UserContext"
+import { useTheme } from "../contexts/ThemeContext"
 
-
-
-
-const VideoCallModal = ({ socket, selectedUser }) => {
-  const { loggedUser } = useContext(UserContext);
+const VideoCallModal = ({ socket }) => {
   const localVideoRef = useRef(null)
   const remoteVideoRef = useRef(null)
-  const [callStartTime, setCallStartTime] = useState(null)
-  const [callDuration, setCallDuration] = useState(0)
-  const [isMinimized, setIsMinimized] = useState(false);
-  const location = useLocation();
-
-
-  useEffect(() => {
-  // Only minimize if a call is active
-  if (isCallActive && !isMinimized) {
-    setIsMinimized(true);
-  }
-}, [location.pathname]);
-
-
-useEffect(() => {
-  if (location.pathname === "/chat" && isCallActive) {
-    setIsMinimized(false);
-  }
-}, [location.pathname]);
-
-// prevent minimize for incoming calls
-useEffect(() => {
-  if (!incomingCall && isCallActive && !isMinimized) {
-    setIsMinimized(true);
-  }
-}, [location.pathname]);
-
-  
-
- 
 
   const {
     currentCall,
@@ -70,49 +34,21 @@ useEffect(() => {
     setCurrentCall,
     addIceCandidate,
     processQueuedIceCandidates,
-    setIncomingCall
   } = useVideoCallStore()
 
-
-  
-
+  const { loggedUser } = useContext(UserContext)
+  const { theme } = useTheme()
 
   // The rtcConfiguration object you posted is used to configure a WebRTC peer-to-peer connection. 
   // Specifically, it helps define how two browsers can discover and connect to each other, 
   // even when they're behind firewalls or NATs.
-const rtcConfiguration = {
-  iceServers: [
-    {
-      urls: "stun:global.stun.twilio.com:3478",
-    },
-    {
-       urls: [
-        "turn:global.relay.metered.ca:80",
-        "turn:global.relay.metered.ca:80?transport=tcp",
-        "turn:global.relay.metered.ca:443",
-        "turns:global.relay.metered.ca:443?transport=tcp",
-      ],
-      username: "5478a7ec3c7f0e7920acf1ae",
-      credential: "V7y9tTE4lsW9tpKo",
-    },
-  ],
-};
-
-  // format time duration in mm:ss
-  const formatTime = (seconds) => {
-  const hrs = Math.floor(seconds / 3600)
-  const mins = Math.floor((seconds % 3600) / 60)
-  const secs = seconds % 60
-
-  return [
-    hrs > 0 ? String(hrs).padStart(2, "0") : null,
-    String(mins).padStart(2, "0"),
-    String(secs).padStart(2, "0"),
-  ]
-    .filter(Boolean)
-    .join(":")
-}
-
+  const rtcConfiguration = {
+    iceServers: [
+      { urls: "stun:stun.l.google.com:19302" },
+      { urls: "stun:stun1.l.google.com:19302" },
+      { urls: "stun:stun2.l.google.com:19302" },
+    ],
+  }
 
   // Memoize display info to prevent unnecessary re-renders
   const displayInfo = useMemo(() => {
@@ -153,40 +89,6 @@ const rtcConfiguration = {
     }
   }, [remoteStream])
 
-  useEffect(() => {
-  if (remoteStream) {
-    console.log(
-      "Remote video tracks:",
-      remoteStream.getVideoTracks()
-    );
-
-    console.log(
-      "Remote audio tracks:",
-      remoteStream.getAudioTracks()
-    );
-
-    if (remoteVideoRef.current) {
-      remoteVideoRef.current.srcObject = remoteStream;
-    }
-  }
-}, [remoteStream]);
-
-
-  // useEffect to track call duration
- useEffect(() => {
-  if (!isCallActive || !callStartTime) return
-
-  const interval = setInterval(() => {
-    setCallDuration(
-      Math.floor((Date.now() - callStartTime) / 1000)
-    )
-  }, 1000)
-
-  return () => clearInterval(interval)
-}, [isCallActive, callStartTime])
-
-
-
   // Initialize media stream
   const initializeMedia = async (video = true) => {
     try {
@@ -218,7 +120,6 @@ const rtcConfiguration = {
         pc.addTrack(track, stream)
       })
     }
-    
 
     // Handle ICE candidates
     pc.onicecandidate = (event) => {
@@ -236,7 +137,6 @@ const rtcConfiguration = {
         }
       }
     }
-   
 
     // Handle remote stream - CRITICAL FIX
     pc.ontrack = (event) => {
@@ -248,13 +148,7 @@ const rtcConfiguration = {
         const stream = new MediaStream([event.track])
         setRemoteStream(stream)
       }
-      setCallStartTime((prev) => {
-        if (prev) return prev   // prevents double start
-        setCallActive(true)
-        return Date.now()
-      })
     }
-
 
     // Connection state monitoring
     pc.onconnectionstatechange = () => {
@@ -290,7 +184,10 @@ const rtcConfiguration = {
 
       // 3. Create and send offer
       console.log("CALLER: Creating offer...")
-      const offer = await pc.createOffer();
+      const offer = await pc.createOffer({
+        offerToReceiveAudio: true,
+        offerToReceiveVideo: callType === "video",
+      })
 
       await pc.setLocalDescription(offer)
 
@@ -324,7 +221,7 @@ const rtcConfiguration = {
         callId: incomingCall.callId,
         receiverInfo: {
           username: loggedUser.username,
-          profilePicture: loggedUser.profilePic,
+          profilePicture: loggedUser.profilePicture,
         },
       })
 
@@ -366,11 +263,6 @@ const rtcConfiguration = {
         participantId: participantId,
       })
     }
-
-    setCallStartTime(null)
-    setCallDuration(0)
-
-    
     endCall()
   }
 
@@ -398,12 +290,10 @@ const rtcConfiguration = {
     }
 
     // Call ended
-  const handleCallEnded = () => {
+    const handleCallEnded = () => {
       console.log(" Call ended")
       endCall()
-     
     }
-
 
     // Receive offer (RECEIVER)
     const handleWebRTCOffer = async ({ offer, senderId, callId }) => {
@@ -438,7 +328,7 @@ const rtcConfiguration = {
     }
 
     // Receive answer (CALLER) - CRITICAL FIX
-    const handleWebRTCAnswer = async ({ answer, senderId, callId }) => {
+    const handleWebRTCAnswer = async ({ answer}) => {
 
       if (!peerConnection) {
         console.error(" CALLER: No peer connection!")
@@ -513,7 +403,7 @@ const rtcConfiguration = {
       socket.off("webrtc_answer", handleWebRTCAnswer)
       socket.off("webrtc_ice_candidate", handleWebRTCIceCandidate)
     }
-  }, [socket, peerConnection, currentCall, incomingCall, selectedUser?.username, selectedUser?.profilePic])
+  }, [socket, peerConnection, currentCall, incomingCall, loggedUser.username, loggedUser.profilePicture])
 
   // Don't render if modal should not be open
   if (!isCallModalOpen && !incomingCall) {
@@ -530,37 +420,30 @@ const rtcConfiguration = {
   const shouldShowActiveCall = isCallActive || callStatus === "calling" || callStatus === "connecting"
 
   return (
-    <div  className={`fixed z-50 bg-black/75 transition-all duration-300 ${isMinimized ? "top-0 right-4 w-[300px] h-[200px] rounded-xl shadow-xl"
-      : "inset-0 flex items-center justify-center"
-    }
-  `}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75">
       <div
-        className={`
-    relative bg-black overflow-hidden
-    ${isMinimized
-      ? "w-full h-full rounded-xl"
-      : "w-full h-[100dvh] max-w-5xl rounded-lg"
-    }
-  `}
+        className={`relative w-full h-full max-w-4xl max-h-3xl rounded-lg overflow-hidden ${
+          theme === "dark" ? "bg-gray-900" : "bg-white"
+        }`}
       >
         {/* Incoming Call UI */}
-        {incomingCall && !isCallActive  && !isMinimized && (
+        {incomingCall && !isCallActive && (
           <div className="flex flex-col items-center justify-center h-full p-8">
             <div className="text-center mb-8">
               <div className="w-32 h-32 rounded-full bg-gray-300 mx-auto mb-4 overflow-hidden">
                 <img
-                  src={selectedUser?.profilePic|| "/placeholder.svg?height=128&width=128"}
-                  alt={selectedUser?.username || "Unknown"}
+                  src={displayInfo?.avatar || "/placeholder.svg?height=128&width=128"}
+                  alt={displayInfo?.name || "Unknown"}
                   className="w-full h-full object-cover"
                   onError={(e) => {
                     e.target.src = "/placeholder.svg?height=128&width=128"
                   }}
                 />
               </div>
-              <h2 className={`text-2xl font-semibold mb-2`}>
-                {selectedUser?.username|| "Unknown"}
+              <h2 className={`text-2xl font-semibold mb-2 ${theme === "dark" ? "text-white" : "text-gray-900"}`}>
+                {displayInfo?.name || "Unknown"}
               </h2>
-              <p className={`text-lg`}>
+              <p className={`text-lg ${theme === "dark" ? "text-gray-300" : "text-gray-600"}`}>
                 Incoming {callType} call...
               </p>
             </div>
@@ -585,33 +468,15 @@ const rtcConfiguration = {
         {/* Active Call UI */}
         {shouldShowActiveCall && (
           <div className="relative w-full h-full">
-            {/* /// Minimize/Maximize Button */}
-            <div className="absolute top-4 right-4 flex gap-2 z-50">
-  <button
-    onClick={() => setIsMinimized(prev => !prev)}
-    className="w-9 h-9 bg-black/60 hover:bg-black/80 rounded-full flex items-center justify-center text-white"
-  >
-    {isMinimized ? <FaExpand /> : <FaCompress />}
-  </button>
-</div>
-
             {/* Remote Video */}
             {callType === "video" && (
               <video
                 ref={remoteVideoRef}
                 autoPlay
                 playsInline
-                className={`w-full h-full object-cover bg-gray-800 `}
+                className={`w-full h-full object-cover bg-gray-800 ${remoteStream ? "block" : "hidden"}`}
               />
-              
-              
             )}
-            <div className="absolute bottom-1 right-1 bg-black/60 px-2 py-0.5 rounded text-xs font-mono text-white">
-                  {formatTime(callDuration)}
-                </div>
-           
-            
-
 
             {/* Avatar/Status Display */}
             {(!remoteStream || callType !== "video") && (
@@ -619,8 +484,8 @@ const rtcConfiguration = {
                 <div className="text-center">
                   <div className="w-32 h-32 rounded-full bg-gray-600 mx-auto mb-4 overflow-hidden">
                     <img
-                      src={selectedUser?.profilePic || "/placeholder.svg?height=128&width=128"}
-                      alt={selectedUser?.username || "Unknown"}
+                      src={displayInfo?.avatar || "/placeholder.svg?height=128&width=128"}
+                      alt={displayInfo?.name || "Unknown"}
                       className="w-full h-full object-cover"
                       onError={(e) => {
                         e.target.src = "/placeholder.svg?height=128&width=128"
@@ -644,27 +509,21 @@ const rtcConfiguration = {
 
             {/* Local Video (Picture-in-Picture) */}
             {callType === "video" && localStream && (
-              <div className={`absolute bg-gray-800 overflow-hidden border-2 border-white
-    ${isMinimized ? "bottom-2 right-2 w-24 h-16 rounded-md" : "top-4 right-4 w-48 h-36 rounded-lg"}`}>
+              <div className="absolute top-4 right-4 w-48 h-36 bg-gray-800 rounded-lg overflow-hidden border-2 border-white">
                 <video ref={localVideoRef} autoPlay playsInline muted className="w-full h-full object-cover" />
-                <div className="absolute bottom-1 right-1 bg-black/60 px-2 py-0.5 rounded text-xs font-mono text-white">
-                  {formatTime(callDuration)}
-                </div>
-
               </div>
             )}
 
             {/* Call Status */}
             <div className="absolute top-4 left-4">
-              <div className={`px-4 py-2 rounded-full bg-opacity-75`}>
-                <p className={`text-sm font-medium text-white`}>
+              <div className={`px-4 py-2 rounded-full ${theme === "dark" ? "bg-gray-800" : "bg-white"} bg-opacity-75`}>
+                <p className={`text-sm ${theme === "dark" ? "text-white" : "text-gray-900"}`}>
                   {callStatus === "connected" ? "Connected" : callStatus}
                 </p>
               </div>
             </div>
 
             {/* Call Controls */}
-            {!isMinimized && (
             <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2">
               <div className="flex space-x-4">
                 {callType === "video" && (
@@ -698,7 +557,7 @@ const rtcConfiguration = {
                   <FaPhoneSlash className="w-5 h-5" />
                 </button>
               </div>
-            </div>)}
+            </div>
           </div>
         )}
 

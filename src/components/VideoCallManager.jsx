@@ -1,17 +1,14 @@
 "use client"
 
 import { useEffect, useCallback } from "react"
+import useVideoCallStore from "../../store/videoCallStore"
+import useUserStore from "../../store/useUserStore"
 import VideoCallModal from "./VideoCallModal"
-import { useContext } from "react"
-import { UserContext } from "../contexts/UserContext"
-import useVideoCallStore from "../store/VideoCallStore"
 
-
-
-const VideoCallManager = ({ socket, selectedUser }) => {
+const VideoCallManager = ({ socket }) => {
   const { setIncomingCall, setCurrentCall, setCallType, setCallModalOpen, setCallStatus, endCall } = useVideoCallStore()
-const {loggedUser} = useContext(UserContext);
-    const callerAvatar = loggedUser.profilePic;
+
+  const { user } = useUserStore()
 
   useEffect(() => {
     if (!socket) return
@@ -21,12 +18,11 @@ const {loggedUser} = useContext(UserContext);
       console.log("Received incoming call:", { callerId, callerName, callerAvatar, callType, callId })
 
       setIncomingCall({
-  callerId,
-  callerName,
-  callerAvatar,
-  callId,
-  callType,
-})
+        callerId,
+        callerName,
+        callerAvatar,
+        callId,
+      })
       setCallType(callType)
       setCallModalOpen(true)
       setCallStatus("ringing")
@@ -53,7 +49,7 @@ const {loggedUser} = useContext(UserContext);
   // Memoized function to initiate a call
   const initiateCall = useCallback(
     (receiverId, receiverName, receiverAvatar, callType = "video") => {
-      const callId = `${loggedUser.userid}-${receiverId}-${Date.now()}`
+      const callId = `${user._id}-${receiverId}-${Date.now()}`
 
       console.log("Initiating call with:", {
         receiverId,
@@ -82,21 +78,21 @@ const {loggedUser} = useContext(UserContext);
 
       // Emit the call initiation
       socket.emit("initiate_call", {
-        callerId: loggedUser.userid,
+        callerId: user._id,
         receiverId,
         callType,
         callerInfo: {
-          username: loggedUser?.username,
-          profilePicture: loggedUser?.profilePic,
+          username: user.username,
+          profilePicture: user.profilePicture,
         },
       })
 
       console.log("Call initiated, currentCall set to:", callData)
     },
     [
-      loggedUser?.userid,
-      loggedUser?.username,
-      loggedUser?.profilePic,
+      user._id,
+      user.username,
+      user.profilePicture,
       socket,
       setCurrentCall,
       setCallType,
@@ -110,7 +106,7 @@ const {loggedUser} = useContext(UserContext);
     useVideoCallStore.getState().initiateCall = initiateCall
   }, [initiateCall])
 
-  return <VideoCallModal selectedUser={selectedUser} socket={socket} />
+  return <VideoCallModal socket={socket} />
 }
 
 export default VideoCallManager
