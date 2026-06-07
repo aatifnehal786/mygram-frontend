@@ -156,34 +156,34 @@ useEffect(() => {
     }
 
     // Handle remote stream - CRITICAL FIX
-   let remoteStreamSet = false;
+  pc.ontrack = (event) => {
+  console.log("TRACK:", event.track.kind);
 
-pc.ontrack = (event) => {
-  if (remoteStreamSet) return;
+  setRemoteStream((prevStream) => {
+    const stream = prevStream || new MediaStream();
 
-  const stream = event.streams?.[0];
-  if (!stream) return;
+    stream.addTrack(event.track);
 
-  remoteStreamSet = true;
-  setRemoteStream(stream);
+    return stream;
+  });
 };
 
     // Connection state monitoring
     pc.onconnectionstatechange = () => {
-      console.log(` ${role}: Connection state:`, pc.connectionState)
+  console.log("STATE:", pc.connectionState);
+
+  if (pc.connectionState === "connected") {
+    setCallStatus("connected");
+  }
+
+  if (pc.connectionState === "failed") {
+    setTimeout(() => {
       if (pc.connectionState === "failed") {
-        setCallStatus("failed")
-        setTimeout(handleEndCall, 2000)
+        setCallStatus("failed");
       }
-    }
-
-    pc.oniceconnectionstatechange = () => {
-      console.log(` ${role}: ICE state:`, pc.iceConnectionState)
-    }
-
-    pc.onsignalingstatechange = () => {
-      console.log(`${role}: Signaling state:`, pc.signalingState)
-    }
+    }, 3000);
+  }
+};
 
     setPeerConnection(pc)
     return pc
