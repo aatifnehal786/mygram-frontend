@@ -3,7 +3,7 @@
 import { useEffect, useRef, useMemo, useContext } from "react"
 import { FaVideo, FaVideoSlash, FaMicrophone, FaMicrophoneSlash, FaPhoneSlash, FaTimes } from "react-icons/fa"
 import useVideoCallStore from "../store/VideoCallStore"
-import {UserContext} from "../../contexts/UserContext"
+import {UserContext} from "../contexts/UserContext"
 import {useTheme} from "../contexts/ThemeContext"
 const VideoCallModal = ({ socket, selectedUser }) => {
   const localVideoRef = useRef(null)
