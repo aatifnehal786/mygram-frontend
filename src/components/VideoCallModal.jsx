@@ -80,23 +80,13 @@ useEffect(() => {
   // The rtcConfiguration object you posted is used to configure a WebRTC peer-to-peer connection. 
   // Specifically, it helps define how two browsers can discover and connect to each other, 
   // even when they're behind firewalls or NATs.
-const rtcConfiguration = {
-  iceServers: [
-    {
-      urls: "stun:global.stun.twilio.com:3478",
-    },
-    {
-       urls: [
-        "turn:global.relay.metered.ca:80",
-        "turn:global.relay.metered.ca:80?transport=tcp",
-        "turn:global.relay.metered.ca:443",
-        "turns:global.relay.metered.ca:443?transport=tcp",
-      ],
-      username: "5478a7ec3c7f0e7920acf1ae",
-      credential: "V7y9tTE4lsW9tpKo",
-    },
-  ],
-};
+ const rtcConfiguration = {
+    iceServers: [
+      { urls: "stun:stun.l.google.com:19302" },
+      { urls: "stun:stun1.l.google.com:19302" },
+      { urls: "stun:stun2.l.google.com:19302" },
+    ],
+  }
 
   // format time duration in mm:ss
   const formatTime = (seconds) => {
