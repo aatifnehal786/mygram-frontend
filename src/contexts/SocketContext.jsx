@@ -14,12 +14,9 @@ export const SocketProvider = ({ children }) => {
     if (socketRef.current) return;
 
     const socket = io("https://mygram-mvc.onrender.com", {
-      transports: ["polling", "websocket"],
-      withCredentials: true,
-      reconnection: true,
-      reconnectionAttempts: Infinity,
-      reconnectionDelay: 1000,
-    });
+  transports: ["polling", "websocket"],
+  withCredentials: true,
+});
 
     socketRef.current = socket;
    
