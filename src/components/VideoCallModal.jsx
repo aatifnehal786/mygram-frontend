@@ -162,17 +162,21 @@ useEffect(() => {
 }, [remoteStream]);
 
 useEffect(() => {
-  if (
-    remoteVideoRef.current &&
-    remoteStream
-  ) {
-    remoteVideoRef.current.srcObject =
-      remoteStream;
+  if (!remoteStream || !remoteVideoRef.current) return;
 
-    remoteVideoRef.current
-      .play()
-      .catch(console.error);
-  }
+  const video = remoteVideoRef.current;
+  video.srcObject = remoteStream;
+
+  const playVideo = async () => {
+    try {
+      await video.play();
+      console.log("Remote video playing");
+    } catch (err) {
+      console.log("Autoplay blocked:", err);
+    }
+  };
+
+  playVideo();
 }, [remoteStream]);
 
   // useEffect to track call duration
@@ -240,35 +244,13 @@ useEffect(() => {
       }
     }
 
-    pc.ontrack = (event) => {
-  console.log("ONTRACK");
-  console.log("Track kind:", event.track.kind);
-  console.log("Track state:", event.track.readyState);
-  console.log("Streams:", event.streams);
+   pc.ontrack = (event) => {
+  console.log("ONTRACK RECEIVED:", event.track.kind);
 
-  if (event.streams?.[0]) {
-    setRemoteStream(event.streams[0]);
-  }
+  const stream = event.streams?.[0] || new MediaStream([event.track]);
+
+  setRemoteStream(stream);
 };
-   
-
-    // Handle remote stream - CRITICAL FIX
-    pc.ontrack = (event) => {
-
-      if (event.streams && event.streams[0]) {
-        setRemoteStream(event.streams[0])
-      } else {
-        // Fallback: create stream from track
-        const stream = new MediaStream([event.track])
-        setRemoteStream(stream)
-      }
-      setCallStartTime((prev) => {
-        if (prev) return prev   // prevents double start
-        setCallActive(true)
-        return Date.now()
-      })
-    }
-
 
     // Connection state monitoring
     pc.onconnectionstatechange = () => {
@@ -615,6 +597,7 @@ useEffect(() => {
                 ref={remoteVideoRef}
                 autoPlay
                 playsInline
+                muted
                 className={`w-full h-full object-cover `}
               />
               
