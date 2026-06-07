@@ -225,25 +225,7 @@ useEffect(() => {
         }
       }
     }
-pc.ontrack = (event) => {
-  console.log(
-    role,
-    "Received track:",
-    event.track.kind
-  );
-
-  console.log(
-    role,
-    "Stream tracks:",
-    event.streams[0]
-      ?.getTracks()
-      .map(t => t.kind)
-  );
-
-  if (event.streams[0]) {
-    setRemoteStream(event.streams[0]);
-  }
-};
+   
 
     // Handle remote stream - CRITICAL FIX
     pc.ontrack = (event) => {
@@ -608,7 +590,7 @@ pc.ontrack = (event) => {
                 ref={remoteVideoRef}
                 autoPlay
                 playsInline
-                className={`w-full h-full object-cover bg-gray-800 ${remoteStream ? "block" : "hidden"}`}
+                className={`w-full h-full object-cover bg-gray-800 `}
               />
               
               
