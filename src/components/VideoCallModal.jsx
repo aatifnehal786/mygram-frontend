@@ -112,11 +112,26 @@ const VideoCallModal = ({ socket, selectedUser }) => {
   }, [localStream])
 
   // Set up remote video when remoteStream changes
-  useEffect(() => {
-    if (remoteStream && remoteVideoRef.current) {
-      remoteVideoRef.current.srcObject = remoteStream
+ useEffect(() => {
+  if (!remoteStream) return;
+
+  const video = remoteVideoRef.current;
+  if (!video) return;
+
+  video.srcObject = remoteStream;
+
+  const tryPlay = async () => {
+    try {
+      await video.play();
+      console.log("Remote video playing");
+    } catch (err) {
+      console.log("Play blocked:", err);
     }
-  }, [remoteStream])
+  };
+
+  // IMPORTANT: delay helps mobile browsers
+  setTimeout(tryPlay, 200);
+}, [remoteStream]);
 
   // Initialize media stream
   const initializeMedia = async (video = true) => {
@@ -168,16 +183,14 @@ const VideoCallModal = ({ socket, selectedUser }) => {
     }
 
     // Handle remote stream - CRITICAL FIX
-    pc.ontrack = (event) => {
+   pc.ontrack = (event) => {
+  console.log("🔥 ONTRACK FIRED");
 
-      if (event.streams && event.streams[0]) {
-        setRemoteStream(event.streams[0])
-      } else {
-        // Fallback: create stream from track
-        const stream = new MediaStream([event.track])
-        setRemoteStream(stream)
-      }
-    }
+  console.log("Video tracks:", event.streams?.[0]?.getVideoTracks());
+
+  const stream = event.streams?.[0] || new MediaStream([event.track]);
+  setRemoteStream(stream);
+};
 
     // Connection state monitoring
     pc.onconnectionstatechange = () => {
