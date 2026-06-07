@@ -68,13 +68,14 @@ const VideoCallModal = ({ socket }) => {
   }, [incomingCall, currentCall, isCallActive])
 
   // Connection detection
-  useEffect(() => {
-    if (peerConnection && remoteStream) {
-      console.log("Both peer connection and remote stream available - marking as connected")
-      setCallStatus("connected")
-      setCallActive(true)
-    }
-  }, [peerConnection, remoteStream, setCallStatus, setCallActive])
+useEffect(() => {
+  if (!remoteStream) return;
+
+  console.log("Stream received");
+
+  setCallStatus("connected");
+  setCallActive(true);
+}, [remoteStream]);
 
   // Set up local video when localStream changes
   useEffect(() => {
@@ -84,11 +85,26 @@ const VideoCallModal = ({ socket }) => {
   }, [localStream])
 
   // Set up remote video when remoteStream changes
-  useEffect(() => {
-    if (remoteStream && remoteVideoRef.current) {
-      remoteVideoRef.current.srcObject = remoteStream
+useEffect(() => {
+  const video = remoteVideoRef.current;
+  if (!video || !remoteStream) return;
+
+  video.srcObject = remoteStream;
+
+  const playVideo = async () => {
+    try {
+      await video.play();
+      console.log("Remote video playing");
+    } catch (err) {
+      console.log("Play blocked:", err);
     }
-  }, [remoteStream])
+  };
+
+  video.onloadedmetadata = playVideo;
+
+  // fallback (VERY IMPORTANT for mobile)
+  setTimeout(playVideo, 300);
+}, [remoteStream]);
 
   // Initialize media stream
   const initializeMedia = async (video = true) => {
@@ -140,16 +156,17 @@ const VideoCallModal = ({ socket }) => {
     }
 
     // Handle remote stream - CRITICAL FIX
-    pc.ontrack = (event) => {
+   let remoteStreamSet = false;
 
-      if (event.streams && event.streams[0]) {
-        setRemoteStream(event.streams[0])
-      } else {
-        // Fallback: create stream from track
-        const stream = new MediaStream([event.track])
-        setRemoteStream(stream)
-      }
-    }
+pc.ontrack = (event) => {
+  if (remoteStreamSet) return;
+
+  const stream = event.streams?.[0];
+  if (!stream) return;
+
+  remoteStreamSet = true;
+  setRemoteStream(stream);
+};
 
     // Connection state monitoring
     pc.onconnectionstatechange = () => {
