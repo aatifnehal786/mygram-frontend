@@ -12,10 +12,6 @@ export const apiFetch = async (endpoint, options = {}) => {
     ...options.headers,
   };
 
-  const isPublicRoute =
-    endpoint.includes("login") ||
-    endpoint.includes("verify-device-otp");
-
   let response;
   try {
     const apiUrl = "https://mygram-mvc.onrender.com";
@@ -36,26 +32,10 @@ export const apiFetch = async (endpoint, options = {}) => {
     data = { raw: text };
   }
 
-  // ✅ Skip auth handling for login/OTP
-  if (!isPublicRoute) {
-    if (response.status === 401) {
-  const auth = localStorage.getItem("token-auth");
-
-  if (auth) {
-    alert("Session expired. Please log in again.");
-  }
-
-  localStorage.removeItem("token-auth");
-  localStorage.removeItem("deviceId");
-
-  window.location.href = "/login";
-  return;
-}
-
-    if (response.status === 403) {
-      return data; // let UI handle
-    }
-  }
+    
+     
+    
+  
 
   return data;
 };
