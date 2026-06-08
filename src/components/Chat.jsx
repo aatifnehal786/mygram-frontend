@@ -21,6 +21,17 @@ const Chat = () => {
   const [messageToForward, setMessageToForward] = useState(null);
   const {theme} = useTheme();
    const [followedUsers, setFollowedUsers] = useState([]);
+
+
+
+   useEffect(() => {
+  if (!socket || !loggedUser?.userid) return;
+
+  socket.emit("join", loggedUser.userid);
+
+  console.log("Joined socket room:", loggedUser.userid);
+
+}, [socket, loggedUser?.userid]);
  
 useEffect(() => {
   if (!selectedUser || !loggedUser?.token) return;
@@ -42,9 +53,7 @@ useEffect(() => {
 
   fetchChat();
 
-  if (loggedUser?.userid) {
-    socket.emit("join", loggedUser.userid);
-  }
+
 
 const handleReceiveMessage = (msg) => {
   const senderId = msg.sender?._id || msg.sender;
