@@ -8,7 +8,7 @@ import VideoCallManager from './VideoCallManager';
 import useVideoCallStore from "../store/VideoCallStore"
 import EmojiPicker from "emoji-picker-react";
 import { VscReactions } from "react-icons/vsc";
-import useChatStore from "../store/ChatStore";
+import useChatStore from "../store/chatStore";
 
 
 
