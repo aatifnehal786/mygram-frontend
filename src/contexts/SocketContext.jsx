@@ -26,7 +26,7 @@ export const initializeSocket = () => {
   // Connection events
   socket.on("connect", () => {
     console.log("Socket connected:", socket.id);
-    socket.emit("user_connected", user._id);
+    socket.emit("join", user._id);
   });
 
   socket.on("connect_error", (error) => {
