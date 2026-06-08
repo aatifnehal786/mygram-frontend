@@ -90,9 +90,7 @@ console.log(selectedUser)
       console.log("Call initiated, currentCall set to:", callData)
     },
     [
-      selectedUser._id,
-      selectedUser.username,
-      selectedUser.profilePicture,
+      loggedUser,
       socket,
       setCurrentCall,
       setCallType,

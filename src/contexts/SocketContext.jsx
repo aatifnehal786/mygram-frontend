@@ -1,43 +1,43 @@
-import { createContext, useEffect, useContext, useRef } from "react";
+import { createContext, useEffect, useContext, useState } from "react";
 import { io } from "socket.io-client";
 import { UserContext } from "./UserContext";
 
 export const SocketContext = createContext(null);
 
 export const SocketProvider = ({ children }) => {
-  const socketRef = useRef(null);
+  const [socket, setSocket] = useState(null);
   const { loggedUser } = useContext(UserContext);
 
   useEffect(() => {
-    const socket = io("https://mygram-mvc.onrender.com", {
+    const newSocket = io("https://mygram-mvc.onrender.com", {
       transports: ["polling", "websocket"],
       withCredentials: true,
     });
 
-    socketRef.current = socket;
+    setSocket(newSocket);
 
-    socket.on("connect", () => {
-      console.log("Socket connected:", socket.id);
+    newSocket.on("connect", () => {
+      console.log("Socket connected:", newSocket.id);
     });
 
-    socket.on("disconnect", (reason) => {
+    newSocket.on("disconnect", (reason) => {
       console.warn("Socket disconnected:", reason);
     });
 
     return () => {
-      socket.disconnect();
+      newSocket.disconnect();
     };
   }, []);
 
   useEffect(() => {
-    if (!socketRef.current || !loggedUser?.userid) return;
+    if (!socket || !loggedUser?.userid) return;
 
-    socketRef.current.emit("join", loggedUser.userid);
+    socket.emit("join", loggedUser.userid);
     console.log("🟢 Joined socket room:", loggedUser.userid);
-  }, [loggedUser]);
+  }, [socket, loggedUser]);
 
   return (
-    <SocketContext.Provider value={socketRef.current}>
+    <SocketContext.Provider value={socket}>
       {children}
     </SocketContext.Provider>
   );

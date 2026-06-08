@@ -38,7 +38,7 @@ const {theme} = useTheme()
     processQueuedIceCandidates,
   } = useVideoCallStore()
 
-const {loggedUser} = useContext(UserContext)
+// const {loggedUser} = useContext(UserContext)
 
   // The rtcConfiguration object you posted is used to configure a WebRTC peer-to-peer connection. 
   // Specifically, it helps define how two browsers can discover and connect to each other, 
