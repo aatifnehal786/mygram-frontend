@@ -7,7 +7,7 @@ import { UserContext } from "../contexts/UserContext"
 import { useTheme } from "../contexts/ThemeContext"
 import { SocketContext } from "../contexts/SocketContext";
 
-const VideoCallModal = ({selectedUser}) => {
+const VideoCallModal = () => {
   const localVideoRef = useRef(null)
   const remoteVideoRef = useRef(null)
     const socket = useContext(SocketContext);
@@ -38,7 +38,7 @@ const {theme} = useTheme()
     processQueuedIceCandidates,
   } = useVideoCallStore()
 
-// const {loggedUser} = useContext(UserContext)
+const {loggedUser} = useContext(UserContext)
 
   // The rtcConfiguration object you posted is used to configure a WebRTC peer-to-peer connection. 
   // Specifically, it helps define how two browsers can discover and connect to each other, 
@@ -197,8 +197,8 @@ const {theme} = useTheme()
 
       socket.emit("webrtc_offer", {
         offer,
-        receiverId: selectedUser?._id,
-        callId: currentCall.callId,
+        receiverId: currentCall?.participantId,
+        callId: currentCall?.callId,
       })
 
     } catch (error) {
@@ -224,17 +224,17 @@ const {theme} = useTheme()
         callerId: incomingCall.callerId,
         callId: incomingCall.callId,
         receiverInfo: {
-          username: selectedUser?.username,
-          profilePicture: selectedUser?.profilePicture,
+          username: loggedUser?.username,
+          profilePicture: loggedUser?.profilePicture,
         },
       })
 
       // 4. Move to current call state
       setCurrentCall({
-        callId: incomingCall.callId,
-        participantId: incomingCall.callerId,
-        participantName: selectedUser?.username,
-        participantAvatar: selectedUser?.profilePicture,
+        callId: incomingCall?.callId,
+        participantId: incomingCall?.callerId,
+        participantName: incomingCall?.callerName,
+        participantAvatar: incomingCall?.callerAvatar,
       })
 
       clearIncomingCall()
@@ -249,8 +249,8 @@ const {theme} = useTheme()
   const handleRejectCall = () => {
     if (incomingCall) {
       socket.emit("reject_call", {
-        callerId: incomingCall.callerId,
-        callId: incomingCall.callId,
+        callerId: incomingCall?.callerId,
+        callId: incomingCall?.callId,
       })
     }
     endCall()
@@ -407,7 +407,7 @@ const {theme} = useTheme()
       socket.off("webrtc_answer", handleWebRTCAnswer)
       socket.off("webrtc_ice_candidate", handleWebRTCIceCandidate)
     }
-  }, [socket])
+  }, [socket,peerConnection,currentCall,incomingCall,loggedUser])
 
   // Don't render if modal should not be open
   if (!isCallModalOpen && !incomingCall) {
@@ -436,7 +436,7 @@ const {theme} = useTheme()
             <div className="text-center mb-8">
               <div className="w-32 h-32 rounded-full bg-gray-300 mx-auto mb-4 overflow-hidden">
                 <img
-                  src={selectedUser?.profilePicture || "/placeholder.svg?height=128&width=128"}
+                  src={displayInfo?.avatar || "/placeholder.svg?height=128&width=128"}
                   alt={displayInfo?.name || "Unknown"}
                   className="w-full h-full object-cover"
                   onError={(e) => {
@@ -445,7 +445,7 @@ const {theme} = useTheme()
                 />
               </div>
               <h2 className={`text-2xl font-semibold mb-2 ${theme === "dark" ? "text-white" : "text-gray-900"}`}>
-                {selectedUser?.username || "Unknown"}
+                {displayInfo?.name || "Unknown"}
               </h2>
               <p className={`text-lg ${theme === "dark" ? "text-gray-300" : "text-gray-600"}`}>
                 Incoming {callType} call...
@@ -488,7 +488,7 @@ const {theme} = useTheme()
                 <div className="text-center">
                   <div className="w-32 h-32 rounded-full bg-gray-600 mx-auto mb-4 overflow-hidden">
                     <img
-                      src={selectedUser?.profilePicture || "/placeholder.svg?height=128&width=128"}
+                      src={displayInfo?.avatar || "/placeholder.svg?height=128&width=128"}
                       alt={displayInfo?.name || "Unknown"}
                       className="w-full h-full object-cover"
                       onError={(e) => {
@@ -498,14 +498,14 @@ const {theme} = useTheme()
                   </div>
                   <p className="text-white text-xl">
                     {callStatus === "calling"
-                      ? `Calling ${selectedUser?.username || "User"}...`
+                      ? `Calling ${displayInfo?.name || "User"}...`
                       : callStatus === "connecting"
                         ? "Connecting..."
                         : callStatus === "connected"
-                          ?selectedUser?.username  || "Connected"
+                          ? displayInfo?.name  || "Connected"
                           : callStatus === "failed"
                             ? "Connection failed"
-                            : selectedUser?.username  || "Unknown"}
+                            : displayInfo?.name  || "Unknown"}
                   </p>
                 </div>
               </div>

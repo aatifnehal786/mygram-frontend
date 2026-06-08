@@ -616,7 +616,7 @@ const deleteMessageForEveryone = async (messageId) => {
 }, [socket, currentUserId]);
   
   const handleVideoCall = () => {
-    if (loggedUser && onlineMap[loggedUser?.userid]?.isOnline) {
+    if (selectedUser && onlineMap[loggedUser?.userid]?.isOnline) {
       // Get the initiateCall function from the store
       const { initiateCall } = useVideoCallStore.getState();
       console.log('this is initial call',initiateCall)
@@ -630,7 +630,7 @@ const deleteMessageForEveryone = async (messageId) => {
 
       // Make sure we're passing the correct profile picture URL
       const avatarUrl =
-        selectedUser?.profilePic ||
+        selectedUser?.profilePicture ||
         "/placeholder.svg?height=128&width=128";
 
       initiateCall(
@@ -646,7 +646,7 @@ const deleteMessageForEveryone = async (messageId) => {
 
 
 return (
-  
+  <>
 <div className={`flex-1 w-full flex flex-col h-full bg-gray-50 ${theme === 'dark' ? 'bg-gray-800 text-white' : 'bg-gray-50 text-gray-900'}`}>
 
     {/* Header */}
@@ -989,11 +989,12 @@ return (
     Send
   </button>
 </div>
-    <VideoCallManager selectedUser={selectedUser} />
+   
     
   </div> 
+ <VideoCallManager selectedUser={selectedUser} />
 
-
+</>
 )
 
 
