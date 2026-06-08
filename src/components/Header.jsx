@@ -1,16 +1,18 @@
-import { useContext, useState } from "react";
+import {  useState } from "react";
 
 import { UserContext } from "../contexts/UserContext";
 import { useNavigate, Link } from "react-router-dom";
 import { FaBars } from "react-icons/fa";
 import { RxCross1 } from "react-icons/rx";
 import { useTheme } from "../contexts/ThemeContext";
+import useUserStore from "../store/useUserStore";
 
 
 export default function Header() {
 
   
-  const loggedData = useContext(UserContext);
+  // const loggedData = useContext(UserContext);
+    const loggedData = useUserStore.getState((state) => state.loggedUser);
   
   const [menuOpen, setMenuOpen] = useState(false);
   const navigate = useNavigate();

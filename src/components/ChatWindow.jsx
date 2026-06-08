@@ -2,21 +2,23 @@ import React, { useEffect, useRef, useState, useContext } from 'react';
 import { UserContext } from '../contexts/UserContext';
 import { apiFetch } from "../api/apiFetch";
 import './chat.css';
-import { SocketContext } from "../contexts/SocketContext";
+import { getSocket } from "../contexts/SocketContext";
 import { FaVideo, FaEllipsisV, FaArrowLeft} from 'react-icons/fa';
 import VideoCallManager from './VideoCallManager';
 import useVideoCallStore from "../store/VideoCallStore"
 import EmojiPicker from "emoji-picker-react";
 import { VscReactions } from "react-icons/vsc";
 import useChatStore from "../store/chatStore";
+import useUserStore from '../store/useUserStore';
 
 
 
 const REACTIONS = ["❤️", "😂", "😮", "😢", "👍", "👎"];
 
 const ChatWindow = ({  onBack, theme,}) => {
-  const { loggedUser } = useContext(UserContext);
-  const socket = useContext(SocketContext);
+  // const { loggedUser } = useContext(UserContext);
+    const loggedUser = useUserStore.getState((state) => state.loggedUser);
+  const socket = useContext(getSocket);
   const currentUserId = loggedUser?.userid;
   const [input, setInput] = useState('');
   const [openDropdownId, setOpenDropdownId] = useState(null);

@@ -1,22 +1,25 @@
-import { useEffect, useState, useContext } from "react";
+import { useEffect, useState} from "react";
 import { UserContext } from "../contexts/UserContext";
 import { Link } from "react-router-dom";
 import { apiFetch } from "../api/apiFetch";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useTheme } from "../contexts/ThemeContext";
+import useUserStore from "../store/useUserStore";
 export default function Home() {
   const [users, setUsers] = useState([]);
  
  
   const [showVerifyMessage, setShowVerifyMessage] = useState(false); // Renamed for clarity
-  const { loggedUser } = useContext(UserContext);
+  // const { loggedUser } = useContext(UserContext);
+    const loggedUser = useUserStore.getState((state) => state.loggedUser);
   const [followStatus, setFollowStatus] = useState({});
   const [loadingUserId, setLoadingUserId] = useState(null);
   const { theme } = useTheme();
 
 
-  console.log(loggedUser);
+  // console.log(loggedUser);
+
 // FETCH ALL USERS
 
 useEffect(() => {

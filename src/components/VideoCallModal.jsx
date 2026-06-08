@@ -5,12 +5,12 @@ import { FaVideo, FaVideoSlash, FaMicrophone, FaMicrophoneSlash, FaPhoneSlash, F
 import useVideoCallStore from "../store/VideoCallStore"
 import { UserContext } from "../contexts/UserContext"
 import { useTheme } from "../contexts/ThemeContext"
-import { SocketContext } from "../contexts/SocketContext";
-
+import { getSocket } from "../contexts/SocketContext";
+import useUserStore from "../store/useUserStore"
 const VideoCallModal = () => {
   const localVideoRef = useRef(null)
   const remoteVideoRef = useRef(null)
-    const socket = useContext(SocketContext);
+    const socket = useContext(getSocket);
 const {theme} = useTheme()
   const {
     currentCall,
@@ -38,7 +38,8 @@ const {theme} = useTheme()
     processQueuedIceCandidates,
   } = useVideoCallStore()
 
-const {loggedUser} = useContext(UserContext)
+// const {loggedUser} = useContext(UserContext)
+  const loggedUser = useUserStore.getState((state) => state.loggedUser);
 
   // The rtcConfiguration object you posted is used to configure a WebRTC peer-to-peer connection. 
   // Specifically, it helps define how two browsers can discover and connect to each other, 

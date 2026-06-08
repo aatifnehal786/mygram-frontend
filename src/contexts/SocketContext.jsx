@@ -1,44 +1,55 @@
-import { createContext, useEffect, useContext, useState } from "react";
 import { io } from "socket.io-client";
-import { UserContext } from "./UserContext";
+import useUserStore from "../store/useUserStore";
 
-export const SocketContext = createContext(null);
+let socket = null;
+// const token = localStorage.getItem("auth_token");
 
-export const SocketProvider = ({ children }) => {
-  const [socket, setSocket] = useState(null);
-  const { loggedUser } = useContext(UserContext);
 
-  useEffect(() => {
-    const newSocket = io("https://mygram-mvc.onrender.com", {
-      transports: ["websocket"],
-      withCredentials: true,
-    });
+export const initializeSocket = () => {
+  if (socket) return socket;
 
-    setSocket(newSocket);
+  const user = useUserStore.getState((state) => state.loggedUser);
+  
+  if (!user?._id) return null;
 
-    newSocket.on("connect", () => {
-      console.log("Socket connected:", newSocket.id);
-    });
+  const BACKEND_URL = "https://mygram-mvc.onrender.com"
 
-    newSocket.on("disconnect", (reason) => {
-      console.warn("Socket disconnected:", reason);
-    });
+  socket = io(BACKEND_URL, {
+    withCredentials: true,
+    autoConnect: true,
+    reconnection: true,
+    reconnectionAttempts: 10,
+    reconnectionDelay: 1000,
+    // 🚫 DO NOT force transports
+  });
 
-    return () => {
-      newSocket.disconnect();
-    };
-  }, []);
+  // Connection events
+  socket.on("connect", () => {
+    console.log("Socket connected:", socket.id);
+    socket.emit("user_connected", user._id);
+  });
 
-  useEffect(() => {
-    if (!socket || !loggedUser?.userid) return;
+  socket.on("connect_error", (error) => {
+    console.error("Socket connection error:", error);
+  });
 
-    socket.emit("join", loggedUser.userid);
-    console.log("🟢 Joined socket room:", loggedUser.userid);
-  }, [socket, loggedUser]);
+  socket.on("disconnect", (reason) => {
+    console.log("Socket disconnected:", reason);
+  });
 
-  return (
-    <SocketContext.Provider value={socket}>
-      {children}
-    </SocketContext.Provider>
-  );
+  return socket;
+};
+
+export const getSocket = () => {
+  if (!socket) {
+    return initializeSocket();
+  }
+  return socket;
+};
+
+export const disconnectSocket = () => {
+  if (socket) {
+    socket.disconnect();
+    socket = null;
+  }
 };

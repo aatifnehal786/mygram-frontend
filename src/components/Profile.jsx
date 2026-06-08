@@ -1,13 +1,15 @@
 import { useParams } from "react-router-dom";
-import { useContext, useEffect, useState, useRef } from "react";
-import { UserContext } from "../contexts/UserContext";
+import {  useEffect, useState, useRef } from "react";
+// import { UserContext } from "../contexts/UserContext";
+import useUserStore from "../store/useUserStore";
 import ImagePostWithMusic from "./ImagePostWithMusic";
 import { apiFetch } from "../api/apiFetch"; // 👈 adjust path as needed
 import { useTheme } from "../contexts/ThemeContext";
 import VideoPost from "./VideoPost";
 export default function Profile() {
   const { id } = useParams();
-  const { loggedUser } = useContext(UserContext);
+  // const { loggedUser } = useContext(UserContext);
+    const loggedUser = useUserStore.getState((state) => state.loggedUser);
   const [currentlyPlayingId, setCurrentlyPlayingId] = useState(null);
   
   const [stats, setStats] = useState(null);

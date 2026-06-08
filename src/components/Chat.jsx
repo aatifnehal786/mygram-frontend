@@ -8,17 +8,19 @@ import { apiFetch } from '../api/apiFetch';
 import './chat.css';
 import { UserContext } from '../contexts/UserContext';
 import { useTheme } from '../contexts/ThemeContext';  
-import { SocketContext } from "../contexts/SocketContext";
+import { getSocket } from "../contexts/SocketContext";
 import useChatStore from "../store/chatStore";
+import useUserStore from '../store/useUserStore';
 
 
 
 
 const Chat = () => {
   // const [selectedUser, setSelectedUser] = useState(null);
-   const socket = useContext(SocketContext);
+   const socket = useContext(getSocket);
   // const [messages, setMessages] = useState([]);
-  const {loggedUser} = useContext(UserContext)
+  // const {loggedUser} = useContext(UserContext)
+    const loggedUser = useUserStore.getState((state) => state.loggedUser);
   // const [isForwarding, setIsForwarding] = useState(false);
   // const [messageToForward, setMessageToForward] = useState(null);
   const {theme} = useTheme();
@@ -38,14 +40,7 @@ const {
 } = useChatStore();
 
 
-   useEffect(() => {
-  if (!socket || !loggedUser?.userid) return;
 
-  socket.emit("join", loggedUser.userid);
-
-  console.log("Joined socket room:", loggedUser.userid);
-
-}, [socket, loggedUser?.userid]);
  
 useEffect(() => {
   if (!selectedUser || !loggedUser?.token) return;

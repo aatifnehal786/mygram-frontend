@@ -1,5 +1,5 @@
 import { Link, useNavigate } from "react-router-dom";
-import { useState, useContext, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { UserContext } from "../contexts/UserContext";
 import hide from "../assets/hide.png";
 import show from "../assets/show.png";
@@ -8,9 +8,10 @@ import {apiFetch} from '../api/apiFetch'
 import { toast,ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Spinner from "../Spinner";
+import useUserStore from "../store/useUserStore";
 
 export default function Login() {
-  const loggedData = useContext(UserContext);
+  // const loggedData = useContext(UserContext);
   const [user, setUser] = useState({ loginId: "", password: "" });
   const [deviceId, setDeviceId] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -18,6 +19,9 @@ export default function Login() {
   const [otpRequired, setOtpRequired] = useState(false);
   const [otp, setOtp] = useState("");
   const [email, setEmail] = useState("");
+  const setLoggedUser = useUserStore(
+  (state) => state.setLoggedUser
+);
 
   const navigate = useNavigate();
 
@@ -74,7 +78,7 @@ export default function Login() {
 
     // ✅ CASE 1: Login success
     if (data.token) {
-      loggedData.setLoggedUser(data);
+      setLoggedUser(data);
 
       localStorage.setItem(
         "token-auth",
@@ -127,7 +131,7 @@ const handleVerifyOtp = async () => {
 
     // ✅ SUCCESS
     if (data.token) {
-      loggedData.setLoggedUser(data);
+      setLoggedUser(data);
 
       localStorage.setItem(
         "token-auth",

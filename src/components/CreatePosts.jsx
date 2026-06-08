@@ -5,6 +5,8 @@ import { apiFetch } from "../api/apiFetch";
 import { UserContext } from '../contexts/UserContext';
 import {useTheme} from '../contexts/ThemeContext';
 import Spinner from "../Spinner";
+
+
 const CreatePost = () => {
   const [caption, setCaption] = useState('');
   const [mediaType, setMediaType] = useState('image');
