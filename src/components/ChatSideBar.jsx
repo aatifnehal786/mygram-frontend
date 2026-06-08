@@ -3,11 +3,13 @@ import { UserContext } from '../contexts/UserContext';
 import { apiFetch } from "../api/apiFetch";
 // import { useSocket } from '../contexts/SocketContext';
 import { SocketContext } from "../contexts/SocketContext";
+import useChatStore from "../store/chatStore";
 
 
 
 
-const ChatSidebar = ({followedUsers, onSelectUser, selectedUserId, onSelectForwardUser, isForwarding = false, theme}) => {
+const ChatSidebar = ({ onSelectForwardUser,
+  theme}) => {
 //   const { loggedUser } = useContext(UserContext);
 
   const [searchQuery, setSearchQuery] = useState('');
@@ -16,7 +18,13 @@ const ChatSidebar = ({followedUsers, onSelectUser, selectedUserId, onSelectForwa
   const [selectedForwardUsers, setSelectedForwardUsers] = useState([]);
   
  
-
+const {
+  followedUsers,
+  selectedUser,
+  setSelectedUser,
+  isForwarding,
+  setForwardMode,
+} = useChatStore();
 
 
 const handleSearch = async (q) => {
@@ -39,19 +47,24 @@ const handleSearch = async (q) => {
         : [...prev, userId]
     );
   };
+const handleSend = () => {
+  if (selectedForwardUsers.length === 0) return;
 
-  const handleSend = () => {
-    if (selectedForwardUsers.length > 0) {
-      onSelectForwardUser(selectedForwardUsers);
-      setSelectedForwardUsers([]);
-    }
-  };
+  onSelectForwardUser(selectedForwardUsers);
 
-  const handleCancel = () => {
-    setSelectedForwardUsers([]);
-    onSelectForwardUser([]); // empty array triggers cancel
-  };
+  setSelectedForwardUsers([]);
 
+  setForwardMode(false, null);
+};
+
+
+const handleCancel = () => {
+  setSelectedForwardUsers([]);
+
+  setForwardMode(false, null);
+
+  onSelectForwardUser([]);
+};
   const usersToDisplay = searchQuery ? results : followedUsers;
 
  
@@ -88,11 +101,15 @@ const handleSearch = async (q) => {
         {usersToDisplay.map((user) => (
           <div
             key={user._id}
-            onClick={() => !isForwarding && onSelectUser(user)}
+           onClick={() => {
+  if (!isForwarding) {
+    setSelectedUser(user);
+  }
+}}
             className={`
               flex items-center gap-3 px-4 py-3 cursor-pointer
               hover:bg-gray-100 transition
-              ${selectedUserId === user._id ? "bg-gray-200" : ""}
+              ${selectedUser?._id === user._id ? "bg-gray-200" : ""}
             `}
           >
             {/* Profile */}

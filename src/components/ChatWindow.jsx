@@ -8,12 +8,13 @@ import VideoCallManager from './VideoCallManager';
 import useVideoCallStore from "../store/VideoCallStore"
 import EmojiPicker from "emoji-picker-react";
 import { VscReactions } from "react-icons/vsc";
+import useChatStore from "../store/ChatStore";
 
 
 
 const REACTIONS = ["❤️", "😂", "😮", "😢", "👍", "👎"];
 
-const ChatWindow = ({ selectedUser, triggerForwardMode, messages, setMessages, onBack, theme }) => {
+const ChatWindow = ({  onBack, theme,}) => {
   const { loggedUser } = useContext(UserContext);
   const socket = useContext(SocketContext);
   const currentUserId = loggedUser?.userid;
@@ -38,6 +39,12 @@ const ChatWindow = ({ selectedUser, triggerForwardMode, messages, setMessages, o
   const [hasMore, setHasMore] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const shouldAutoScrollRef = useRef(true);
+   const {
+    selectedUser,
+    messages,
+    setMessages,
+    triggerForwardMode,
+  } = useChatStore();
 
 
 
@@ -616,7 +623,7 @@ const deleteMessageForEveryone = async (messageId) => {
 }, [socket, currentUserId]);
   
   const handleVideoCall = () => {
-    if (selectedUser && onlineMap[loggedUser?.userid]?.isOnline) {
+    if (selectedUser && onlineMap[selectedUser?._id]?.isOnline) {
       // Get the initiateCall function from the store
       const { initiateCall } = useVideoCallStore.getState();
       console.log('this is initial call',initiateCall)

@@ -1,5 +1,5 @@
 // ✅ Chat.js
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useEffect, useContext } from 'react';
 import ChatSidebar from './ChatSideBar';
 import ChatWindow from './ChatWindow';
 import { ToastContainer } from 'react-toastify';
@@ -9,19 +9,33 @@ import './chat.css';
 import { UserContext } from '../contexts/UserContext';
 import { useTheme } from '../contexts/ThemeContext';  
 import { SocketContext } from "../contexts/SocketContext";
+import useChatStore from "../store/chatStore";
+
 
 
 
 const Chat = () => {
-  const [selectedUser, setSelectedUser] = useState(null);
+  // const [selectedUser, setSelectedUser] = useState(null);
    const socket = useContext(SocketContext);
-  const [messages, setMessages] = useState([]);
+  // const [messages, setMessages] = useState([]);
   const {loggedUser} = useContext(UserContext)
-  const [isForwarding, setIsForwarding] = useState(false);
-  const [messageToForward, setMessageToForward] = useState(null);
+  // const [isForwarding, setIsForwarding] = useState(false);
+  // const [messageToForward, setMessageToForward] = useState(null);
   const {theme} = useTheme();
-   const [followedUsers, setFollowedUsers] = useState([]);
-
+  //  const [followedUsers, setFollowedUsers] = useState([]);
+const {
+  selectedUser,
+  setSelectedUser,
+  setMessages,
+  addMessage,
+  followedUsers,
+  setFollowedUsers,
+  updateUnreadCount,
+  updateLastMessage,
+  isForwarding,
+  messageToForward,
+  setForwardMode,
+} = useChatStore();
 
 
    useEffect(() => {
@@ -44,158 +58,207 @@ useEffect(() => {
         `api/chats/chat/${selectedUser._id}`
       );
 
-      setMessages(Array.isArray(data) ? data : []);
+      setMessages(
+        Array.isArray(data) ? data : []
+      );
     } catch (err) {
-      console.error("Fetch chat error:", err);
+      console.error(
+        "Fetch chat error:",
+        err
+      );
+
       setMessages([]);
     }
   };
 
   fetchChat();
 
+  const handleReceiveMessage = (msg) => {
+    const senderId =
+      msg.sender?._id || msg.sender;
 
+    const receiverId =
+      msg.receiver?._id || msg.receiver;
 
-const handleReceiveMessage = (msg) => {
-  const senderId = msg.sender?._id || msg.sender;
-  const receiverId = msg.receiver?._id || msg.receiver;
+    const otherUserId =
+      senderId === loggedUser.userid
+        ? receiverId
+        : senderId;
 
-  const otherUserId =
-    senderId === loggedUser.userid
-      ? receiverId
-      : senderId;
-
-  // Update chat window
-  const isCurrentChat =
-    selectedUser &&
-    (
-      (senderId === loggedUser.userid &&
-        receiverId === selectedUser._id) ||
-      (receiverId === loggedUser.userid &&
-        senderId === selectedUser._id)
-    );
-
-  if (isCurrentChat) {
-    setMessages(prev => [...prev, msg]);
-  }
-
-  // Update sidebar and move chat to top
-  setFollowedUsers(prev => {
-    const updated = prev.map(user =>
-      user._id === otherUserId
-        ? {
-            ...user,
-            lastMessage: msg,
-          }
-        : user
-    );
-
-    updated.sort((a, b) => {
-      if (!a.lastMessage) return 1;
-      if (!b.lastMessage) return -1;
-
-      return (
-        new Date(b.lastMessage.createdAt) -
-        new Date(a.lastMessage.createdAt)
+    const isCurrentChat =
+      selectedUser &&
+      (
+        (
+          senderId === loggedUser.userid &&
+          receiverId === selectedUser._id
+        ) ||
+        (
+          receiverId === loggedUser.userid &&
+          senderId === selectedUser._id
+        )
       );
-    });
 
-    return [...updated];
-  });
-};
+    if (isCurrentChat) {
+      addMessage(msg);
+    }
 
-  socket.on("receiveMessage", handleReceiveMessage);
+    updateLastMessage(otherUserId, msg);
+  };
+
+  socket.on(
+    "receiveMessage",
+    handleReceiveMessage
+  );
 
   return () => {
-    socket.off("receiveMessage", handleReceiveMessage);
+    socket.off(
+      "receiveMessage",
+      handleReceiveMessage
+    );
   };
-
-}, [selectedUser, loggedUser, socket]);
-
-
-
- useEffect(() => {
-  if (!loggedUser?.token) return;
-
-  const fetchFollowedUsers = async () => {
-   
-    try {
-      const data = await apiFetch(`api/followers/${loggedUser?.userid}`);
-      setFollowedUsers(data.followers || []);
-    } catch (err) {
-      console.error("Error fetching followed users:", err.message);
-    }
-  };
-
-  fetchFollowedUsers();
-}, [loggedUser]);
+}, [
+  selectedUser,
+  loggedUser,
+  socket,
+  setMessages,
+  addMessage,
+  updateLastMessage,
+]);
 
 
 
 useEffect(() => {
+  if (!loggedUser?.token) return;
+
+  const fetchFollowedUsers = async () => {
+    try {
+      const data = await apiFetch(
+        `api/followers/${loggedUser.userid}`
+      );
+
+      setFollowedUsers(
+        data.followers || []
+      );
+    } catch (err) {
+      console.error(
+        "Error fetching followed users:",
+        err.message
+      );
+    }
+  };
+
+  fetchFollowedUsers();
+}, [
+  loggedUser?.token,
+  loggedUser?.userid,
+  setFollowedUsers,
+]);
+
+useEffect(() => {
   if (!socket) return;
 
-  const handleUnreadUpdate = (data) => {
-    setFollowedUsers((prev) =>
-      prev.map((user) =>
-        user._id === data.senderId
-          ? {
-              ...user,
-              unreadCount: data.unreadCount,
-            }
-          : user
-      )
+  const handleUnreadUpdate = (
+    data
+  ) => {
+    updateUnreadCount(
+      data.senderId,
+      data.unreadCount
     );
   };
 
-  socket.on("unreadCountUpdated", handleUnreadUpdate);
+  socket.on(
+    "unreadCountUpdated",
+    handleUnreadUpdate
+  );
 
   return () => {
-    socket.off("unreadCountUpdated", handleUnreadUpdate);
+    socket.off(
+      "unreadCountUpdated",
+      handleUnreadUpdate
+    );
   };
-}, [socket]);
+}, [
+  socket,
+  updateUnreadCount,
+]);
+
+
 // Forward message to multiple users
-const forwardMessageToUsers = async (msg, receiverIds) => {
-  const receivers = Array.isArray(receiverIds) ? receiverIds : [receiverIds];
-  setIsForwarding(true);
+const forwardMessageToUsers = async (
+  msg,
+  receiverIds
+) => {
+  const receivers = Array.isArray(
+    receiverIds
+  )
+    ? receiverIds
+    : [receiverIds];
+
+  setForwardMode(true, msg);
 
   try {
     for (const receiverId of receivers) {
-      if (receiverId === loggedUser.userid) continue;
+      if (
+        receiverId ===
+        loggedUser.userid
+      )
+        continue;
 
-      const newMsg = await apiFetch("api/chats/chat/forward", {
-        method: "POST",
-        body: JSON.stringify({
-          senderId: loggedUser.userid,
-          receiverId,
-          message: msg.message || '',
-          fileUrl: msg.fileUrl || null,
-          fileType: msg.fileType || null,
-          isForwarded: true,
-        }),
-      });
+      const newMsg =
+        await apiFetch(
+          "api/chats/chat/forward",
+          {
+            method: "POST",
+            body: JSON.stringify({
+              senderId:
+                loggedUser.userid,
+              receiverId,
+              message:
+                msg.message || "",
+              fileUrl:
+                msg.fileUrl || null,
+              fileType:
+                msg.fileType || null,
+              isForwarded: true,
+            }),
+          }
+        );
 
-      socket?.emit("sendMessage", newMsg);
+      socket?.emit(
+        "sendMessage",
+        newMsg
+      );
 
-      if (selectedUser?._id === receiverId) {
-        setMessages(prev => [...prev, newMsg]);
+      if (
+        selectedUser?._id ===
+        receiverId
+      ) {
+        addMessage(newMsg);
       }
     }
 
-    alert("Message forwarded successfully.");
+    alert(
+      "Message forwarded successfully."
+    );
   } catch (err) {
-    console.error("Forward failed:", err);
+    console.error(
+      "Forward failed:",
+      err
+    );
+
     alert("Forwarding failed.");
   } finally {
-    setIsForwarding(false);
+    setForwardMode(false, null);
   }
 };
 
-  const triggerForwardMode = (msg) => {
-    setIsForwarding(true);
-    setSelectedUser(null)
-    setMessageToForward(msg);
-    
-  };
+const triggerForwardMode = (
+  msg
+) => {
+  setForwardMode(true, msg);
+
+  setSelectedUser(null);
+};
 
   
 
@@ -212,25 +275,27 @@ const forwardMessageToUsers = async (msg, receiverIds) => {
       ${selectedUser ? "hidden md:block" : "block"}
     `}
   >
-    <ChatSidebar
-      onSelectUser={(user) => {
-        if (!isForwarding) {
-          setSelectedUser(user);
-        }
-      }}
-      followedUsers={followedUsers}
-      selectedUserId={selectedUser?._id}
-      isForwarding={isForwarding}
-      onSelectForwardUser={(userIds) => {
-        if (userIds.length === 0) {
-          setIsForwarding(false);
-          setMessageToForward(null);
-        } else {
-          forwardMessageToUsers(messageToForward, userIds);
-        }
-      }}
-      theme={theme}
-    />
+   <ChatSidebar
+  onSelectUser={(user) => {
+    if (!isForwarding) {
+      setSelectedUser(user);
+    }
+  }}
+  followedUsers={followedUsers}
+  selectedUserId={selectedUser?._id}
+  isForwarding={isForwarding}
+  onSelectForwardUser={(userIds) => {
+    if (userIds.length === 0) {
+      setForwardMode(false, null);
+    } else {
+      forwardMessageToUsers(
+        messageToForward,
+        userIds
+      );
+    }
+  }}
+  theme={theme}
+/>
   </div>
 
   {/* Chat Window */}
@@ -242,14 +307,12 @@ const forwardMessageToUsers = async (msg, receiverIds) => {
     `}
   >
     {selectedUser ? (
-      <ChatWindow
-        selectedUser={selectedUser}
-        messages={messages}
-        setMessages={setMessages}
-        triggerForwardMode={triggerForwardMode}
-        onBack={() => setSelectedUser(null)} // mobile back
-        theme={theme}
-      />
+     <ChatWindow
+  selectedUser={selectedUser}
+  triggerForwardMode={triggerForwardMode}
+  onBack={() => setSelectedUser(null)}
+  theme={theme}
+/>
     ) : (
       <div className="hidden md:flex h-full items-center justify-center text-gray-400">
         Select a chat to start messaging
