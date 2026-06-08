@@ -10,8 +10,10 @@ const useChatStore = create((set) => ({
   setSelectedUser: (user) =>
     set({ selectedUser: user }),
 
-  setMessages: (messages) =>
-    set({ messages }),
+   setMessages: (messages) =>
+    set({
+      messages: Array.isArray(messages) ? messages : [],
+    }),
 
   addMessage: (message) =>
     set((state) => ({
