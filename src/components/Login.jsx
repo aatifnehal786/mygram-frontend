@@ -19,9 +19,10 @@ export default function Login() {
   const [otpRequired, setOtpRequired] = useState(false);
   const [otp, setOtp] = useState("");
   const [email, setEmail] = useState("");
-  const setLoggedUser = useUserStore(
-  (state) => state.setLoggedUser
-);
+  const setLoggedUser = useUserStore((state) => state.setLoggedUser);
+ 
+
+
 
   const navigate = useNavigate();
 

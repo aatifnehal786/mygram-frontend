@@ -11,14 +11,13 @@ import useUserStore from "../store/useUserStore";
 export default function Header() {
 
   
-  // const loggedData = useContext(UserContext);
-    const loggedData = useUserStore.getState((state) => state.loggedUser);
+
   
   const [menuOpen, setMenuOpen] = useState(false);
   const navigate = useNavigate();
   const { theme } = useTheme();
 
-
+ const logout = useUserStore((state) => state.logout);
 
 
 // FETCH ALL USERS EXCEPT THE CURRENT LOGGED IN
@@ -28,10 +27,7 @@ export default function Header() {
 
 
   function logOut() {
-    localStorage.removeItem('token-auth');
-    sessionStorage.removeItem("token-auth")
-    localStorage.removeItem('chatUnlocked')
-    loggedData.setLoggedUser(null);
+    logout();
     navigate('/login', { replace: true });
   }
 

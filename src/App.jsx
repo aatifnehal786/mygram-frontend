@@ -22,7 +22,7 @@ import Devices from './components/Devices';
 // import { SocketProvider } from './contexts/SocketContext';
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { SocketContext } from "./contexts/SocketContext";
+import { getSocket } from "./contexts/SocketContext";
 
 
 
@@ -44,7 +44,7 @@ useEffect(() => {
 }, []);
 
 function NotificationListener() {
-  const socket = useContext(SocketContext);
+  const socket = useContext(getSocket);
 
   useEffect(() => {
     if (!socket) return;
