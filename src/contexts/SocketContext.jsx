@@ -10,7 +10,7 @@ export const SocketProvider = ({ children }) => {
 
   useEffect(() => {
     const newSocket = io("https://mygram-mvc.onrender.com", {
-      transports: ["polling", "websocket"],
+      transports: ["websocket"],
       withCredentials: true,
     });
 
