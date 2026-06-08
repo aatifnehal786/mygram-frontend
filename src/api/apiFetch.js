@@ -39,12 +39,18 @@ export const apiFetch = async (endpoint, options = {}) => {
   // ✅ Skip auth handling for login/OTP
   if (!isPublicRoute) {
     if (response.status === 401) {
-      alert("Session expired. Please log in again.");
-      localStorage.removeItem("token-auth");
-      localStorage.removeItem("deviceId");
-      window.location.href = "/login";
-      return;
-    }
+  const auth = localStorage.getItem("token-auth");
+
+  if (auth) {
+    alert("Session expired. Please log in again.");
+  }
+
+  localStorage.removeItem("token-auth");
+  localStorage.removeItem("deviceId");
+
+  window.location.href = "/login";
+  return;
+}
 
     if (response.status === 403) {
       return data; // let UI handle
