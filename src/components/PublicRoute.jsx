@@ -1,10 +1,12 @@
 // components/PublicRoute.jsx
-import { useContext } from "react";
+// import { useContext } from "react";
 import { Navigate } from "react-router-dom";
-import { UserContext } from "../contexts/UserContext";
+// import { UserContext } from "../contexts/UserContext";
+import useUserStore from '../store/useUserStore'
 
 export default function PublicRoute({ children }) {
-  const { loggedUser } = useContext(UserContext);
+  
+   const loggedUser = useUserStore.getState((state) => state.loggedUser);
 
   if (loggedUser) {
     // if logged in → redirect away from login/register
