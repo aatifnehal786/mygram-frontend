@@ -39,6 +39,27 @@ const useChatStore = create((set) => ({
       ),
     })),
 
+
+    markMessagesSeen: (userId, currentUserId) =>
+  set((state) => ({
+    messages: state.messages.map((m) => {
+      const senderId =
+        m.sender?._id || m.sender;
+
+      if (
+        senderId === currentUserId &&
+        (m.receiver?._id || m.receiver) === userId
+      ) {
+        return {
+          ...m,
+          isSeen: true,
+        };
+      }
+
+      return m;
+    }),
+  })),
+
   updateLastMessage: (otherUserId, msg) =>
     set((state) => {
       const updated = state.followedUsers.map((user) =>

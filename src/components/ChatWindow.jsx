@@ -44,6 +44,7 @@ const ChatWindow = ({  onBack, theme,}) => {
     messages,
     setMessages,
     triggerForwardMode,
+    markMessagesSeen
   } = useChatStore();
 
 
@@ -449,24 +450,13 @@ const handleDynamicEnter = (e) => {
 
   }
 
-  
+
+
 useEffect(() => {
   if (!socket) return;
 
   const handler = ({ userId }) => {
-    setMessages((prev) =>
-      prev.map((m) => {
-        const senderId = m.sender?._id || m.sender;
-
-        // ✅ mark only messages sent by current user
-        // AND only when seen by the correct receiver
-        if (senderId === currentUserId && m.receiver === userId) {
-          return { ...m, isSeen: true };
-        }
-
-        return m;
-      })
-    );
+    markMessagesSeen(userId, currentUserId);
   };
 
   socket.on("messagesSeen", handler);
