@@ -115,7 +115,7 @@ useEffect(() => {
       handleReceiveMessage
     );
   };
-}, [
+}, [selectedUser,
   loggedUser,
   socket
 ]);
