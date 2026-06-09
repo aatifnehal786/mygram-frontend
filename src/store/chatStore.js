@@ -10,15 +10,22 @@ const useChatStore = create((set) => ({
   setSelectedUser: (user) =>
     set({ selectedUser: user }),
 
-   setMessages: (messages) =>
-    set({
-      messages: Array.isArray(messages) ? messages : [],
-    }),
+  setMessages: (messages) => {
+  console.log("SET MESSAGES", messages.length);
 
-  addMessage: (message) =>
-    set((state) => ({
-      messages: [...state.messages, message],
-    })),
+  set({
+    messages: Array.isArray(messages)
+      ? messages
+      : [],
+  });
+},
+ addMessage: (message) => {
+  console.log("ADD MESSAGE", message);
+
+  set((state) => ({
+    messages: [...state.messages, message],
+  }));
+},
 
   setFollowedUsers: (users) =>
     set({ followedUsers: users }),
