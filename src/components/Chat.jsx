@@ -116,7 +116,6 @@ useEffect(() => {
     );
   };
 }, [
-  selectedUser,
   loggedUser,
   socket
 ]);
