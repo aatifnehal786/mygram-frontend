@@ -448,6 +448,8 @@ const handleDynamicEnter = (e) => {
     }
 
   }
+
+  
 useEffect(() => {
   if (!socket) return;
 
