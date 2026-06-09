@@ -48,7 +48,7 @@ const {
 useEffect(() => {
   if (!selectedUser || !loggedUser?.token) return;
 
-  setMessages([]);
+  // setMessages([]);
 
   const fetchChat = async () => {
     try {
@@ -65,7 +65,7 @@ useEffect(() => {
         err
       );
 
-      setMessages([]);
+      // setMessages([]);
     }
   };
 
