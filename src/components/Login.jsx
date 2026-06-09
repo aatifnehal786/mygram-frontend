@@ -79,8 +79,13 @@ export default function Login() {
 
     // ✅ CASE 1: Login success
     if (data.token) {
-      setLoggedUser(data);
+      console.log("Before set:", useUserStore.getState().loggedUser);
 
+setLoggedUser(data);
+
+setTimeout(() => {
+  console.log("After set:", useUserStore.getState().loggedUser);
+}, 100);
      
 
       navigate("/home");
