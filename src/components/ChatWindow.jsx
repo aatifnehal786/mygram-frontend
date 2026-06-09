@@ -42,7 +42,6 @@ const ChatWindow = ({  onBack, theme,}) => {
    const {
     selectedUser,
     messages,
-    setMessages,
     triggerForwardMode,
     markMessagesSeen,
     updateMessages
@@ -210,7 +209,7 @@ const deleteMessage = async () => {
         body: JSON.stringify({ messageIds: [messageToDelete] }),
       });
 
-      setMessages((prev) => prev.filter((msg) => msg._id !== messageToDelete));
+      updateMessages((prev) => prev.filter((msg) => msg._id !== messageToDelete));
       setToastMessage("Message deleted successfully.");
     } catch (err) {
       console.error("Delete failed:", err.message);
@@ -393,37 +392,46 @@ const handleScroll = () => {
   shouldAutoScrollRef.current = distanceFromBottom < 100;
 };
 
-
 const handleReaction = (messageId, emoji) => {
-  // 🔥 Optimistic UI update
-  setMessages(prev =>
-    prev.map(msg => {
+  updateMessages((messages) =>
+    messages.map((msg) => {
       if (msg._id !== messageId) return msg;
 
       const existing = msg.reactions?.find(
-        r => r.user === currentUserId && r.emoji === emoji
+        (r) =>
+          r.user === currentUserId &&
+          r.emoji === emoji
       );
 
       let updatedReactions;
 
       if (existing) {
         // remove reaction
-        updatedReactions = msg.reactions.filter(
-          r => !(r.user === currentUserId && r.emoji === emoji)
+        updatedReactions = (msg.reactions || []).filter(
+          (r) =>
+            !(
+              r.user === currentUserId &&
+              r.emoji === emoji
+            )
         );
       } else {
         // add reaction
         updatedReactions = [
           ...(msg.reactions || []),
-          { user: currentUserId, emoji },
+          {
+            user: currentUserId,
+            emoji,
+          },
         ];
       }
 
-      return { ...msg, reactions: updatedReactions };
+      return {
+        ...msg,
+        reactions: updatedReactions,
+      };
     })
   );
 
-  // 🔥 Send to server
   socket.emit("react-message", {
     messageId,
     userId: currentUserId,
@@ -432,7 +440,6 @@ const handleReaction = (messageId, emoji) => {
 
   setReactionPickerFor(null);
 };
-
 
 const sortedMessages = [...messages].sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
 
@@ -521,10 +528,9 @@ const deleteMessageForMe = async (messageId) => {
     });
 
     // 🔥 REMOVE instantly from UI
-    setMessages((prev) =>
-      prev.filter((msg) => msg._id !== messageId)
-    );
-
+   updateMessages((prev) =>
+  prev.filter((msg) => msg._id !== messageId)
+);
     setOpenDropdownId(null);
     setToastMessage("Message deleted for you.");
 
@@ -544,13 +550,13 @@ const deleteMessageForEveryone = async (messageId) => {
     );
 
     // ✅ optimistic UI update
-    setMessages((prev) =>
-      prev.map((msg) =>
-        msg._id === messageId
-          ? { ...msg, isDeleted: true, message: "" }
-          : msg
-      )
-    );
+   updateMessages((prev) =>
+  prev.map((msg) =>
+    msg._id === messageId
+      ? { ...msg, isDeleted: true, message: "" }
+      : msg
+  )
+);
 
     setOpenDropdownId(null);
     setToastMessage("Message deleted for everyone.");
@@ -566,29 +572,31 @@ const deleteMessageForEveryone = async (messageId) => {
   if (!socket) return;
 
   const handleDeleteEveryone = ({ messageId }) => {
-    setMessages((prev) =>
-      prev.map((msg) => 
-        msg._id === messageId
-          ? { ...msg, isDeleted: true }
-          : msg
-      )
-    );
+    updateMessages((prev) =>
+  prev.map((msg) =>
+    msg._id === messageId
+      ? { ...msg, isDeleted: true }
+      : msg
+  )
+);
   };
   
 
-  const handleDeleteForMe = ({ messageId }) => {
-    setMessages((prev) =>
-      prev.map((msg) =>
-        msg._id === messageId
-          ? {
-              ...msg,
-              deletedFor: [...(msg.deletedFor || []), currentUserId],
-              
-            }
-          : msg
-      )
-    );
-  };
+ const handleDeleteForMe = ({ messageId }) => {
+  updateMessages((prev) =>
+    prev.map((msg) =>
+      msg._id === messageId
+        ? {
+            ...msg,
+            deletedFor: [
+              ...(msg.deletedFor || []),
+              currentUserId,
+            ],
+          }
+        : msg
+    )
+  );
+};
 
   socket.on("messageDeleted", handleDeleteEveryone);
   socket.on("messageDeletedForMe", handleDeleteForMe);
