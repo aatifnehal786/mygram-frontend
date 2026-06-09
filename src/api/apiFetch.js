@@ -3,7 +3,7 @@ import useUserStore from "../store/useUserStore";
 export const apiFetch = async (endpoint, options = {}) => {
   const token = useUserStore.getState().loggedUser?.token;
   const deviceId = localStorage.getItem("deviceId");
-
+console.log(useUserStore.getState().loggedUser);
   const isFormData = options.body instanceof FormData;
 
   const headers = {
