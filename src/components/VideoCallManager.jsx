@@ -10,8 +10,9 @@ const VideoCallManager = ({selectedUser}) => {
   const { setIncomingCall, setCurrentCall, setCallType, setCallModalOpen, setCallStatus, endCall } = useVideoCallStore()
  const socket = useContext(getSocket);
   // const {loggedUser} = useContext(UserContext)
-    const loggedUser = useUserStore.getState((state) => state.loggedUser);
-
+    const loggedUser = useUserStore(
+    (state) => state.loggedUser
+  );
   useEffect(() => {
     if (!socket) return
 

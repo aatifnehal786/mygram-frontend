@@ -24,10 +24,8 @@ export default function Header() {
 
 
 
-
 function logOut() {
   logout();
-  localStorage.removeItem("deviceId");
   navigate("/login", { replace: true });
 }
   const toggleMenu = ()=>{

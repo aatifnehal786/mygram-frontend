@@ -20,7 +20,9 @@ const Chat = () => {
    const socket = useContext(getSocket);
   // const [messages, setMessages] = useState([]);
   // const {loggedUser} = useContext(UserContext)
-    const loggedUser = useUserStore.getState((state) => state.loggedUser);
+   const loggedUser = useUserStore(
+    (state) => state.loggedUser
+  );
   // const [isForwarding, setIsForwarding] = useState(false);
   // const [messageToForward, setMessageToForward] = useState(null);
   const {theme} = useTheme();

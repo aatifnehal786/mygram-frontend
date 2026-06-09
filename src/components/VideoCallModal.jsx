@@ -39,7 +39,9 @@ const {theme} = useTheme()
   } = useVideoCallStore()
 
 // const {loggedUser} = useContext(UserContext)
-  const loggedUser = useUserStore.getState((state) => state.loggedUser);
+  const loggedUser = useUserStore(
+    (state) => state.loggedUser
+  );
 
   // The rtcConfiguration object you posted is used to configure a WebRTC peer-to-peer connection. 
   // Specifically, it helps define how two browsers can discover and connect to each other, 

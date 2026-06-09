@@ -17,7 +17,9 @@ const REACTIONS = ["❤️", "😂", "😮", "😢", "👍", "👎"];
 
 const ChatWindow = ({  onBack, theme,}) => {
   // const { loggedUser } = useContext(UserContext);
-    const loggedUser = useUserStore.getState((state) => state.loggedUser);
+  const loggedUser = useUserStore(
+    (state) => state.loggedUser
+  );
   const socket = useContext(getSocket);
   const currentUserId = loggedUser?.userid;
   const [input, setInput] = useState('');

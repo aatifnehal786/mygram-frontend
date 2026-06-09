@@ -81,10 +81,7 @@ export default function Login() {
     if (data.token) {
       setLoggedUser(data);
 
-      localStorage.setItem(
-        "token-auth",
-        JSON.stringify(data) // ✅ FIXED
-      );
+     
 
       navigate("/home");
       toast.success("Login Successful");
@@ -134,10 +131,7 @@ const handleVerifyOtp = async () => {
     if (data.token) {
       setLoggedUser(data);
 
-      localStorage.setItem(
-        "token-auth",
-        JSON.stringify({ token: data.token }) // ✅ FIXED
-      );
+     
 
       navigate("/home");
       toast.success("Device verified & login successful");

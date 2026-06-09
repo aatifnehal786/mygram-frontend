@@ -9,7 +9,9 @@ import VideoPost from "./VideoPost";
 export default function Profile() {
   const { id } = useParams();
   // const { loggedUser } = useContext(UserContext);
-    const loggedUser = useUserStore.getState((state) => state.loggedUser);
+    const loggedUser = useUserStore(
+    (state) => state.loggedUser
+  );
   const [currentlyPlayingId, setCurrentlyPlayingId] = useState(null);
   
   const [stats, setStats] = useState(null);
