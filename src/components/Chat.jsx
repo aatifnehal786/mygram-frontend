@@ -97,7 +97,7 @@ useEffect(() => {
           senderId === selectedUser._id
         )
       );
-
+ console.log("isCurrentChat:", isCurrentChat);
     if (isCurrentChat) {
       addMessage(msg);
     }
