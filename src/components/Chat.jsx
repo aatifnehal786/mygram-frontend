@@ -217,10 +217,7 @@ const forwardMessageToUsers = async (
           }
         );
 
-      socket?.emit(
-        "sendMessage",
-        newMsg
-      );
+      
 
       if (
         selectedUser?._id ===

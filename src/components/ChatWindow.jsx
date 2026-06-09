@@ -38,10 +38,6 @@ const ChatWindow = ({  onBack, theme,}) => {
   const inputRef = useRef(null);
   const handleReactionRef = useRef(null);
   const [reactionPickerFor, setReactionPickerFor] = useState(null);
-  const [limit, setLimit] = useState(20);
-  const [skip, setSkip] = useState(0);
-  const [hasMore, setHasMore] = useState(true);
-  const [loadingMore, setLoadingMore] = useState(false);
   const shouldAutoScrollRef = useRef(true);
    const {
     selectedUser,
@@ -52,15 +48,6 @@ const ChatWindow = ({  onBack, theme,}) => {
 
 
 
-useEffect(() => {
-    if (!chatContainerRef.current) return;
-
-    const height = chatContainerRef.current.clientHeight;
-    const MESSAGE_HEIGHT = 60; // avg bubble height
-    const calculatedLimit = Math.ceil(height / MESSAGE_HEIGHT);
-
-    setLimit(calculatedLimit);
-  }, []);
 
 
 
@@ -350,55 +337,45 @@ const renderMessageWithLinks = (text) => {
     return date.toLocaleDateString();
   }
 
-const loadMessages = async (initial = false) => {
-  if (loadingMore || !hasMore || !selectedUser) return;
+// const loadMessages = async (initial = false) => {
+//   if (loadingMore || !hasMore || !selectedUser) return;
 
-  setLoadingMore(true);
+//   setLoadingMore(true);
 
-  const prevScrollHeight = chatContainerRef.current?.scrollHeight || 0;
+//   const prevScrollHeight = chatContainerRef.current?.scrollHeight || 0;
 
-  try {
-    const currentSkip = initial ? 0 : skip;
+//   try {
+//     const currentSkip = initial ? 0 : skip;
 
-    const data = await apiFetch(
-      `api/chats/chat/${selectedUser._id}?limit=${limit}&skip=${currentSkip}`
-    );
+//     const data = await apiFetch(
+//       `api/chats/chat/${selectedUser._id}?limit=${limit}&skip=${currentSkip}`
+//     );
 
-    if (data.length < limit) setHasMore(false);
+//     if (data.length < limit) setHasMore(false);
 
-    setMessages(prev =>
-      initial ? data : [...data, ...prev]
-    );
+//     setMessages(prev =>
+//       initial ? data : [...data, ...prev]
+//     );
 
-    // ✅ FIX: correct skip update
-    setSkip(prev => (initial ? data.length : prev + data.length));
+//     // ✅ FIX: correct skip update
+//     setSkip(prev => (initial ? data.length : prev + data.length));
 
-    // 🔒 preserve scroll position
-    requestAnimationFrame(() => {
-      if (!initial && chatContainerRef.current) {
-        const newHeight = chatContainerRef.current.scrollHeight;
-        chatContainerRef.current.scrollTop =
-          newHeight - prevScrollHeight;
-      }
-    });
+//     // 🔒 preserve scroll position
+//     requestAnimationFrame(() => {
+//       if (!initial && chatContainerRef.current) {
+//         const newHeight = chatContainerRef.current.scrollHeight;
+//         chatContainerRef.current.scrollTop =
+//           newHeight - prevScrollHeight;
+//       }
+//     });
 
-  } catch (err) {
-    console.error("Failed to load messages", err);
-  } finally {
-    setLoadingMore(false);
-  }
-};
+//   } catch (err) {
+//     console.error("Failed to load messages", err);
+//   } finally {
+//     setLoadingMore(false);
+//   }
+// };
 
-useEffect(() => {
-  if (!selectedUser) return;
-
-  // reset state properly
-  setSkip(0);
-  setHasMore(true);
-  setMessages([]); // ✅ important to avoid mixing chats
-
-  loadMessages(true);
-}, [selectedUser]);
 
 
 const handleScroll = () => {
