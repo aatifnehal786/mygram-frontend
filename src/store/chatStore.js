@@ -60,6 +60,11 @@ const useChatStore = create((set) => ({
     }),
   })),
 
+  updateMessages: (updater) =>
+    set((state) => ({
+      messages: updater(state.messages),
+    })),
+
   updateLastMessage: (otherUserId, msg) =>
     set((state) => {
       const updated = state.followedUsers.map((user) =>

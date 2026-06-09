@@ -44,7 +44,8 @@ const ChatWindow = ({  onBack, theme,}) => {
     messages,
     setMessages,
     triggerForwardMode,
-    markMessagesSeen
+    markMessagesSeen,
+    updateMessages
   } = useChatStore();
 
 
@@ -52,13 +53,16 @@ const ChatWindow = ({  onBack, theme,}) => {
 
 
 
+
  /* -------------------- SOCKET: REACTION UPDATE -------------------- */
+
+
 useEffect(() => {
   if (!socket) return;
 
   const handleReaction = ({ messageId, reactions }) => {
-    setMessages(prev =>
-      prev.map(msg =>
+    updateMessages((prev) =>
+      prev.map((msg) =>
         msg._id === messageId
           ? { ...msg, reactions }
           : msg
