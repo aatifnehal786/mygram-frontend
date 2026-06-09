@@ -25,14 +25,11 @@ export default function Header() {
 
 
 
-
 function logOut() {
-  localStorage.removeItem("token-auth");
-  sessionStorage.removeItem("token-auth");
   logout();
-  navigate('/login', { replace: true });
+  localStorage.removeItem("deviceId");
+  navigate("/login", { replace: true });
 }
-
   const toggleMenu = ()=>{
     setMenuOpen((prev)=>!prev)
   }
