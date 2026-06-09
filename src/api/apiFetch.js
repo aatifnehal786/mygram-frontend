@@ -1,9 +1,9 @@
 
 import useUserStore from "../store/useUserStore";
 export const apiFetch = async (endpoint, options = {}) => {
-  const token = useUserStore.getState().loggedUser?.token;
+  const token = JSON.parse(localStorage.getItem("token-auth"))?.token;
   const deviceId = localStorage.getItem("deviceId");
-console.log(useUserStore.getState().loggedUser);
+
   const isFormData = options.body instanceof FormData;
 
   const headers = {
@@ -12,6 +12,10 @@ console.log(useUserStore.getState().loggedUser);
     ...(deviceId && { "x-device-id": deviceId }),
     ...options.headers,
   };
+
+  const isPublicRoute =
+    endpoint.includes("login") ||
+    endpoint.includes("verify-device-otp");
 
   let response;
   try {
@@ -33,10 +37,30 @@ console.log(useUserStore.getState().loggedUser);
     data = { raw: text };
   }
 
-    
-     
-    
-  
+  // ✅ Skip auth handling for login/OTP
+ 
+if (!isPublicRoute) {
+  if (response.status === 401) {
+    const { logout } = useUserStore.getState();
+
+    logout();
+
+    localStorage.removeItem("deviceId");
+
+    if (window.location.pathname !== "/login") {
+      window.location.replace("/login");
+    }
+
+    return {
+      error: "Session expired",
+      status: 401,
+    };
+  }
+
+  if (response.status === 403) {
+    return data;
+  }
+}
 
   return data;
 };
