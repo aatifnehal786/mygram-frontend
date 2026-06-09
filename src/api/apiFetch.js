@@ -1,6 +1,10 @@
 
+
+ import useUserStore from "../store/useUserStore";
 export const apiFetch = async (endpoint, options = {}) => {
-  const token = JSON.parse(localStorage.getItem("token-auth"))?.token;
+ 
+
+  const token = useUserStore.getState().loggedUser?.token;
   const deviceId = localStorage.getItem("deviceId");
 
   const isFormData = options.body instanceof FormData;
