@@ -15,7 +15,7 @@ import useUserStore from '../store/useUserStore';
 
 const REACTIONS = ["❤️", "😂", "😮", "😢", "👍", "👎"];
 
-const ChatWindow = ({  onBack, theme,}) => {
+const ChatWindow = ({  triggerForwardMode, onBack, theme,}) => {
   // const { loggedUser } = useContext(UserContext);
   const loggedUser = useUserStore(
     (state) => state.loggedUser
@@ -42,7 +42,6 @@ const ChatWindow = ({  onBack, theme,}) => {
    const {
     selectedUser,
     messages,
-    triggerForwardMode,
     markMessagesSeen,
     updateMessages
   } = useChatStore();
