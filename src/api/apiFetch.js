@@ -1,5 +1,4 @@
 
-import useUserStore from "../store/useUserStore";
 export const apiFetch = async (endpoint, options = {}) => {
   const token = JSON.parse(localStorage.getItem("token-auth"))?.token;
   const deviceId = localStorage.getItem("deviceId");
@@ -38,29 +37,19 @@ export const apiFetch = async (endpoint, options = {}) => {
   }
 
   // ✅ Skip auth handling for login/OTP
- 
-if (!isPublicRoute) {
-  if (response.status === 401) {
-    const { logout } = useUserStore.getState();
-
-    logout();
-
-    localStorage.removeItem("deviceId");
-
-    if (window.location.pathname !== "/login") {
-      window.location.replace("/login");
+  if (!isPublicRoute) {
+    if (response.status === 401) {
+      alert("Session expired. Please log in again.");
+      localStorage.removeItem("token-auth");
+      localStorage.removeItem("deviceId");
+      window.location.href = "/login";
+      return;
     }
 
-    return {
-      error: "Session expired",
-      status: 401,
-    };
+    if (response.status === 403) {
+      return data; // let UI handle
+    }
   }
-
-  if (response.status === 403) {
-    return data;
-  }
-}
 
   return data;
 };
