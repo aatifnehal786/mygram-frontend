@@ -1,5 +1,5 @@
 
-import React, { useEffect , useContext} from 'react';
+import React, { useEffect} from 'react';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 // import { UserProvider } from './contexts/UserContext';
 import { ThemeProvider } from './contexts/ThemeContext';
@@ -44,7 +44,7 @@ useEffect(() => {
 }, []);
 
 function NotificationListener() {
-  const socket = useContext(getSocket);
+  const socket = getSocket();
 
   useEffect(() => {
     if (!socket) return;
