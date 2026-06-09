@@ -1,16 +1,16 @@
 "use client"
 
-import { useEffect, useRef, useMemo, useContext } from "react"
+import { useEffect, useRef, useMemo } from "react"
 import { FaVideo, FaVideoSlash, FaMicrophone, FaMicrophoneSlash, FaPhoneSlash, FaTimes } from "react-icons/fa"
 import useVideoCallStore from "../store/VideoCallStore"
-import { UserContext } from "../contexts/UserContext"
+// import { UserContext } from "../contexts/UserContext"
 import { useTheme } from "../contexts/ThemeContext"
 import { getSocket } from "../contexts/SocketContext";
 import useUserStore from "../store/useUserStore"
 const VideoCallModal = () => {
   const localVideoRef = useRef(null)
   const remoteVideoRef = useRef(null)
-    const socket = useContext(getSocket);
+    const socket = getSocket()
 const {theme} = useTheme()
   const {
     currentCall,

@@ -1,7 +1,7 @@
 
 import React, { useEffect , useContext} from 'react';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
-import { UserProvider } from './contexts/UserContext';
+// import { UserProvider } from './contexts/UserContext';
 import { ThemeProvider } from './contexts/ThemeContext';
 import Login from './components/Login';
 import './App.css'

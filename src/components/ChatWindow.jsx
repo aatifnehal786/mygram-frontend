@@ -1,5 +1,5 @@
-import React, { useEffect, useRef, useState, useContext } from 'react';
-import { UserContext } from '../contexts/UserContext';
+import React, { useEffect, useRef, useState } from 'react';
+// import { UserContext } from '../contexts/UserContext';
 import { apiFetch } from "../api/apiFetch";
 import './chat.css';
 import { getSocket } from "../contexts/SocketContext";
@@ -20,7 +20,7 @@ const ChatWindow = ({  onBack, theme,}) => {
   const loggedUser = useUserStore(
     (state) => state.loggedUser
   );
-  const socket = useContext(getSocket);
+ const socket = getSocket();
   const currentUserId = loggedUser?.userid;
   const [input, setInput] = useState('');
   const [openDropdownId, setOpenDropdownId] = useState(null);

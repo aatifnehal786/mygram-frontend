@@ -1,12 +1,12 @@
 // ✅ Chat.js
-import React, { useEffect, useContext } from 'react';
+import React, { useEffect } from 'react';
 import ChatSidebar from './ChatSideBar';
 import ChatWindow from './ChatWindow';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { apiFetch } from '../api/apiFetch';
 import './chat.css';
-import { UserContext } from '../contexts/UserContext';
+// import { UserContext } from '../contexts/UserContext';
 import { useTheme } from '../contexts/ThemeContext';  
 import { getSocket } from "../contexts/SocketContext";
 import useChatStore from "../store/chatStore";
@@ -17,12 +17,13 @@ import useUserStore from '../store/useUserStore';
 
 const Chat = () => {
   // const [selectedUser, setSelectedUser] = useState(null);
-   const socket = useContext(getSocket);
+   const socket = getSocket();
   // const [messages, setMessages] = useState([]);
   // const {loggedUser} = useContext(UserContext)
    const loggedUser = useUserStore(
     (state) => state.loggedUser
   );
+  console.log(loggedUser)
   // const [isForwarding, setIsForwarding] = useState(false);
   // const [messageToForward, setMessageToForward] = useState(null);
   const {theme} = useTheme();
@@ -71,6 +72,8 @@ useEffect(() => {
   fetchChat();
 
   const handleReceiveMessage = (msg) => {
+     console.log("🔥 SOCKET MESSAGE RECEIVED", msg);
+
     const senderId =
       msg.sender?._id || msg.sender;
 
@@ -102,8 +105,7 @@ useEffect(() => {
     updateLastMessage(otherUserId, msg);
   };
 
-  socket.on(
-    "receiveMessage",
+  socket.on("receiveMessage",
     handleReceiveMessage
   );
 
@@ -116,10 +118,7 @@ useEffect(() => {
 }, [
   selectedUser,
   loggedUser,
-  socket,
-  setMessages,
-  addMessage,
-  updateLastMessage,
+  socket
 ]);
 
 

@@ -8,9 +8,10 @@ let socket = null;
 export const initializeSocket = () => {
   if (socket) return socket;
 
-  const user = useUserStore.getState((state) => state.loggedUser);
+   const user = useUserStore.getState().loggedUser;
+
   
-  if (!user?._id) return null;
+  if (!user?.userid) return null;
 
   const BACKEND_URL = "https://mygram-mvc.onrender.com"
 
@@ -26,7 +27,7 @@ export const initializeSocket = () => {
   // Connection events
   socket.on("connect", () => {
     console.log("Socket connected:", socket.id);
-    socket.emit("join", user._id);
+    socket.emit("join", user?.userid);
   });
 
   socket.on("connect_error", (error) => {

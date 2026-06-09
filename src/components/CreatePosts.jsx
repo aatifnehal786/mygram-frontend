@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import './Post.css'
 import { apiFetch } from "../api/apiFetch";
 // import './App.css';
-import { UserContext } from '../contexts/UserContext';
+// import { UserContext } from '../contexts/UserContext';
 import {useTheme} from '../contexts/ThemeContext';
 import Spinner from "../Spinner";
 
