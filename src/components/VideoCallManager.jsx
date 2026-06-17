@@ -3,40 +3,22 @@
 import { useEffect, useCallback } from "react"
 import useVideoCallStore from "../store/VideoCallStore"
 import VideoCallModal from "./VideoCallModal"
-import { getSocket } from "../contexts/SocketContext"
+// import {UserContext} from "../contexts/UserContext"
+import { getSocket } from "../contexts/SocketContext";
 import useUserStore from "../store/useUserStore"
-
-const VideoCallManager = ({ selectedUser }) => {
-  const {
-    setIncomingCall,
-    setCurrentCall,
-    setCallType,
-    setCallModalOpen,
-    setCallStatus,
-    endCall,
-  } = useVideoCallStore()
-
-  const socket = getSocket()
-  const loggedUser = useUserStore((state) => state.loggedUser)
-
+const VideoCallManager = ({selectedUser}) => {
+  const { setIncomingCall, setCurrentCall, setCallType, setCallModalOpen, setCallStatus, endCall } = useVideoCallStore()
+ const socket = getSocket();
+  // const {loggedUser} = useContext(UserContext)
+    const loggedUser = useUserStore(
+    (state) => state.loggedUser
+  );
   useEffect(() => {
     if (!socket) return
 
-    // Handle incoming call notification
-    const handleIncomingCall = ({
-      callerId,
-      callerName,
-      callerAvatar,
-      callType,
-      callId,
-    }) => {
-      console.log("Received incoming call:", {
-        callerId,
-        callerName,
-        callerAvatar,
-        callType,
-        callId,
-      })
+    // Handle incoming call
+    const handleIncomingCall = ({ callerId, callerName, callerAvatar, callType, callId }) => {
+      console.log("Received incoming call:", { callerId, callerName, callerAvatar, callType, callId })
 
       setIncomingCall({
         callerId,
@@ -49,7 +31,7 @@ const VideoCallManager = ({ selectedUser }) => {
       setCallStatus("ringing")
     }
 
-    // Handle call failed (server-side failure before WebRTC starts)
+    // Handle call failed
     const handleCallFailed = ({ reason }) => {
       console.error("Call failed:", reason)
       setCallStatus("failed")
@@ -67,29 +49,29 @@ const VideoCallManager = ({ selectedUser }) => {
     }
   }, [socket, setIncomingCall, setCallType, setCallModalOpen, setCallStatus, endCall])
 
-  // Memoized function to initiate an outgoing call
+  // Memoized function to initiate a call
   const initiateCall = useCallback(
     (receiverId, receiverName, receiverAvatar, callType = "video") => {
       const callId = `${loggedUser?.userid}-${receiverId}-${Date.now()}`
 
-      console.log("Initiating call:", {
+      console.log("Initiating call with:", {
         receiverId,
         receiverName,
         receiverAvatar,
         callType,
         callId,
       })
-
+console.log(selectedUser)
+      // Validate the avatar URL
       const validatedAvatar =
-        receiverAvatar && receiverAvatar !== "video"
-          ? receiverAvatar
-          : "/placeholder.svg?height=128&width=128"
+        receiverAvatar && receiverAvatar !== "video" ? receiverAvatar : "/placeholder.svg?height=128&width=128"
 
+      // Set current call FIRST before opening modal
       const callData = {
         callId,
         participantId: receiverId,
         participantName: receiverName,
-        participantAvatar: validatedAvatar,
+        participantAvatar: validatedAvatar, // Use validated avatar
       }
 
       setCurrentCall(callData)
@@ -97,22 +79,30 @@ const VideoCallManager = ({ selectedUser }) => {
       setCallModalOpen(true)
       setCallStatus("calling")
 
+      // Emit the call initiation
       socket.emit("initiate_call", {
-        callerId: loggedUser.userid,
-        receiverId,
-        callType,
-        callerInfo: {
-          username: loggedUser.username,
-          profilePicture: loggedUser.profilePicture,
-        },
-      })
+  callerId: loggedUser.userid,
+  receiverId,
+  callType,
+  callerInfo: {
+    username: loggedUser.username,
+    profilePicture: loggedUser.profilePicture,
+  },
+});
 
-      console.log("Call initiated, currentCall:", callData)
+      console.log("Call initiated, currentCall set to:", callData)
     },
-    [loggedUser, socket, setCurrentCall, setCallType, setCallModalOpen, setCallStatus],
+    [
+      loggedUser,
+      socket,
+      setCurrentCall,
+      setCallType,
+      setCallModalOpen,
+      setCallStatus,
+    ],
   )
 
-  // Expose initiateCall on the store so other components can trigger calls
+  // Expose the initiateCall function to the store
   useEffect(() => {
     useVideoCallStore.getState().initiateCall = initiateCall
   }, [initiateCall])
