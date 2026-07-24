@@ -23,7 +23,7 @@ import Devices from './components/Devices';
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { getSocket } from "./contexts/SocketContext";
-
+import GuestLogin from './components/GuestLogin';
 
 
 
@@ -118,6 +118,14 @@ const router = createBrowserRouter(
         </PublicRoute>
       ),
     },
+    {
+      path: "/guest-login",
+      element: (
+        <PublicRoute>
+          <GuestLogin />
+        </PublicRoute>
+      ),
+    },
     
 
     {
@@ -203,11 +211,12 @@ const router = createBrowserRouter(
 
  return (
   <ThemeProvider>
-    <ToastContainer position="top-right" autoClose={3000} />
+    
 
     <NotificationListener />
 
     <RouterProvider router={router} />
+     <ToastContainer position="top-right" autoClose={3000} />
   </ThemeProvider>
 );
 }

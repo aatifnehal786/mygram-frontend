@@ -1,39 +1,32 @@
 import { useParams } from "react-router-dom";
 import {  useEffect, useState, useRef } from "react";
-// import { UserContext } from "../contexts/UserContext";
 import useUserStore from "../store/useUserStore";
-import ImagePostWithMusic from "./ImagePostWithMusic";
 import { apiFetch } from "../api/apiFetch"; // 👈 adjust path as needed
 import { useTheme } from "../contexts/ThemeContext";
-import VideoPost from "./VideoPost";
+
 export default function Profile() {
+
+
   const { id } = useParams();
-  // const { loggedUser } = useContext(UserContext);
-    const loggedUser = useUserStore(
-    (state) => state.loggedUser
-  );
-  const [currentlyPlayingId, setCurrentlyPlayingId] = useState(null);
+  const loggedUser = useUserStore((state) => state.loggedUser);
+
   
   const [stats, setStats] = useState(null);
-  const [posts, setPosts] = useState([]);
-  // const [isFollowing, setIsFollowing] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef();
-  const [message, setMessage] = useState({ text: "", data: "" })
+
   const [isUsernameModalOpen, setIsUsernameModalOpen] = useState(false);
   const [followers, setFollowers] = useState([]);
   const [following, setFollowing] = useState([]);
   const [loadingFollowers, setLoadingFollowers] = useState(true);
   const [showFollowModal, setShowFollowModal] = useState(false);
   const [activeTab, setActiveTab] = useState("followers"); // or "following"
-  // const [requests, setRequests] = useState([]);
-
+  
 
   const isOwnProfile = loggedUser && (!id || id === loggedUser.userid);
   const targetUserId = loggedUser?.userid;
-  // const [followStatus, setFollowStatus] = useState({});
   const { theme } = useTheme();
-  // console.log(loggedUser)
+
 
 
 
@@ -46,18 +39,13 @@ export default function Profile() {
     if (!targetUserId || !loggedUser?.token) return;
 
     async function fetchStatsAndPosts() {
-      try {
+      try 
+      {
         const statsData = await apiFetch(`api/user/stats/${targetUserId}`);
         setStats(statsData);
-
-        const data = await apiFetch("api/posts/allposts");
-        const userPosts = data.filter(
-          (post) => post.postedBy?._id === targetUserId
-        );
-        setPosts(userPosts);
-
-
-      } catch (err) {
+      }
+      catch (err) 
+      {
         console.error("Failed to fetch data:", err);
       }
     }
@@ -122,60 +110,6 @@ export default function Profile() {
   };
 
 
-  // HANDLE LIKE
-
-  const handleLike = async (postId) => {
-    try {
-      const updated = await apiFetch(`api/posts/like/${postId}`, {
-        method: "PUT",
-      });
-
-      setPosts(posts.map((p) => (p._id === postId ? updated : p)));
-    } catch (err) {
-      console.error("Failed to like post", err);
-    }
-  };
-
-
-  // HANDLE COMMENT
-
-  const handleComment = async (postId, text) => {
-    if (!text) return;
-    try {
-      const updated = await apiFetch(`api/posts/comment/${postId}`, {
-        method: "POST",
-        body: JSON.stringify({ text }),
-      });
-
-      setPosts(posts.map((p) => (p._id === postId ? updated : p)));
-    } catch (err) {
-      console.error("Failed to comment", err);
-    }
-  };
-
-
-  // HANDLE DELETE POSTS
-
-  const handleDeletePost = async (deletePostId) => {
-    try {
-      const data = await apiFetch(`api/posts/delete-post/${deletePostId}`, {
-        method: "DELETE",
-      });
-
-      setMessage({ text: "delete", data: data.message });
-      setTimeout(() => {
-        setMessage({ text: "", data: "" });
-      }, 3000);
-
-      setPosts((prevPosts) =>
-        prevPosts.filter((post) => post._id !== deletePostId)
-      );
-    } catch (err) {
-      console.error("Delete post failed:", err);
-    }
-  };
-
-
   // HANDLE CHANGE USERNAME
   const handleChangeUserName = async (newUsername) => {
     if (!newUsername?.trim()) return;
@@ -198,11 +132,29 @@ export default function Profile() {
   };
 
 
+ // Profile UI for guest users
 
-  if (!loggedUser || !stats) return <p>Loading...</p>;
+
+
+
+  // public posts section
+  
+
+
+  
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
+      {loggedUser?.user?.isGuest && (
+        <div className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 mb-6" role="alert">
+          <p className="font-bold">Guest User Notice</p>
+          <p>You are currently logged in as a guest. Some features may be limited.</p>
+          <p className="mt-2 text-sm">To access all features, please register or log in with a full account.</p>
+          <h1 className="mt-2 text-xl text-gray-600">
+            Welcome, {loggedUser?.user?.fullName || "Guest"}! You can view your profile and posts, but some actions may be restricted.
+          </h1>
+        </div>
+      )}
       <div className="flex gap-8">
 
         {/* ===== LEFT SIDEBAR: FOLLOWERS / FOLLOWING ===== */}
@@ -217,11 +169,11 @@ export default function Profile() {
               </h3>
 
               <div className="space-y-3 max-h-[40vh] overflow-y-auto">
-                {loadingFollowers ? (
+                {followers.length === 0 ? (
                   <p className="text-sm text-gray-400">Loading...</p>
                 ) : followers.length === 0 ? (
                   <p className="text-sm text-gray-400">No followers yet</p>
-                ) : (
+                ) : ( Array.isArray(followers) ?
                   followers.map((user) => (
                     <div
                       key={user._id}
@@ -236,7 +188,7 @@ export default function Profile() {
                         {user.username}
                       </span>
                     </div>
-                  ))
+                  )) : null
                 )}
               </div>
             </div>
@@ -252,7 +204,7 @@ export default function Profile() {
                   <p className="text-sm text-gray-400">Loading...</p>
                 ) : following.length === 0 ? (
                   <p className="text-sm text-gray-400">Not following anyone</p>
-                ) : (
+                ) : ( Array.isArray(following) ?
                   following.map((user) => (
                     <div
                       key={user._id}
@@ -267,7 +219,7 @@ export default function Profile() {
                         {user.username}
                       </span>
                     </div>
-                  ))
+                  )) : null
                 )}
               </div>
             </div>
@@ -275,7 +227,9 @@ export default function Profile() {
           </div>
         </div>
 
-        {/* ===== RIGHT CONTENT ===== */}
+       {stats && (
+        <div className="flex-1 space-y-6">
+           {/* ===== RIGHT CONTENT ===== */}
         <div className="flex-1">
 
           {/* ===== Profile Header ===== */}
@@ -361,94 +315,9 @@ export default function Profile() {
               )}
             </div>
           </div>
-
-          {/* ===== POSTS SECTION ===== */}
-          <div className="mt-10">
-            <h3 className="text-xl font-semibold mb-6">Posts</h3>
-
-            {message && (
-              <p className="text-sm text-red-500 mb-4">
-                {message.data}
-              </p>
-            )}
-
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {posts.map((post) => (
-                <div
-                  key={post._id}
-                  className="bg-white border rounded-lg shadow-sm overflow-hidden"
-                >
-                  {/* Media */}
-                  {post.mediaType === "video" ? (
-                    <VideoPost
-                      post={post}
-                      currentlyPlayingId={currentlyPlayingId}
-                      setCurrentlyPlayingId={setCurrentlyPlayingId}
-                      
-                    />
-                  ) : (
-                    <ImagePostWithMusic
-                      post={post}
-                      currentlyPlayingId={currentlyPlayingId}
-                      setCurrentlyPlayingId={setCurrentlyPlayingId}
-                     
-                    />
-                  )}
-
-                  {/* Content */}
-                  <div className="p-4 space-y-3">
-                    <p className={`font-medium ${theme === "dark" ? "text-red-400" : "text-black"}`}>
-                      {post.caption}
-                    </p>
-
-                    <div className="flex justify-between text-sm">
-                      <span>❤️ {post.likes.length}</span>
-                      <button
-                        onClick={() => handleLike(post._id)}
-                        className={`hover:underline ${theme === "dark" ? "text-indigo-400" : "text-indigo-600"
-                          }`}
-                      >
-                        Like
-                      </button>
-                    </div>
-
-                    {/* Comments */}
-                    <div className="space-y-1 text-sm text-gray-700">
-                      {post.comments.map((c, idx) => (
-                        <p key={idx}>
-                          <strong>{c.commentedBy?.username}:</strong>{" "}
-                          {c.text}
-                        </p>
-                      ))}
-                    </div>
-
-                    {/* Add Comment */}
-                    <input
-                      type="text"
-                      placeholder="Add a comment..."
-                      className="w-full border rounded-md px-3 py-2 text-sm"
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter") {
-                          handleComment(post._id, e.target.value);
-                          e.target.value = "";
-                        }
-                      }}
-                    />
-
-                    {isOwnProfile && (
-                      <button
-                        onClick={() => handleDeletePost(post._id)}
-                        className="text-xs text-red-500 hover:underline"
-                      >
-                        Delete post
-                      </button>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
         </div>
+        </div>
+       )}
 
         {/* ===== USERNAME MODAL ===== */}
         {isUsernameModalOpen && (

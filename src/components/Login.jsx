@@ -79,17 +79,14 @@ export default function Login() {
 
     // ✅ CASE 1: Login success
     if (data.token) {
-      console.log("Before set:", useUserStore.getState().loggedUser);
-
+    
 setLoggedUser(data);
 
-setTimeout(() => {
-  console.log("After set:", useUserStore.getState().loggedUser);
-}, 100);
-     
 
+     
+       toast.success("Login Successful");
       navigate("/home");
-      toast.success("Login Successful");
+     
     }
 
     // ✅ CASE 2: OTP required
@@ -225,11 +222,20 @@ const handleVerifyOtp = async () => {
           >
             Forgot Password?
           </Link>
+          <br/>
+          <Link
+            to="/guest-login"
+            className="text-indigo-600 hover:underline font-medium"
+          >
+            or Continue as Guest
+          </Link>
+
         </div>
 
         {/* Message */}
-        <ToastContainer position="top-right" autoClose={3000} />
+       
       </form>
+      
     ) : (
       /* OTP FORM */
       <form className="w-full max-w-sm bg-white rounded-2xl shadow-xl p-8 space-y-6">
@@ -255,10 +261,11 @@ const handleVerifyOtp = async () => {
         >
           {isLoading ? <Spinner/> : "Verify OTP"}
         </button>
-      <ToastContainer position="top-right" autoClose={3000} />
+      
       </form>
       
     )}
+   
   </section>
 );
 

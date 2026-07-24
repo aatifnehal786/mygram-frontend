@@ -254,71 +254,80 @@ const triggerForwardMode = (
 
  
 
-  return (
-    <div className="flex h-screen w-full bg-gray-100 overflow-hidden">
-  {/* Sidebar */}
-  <div
-    className={`
-      w-full md:w-1/3 lg:w-1/4
-      bg-white border-r
-      transition-all duration-300
-      ${selectedUser ? "hidden md:block" : "block"}
-    `}
-  >
-   <ChatSidebar
-  onSelectUser={(user) => {
-    if (!isForwarding) {
-      setSelectedUser(user);
-    }
-  }}
-  followedUsers={followedUsers}
-  selectedUserId={selectedUser?._id}
-  isForwarding={isForwarding}
-  onSelectForwardUser={(userIds) => {
-    if (userIds.length === 0) {
-      setForwardMode(false, null);
-    } else {
-      forwardMessageToUsers(
-        messageToForward,
-        userIds
-      );
-    }
-  }}
-  theme={theme}
-/>
-  </div>
+ return (
+  loggedUser?.user?.isGuest ? (
+    <div className="flex h-screen items-center justify-center bg-gray-100">
+      <div className="bg-white p-8 rounded-lg shadow-lg text-center max-w-md">
+        <h2 className="text-2xl font-bold mb-3">
+          Chat is unavailable
+        </h2>
 
-  {/* Chat Window */}
-  <div
-    className={`
-      flex-1 bg-gray-50
-      transition-all duration-300
-      ${selectedUser ? "block" : "hidden md:block"}
-    `}
-  >
-    {selectedUser ? (
-     <ChatWindow
-  selectedUser={selectedUser}
-  triggerForwardMode={triggerForwardMode}
-  onBack={() => setSelectedUser(null)}
-  theme={theme}
-/>
-    ) : (
-      <div className="hidden md:flex h-full items-center justify-center text-gray-400">
-        Select a chat to start messaging
+        <p className="text-gray-600 mb-6">
+          Please sign up or log in to send and receive messages.
+        </p>
+
+        
       </div>
-    )}
-  </div>
+    </div>
+  ) : (
+    <div className="flex h-screen w-full bg-gray-100 overflow-hidden">
 
-  {/* Toast */}
-  <ToastContainer position="bottom-right" autoClose={3000} />
+      {/* Sidebar */}
+      <div
+        className={`
+          w-full md:w-1/3 lg:w-1/4
+          bg-white border-r
+          transition-all duration-300
+          ${selectedUser ? "hidden md:block" : "block"}
+        `}
+      >
+        <ChatSidebar
+          onSelectUser={(user) => {
+            if (!isForwarding) {
+              setSelectedUser(user);
+            }
+          }}
+          followedUsers={followedUsers}
+          selectedUserId={selectedUser?._id}
+          isForwarding={isForwarding}
+          onSelectForwardUser={(userIds) => {
+            if (userIds.length === 0) {
+              setForwardMode(false, null);
+            } else {
+              forwardMessageToUsers(messageToForward, userIds);
+            }
+          }}
+          theme={theme}
+        />
+      </div>
 
- 
-  
-</div>
+      {/* Chat Window */}
+      <div
+        className={`
+          flex-1 bg-gray-50
+          transition-all duration-300
+          ${selectedUser ? "block" : "hidden md:block"}
+        `}
+      >
+        {selectedUser ? (
+          <ChatWindow
+            selectedUser={selectedUser}
+            triggerForwardMode={triggerForwardMode}
+            onBack={() => setSelectedUser(null)}
+            theme={theme}
+          />
+        ) : (
+          <div className="hidden md:flex h-full items-center justify-center text-gray-400">
+            Select a chat to start messaging
+          </div>
+        )}
+      </div>
 
+      <ToastContainer position="bottom-right" autoClose={3000} />
 
-  );
+    </div>
+  )
+);
 };
 
 export default Chat;
