@@ -1,138 +1,84 @@
-import {  useState } from "react";
-
-// import { UserContext } from "../contexts/UserContext";
-import { useNavigate, Link } from "react-router-dom";
-import { FaBars } from "react-icons/fa";
+import { useState } from "react";
+import { Link, useNavigate, useLocation } from "react-router-dom";
+import { FaBars, FaHome, FaRegHeart, FaRegPaperPlane, FaSearch, FaPlusSquare } from "react-icons/fa";
 import { RxCross1 } from "react-icons/rx";
 import { useTheme } from "../contexts/ThemeContext";
 import useUserStore from "../store/useUserStore";
 
-
 export default function Header() {
-
-  
-
-  
   const [menuOpen, setMenuOpen] = useState(false);
+  const [showSearch, setShowSearch] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
   const { theme } = useTheme();
+  const loggedUser = useUserStore(s => s.loggedUser);
+  const logout = useUserStore(s => s.logout);
+  const isGuest = loggedUser?.user?.isGuest;
+  const myPic = loggedUser?.profilePic || loggedUser?.profilePicture || "/placeholder.svg";
 
- const logout = useUserStore((state) => state.logout);
+  const isActive = (path) => location.pathname === path? "font-bold" : "";
 
-
-// FETCH ALL USERS EXCEPT THE CURRENT LOGGED IN
-
-
-
-function logOut() {
-  logout();
-  navigate("/login", { replace: true });
-}
-  const toggleMenu = ()=>{
-    setMenuOpen((prev)=>!prev)
-  }
-
-  const removeMenu = ()=>{
-    setTimeout(()=>{
-     setMenuOpen(false)
-   },100)
+  function logOut() {
+    logout();
+    navigate("/login", { replace: true });
   }
 
   return (
-  <header className= {`fixed top-0 left-0 w-full bg-white border-b shadow-sm z-50 ${
-        theme === "dark"
-          ? "bg-black text-white"
-          : "bg-gray-100 text-black"
-      }`}>
-    <nav className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
+    <>
+     
+      <header className={`flex h-[60px] items-center justify-between px-4 border-b w-full ${theme==="dark"? "bg-black" : "bg-white"}`}>
+        <nav className="w-full mx-auto px-4 h-16 flex items-center justify-between">
 
-      {/* Logo */}
-      <h1 className="text-xl font-bold text-blue-600">
-        MyGram
-      </h1>
+          {/* Logo */}
+          <Link to="/home" className="text- font-[Grand_Hotel] tracking-wide" style={{ fontFamily: 'cursive' }}>
+            MyGram
+          </Link>
 
-      {/* Desktop Links */}
-      <ul className={`hidden md:flex items-center gap-6 text-sm font-medium ${
-        theme === "dark"
-          ? "text-red-400"
-          : "text-black"
-      }`}>
-        <li><Link to="/home" className="hover:text-blue-600">Home</Link></li>
-        <li><Link to="/profile" className="hover:text-blue-600">Profile</Link></li>
-        <li><Link to="/createpost" className="hover:text-blue-600">Create Post</Link></li>
-        <li><Link to="/chat" className="hover:text-blue-600">Chat</Link></li>
-        <li><Link to="/getdevices" className="hover:text-blue-600">Devices</Link></li>
-      </ul>
+          {/* Center - Search (Desktop) */}
+          <div className="hidden md:flex">
+            <div className="relative">
+              <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm" />
+              <input placeholder="Search" className={`pl-9 pr-4 py-2 rounded-lg text-sm w- ${theme === "dark"? "bg-zinc-800" : "bg-gray-100"} focus:outline-none`} onFocus={() => setShowSearch(true)} />
+            </div>
+          </div>
 
-      {/* Desktop Logout */}
-      <button
-        onClick={logOut}
-        className={`hidden md:block px-4 py-2 rounded-md text-sm
-        ${theme === "dark" ? "bg-red-600 text-white" : "bg-red-600 text-black"}
-        `}
-      >
-        Log Out
-      </button>
+          {/* Right Icons - Desktop */}
+          <div className="hidden md:flex items-center gap-5 text-">
+            <Link to="/home" className={isActive("/home")}><FaHome /></Link>
+            <button onClick={() => setShowSearch(!showSearch)}><FaSearch /></button>
+            <Link to="/createpost"><FaPlusSquare /></Link>
+            <Link to="/chat"><FaRegPaperPlane /></Link>
+            <Link to="/getdevices"><FaRegHeart /></Link>
+            <Link to="/profile"><img src={myPic} className="w-7 h-7 rounded-full object-cover" /></Link>
+            {!isGuest && <button onClick={logOut} className="text-xs bg-red-500 text-white px-3 py-1 rounded">Logout</button>}
+          </div>
 
-      {/* Mobile Menu Button */}
-      <button
-        onClick={toggleMenu}
-        className={`md:hidden text-2xl
-          ${theme === "dark" ? "text-red-500" : "text-gray-700"}
-        `}
-      >
-        {menuOpen ? <RxCross1 /> : <FaBars />}
-      </button>
-    </nav>
+          {/* Mobile Menu Button */}
+          <button onClick={() => setMenuOpen(!menuOpen)} className="md:hidden text-xl">
+            {menuOpen? <RxCross1 /> : <FaBars />}
+          </button>
+        </nav>
 
-    {/* Mobile Menu */}
-    {menuOpen && (
-      <div className={`md:hidden ${
-        theme === "dark"
-          ? "bg-black text-white"
-          : "bg-gray-100 text-black"
-      } border-t shadow-md`}>
-        <ul className="flex flex-col divide-y text-sm">
-          <li>
-            <Link onClick={removeMenu} to="/home" className="block px-4 py-3">
-              Home
-            </Link>
-          </li>
-          <li>
-            <Link onClick={removeMenu} to="/profile" className="block px-4 py-3">
-              Profile
-            </Link>
-          </li>
-          <li>
-            <Link onClick={removeMenu} to="/createpost" className="block px-4 py-3">
-              Create Post
-            </Link>
-          </li>
-          <li>
-            <Link onClick={removeMenu} to="/chat" className="block px-4 py-3">
-              Chat
-            </Link>
-          </li>
-          <li>
-            <Link onClick={removeMenu} to="/getdevices" className="block px-4 py-3">
-              Devices
-            </Link>
-          </li>
-          <li className="px-4 py-3">
-             <button
-        onClick={logOut}
-        className={`md:block px-4 py-2 rounded-md text-sm
-        ${theme === "dark" ? "bg-red-600 text-white" : "bg-red-600 text-black"}
-        `}
-      >
-        Log Out
-      </button>
-          </li>
-        </ul>
-        
+        {/* Mobile Dropdown */}
+        {menuOpen && (
+          <div className={`md:hidden border-t ${theme === "dark"? "bg-black border-zinc-800" : "bg-white"}`}>
+            <Link to="/home" onClick={() => setMenuOpen(false)} className="block px-4 py-3">Home</Link>
+            <Link to="/profile" onClick={() => setMenuOpen(false)} className="block px-4 py-3">Profile</Link>
+            <Link to="/createpost" onClick={() => setMenuOpen(false)} className="block px-4 py-3">Create</Link>
+            <Link to="/chat" onClick={() => setMenuOpen(false)} className="block px-4 py-3">Messages</Link>
+            <button onClick={logOut} className="w-full text-left px-4 py-3 text-red-500">Log Out</button>
+          </div>
+        )}
+      </header>
+
+      {/* Mobile Bottom Nav - Instagram style */}
+      <div className={`md:hidden fixed bottom-0 left-0 w-full border-t flex justify-around py-3 z-50 ${theme === "dark"? "bg-black border-zinc-800 text-white" : "bg-white border-gray-200 text-black"}`}>
+        <Link to="/home"><FaHome className="text-xl" /></Link>
+        <button onClick={() => setShowSearch(!showSearch)}><FaSearch className="text-xl" /></button>
+        <Link to="/createpost"><FaPlusSquare className="text-xl" /></Link>
+        <Link to="/chat"><FaRegPaperPlane className="text-xl" /></Link>
+        <Link to="/profile"><img src={myPic} className="w-6 h-6 rounded-full" /></Link>
       </div>
-    )}
-  </header>
-);
-
+    </>
+  );
 }

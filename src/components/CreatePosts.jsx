@@ -1,174 +1,58 @@
-import React, { useState } from 'react';
-import './Post.css'
+import { useState } from 'react';
 import { apiFetch } from "../api/apiFetch";
-// import './App.css';
-// import { UserContext } from '../contexts/UserContext';
-import {useTheme} from '../contexts/ThemeContext';
-import Spinner from "../Spinner";
+import { useTheme } from '../contexts/ThemeContext';
 
-
-const CreatePost = () => {
+export default function CreatePost() {
   const [caption, setCaption] = useState('');
-  const [mediaType, setMediaType] = useState('image');
-  const [musicFile,setMusicFile] = useState('')
   const [mediaFile, setMediaFile] = useState(null);
-  const [status, setStatus] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const {theme} = useTheme();
- 
-const handleCreatePost = async (e) => {
-  e.preventDefault();
-  setIsLoading(true);
-  if (!mediaFile) {
-    setStatus("Please select a media file before posting.");
-    setIsLoading(false);
-    return;
-  }
+  const [preview, setPreview] = useState(null);
+  const [mediaType, setMediaType] = useState('image');
+  const { theme } = useTheme();
+  const [loading, setLoading] = useState(false);
 
-  const formData = new FormData();
-  formData.append("caption", caption);
-  formData.append("mediaType", mediaType);
-  formData.append("media", mediaFile); // ✅ must match backend field name
+  const onFile = (e) => {
+    const f = e.target.files[0];
+    if (!f) return;
+    setMediaFile(f);
+    setPreview(URL.createObjectURL(f));
+    setMediaType(f.type.startsWith("video")? "video" : "image");
+  };
 
-  if (mediaType === "image" && musicFile) {
-    formData.append("backgroundMusic", musicFile); // ✅ must match backend
-  }
-
-  try {
-    const data = await apiFetch("api/create-posts/create", {
-      method: "POST",
-      body: formData,
-    });
-    console.log("Create post response:", data);
-    setStatus(data.message);
-
-    setIsLoading(false);
-  } catch (err) {
-    console.error("Create post failed:", err);
-    setStatus("Failed to create post. Please try again.");
-    setIsLoading(false);
-  }
-};
-
-
-
-
+  const handleCreate = async () => {
+    setLoading(true);
+    const fd = new FormData();
+    fd.append("caption", caption);
+    fd.append("mediaType", mediaType);
+    fd.append("media", mediaFile);
+    await apiFetch("api/create-posts/create", { method: "POST", body: fd });
+    setLoading(false);
+    setCaption(""); setPreview(null);
+    alert("Posted!");
+  };
 
   return (
-  <div className={`min-h-800 bg-red-100 flex flex-col rounded-lg ring-4 ${theme === "dark" ? "bg-green-900 text-white ring-green-300" : "bg-red-400 text-black ring-gray-300"} shadow-lg`}>
+    <div className="max-w- mx-auto mt-6">
+      <div className={`border rounded-xl overflow-hidden ${theme === "dark"? "bg-zinc-900 border-zinc-800" : "bg-white border-gray-200"}`}>
+        <div className="flex justify-between items-center p-3 border-b">
+          <h2 className="font-semibold mx-auto">Create new post</h2>
+          <button onClick={handleCreate} disabled={!mediaFile} className="text-blue-600 text-sm font-semibold">Share</button>
+        </div>
 
-    {/* Navbar */}
-    <nav className="bg-white border-b px-6 py-4 flex items-center justify-between">
-      <h1 className="text-xl font-bold tracking-wide text-blue-600">
-        MyGram
-      </h1>
-    </nav>
-
-    {/* Main */}
-    <main className="flex-1 flex items-center justify-center px-4 py-4">
-      <div className="w-full max-w-md bg-white rounded-xl shadow-md p-6">
-
-        <h2 className={`text-lg font-semibold mb-5 text-center ${theme === 'dark' ? 'text-green-500' : 'text-gray-800'}`}>
-          Create Post
-        </h2>
-
-        <form onSubmit={handleCreatePost} className="space-y-4">
-
-          {/* Caption */}
-          <input
-            type="text"
-            placeholder="Write a caption..."
-            value={caption}
-            onChange={(e) => setCaption(e.target.value)}
-            required
-            className={`w-full px-4 py-2 rounded-lg border
-              focus:outline-none focus:ring-2 focus:ring-blue-500
-              text-sm bg-white ${theme === 'dark' ? 'text-blue-800' : 'text-gray-700'}`}
-          />
-
-          {/* Media Type */}
-          <select
-            value={mediaType}
-            onChange={(e) => setMediaType(e.target.value)}
-            className=
-              {`w-full px-4 py-2 rounded-lg border
-              focus:outline-none focus:ring-2 focus:ring-blue-500
-              text-sm bg-white ${theme === 'dark' ? 'text-blue-800' : 'text-gray-700'}`}
-            
-          >
-            <option value="image">Image</option>
-            <option value="video">Video</option>
-          </select>
-
-          {/* Audio (image only) */}
-          {mediaType === "image" && (
-            <div className="space-y-1">
-              <p className="text-xs text-gray-500">Optional background audio</p>
-              <input
-                type="file"
-                accept="audio/*"
-                onChange={(e) => setMusicFile(e.target.files[0])}
-                className="w-full text-sm file:mr-4 file:py-2 file:px-4
-                           file:rounded-lg file:border-0
-                           file:bg-gray-100 file:text-gray-700
-                           hover:file:bg-gray-200"
-              />
-            </div>
-          )}
-
-          {/* Media */}
-          <div className="space-y-1">
-            <p className="text-xs text-gray-500">
-              Choose image or video
-            </p>
-              <input
-                type="file"
-                accept="image/*,video/*"
-                onChange={(e) => {
-                  const file = e.target.files[0];
-
-                  if (!file) return;
-
-                  setMediaFile(file);
-
-                  // auto detect media type
-                  if (file.type.startsWith("video")) {
-                    setMediaType("video");
-                  } else {
-                    setMediaType("image");
-                  }
-                }}
-                required
-                className="w-full text-sm file:mr-4 file:py-2 file:px-4
-             file:rounded-lg file:border-0
-             file:bg-blue-50 file:text-blue-600
-             hover:file:bg-blue-100"
-              />
+        <div className="flex flex-col md:flex-row">
+          <div className="flex-1 bg-black aspect-square flex items-center justify-center">
+            {preview? mediaType === "video"? <video src={preview} className="max-h-full" controls /> : <img src={preview} className="max-h-full" /> : (
+              <label className="cursor-pointer flex flex-col items-center text-white">
+                <span className="text-5xl mb-2">📷</span>
+                <span>Select from computer</span>
+                <input type="file" accept="image/*,video/*" onChange={onFile} className="hidden" />
+              </label>
+            )}
           </div>
-
-          {/* Submit */}
-          <button
-            type="submit"
-            className="
-              w-full bg-blue-600 text-white py-2 rounded-lg
-              font-medium hover:bg-blue-700 transition
-            "
-          >
-           {isLoading ? <Spinner/> : "Create Post"}
-          </button>
-        </form>
-
-        {/* Status */}
-        {status && (
-          <p className="mt-4 text-center text-sm text-gray-600">
-            {status}
-          </p>
-        )}
+          <div className="w-full md:w- p-4">
+            <textarea value={caption} onChange={e => setCaption(e.target.value)} placeholder="Write a caption..." className={`w-full h-32 resize-none outline-none text-sm ${theme === "dark"? "bg-zinc-900" : "bg-white"}`} />
+          </div>
+        </div>
       </div>
-    </main>
-  </div>
-);
-
-};
-
-export default CreatePost;
+    </div>
+  );
+}

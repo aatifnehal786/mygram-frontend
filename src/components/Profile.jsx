@@ -1,430 +1,153 @@
 import { useParams } from "react-router-dom";
-import {  useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef } from "react";
 import useUserStore from "../store/useUserStore";
-import { apiFetch } from "../api/apiFetch"; // 👈 adjust path as needed
+import { apiFetch } from "../api/apiFetch";
 import { useTheme } from "../contexts/ThemeContext";
 
 export default function Profile() {
-
-
   const { id } = useParams();
-  const loggedUser = useUserStore((state) => state.loggedUser);
-
-  
+  const loggedUser = useUserStore((s) => s.loggedUser);
   const [stats, setStats] = useState(null);
-  const [isUploading, setIsUploading] = useState(false);
-  const fileInputRef = useRef();
-
-  const [isUsernameModalOpen, setIsUsernameModalOpen] = useState(false);
+  const [posts, setPosts] = useState([]);
   const [followers, setFollowers] = useState([]);
   const [following, setFollowing] = useState([]);
-  const [loadingFollowers, setLoadingFollowers] = useState(true);
+  const [activeTab, setActiveTab] = useState("posts");
   const [showFollowModal, setShowFollowModal] = useState(false);
-  const [activeTab, setActiveTab] = useState("followers"); // or "following"
-  
-
-  const isOwnProfile = loggedUser && (!id || id === loggedUser.userid);
-  const targetUserId = loggedUser?.userid;
+  const [modalTab, setModalTab] = useState("followers");
+  const fileInputRef = useRef();
   const { theme } = useTheme();
+  const isOwnProfile =!id || id === loggedUser.userid;
+  const targetId = id || loggedUser.userid;
+  const [newUsername, setNewUsername] = useState("");
+  const [showEditName, setShowEditName] = useState(false);
 
+ useEffect(() => {
+  if (!targetId) return;
 
+  apiFetch(`api/user/stats/${targetId}`).then(setStats).catch(console.error);
 
+  apiFetch(`api/posts/allposts`)
+   .then(data => {
+      if (!Array.isArray(data)) return;
+      const mine = data.filter(p => {
+        const postedById = p.postedBy?._id || p.postedBy;
+        return postedById?.toString() === targetId?.toString();
+      });
+      setPosts(mine);
+    })
+   .catch(console.error);
+}, [targetId]);
 
+useEffect(() => {
+  if (!targetId) return;
 
+  // Followers - from followRoutes
+  apiFetch(`api/follow/followers/${targetId}`)
+   .then(d => {
+      console.log("followers res:", d);
+      setFollowers(d?.followers || []);
+    })
+   .catch(() => setFollowers([]));
 
-
-
-  // FETCH STATS AND POSTS
-  useEffect(() => {
-    if (!targetUserId || !loggedUser?.token) return;
-
-    async function fetchStatsAndPosts() {
-      try 
-      {
-        const statsData = await apiFetch(`api/user/stats/${targetUserId}`);
-        console.log("Fetched stats:", statsData);
-        setStats(statsData);
-      }
-      catch (err) 
-      {
-        console.error("Failed to fetch data:", err);
-      }
-    }
-
-    fetchStatsAndPosts();
-  }, [targetUserId, loggedUser]);
-
-  const [newUsername, setNewUsername] = useState(stats?.username || "");
-
-
-  // followers and following
-  useEffect(() => {
-
-
-    const fetchFollowersAndFollowing = async () => {
-      try {
-        setLoadingFollowers(true);
-
-        const [followersRes, followingRes] = await Promise.all([
-          apiFetch(`api/user/followers/${targetUserId}`),
-          apiFetch(`api/user/following/${targetUserId}`),
-        ]);
-
-        setFollowers(followersRes);
-        setFollowing(followingRes);
-      } catch (error) {
-        console.error("Error fetching followers/following:", error);
-      } finally {
-        setLoadingFollowers(false);
-      }
-    };
-
-    fetchFollowersAndFollowing();
-  }, [stats, targetUserId]);
-
-
-
-  // HANDLE FILE CHANGE
+  // Following - you don't have this endpoint, so we fake it from followers for now
+  // Add this endpoint in backend, for now set empty
+  apiFetch(`api/follow/following/${targetId}`).then(d => setFollowing(d.following || [])).catch(()=>setFollowing([]));
+}, [targetId]);
 
   const handleFileChange = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
-
-    const formData = new FormData();
-    formData.append("profilePic", file);
-
-    try {
-      setIsUploading(true);
-
-      const data = await apiFetch("api/uploads/profile", {
-        method: "POST",
-        body: formData, // ✅ handled by apiFetch (skips Content-Type for FormData)
-      });
-      console.log(data)
-      // Update profilePic in stats state
-      setStats((prev) => ({ ...prev, profilePic: data.profilePic }));
-    } catch (err) {
-      console.error("Profile pic upload failed:", err);
-    } finally {
-      setIsUploading(false);
-    }
+    const fd = new FormData();
+    fd.append("profilePic", file);
+    const data = await apiFetch("api/uploads/profile", { method: "POST", body: fd });
+    setStats(p => ({...p, profilePic: data.profilePic}));
   };
 
-
-  // HANDLE CHANGE USERNAME
-  const handleChangeUserName = async (newUsername) => {
-    if (!newUsername?.trim()) return;
-    if (newUsername === stats.username) return;
-
-    try {
-      const data = await apiFetch("api/user/updateprofile", {
-        method: "PUT",
-        body: JSON.stringify({ newUsername }),
-      });
-
-      // update UI instantly
-      setStats((prev) => ({
-        ...prev,
-        username: data.newUsername || newUsername,
-      }));
-    } catch (err) {
-      console.error("Failed to change username:", err);
-    }
+  const handleChangeUserName = async () => {
+    const data = await apiFetch("api/user/updateprofile", { method: "PUT", body: JSON.stringify({ newUsername }) });
+    setStats(p => ({...p, username: data.newUsername}));
+    setShowEditName(false);
   };
 
-
- // Profile UI for guest users
-
-
-
-
-  // public posts section
-  
-
-
-  
+  if (!stats) return <div className="p-10 text-center">Loading...</div>;
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8">
-      {loggedUser?.user?.isGuest && (
-        <div className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 mb-6" role="alert">
-          <p className="font-bold">Guest User Notice</p>
-          <p>You are currently logged in as a guest. Some features may be limited.</p>
-          <p className="mt-2 text-sm">To access all features, please register or log in with a full account.</p>
-          <h1 className="mt-2 text-xl text-gray-600">
-            Welcome, {loggedUser?.user?.fullName || "Guest"}! You can view your profile and posts, but some actions may be restricted.
-          </h1>
+    <div className={`max-w- mx-auto ${theme === "dark"? "text-white" : "text-black"}`}>
+      {/* Header */}
+      <div className="flex gap-10 md:gap-24 px-4 py-8 border-b border-gray-200 dark:border-zinc-800">
+        <div className="relative">
+          <img src={loggedUser?.profilePic || "/placeholder.svg"} className="w-20 h-20 md:w-36 md:h-36 rounded-full object-cover" />
+          {isOwnProfile && (
+            <>
+              <button onClick={() => fileInputRef.current.click()} className="absolute bottom-0 right-0 bg-white border rounded-full px-2 py-1 text-xs">Edit</button>
+              <input type="file" ref={fileInputRef} onChange={handleFileChange} className="hidden" accept="image/*" />
+            </>
+          )}
         </div>
-      )}
-      <div className="flex gap-8">
-
-        {/* ===== LEFT SIDEBAR: FOLLOWERS / FOLLOWING ===== */}
-        {/* ===== LEFT SIDEBAR ===== */}
-        <div className="hidden lg:block w-72">
-          <div className="sticky top-24 space-y-6">
-
-            {/* Followers */}
-            <div>
-              <h3 className="text-sm font-semibold mb-3">
-                Followers ({followers.length})
-              </h3>
-
-              <div className="space-y-3 max-h-[40vh] overflow-y-auto">
-                {followers.length === 0 ? (
-                  <p className="text-sm text-gray-400">Loading...</p>
-                ) : followers.length === 0 ? (
-                  <p className="text-sm text-gray-400">No followers yet</p>
-                ) : ( Array.isArray(followers) ?
-                  followers.map((user) => (
-                    <div
-                      key={user._id}
-                      className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-100 cursor-pointer"
-                    >
-                      <img
-                        src={user.profilePic || "/avatar.png"}
-                        alt={user.username}
-                        className="w-9 h-9 rounded-full object-cover"
-                      />
-                      <span className="text-sm font-medium">
-                        {user.username}
-                      </span>
-                    </div>
-                  )) : null
-                )}
-              </div>
-            </div>
-
-            {/* Following */}
-            <div>
-              <h3 className="text-sm font-semibold mb-3">
-                Following ({following.length})
-              </h3>
-
-              <div className="space-y-3 max-h-[40vh] overflow-y-auto">
-                {loadingFollowers ? (
-                  <p className="text-sm text-gray-400">Loading...</p>
-                ) : following.length === 0 ? (
-                  <p className="text-sm text-gray-400">Not following anyone</p>
-                ) : ( Array.isArray(following) ?
-                  following.map((user) => (
-                    <div
-                      key={user._id}
-                      className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-100 cursor-pointer"
-                    >
-                      <img
-                        src={user.profilePic || "/avatar.png"}
-                        alt={user.username}
-                        className="w-9 h-9 rounded-full object-cover"
-                      />
-                      <span className="text-sm font-medium">
-                        {user.username}
-                      </span>
-                    </div>
-                  )) : null
-                )}
-              </div>
-            </div>
-
-          </div>
-        </div>
-
-       {stats && (
-        <div className="flex-1 space-y-6">
-           {/* ===== RIGHT CONTENT ===== */}
         <div className="flex-1">
-
-          {/* ===== Profile Header ===== */}
-          <div className="flex flex-col md:flex-row items-center md:items-start gap-10 border-b pb-8">
-
-            {/* Profile Image */}
-            <div className="relative">
-              <img
-                src={stats.profilePic}
-                alt="Profile"
-                className="w-36 h-36 md:w-40 md:h-40 rounded-full object-cover border"
-              />
-
-              {isOwnProfile && (
-                <>
-                  <button
-                    onClick={() => fileInputRef.current.click()}
-                    className={`absolute bottom-2 right-2 ${theme === "dark" ? "bg-gray-800 text-white" : "bg-white text-black"} text-sm px-3 py-1 rounded-full shadow`}
-                  >
-                    Edit
-                  </button>
-
-                  <input
-                    type="file"
-                    accept="image/*"
-                    ref={fileInputRef}
-                    onChange={handleFileChange}
-                    className="hidden"
-                  />
-                </>
-              )}
-            </div>
-
-            {/* Profile Info */}
-            <div className="flex-1 space-y-4 text-center md:text-left">
-              <div className="flex items-center justify-center md:justify-start gap-2">
-                <h2 className="text-2xl font-semibold">{stats.username}</h2>
-
-                {isOwnProfile && (
-                  <button
-                    onClick={() => setIsUsernameModalOpen(true)}
-                    className={`text-sm px-2 py-1 rounded-md border ${theme === "dark" ? "bg-gray-800 text-white" : "bg-white text-black"
-                      }`}
-                  >
-                    Edit
-                  </button>
-                )}
-              </div>
-
-              <div className="flex justify-center md:justify-start gap-6 text-sm">
-                <span><strong>{stats.postsCount}</strong> posts</span>
-
-                <span
-                  onClick={() => {
-                    setActiveTab("followers");
-                    setShowFollowModal(true);
-                  }}
-                  className="cursor-pointer"
-                >
-                  <strong>{followers.length}</strong> followers
-                </span>
-
-                <span
-                  onClick={() => {
-                    setActiveTab("following");
-                    setShowFollowModal(true);
-                  }}
-                  className="cursor-pointer"
-                >
-                  <strong>{following.length}</strong> following
-                </span>
-              </div>
-
-
-              <p className="text-sm text-gray-600">
-                ❤️ Total Likes: {stats.likesReceived}
-              </p>
-
-              {isUploading && (
-                <p className="text-sm text-indigo-500">
-                  Uploading profile picture...
-                </p>
-              )}
-            </div>
+          <div className="flex items-center gap-4 mb-4">
+            <h2 className="text-xl">{stats.username}</h2>
+            {isOwnProfile && <button onClick={() => { setNewUsername(stats.username); setShowEditName(true); }} className={`px-4 py-1 rounded-lg text-sm font-semibold border ${theme === "dark"? "bg-zinc-800" : "bg-gray-100"}`}>Edit profile</button>}
           </div>
-        </div>
-        </div>
-       )}
-
-        {/* ===== USERNAME MODAL ===== */}
-        {isUsernameModalOpen && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-            <div className="bg-white rounded-xl w-[90%] max-w-md p-6">
-              <h3 className={`text-lg font-semibold mb-4 text-center ${theme === "dark" ? "text-red-400" : "text-black"}`}>
-                Change Username
-              </h3>
-
-              <input
-                value={newUsername}
-                onChange={(e) => setNewUsername(e.target.value)}
-                className={`w-full border rounded-lg px-3 py-2 ${theme === "dark" ? "bg-gray-800 text-white" : "bg-white text-black"}`}
-                placeholder="Enter new username"
-              />
-
-              <div className="flex justify-end gap-3 mt-6">
-                <button
-                  onClick={() => setIsUsernameModalOpen(false)}
-                  className={`px-4 py-2 text-sm border rounded-lg ${theme === "dark" ? "bg-gray-600 text-white" : "bg-gray-300 text-black"}`}
-                >
-                  Cancel
-                </button>
-
-                <button
-                  disabled={newUsername === stats.username || !newUsername.trim()}
-                  onClick={() => {
-                    handleChangeUserName(newUsername);
-                    setIsUsernameModalOpen(false);
-                  }}
-                  className={`px-4 py-2 text-sm rounded-lg text-white ${theme === "dark" ? "bg-indigo-600 disabled:bg-gray-400 hover:bg-green-800 hover:text-red-500" : "bg-indigo-600 disabled:bg-gray-400 hover:bg-green-800 hover:text-red-500"}`}
-                >
-                  Update
-                </button>
-              </div>
-            </div>
+          <div className="flex gap-6 md:gap-10 text-sm mb-4">
+            <span><b>{stats.postsCount}</b> posts</span>
+            <button onClick={() => { setModalTab("followers"); setShowFollowModal(true); }}><b>{followers.length}</b> followers</button>
+            <button onClick={() => { setModalTab("following"); setShowFollowModal(true); }}><b>{following.length}</b> following</button>
           </div>
-        )}
-
+          <p className="text-sm">❤ {stats.likesReceived} likes</p>
+        </div>
       </div>
 
-      {showFollowModal && (
-        <div className="fixed inset-0 z-50 bg-white flex flex-col md:hidden">
+      {/* Tabs */}
+      <div className="flex justify-center gap-12 border-t text-xs tracking-widest">
+        <button onClick={() => setActiveTab("posts")} className={`py-3 border-t ${activeTab === "posts"? "border-black dark:border-white" : "border-transparent text-gray-400"}`}>POSTS</button>
+        <button onClick={() => setActiveTab("reels")} className={`py-3 border-t ${activeTab === "reels"? "border-black" : "border-transparent text-gray-400"}`}>REELS</button>
+      </div>
 
-          {/* Header */}
-          <div className="flex items-center justify-between p-4 border-b">
-            <h3 className="font-semibold">
-              {activeTab === "followers" ? "Followers" : "Following"}
-            </h3>
-
-            <button
-              onClick={() => setShowFollowModal(false)}
-              className="text-gray-600 text-xl"
-            >
-              ✕
-            </button>
+      {/* Grid */}
+      <div className="grid grid-cols-3 gap-1 md:gap-1">
+        {posts.filter(p => activeTab === "posts"? p.mediaType === "image" : p.mediaType === "video").map(post => (
+          <div key={post._id} className="aspect-square bg-black relative group cursor-pointer">
+            <img src={post.mediaType === "video"? post.thumbnail || post.mediaUrl : post.mediaUrl} alt="" className="w-full h-full object-cover" />
+            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white text-sm gap-4">❤ {post.likes?.length} 💬 {post.comments?.length}</div>
           </div>
+        ))}
+      </div>
 
-          {/* Tabs */}
-          <div className="flex border-b">
-            <button
-              onClick={() => setActiveTab("followers")}
-              className={`flex-1 py-2 text-sm ${activeTab === "followers"
-                  ? "border-b-2 border-black font-medium"
-                  : "text-gray-500"
-                }`}
-            >
-              Followers
-            </button>
-
-            <button
-              onClick={() => setActiveTab("following")}
-              className={`flex-1 py-2 text-sm ${activeTab === "following"
-                  ? "border-b-2 border-black font-medium"
-                  : "text-gray-500"
-                }`}
-            >
-              Following
-            </button>
-          </div>
-
-          {/* List */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-3">
-            {(activeTab === "followers" ? followers : following).map((user) => (
-              <div
-                key={user._id}
-                className="flex items-center gap-3"
-              >
-                <img
-                  src={user.profilePic || "/avatar.png"}
-                  alt={user.username}
-                  className="w-10 h-10 rounded-full object-cover"
-                />
-
-                <span className="text-sm font-medium">
-                  {user.username}
-                </span>
-              </div>
-            ))}
+      {/* Edit Username Modal */}
+      {showEditName && (
+        <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center">
+          <div className={`p-6 rounded-xl w-[90%] max-w-sm ${theme === "dark"? "bg-zinc-900" : "bg-white"}`}>
+            <h3 className="font-semibold mb-4">Change username</h3>
+            <input value={newUsername} onChange={e => setNewUsername(e.target.value)} className="w-full border rounded-lg px-3 py-2" />
+            <div className="flex justify-end gap-3 mt-4">
+              <button onClick={() => setShowEditName(false)}>Cancel</button>
+              <button onClick={handleChangeUserName} className="bg-blue-600 text-white px-4 py-1 rounded-lg">Save</button>
+            </div>
           </div>
         </div>
       )}
 
-
+      {/* Followers Modal */}
+      {showFollowModal && (
+        <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4">
+          <div className={`w-full max-w-sm rounded-xl overflow-hidden ${theme === "dark"? "bg-zinc-900" : "bg-white"}`}>
+            <div className="flex border-b">
+              <button onClick={() => setModalTab("followers")} className={`flex-1 py-3 text-sm ${modalTab === "followers"? "font-bold border-b" : ""}`}>Followers</button>
+              <button onClick={() => setModalTab("following")} className={`flex-1 py-3 text-sm ${modalTab === "following"? "font-bold border-b" : ""}`}>Following</button>
+              <button onClick={() => setShowFollowModal(false)} className="px-4">✕</button>
+            </div>
+            <div className="max-h- overflow-y-auto p-3 space-y-3">
+              {(modalTab === "followers"? followers : following).map(u => (
+                <div key={u._id} className="flex items-center gap-3">
+                  <img src={u.profilePic || "/placeholder.svg"} className="w-8 h-8 rounded-full" />
+                  <span className="text-sm">{u.username}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
-
-
 }

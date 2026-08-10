@@ -59,18 +59,17 @@ export default function VideoPost({
   };
 
   return (
-    <div className="w-full max-w-md mx-auto bg-black rounded-xl overflow-hidden shadow-lg">
-      <div className="relative group">
-        
-        <video
-          ref={videoRef}
+    <div className="w-full mx-auto bg-black rounded-xl overflow-hidden shadow-lg">
+      // VideoPost.jsx
+<div className="w-30 h-20">
+  <video  ref={videoRef}
           src={post.mediaUrl}
           loop
           playsInline
           muted={isMuted}
-          onClick={handlePlay}
-          className="w-full h-64 object-cover cursor-pointer"
-        />
+          onClick={handlePlay} className="w-full h-full object-contain" autoPlay muted loop playsInline />
+
+      
 
         {/* Mute / Unmute */}
         {isCurrent && (

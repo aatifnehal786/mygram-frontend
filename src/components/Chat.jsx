@@ -1,4 +1,3 @@
-// ✅ Chat.jsx - FIXED
 import React, { useEffect } from 'react';
 import ChatSidebar from './ChatSideBar';
 import ChatWindow from './ChatWindow';
@@ -13,77 +12,36 @@ import useUserStore from '../store/useUserStore';
 
 const Chat = () => {
   const socket = getSocket();
-  const loggedUser = useUserStore((state) => state.loggedUser);
+  const loggedUser = useUserStore((s) => s.loggedUser);
   const { theme } = useTheme();
+  const { selectedUser, setSelectedUser, followedUsers, setFollowedUsers, updateUnreadCount, updateLastMessage, isForwarding, messageToForward, setForwardMode } = useChatStore();
 
-  const {
-    selectedUser,
-    setSelectedUser,
-    setMessages,
-    followedUsers,
-    setFollowedUsers,
-    updateUnreadCount,
-    updateLastMessage,
-    isForwarding,
-    messageToForward,
-    setForwardMode,
-  } = useChatStore();
-
-
-
-  // 2. GLOBAL socket listener - runs ONCE, no selectedUser dependency
   useEffect(() => {
     if (!socket) return;
-
     const handleReceiveMessage = (msg) => {
-      // Get fresh state inside handler, not from closure
       const { selectedUser: currentSelected, addMessage } = useChatStore.getState();
-      const loggedId = loggedUser?.userid || loggedUser?._id;
-
+      const loggedId = loggedUser?.userid;
       const senderId = msg.sender?._id || msg.sender;
       const receiverId = msg.receiver?._id || msg.receiver;
-
       const otherUserId = senderId === loggedId? receiverId : senderId;
-
-      // Check if this message is for currently open chat
-      const isCurrentChat = currentSelected && (
-        (senderId === loggedId && receiverId === currentSelected._id) ||
-        (receiverId === loggedId && senderId === currentSelected._id)
-      );
-
-      if (isCurrentChat) {
-        addMessage(msg); // store has de-duplication by _id
-      }
-
+      const isCurrentChat = currentSelected && ((senderId === loggedId && receiverId === currentSelected._id) || (receiverId === loggedId && senderId === currentSelected._id));
+      if (isCurrentChat) addMessage(msg);
       updateLastMessage(otherUserId, msg);
     };
-
     socket.on("receiveMessage", handleReceiveMessage);
     return () => socket.off("receiveMessage", handleReceiveMessage);
-  }, [socket, loggedUser?.userid, loggedUser?._id, updateLastMessage]);
+  }, [socket, loggedUser?.userid, updateLastMessage]);
 
-  // 3. Followed users
   useEffect(() => {
     if (!loggedUser?.token) return;
-    const fetchFollowedUsers = async () => {
-      try {
-        const data = await apiFetch(`api/followers/${loggedUser.userid}`);
-        setFollowedUsers(data.followers || []);
-      } catch (err) {
-        console.error("Error fetching followed users:", err.message);
-      }
-    };
-    fetchFollowedUsers();
+    apiFetch(`api/follow/followers/${loggedUser.userid}`).then(data => setFollowedUsers(data.followers || [])).catch(()=>{});
   }, [loggedUser?.token, loggedUser?.userid, setFollowedUsers]);
 
-  // 4. Unread count
   useEffect(() => {
     if (!socket) return;
-    const handleUnreadUpdate = (data) => {
-      updateUnreadCount(data.senderId, data.unreadCount);
-    };
-    socket.on("unreadCountUpdated", handleUnreadUpdate);
-    return () => socket.off("unreadCountUpdated", handleUnreadUpdate);
+    const h = (data) => updateUnreadCount(data.senderId, data.unreadCount);
+    socket.on("unreadCountUpdated", h);
+    return () => socket.off("unreadCountUpdated", h);
   }, [socket, updateUnreadCount]);
 
   const forwardMessageToUsers = async (msg, receiverIds) => {
@@ -93,73 +51,33 @@ const Chat = () => {
       for (const receiverId of receivers) {
         if (receiverId === loggedUser.userid) continue;
         const newMsg = await apiFetch("api/chats/chat/forward", {
-          method: "POST",
-          body: JSON.stringify({
-            senderId: loggedUser.userid,
-            receiverId,
-            message: msg.message || "",
-            fileUrl: msg.fileUrl || null,
-            fileType: msg.fileType || null,
-            isForwarded: true,
-          }),
+          method: "POST", body: JSON.stringify({ senderId: loggedUser.userid, receiverId, message: msg.message || "", fileUrl: msg.fileUrl || null, fileType: msg.fileType || null, isForwarded: true }),
         });
-        if (selectedUser?._id === receiverId) {
-          useChatStore.getState().addMessage(newMsg);
-        }
+        if (selectedUser?._id === receiverId) useChatStore.getState().addMessage(newMsg);
       }
-      alert("Message forwarded successfully.");
-    } catch (err) {
-      console.error("Forward failed:", err);
-      alert("Forwarding failed.");
-    } finally {
-      setForwardMode(false, null);
-    }
+    } finally { setForwardMode(false, null); }
   };
 
-  const triggerForwardMode = (msg) => {
-    setForwardMode(true, msg);
-    setSelectedUser(null);
-  };
+  if (loggedUser?.user?.isGuest) {
+    return <div className="flex h-[calc(100vh-60px)] items-center justify-center"><div className="text-center"><h2 className="text-xl font-bold">Messages are for logged in users</h2><p className="text-sm text-gray-500 mt-2">Sign up to chat with friends</p></div></div>;
+  }
 
   return (
-    loggedUser?.user?.isGuest? (
-      <div className="flex h-screen items-center justify-center bg-gray-100">
-        <div className="bg-white p-8 rounded-lg shadow-lg text-center max-w-md">
-          <h2 className="text-2xl font-bold mb-3">Chat is unavailable</h2>
-          <p className="text-gray-600 mb-6">Please sign up or log in to send and receive messages.</p>
-        </div>
+    <div className={`flex h-[calc(100vh-60px)] md:h-[calc(100vh-60px)] w-full bg-white dark:bg-black ${theme === "dark"? "bg-black border-zinc-800" : "bg-white border-gray-200"}`}>
+      <div className={`w-[320px] min-w-[320px] border-r flex-col ${theme === "dark"? "border-zinc-800" : "border-gray-200"} ${selectedUser? "hidden md:flex" : "flex"}`}>
+        <ChatSidebar theme={theme} onSelectForwardUser={(ids) => { if (!ids.length) setForwardMode(false, null); else forwardMessageToUsers(messageToForward, ids); }} />
       </div>
-    ) : (
-      <div className="flex h-screen w-full bg-gray-100 overflow-hidden">
-        <div className={`w-full md:w-1/3 lg:w-1/4 bg-white border-r transition-all ${selectedUser? "hidden md:block" : "block"}`}>
-          <ChatSidebar
-            onSelectUser={(user) => { if (!isForwarding) setSelectedUser(user); }}
-            followedUsers={followedUsers}
-            selectedUserId={selectedUser?._id}
-            isForwarding={isForwarding}
-            onSelectForwardUser={(userIds) => {
-              if (userIds.length === 0) setForwardMode(false, null);
-              else forwardMessageToUsers(messageToForward, userIds);
-            }}
-            theme={theme}
-          />
-        </div>
-        <div className={`flex-1 bg-gray-50 ${selectedUser? "block" : "hidden md:block"}`}>
-          {selectedUser? (
-            <ChatWindow
-              selectedUser={selectedUser}
-              triggerForwardMode={triggerForwardMode}
-              onBack={() => setSelectedUser(null)}
-              theme={theme}
-            />
-          ) : (
-            <div className="hidden md:flex h-full items-center justify-center text-gray-400">Select a chat to start messaging</div>
-          )}
-        </div>
-        <ToastContainer position="bottom-right" autoClose={3000} />
+      <div className={`flex-1 ${selectedUser? "flex" : "hidden md:flex"} ${theme === "dark"? "bg-black" : "bg-white"}`}>
+        {selectedUser? <ChatWindow onBack={() => setSelectedUser(null)} theme={theme} /> : (
+          <div className="flex flex-1 flex-col items-center justify-center gap-3">
+            <div className="w-24 h-24 border-2 rounded-full flex items-center justify-center text-3xl">✈</div>
+            <h2 className="text-xl">Your messages</h2>
+            <p className="text-sm text-gray-500">Send private photos and messages to a friend or group</p>
+          </div>
+        )}
       </div>
-    )
+      <ToastContainer />
+    </div>
   );
 };
-
 export default Chat;
