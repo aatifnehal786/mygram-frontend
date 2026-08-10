@@ -1,5 +1,5 @@
 "use client"
-import { useEffect, useCallback, useState } from "react"
+import { useEffect, useCallback } from "react"
 import useVideoCallStore from "../store/VideoCallStore"
 import VideoCallModal from "./VideoCallModal"
 import { getSocket } from "../contexts/SocketContext";
@@ -9,26 +9,6 @@ const VideoCallManager = ({selectedUser}) => {
   const { setIncomingCall, setCurrentCall, setCallType, setCallModalOpen, setCallStatus, endCall } = useVideoCallStore()
   const socket = getSocket();
   const loggedUser = useUserStore((state) => state.loggedUser);
-  const [stats, setStats] = useState(null);
-
-  useEffect(() => {
-      if (!loggedUser?.token) return;
-  
-      async function fetchStatsAndPosts() {
-        try 
-        {
-          const statsData = await apiFetch(`api/user/stats/${targetUserId}`);
-          console.log("Fetched stats:", statsData);
-          setStats(statsData);
-        }
-        catch (err) 
-        {
-          console.error("Failed to fetch data:", err);
-        }
-      }
-  
-      fetchStatsAndPosts();
-    }, [loggedUser]);
 
   useEffect(() => {
     if (!socket) return
@@ -61,7 +41,7 @@ const handleIncomingCall = ({ callerId, callerName, callerAvatar, callerPic, cal
     const callId = `${loggedUser?.userid || loggedUser?._id}-${receiverId}-${Date.now()}`
     
     // FIX: handle both profilePic and profilePicture
-    const myAvatar = stats?.profilePic || stats?.profilePicture || "/placeholder.svg";
+    const myAvatar = loggedUser?.profilePicture || loggedUser?.profilePic || loggedUser?.avatar || "/placeholder.svg"
     const validatedAvatar = receiverAvatar && receiverAvatar !== "video" ? receiverAvatar : "/placeholder.svg"
 
     setCurrentCall({ callId, participantId: receiverId, participantName: receiverName, participantAvatar: validatedAvatar })
