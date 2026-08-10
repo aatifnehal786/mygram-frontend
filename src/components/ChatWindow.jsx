@@ -34,15 +34,13 @@ const ChatWindow = ({  triggerForwardMode, onBack, theme,}) => {
   const [isTyping, setIsTyping] = useState(false);
   const typingTimeout = useRef(null);
   const [onlineMap, setOnlineMap] = useState({});
-  const chatContainerRef = useRef(null);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const inputRef = useRef(null);
   const handleReactionRef = useRef(null);
   const [reactionPickerFor, setReactionPickerFor] = useState(null);
   const shouldAutoScrollRef = useRef(true);
-  // const {selectedUser,messages,markMessagesSeen,updateMessages} = useChatStore();
-  const { theme } = useTheme()
-
+  
+  const {theme} = useTheme();
 
 
 const { selectedUser, messages, setMessages, addMessage, markMessagesSeen, updateMessages } = useChatStore();
