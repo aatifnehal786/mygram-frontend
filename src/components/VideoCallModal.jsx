@@ -1,10 +1,10 @@
 "use client"
 
-import { useEffect, useRef, useMemo } from "react"
-import { FaVideo, FaVideoSlash, FaMicrophone, FaMicrophoneSlash, FaPhoneSlash, FaTimes } from "react-icons/fa"
-import useVideoCallStore from "../store/VideoCallStore"
-import useUserStore from "../store/useUserStore"
-import useTheme from "../contexts/ThemeContext"
+import { useEffect, useRef, useMemo } from "react";
+import { FaVideo, FaVideoSlash, FaMicrophone, FaMicrophoneSlash, FaPhoneSlash, FaTimes } from "react-icons/fa";
+import useVideoCallStore from "../store/VideoCallStore";
+import useUserStore from "../store/useUserStore";
+import { useTheme } from '../contexts/ThemeContext'; 
 
 const VideoCallModal = ({ socket }) => {
   const localVideoRef = useRef(null)
@@ -221,8 +221,8 @@ const VideoCallModal = ({ socket }) => {
         callerId: incomingCall.callerId,
         callId: incomingCall.callId,
         receiverInfo: {
-          username: user.username,
-          profilePicture: user.profilePicture,
+          username: loggedUser.username,
+          profilePicture: loggedUser.profilePicture,
         },
       })
 
