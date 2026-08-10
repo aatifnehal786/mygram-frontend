@@ -404,7 +404,7 @@ const VideoCallModal = ({ socket }) => {
       socket.off("webrtc_answer", handleWebRTCAnswer)
       socket.off("webrtc_ice_candidate", handleWebRTCIceCandidate)
     }
-  }, [socket, peerConnection, currentCall, incomingCall, user.username, user.profilePicture])
+  }, [socket, peerConnection, currentCall, incomingCall, loggedUser.username, loggedUser.profilePicture])
 
   // Don't render if modal should not be open
   if (!isCallModalOpen && !incomingCall) {
@@ -433,8 +433,8 @@ const VideoCallModal = ({ socket }) => {
             <div className="text-center mb-8">
               <div className="w-32 h-32 rounded-full bg-gray-300 mx-auto mb-4 overflow-hidden">
                 <img
-                  src={displayInfo?.avatar || "/placeholder.svg?height=128&width=128"}
-                  alt={displayInfo?.name || "Unknown"}
+                  src={loggedUser?.profilePicture || "/placeholder.svg?height=128&width=128"}
+                  alt={loggedUser?.username || "Unknown"}
                   className="w-full h-full object-cover"
                   onError={(e) => {
                     e.target.src = "/placeholder.svg?height=128&width=128"
@@ -442,7 +442,7 @@ const VideoCallModal = ({ socket }) => {
                 />
               </div>
               <h2 className={`text-2xl font-semibold mb-2 ${theme === "dark" ? "text-white" : "text-gray-900"}`}>
-                {displayInfo?.name || "Unknown"}
+                {loggedUser?.username || "Unknown"}
               </h2>
               <p className={`text-lg ${theme === "dark" ? "text-gray-300" : "text-gray-600"}`}>
                 Incoming {callType} call...
@@ -485,8 +485,8 @@ const VideoCallModal = ({ socket }) => {
                 <div className="text-center">
                   <div className="w-32 h-32 rounded-full bg-gray-600 mx-auto mb-4 overflow-hidden">
                     <img
-                      src={displayInfo?.avatar || "/placeholder.svg?height=128&width=128"}
-                      alt={displayInfo?.name || "Unknown"}
+                      src={loggedUser?.profilePicture || "/placeholder.svg?height=128&width=128"}
+                      alt={loggedUser?.username || "Unknown"}
                       className="w-full h-full object-cover"
                       onError={(e) => {
                         e.target.src = "/placeholder.svg?height=128&width=128"
@@ -495,14 +495,14 @@ const VideoCallModal = ({ socket }) => {
                   </div>
                   <p className="text-white text-xl">
                     {callStatus === "calling"
-                      ? `Calling ${displayInfo?.name || "User"}...`
+                      ? `Calling ${loggedUser?.username || "User"}...`
                       : callStatus === "connecting"
                         ? "Connecting..."
                         : callStatus === "connected"
-                          ? displayInfo?.name || "Connected"
+                          ? loggedUser?.username || "Connected"
                           : callStatus === "failed"
                             ? "Connection failed"
-                            : displayInfo?.name || "Unknown"}
+                            : loggedUser?.username || "Unknown"}
                   </p>
                 </div>
               </div>
