@@ -38,7 +38,7 @@ const VideoCallModal = ({ socket }) => {
 
  
  const loggedUser = useUserStore((state) => state.loggedUser);
-  const { theme } = useThemeStore()
+  const { theme } = useTheme()
 
   // The rtcConfiguration object you posted is used to configure a WebRTC peer-to-peer connection. 
   // Specifically, it helps define how two browsers can discover and connect to each other, 
