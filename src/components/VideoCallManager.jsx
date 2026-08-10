@@ -12,12 +12,19 @@ const VideoCallManager = ({selectedUser}) => {
 
   useEffect(() => {
     if (!socket) return
-    const handleIncomingCall = ({ callerId, callerName, callerAvatar, callType, callId }) => {
-      setIncomingCall({ callerId, callerName, callerAvatar, callId })
-      setCallType(callType)
-      setCallModalOpen(true)
-      setCallStatus("ringing")
-    }
+    // In VideoCallManager.jsx -> handleIncomingCall
+const handleIncomingCall = ({ callerId, callerName, callerAvatar, callerPic, callType, callId }) => {
+  console.log("Incoming call data:", { callerId, callerName, callerAvatar, callerPic })
+  setIncomingCall({ 
+    callerId, 
+    callerName: callerName || "Unknown", 
+    callerAvatar: callerAvatar || callerPic || "/placeholder.svg", 
+    callId 
+  })
+  setCallType(callType)
+  setCallModalOpen(true)
+  setCallStatus("ringing")
+}
     const handleCallFailed = ({ reason }) => {
       setCallStatus("failed")
       setTimeout(() => endCall(), 2000)

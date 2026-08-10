@@ -50,9 +50,19 @@ const VideoCallModal = () => {
   }), []);
 
   const displayInfo = useMemo(() => {
-    if (incomingCall &&!isCallActive) return { name: incomingCall.callerName, avatar: incomingCall.callerAvatar };
-    if (currentCall) return { name: currentCall.participantName, avatar: currentCall.participantAvatar };
-    return null;
+    if (incomingCall && !isCallActive) {
+      return {
+        name: incomingCall.callerName || "Unknown",
+        avatar: incomingCall.callerAvatar || incomingCall.callerPic || "/placeholder.svg",
+      };
+    }
+    if (currentCall) {
+      return {
+        name: currentCall.participantName || "Unknown",
+        avatar: currentCall.participantAvatar || "/placeholder.svg",
+      };
+    }
+    return { name: "Unknown", avatar: "/placeholder.svg" };
   }, [incomingCall, currentCall, isCallActive]);
 
   useEffect(() => {
