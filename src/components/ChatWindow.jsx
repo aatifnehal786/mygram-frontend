@@ -983,7 +983,7 @@ return (
    
     
   </div> 
- <VideoCallManager selectedUser={selectedUser} />
+ <VideoCallManager socket={socket} selectedUser={selectedUser} />
 
 </>
 )

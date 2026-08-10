@@ -6,13 +6,14 @@ import VideoCallModal from "./VideoCallModal"
 // import {UserContext} from "../contexts/UserContext"
 import { getSocket } from "../contexts/SocketContext";
 import useUserStore from "../store/useUserStore"
-const VideoCallManager = ({selectedUser}) => {
+const VideoCallManager = ({selectedUser, socket}) => {
   const { setIncomingCall, setCurrentCall, setCallType, setCallModalOpen, setCallStatus, endCall } = useVideoCallStore()
- const socket = getSocket();
+//  const socket = getSocket();
   // const {loggedUser} = useContext(UserContext)
-    const loggedUser = useUserStore(
-    (state) => state.loggedUser
-  );
+    const loggedUser = useUserStore((state) => state.loggedUser);
+
+
+
   useEffect(() => {
     if (!socket) return
 
@@ -93,7 +94,9 @@ console.log(selectedUser)
       console.log("Call initiated, currentCall set to:", callData)
     },
     [
-      loggedUser,
+      loggedUser.userid,
+      loggedUser.username,
+      loggedUser.profilePicture,
       socket,
       setCurrentCall,
       setCallType,
@@ -107,7 +110,7 @@ console.log(selectedUser)
     useVideoCallStore.getState().initiateCall = initiateCall
   }, [initiateCall])
 
-  return <VideoCallModal selectedUser={selectedUser} />
+  return <VideoCallModal socket={socket} selectedUser={selectedUser} />
 }
 
 export default VideoCallManager
