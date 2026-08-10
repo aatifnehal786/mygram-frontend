@@ -11,7 +11,7 @@ import { VscReactions } from "react-icons/vsc";
 import useChatStore from "../store/chatStore";
 import useUserStore from '../store/useUserStore';
 import usePresenceStore from "../store/usePresenceStore";
-import { useTheme } from '../contexts/ThemeContext';
+
 
 
 
@@ -40,7 +40,7 @@ const ChatWindow = ({  triggerForwardMode, onBack, theme,}) => {
   const [reactionPickerFor, setReactionPickerFor] = useState(null);
   const shouldAutoScrollRef = useRef(true);
   
-  const {theme} = useTheme();
+  // const {theme} = useTheme();
 
 
 const { selectedUser, messages, setMessages, addMessage, markMessagesSeen, updateMessages } = useChatStore();
@@ -956,7 +956,7 @@ return (
     onChange={(e) => handleTypingLogic(e.target.value)}
     onKeyDown={handleDynamicEnter}
     placeholder="Type a message..."
-    className="flex-1 px-4 py-2 rounded-full border text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+    className={`flex-1 px-4 py-2 rounded-full border text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${theme === 'dark' ? 'bg-gray-700 text-white border-gray-600' : 'bg-white text-gray-900 border-gray-300'}`}
   />
 
   <label className="cursor-pointer text-xl">
