@@ -10,17 +10,18 @@ import EmojiPicker from "emoji-picker-react";
 import { VscReactions } from "react-icons/vsc";
 import useChatStore from "../store/chatStore";
 import useUserStore from '../store/useUserStore';
+import usePresenceStore from "../store/usePresenceStore";
+import { useTheme } from '../contexts/ThemeContext';
 
 
 
 const REACTIONS = ["❤️", "😂", "😮", "😢", "👍", "👎"];
 
 const ChatWindow = ({  triggerForwardMode, onBack, theme,}) => {
-  // const { loggedUser } = useContext(UserContext);
-  const loggedUser = useUserStore(
-    (state) => state.loggedUser
-  );
- const socket = getSocket();
+
+
+  const loggedUser = useUserStore((state) => state.loggedUser);
+  const socket = getSocket();
   const currentUserId = loggedUser?.userid;
   const [input, setInput] = useState('');
   const [openDropdownId, setOpenDropdownId] = useState(null);
@@ -39,18 +40,8 @@ const ChatWindow = ({  triggerForwardMode, onBack, theme,}) => {
   const handleReactionRef = useRef(null);
   const [reactionPickerFor, setReactionPickerFor] = useState(null);
   const shouldAutoScrollRef = useRef(true);
-   const {
-    selectedUser,
-    messages,
-    markMessagesSeen,
-    updateMessages
-  } = useChatStore();
-
-
-
-
-
-
+  const {selectedUser,messages,markMessagesSeen,updateMessages} = useChatStore();
+  const { theme } = useTheme()
 
  /* -------------------- SOCKET: REACTION UPDATE -------------------- */
 
@@ -60,12 +51,7 @@ useEffect(() => {
 
   const handleReaction = ({ messageId, reactions }) => {
     updateMessages((prev) =>
-      prev.map((msg) =>
-        msg._id === messageId
-          ? { ...msg, reactions }
-          : msg
-      )
-    );
+      prev.map((msg) => msg._id === messageId ? { ...msg, reactions } : msg));
   };
 
   socket.on("message-reaction", handleReaction);
@@ -77,9 +63,10 @@ useEffect(() => {
 
 
 
+// online and offline status management 
 
-
-
+const { onlineUsers } = usePresenceStore();
+const isUserOnline = onlineUsers.includes(selectedUser._id);
 
   useEffect(() => {
     if (toastMessage) {
@@ -220,26 +207,6 @@ const deleteMessage = async () => {
   };
 
 
-// use effect for online and offline status
-useEffect(() => {
-    if (!socket) return;
-
-    socket.emit("get-online-users");
-
-    socket.on("online-users", (userIds) => {
-      setOnlineMap(prev => {
-        const map = { ...prev };
-        userIds.forEach(id => {
-          map[id] = { isOnline: true, lastSeen: null };
-        });
-        return map;
-      });
-    });
-
-    return () => socket.off("online-users");
-  }, [socket]);
-
-
   // use Effect for Typing indicators
 
 useEffect(() => {
@@ -340,44 +307,85 @@ const renderMessageWithLinks = (text) => {
     return date.toLocaleDateString();
   }
 
-// const loadMessages = async (initial = false) => {
-//   if (loadingMore || !hasMore || !selectedUser) return;
 
-//   setLoadingMore(true);
+const { selectedUser, messages, setMessages, addMessage, markMessagesSeen, updateMessages } = useChatStore();
+const [skip, setSkip] = useState(0);
+const [limit] = useState(20);
+const [hasMore, setHasMore] = useState(true);
+const [loadingMore, setLoadingMore] = useState(false);
+const chatContainerRef = useRef(null);
 
-//   const prevScrollHeight = chatContainerRef.current?.scrollHeight || 0;
+const loadMessages = async (initial = false) => {
+  if (loadingMore || (!hasMore &&!initial) ||!selectedUser) return;
 
-//   try {
-//     const currentSkip = initial ? 0 : skip;
+  setLoadingMore(true);
+  const prevScrollHeight = chatContainerRef.current?.scrollHeight || 0;
 
-//     const data = await apiFetch(
-//       `api/chats/chat/${selectedUser._id}?limit=${limit}&skip=${currentSkip}`
-//     );
+  try {
+    const currentSkip = initial? 0 : skip;
+    const data = await apiFetch(
+      `api/chats/chat/${selectedUser._id}?limit=${limit}&skip=${currentSkip}`
+    );
 
-//     if (data.length < limit) setHasMore(false);
+    if (!Array.isArray(data)) {
+      console.error("getChat didn't return array", data);
+      return;
+    }
 
-//     setMessages(prev =>
-//       initial ? data : [...data, ...prev]
-//     );
+    if (data.length < limit) setHasMore(false);
 
-//     // ✅ FIX: correct skip update
-//     setSkip(prev => (initial ? data.length : prev + data.length));
+    // backend already reverses to oldest -> newest
+    if (initial) {
+      setMessages(data); // newest 20 as oldest->newest
+      setSkip(data.length);
+    } else {
+      // prepend older messages on top
+      setMessages((prev) => [...data,...prev]);
+      setSkip((prev) => prev + data.length);
+    }
 
-//     // 🔒 preserve scroll position
-//     requestAnimationFrame(() => {
-//       if (!initial && chatContainerRef.current) {
-//         const newHeight = chatContainerRef.current.scrollHeight;
-//         chatContainerRef.current.scrollTop =
-//           newHeight - prevScrollHeight;
-//       }
-//     });
+    requestAnimationFrame(() => {
+      if (initial) {
+        // scroll to bottom on first load
+        chatContainerRef.current?.scrollTo(0, chatContainerRef.current.scrollHeight);
+      } else if (chatContainerRef.current) {
+        const newHeight = chatContainerRef.current.scrollHeight;
+        chatContainerRef.current.scrollTop = newHeight - prevScrollHeight;
+      }
+    });
 
-//   } catch (err) {
-//     console.error("Failed to load messages", err);
-//   } finally {
-//     setLoadingMore(false);
-//   }
-// };
+  } catch (err) {
+    console.error("Failed to load messages", err);
+  } finally {
+    setLoadingMore(false);
+  }
+};
+
+// Call on user change
+useEffect(() => {
+  if (selectedUser) {
+    setHasMore(true);
+    setSkip(0);
+    loadMessages(true);
+  }
+}, [selectedUser]);
+
+// Socket new message
+useEffect(() => {
+  if (!socket) return;
+  const handleReceive = (msg) => {
+    // only add if belongs to current chat
+    const otherId = selectedUser?._id;
+    const senderId = msg.sender?._id || msg.sender;
+    const receiverId = msg.receiver?._id || msg.receiver;
+
+    if (otherId && (senderId === otherId || receiverId === otherId)) {
+      addMessage(msg);
+    }
+  };
+  socket.on("receiveMessage", handleReceive);
+  return () => socket.off("receiveMessage", handleReceive);
+}, [socket, selectedUser]);
 
 
 
@@ -606,34 +614,21 @@ const deleteMessageForEveryone = async (messageId) => {
   };
 }, [socket, currentUserId]);
   
-  const handleVideoCall = () => {
-    if (selectedUser && onlineMap[selectedUser?._id]?.isOnline) {
-      // Get the initiateCall function from the store
-      const { initiateCall } = useVideoCallStore.getState();
-      console.log('this is initial call',initiateCall)
-
-      console.log("Starting video call with selectedContact:", {
-        id: selectedUser?._id,
-        name: selectedUser?.username,
-        avatar: selectedUser?.profilePicture, // This should be the URL, not "video"
-        fullContact: selectedUser,
-      });
-
-      // Make sure we're passing the correct profile picture URL
-      const avatarUrl =
-        selectedUser?.profilePicture ||
-        "/placeholder.svg?height=128&width=128";
-
-      initiateCall(
-        selectedUser._id,
-        selectedUser.username,
-        avatarUrl, // Pass the actual URL, not "video"
-        "video"
-      );
-    } else {
-      alert("User is offline. Cannot initiate video call.");
-    }
-  };
+ // and in call button
+const handleVideoCall = () => {
+  if (!selectedUser) return;
+  if (!isUserOnline) {
+    alert("User is offline");
+    return;
+  }
+  const { initiateCall } = useVideoCallStore.getState();
+  initiateCall(
+    selectedUser._id,
+    selectedUser.username,
+    selectedUser.profilePicture || selectedUser.profilePic,
+    "video"
+  );
+};
 
 
 return (
@@ -657,18 +652,16 @@ return (
         <p className="text-xs text-gray-500">
           {isTyping
             ? "typing..."
-            : onlineMap[selectedUser._id]?.isOnline
+            : isUserOnline
               ? "Online"
-              : onlineMap[selectedUser._id]?.lastSeen
-                ? `Last seen ${formatTime(onlineMap[selectedUser._id].lastSeen)}`
-                : "Offline"}
+              : "Offline"}
         </p>
       </div>
        <div className="flex items-center space-x-4">
             <button
               className="focus:outline-none"
               onClick={handleVideoCall}
-              title={selectedUser.isOnline ? "Start video call" : "User is offline"}
+              title={isUserOnline ? "Start video call" : "User is offline"}
             >
               <FaVideo
                 className={`h-5 w-5 text-green-500 hover:text-green-600`}
@@ -983,7 +976,7 @@ return (
    
     
   </div> 
- <VideoCallManager socket={socket} selectedUser={selectedUser} />
+
 
 </>
 )
