@@ -40,8 +40,63 @@ const ChatWindow = ({  triggerForwardMode, onBack, theme,}) => {
   const handleReactionRef = useRef(null);
   const [reactionPickerFor, setReactionPickerFor] = useState(null);
   const shouldAutoScrollRef = useRef(true);
-  const {selectedUser,messages,markMessagesSeen,updateMessages} = useChatStore();
+  // const {selectedUser,messages,markMessagesSeen,updateMessages} = useChatStore();
   const { theme } = useTheme()
+
+
+
+const { selectedUser, messages, setMessages, addMessage, markMessagesSeen, updateMessages } = useChatStore();
+const [skip, setSkip] = useState(0);
+const [limit] = useState(20);
+const [hasMore, setHasMore] = useState(true);
+const [loadingMore, setLoadingMore] = useState(false);
+const chatContainerRef = useRef(null);
+
+const loadMessages = async (initial = false) => {
+  if (loadingMore || (!hasMore &&!initial) ||!selectedUser) return;
+
+  setLoadingMore(true);
+  const prevScrollHeight = chatContainerRef.current?.scrollHeight || 0;
+
+  try {
+    const currentSkip = initial? 0 : skip;
+    const data = await apiFetch(
+      `api/chats/chat/${selectedUser._id}?limit=${limit}&skip=${currentSkip}`
+    );
+
+    if (!Array.isArray(data)) {
+      console.error("getChat didn't return array", data);
+      return;
+    }
+
+    if (data.length < limit) setHasMore(false);
+
+    // backend already reverses to oldest -> newest
+    if (initial) {
+      setMessages(data); // newest 20 as oldest->newest
+      setSkip(data.length);
+    } else {
+      // prepend older messages on top
+      setMessages((prev) => [...data,...prev]);
+      setSkip((prev) => prev + data.length);
+    }
+
+    requestAnimationFrame(() => {
+      if (initial) {
+        // scroll to bottom on first load
+        chatContainerRef.current?.scrollTo(0, chatContainerRef.current.scrollHeight);
+      } else if (chatContainerRef.current) {
+        const newHeight = chatContainerRef.current.scrollHeight;
+        chatContainerRef.current.scrollTop = newHeight - prevScrollHeight;
+      }
+    });
+
+  } catch (err) {
+    console.error("Failed to load messages", err);
+  } finally {
+    setLoadingMore(false);
+  }
+};
 
  /* -------------------- SOCKET: REACTION UPDATE -------------------- */
 
@@ -308,58 +363,7 @@ const renderMessageWithLinks = (text) => {
   }
 
 
-const { selectedUser, messages, setMessages, addMessage, markMessagesSeen, updateMessages } = useChatStore();
-const [skip, setSkip] = useState(0);
-const [limit] = useState(20);
-const [hasMore, setHasMore] = useState(true);
-const [loadingMore, setLoadingMore] = useState(false);
-const chatContainerRef = useRef(null);
 
-const loadMessages = async (initial = false) => {
-  if (loadingMore || (!hasMore &&!initial) ||!selectedUser) return;
-
-  setLoadingMore(true);
-  const prevScrollHeight = chatContainerRef.current?.scrollHeight || 0;
-
-  try {
-    const currentSkip = initial? 0 : skip;
-    const data = await apiFetch(
-      `api/chats/chat/${selectedUser._id}?limit=${limit}&skip=${currentSkip}`
-    );
-
-    if (!Array.isArray(data)) {
-      console.error("getChat didn't return array", data);
-      return;
-    }
-
-    if (data.length < limit) setHasMore(false);
-
-    // backend already reverses to oldest -> newest
-    if (initial) {
-      setMessages(data); // newest 20 as oldest->newest
-      setSkip(data.length);
-    } else {
-      // prepend older messages on top
-      setMessages((prev) => [...data,...prev]);
-      setSkip((prev) => prev + data.length);
-    }
-
-    requestAnimationFrame(() => {
-      if (initial) {
-        // scroll to bottom on first load
-        chatContainerRef.current?.scrollTo(0, chatContainerRef.current.scrollHeight);
-      } else if (chatContainerRef.current) {
-        const newHeight = chatContainerRef.current.scrollHeight;
-        chatContainerRef.current.scrollTop = newHeight - prevScrollHeight;
-      }
-    });
-
-  } catch (err) {
-    console.error("Failed to load messages", err);
-  } finally {
-    setLoadingMore(false);
-  }
-};
 
 // Call on user change
 useEffect(() => {
