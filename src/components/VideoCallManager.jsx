@@ -30,9 +30,12 @@ const VideoCallManager = ({selectedUser}) => {
     }
   }, [socket])
 
-  const initiateCall = useCallback((receiverId, receiverName, receiverAvatar, callType = "video") => {
+ const initiateCall = useCallback((receiverId, receiverName, receiverAvatar, callType = "video") => {
     const callId = `${loggedUser?.userid || loggedUser?._id}-${receiverId}-${Date.now()}`
-    const validatedAvatar = receiverAvatar && receiverAvatar!== "video"? receiverAvatar : "/placeholder.svg"
+    
+    // FIX: handle both profilePic and profilePicture
+    const myAvatar = loggedUser?.profilePicture || loggedUser?.profilePic || loggedUser?.avatar || "/placeholder.svg"
+    const validatedAvatar = receiverAvatar && receiverAvatar !== "video" ? receiverAvatar : "/placeholder.svg"
 
     setCurrentCall({ callId, participantId: receiverId, participantName: receiverName, participantAvatar: validatedAvatar })
     setCallType(callType)
@@ -40,16 +43,17 @@ const VideoCallManager = ({selectedUser}) => {
     setCallStatus("calling")
 
     socket.emit("initiate_call", {
-      callerId: loggedUser.userid || loggedUser._id,
+      callerId: loggedUser.userid || loggedUser._id || loggedUser.id,
       receiverId,
       callType,
-      callId, // CRITICAL FIX
+      callId,
       callerInfo: {
-        username: loggedUser.username,
-        profilePicture: loggedUser.profilePicture,
+        username: loggedUser.username || loggedUser.name,
+        profilePicture: myAvatar, // send as profilePicture
+        profilePic: myAvatar,      // also send as profilePic for safety
       },
     });
-  }, [loggedUser, socket])
+  }, [loggedUser, socket, setCurrentCall, setCallType, setCallModalOpen, setCallStatus])
 
   useEffect(() => {
     useVideoCallStore.getState().initiateCall = initiateCall
