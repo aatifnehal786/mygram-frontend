@@ -42,6 +42,7 @@ export default function Profile() {
       try 
       {
         const statsData = await apiFetch(`api/user/stats/${targetUserId}`);
+        console.log("Fetched stats:", statsData);
         setStats(statsData);
       }
       catch (err) 

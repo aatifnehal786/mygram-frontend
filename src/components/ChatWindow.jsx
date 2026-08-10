@@ -39,6 +39,8 @@ const ChatWindow = ({  triggerForwardMode, onBack, theme,}) => {
   const handleReactionRef = useRef(null);
   const [reactionPickerFor, setReactionPickerFor] = useState(null);
   const shouldAutoScrollRef = useRef(true);
+   const [stats, setStats] = useState(null);
+
   
   // const {theme} = useTheme();
 
@@ -615,6 +617,8 @@ const deleteMessageForEveryone = async (messageId) => {
     socket.off("messageDeletedForMe", handleDeleteForMe);
   };
 }, [socket, currentUserId]);
+
+
   
  // and in call button
 const handleVideoCall = () => {
