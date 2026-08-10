@@ -1,50 +1,46 @@
 import { io } from "socket.io-client";
 import useUserStore from "../store/useUserStore";
+import usePresenceStore from "../store/usePresenceStore";
 
 let socket = null;
-// const token = localStorage.getItem("auth_token");
-
 
 export const initializeSocket = () => {
   if (socket) return socket;
-
-   const user = useUserStore.getState().loggedUser;
-
-  
+  const user = useUserStore.getState().loggedUser;
   if (!user?.userid) return null;
 
-  const BACKEND_URL = "https://mygram-mvc.onrender.com"
+  const BACKEND_URL = "https://mygram-mvc.onrender.com";
 
   socket = io(BACKEND_URL, {
     withCredentials: true,
     autoConnect: true,
-    reconnection: true,
-    reconnectionAttempts: 10,
-    reconnectionDelay: 1000,
-    // 🚫 DO NOT force transports
   });
 
-  // Connection events
   socket.on("connect", () => {
     console.log("Socket connected:", socket.id);
     socket.emit("join", user?.userid);
+    socket.emit("get-online-users");
   });
 
-  socket.on("connect_error", (error) => {
-    console.error("Socket connection error:", error);
+  // LIVE PRESENCE LISTENERS - put here so it works even before Layout mounts
+  socket.on("online-users", (users) => {
+    usePresenceStore.getState().setOnlineUsers(users);
   });
-
-  socket.on("disconnect", (reason) => {
-    console.log("Socket disconnected:", reason);
+  socket.on("online-users-list", (users) => {
+    usePresenceStore.getState().setOnlineUsers(users);
+  });
+  socket.on("user-online", ({ userId }) => {
+    usePresenceStore.getState().addOnlineUser(userId);
+  });
+  socket.on("user-offline", ({ userId }) => {
+    usePresenceStore.getState().removeOnlineUser(userId);
   });
 
   return socket;
 };
 
 export const getSocket = () => {
-  if (!socket) {
-    return initializeSocket();
-  }
+  if (!socket) return initializeSocket();
   return socket;
 };
 

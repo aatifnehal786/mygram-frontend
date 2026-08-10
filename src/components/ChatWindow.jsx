@@ -33,7 +33,6 @@ const ChatWindow = ({  triggerForwardMode, onBack, theme,}) => {
   const [toastMessage, setToastMessage] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const typingTimeout = useRef(null);
-  const [onlineMap, setOnlineMap] = useState({});
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const inputRef = useRef(null);
   const handleReactionRef = useRef(null);
@@ -119,7 +118,7 @@ useEffect(() => {
 // online and offline status management 
 
 const { onlineUsers } = usePresenceStore();
-const isUserOnline = onlineUsers.includes(selectedUser._id);
+const isUserOnline = onlineUsers.some(id => id.toString() === selectedUser._id.toString());
 
   useEffect(() => {
     if (toastMessage) {
