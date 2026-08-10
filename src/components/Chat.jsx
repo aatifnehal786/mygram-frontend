@@ -29,21 +29,7 @@ const Chat = () => {
     setForwardMode,
   } = useChatStore();
 
-  // 1. Fetch chat when selectedUser changes - ONLY fetch
-  useEffect(() => {
-    if (!selectedUser ||!loggedUser?.token) return;
 
-    const fetchChat = async () => {
-      try {
-        const data = await apiFetch(`api/chats/chat/${selectedUser._id}?limit=50`);
-        setMessages(Array.isArray(data)? data : []);
-      } catch (err) {
-        console.error("Fetch chat error:", err);
-      }
-    };
-
-    fetchChat();
-  }, [selectedUser?._id, loggedUser?.token, setMessages]);
 
   // 2. GLOBAL socket listener - runs ONCE, no selectedUser dependency
   useEffect(() => {

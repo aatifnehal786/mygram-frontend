@@ -54,7 +54,7 @@ const ChatSidebar = ({ onSelectForwardUser, theme }) => {
 
       <div className="flex-1 overflow-y-auto">
         {usersToDisplay.map((user) => {
-          const isOnline = onlineUsers.includes(user._id); // DYNAMIC CHECK
+          const isOnline = onlineUsers.some(id => id.toString() === user._id.toString()); // DYNAMIC CHECK
           return (
             <div
               key={user._id}
