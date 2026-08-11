@@ -1,4 +1,4 @@
-import { useParams } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 import { useEffect, useState, useRef } from "react";
 import useUserStore from "../store/useUserStore";
 import { apiFetch } from "../api/apiFetch";
@@ -20,11 +20,10 @@ export default function Profile() {
   const targetId = id || loggedUser.userid;
   const [newUsername, setNewUsername] = useState("");
   const [showEditName, setShowEditName] = useState(false);
+  const [loading, setLoading] = useState(true);
 
  useEffect(() => {
   if (!targetId) return;
-
-  apiFetch(`api/user/stats/${targetId}`).then(setStats).catch(console.error);
 
   apiFetch(`api/posts/allposts`)
    .then(data => {
@@ -36,6 +35,17 @@ export default function Profile() {
       setPosts(mine);
     })
    .catch(console.error);
+}, [targetId]);
+
+
+
+useEffect(() => {
+  if (!targetId) return;
+  setLoading(true);
+  apiFetch(`api/user/stats/${targetId}`)
+    .then((data) => setStats(data))
+    .catch(console.error)
+    .finally(() => setLoading(false));
 }, [targetId]);
 
 useEffect(() => {
@@ -106,8 +116,8 @@ useEffect(() => {
               <p className="text-gray-500 max-w-">You are browsing as a guest. You can view public posts and stories, but you can't like, comment, follow or message.</p>
             </div>
             <div className="flex gap-2 justify-center md:justify-start mt-2">
-              <button onClick={() => navigate("/login")} className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-1.5 rounded-lg text-sm font-semibold">Log In</button>
-              <button onClick={() => navigate("/signup")} className={`px-6 py-1.5 rounded-lg text-sm font-semibold ${theme === "dark"? "bg-zinc-800" : "bg-gray-100"}`}>Sign Up</button>
+              <button className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-1.5 rounded-lg text-sm font-semibold"><Link to="/">Log In</Link></button>
+              <button  className={`px-6 py-1.5 rounded-lg text-sm font-semibold ${theme === "dark"? "bg-zinc-800" : "bg-gray-100"}`}><Link to="/register">Sign Up</Link></button>
             </div>
           </div>
         </div>
@@ -127,12 +137,18 @@ useEffect(() => {
               <h3 className="font-bold text-sm md:text-base">Join MyGram to unlock everything ✨</h3>
               <p className="text-xs text-gray-500 mt-1">Create posts, like, comment, follow friends and chat.</p>
             </div>
-            <button onClick={() => navigate("/signup")} className="bg-black dark:bg-white dark:text-black text-white px-5 py-2 rounded-full text-sm font-semibold shrink-0">Create Account</button>
+            <button onClick={() => navigate("/register")} className="bg-black dark:bg-white dark:text-black text-white px-5 py-2 rounded-full text-sm font-semibold shrink-0">Create Account</button>
           </div>
         </div>
       </div>
     );
   }
+
+
+  if (loading || !stats) {
+  return <div className="flex justify-center py-20 text-gray-400">Loading...</div>;
+}
+
 
   // NORMAL PROFILE BELOW
   return (

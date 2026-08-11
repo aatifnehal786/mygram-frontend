@@ -35,7 +35,7 @@ const usersToDisplay = searchQuery? (Array.isArray(results)? results : []) : saf
           <span className="font-semibold">Messages</span><span className="text-gray-500 text-xs">Requests</span>
         </div>
         {usersToDisplay.map(user => {
-          const isOnline = onlineUsers.some(id => id.toString() === user._id.toString());
+          const isOnline = onlineUsers.includes(user._id);
           const isSelected = selectedUser?._id === user._id;
           return (
             <div key={user._id} onClick={() =>!isForwarding && setSelectedUser(user)} className={`flex items-center gap-3 px-4 py-2 cursor-pointer hover:bg-gray-50 dark:hover:bg-zinc-800 ${isSelected? "bg-gray-100 dark:bg-zinc-800" : ""}`}>
