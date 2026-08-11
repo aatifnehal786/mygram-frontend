@@ -1,79 +1,81 @@
 import { useEffect, useRef, useState } from "react";
 
 export default function ImagePostWithMusic({ post, currentlyPlayingId, setCurrentlyPlayingId }) {
-  const audioRef = useRef();
+  const audioRef = useRef(null);
   const [isMuted, setIsMuted] = useState(false);
-
   const isCurrent = currentlyPlayingId === post._id;
 
-useEffect(() => {
-  const audio = audioRef.current;
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio ||!post.backgroundMusic) return;
 
-  if (!audio) return;
+    if (isCurrent) {
+      audio.muted = isMuted;
+      audio.play().catch(() => {});
+    } else {
+      audio.pause();
+      audio.currentTime = 0;
+    }
+  }, [isCurrent, isMuted, post.backgroundMusic]);
 
-  if (isCurrent) {
-    audio.muted = isMuted;
+  // cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current.currentTime = 0;
+      }
+    };
+  }, []);
 
-    audio.play().catch((err) => {
-      console.log(err);
-    });
-  } else {
-    audio.pause();
-    audio.currentTime = 0;
-  }
+  const handlePlay = async () => {
+    if (!post.backgroundMusic) return;
 
-  return () => {
-    audio.pause();
+    if (isCurrent) {
+      setCurrentlyPlayingId(null); // pause if already playing
+    } else {
+      setIsMuted(false); // unmute on first click
+      setCurrentlyPlayingId(post._id);
+    }
   };
-}, [isCurrent, isMuted]);
 
-const handlePlay = async () => {
-  if (!audioRef.current || !post.backgroundMusic) return;
+  return (
+    <div className="w-full max-w- mx-auto bg-black rounded-lg overflow-hidden">
+      <div className="w-full aspect-square relative flex justify-center items-center bg-black overflow-hidden">
+        <img
+          src={post.mediaUrl}
+          alt="Post"
+          onClick={handlePlay}
+          className="w-full h-full object-cover cursor-pointer"
+        />
 
-  try {
-    setCurrentlyPlayingId(post._id);
+        {post.backgroundMusic && (
+          <audio ref={audioRef} src={post.backgroundMusic} loop preload="auto" />
+        )}
 
-    audioRef.current.muted = false;
+        {/* Play icon if not playing */}
+        {!isCurrent && post.backgroundMusic && (
+          <button
+            onClick={handlePlay}
+            className="absolute inset-0 flex items-center justify-center"
+          >
+            <span className="bg-black/50 text-white rounded-full p-4 text-xl">🎵</span>
+          </button>
+        )}
 
-    await audioRef.current.play();
-  } catch (err) {
-    console.log("Playback error:", err);
-  }
-};
-
- return (
-  <div className="w-200 max-w-md mx-auto bg-black rounded-xl overflow-hidden shadow-lg">
-   
-
-    <div className="relative group">
-      {/* Image */}
-      <img
-  src={post.mediaUrl}
-  alt="Post"
-  onClick={handlePlay}
-  className="w-full h-64 object-cover cursor-pointer"
-/>
-       {post.backgroundMusic && (
-      <audio ref={audioRef} src={post.backgroundMusic} loop preload="auto"/>
-    )}
-
-      
-      {/* Mute / Unmute Button */}
-      {isCurrent && post.backgroundMusic && (
-        <button
-          onClick={() => setIsMuted(!isMuted)}
-          className="absolute bottom-3 right-3
-                     bg-black/60 hover:bg-black/80
-                     text-white text-lg
-                     rounded-full px-3 py-2
-                     backdrop-blur-md
-                     transition-all duration-200"
-        >
-          {isMuted ? "🔇" : "🔊"}
-        </button>
-      )}
+        {/* Mute / Unmute */}
+        {isCurrent && post.backgroundMusic && (
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              setIsMuted(!isMuted);
+            }}
+            className="absolute bottom-3 right-3 bg-black/60 hover:bg-black/80 text-white rounded-full w-8 h-8 flex items-center justify-center backdrop-blur-md"
+          >
+            {isMuted? "🔇" : "🔊"}
+          </button>
+        )}
+      </div>
     </div>
-  </div>
-);
-
+  );
 }

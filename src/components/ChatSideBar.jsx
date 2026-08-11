@@ -18,16 +18,17 @@ export default function ChatSidebar({ onSelectForwardUser, theme }) {
     try { const data = await apiFetch(`api/chats/search-users?q=${encodeURIComponent(q)}`); setResults(data); } catch {}
   };
 
-  const usersToDisplay = searchQuery? results : followedUsers;
+ const safeUsers = Array.isArray(followedUsers)? followedUsers : [];
+const usersToDisplay = searchQuery? (Array.isArray(results)? results : []) : safeUsers;
 
   return (
     <div className={`flex flex-col h-full ${theme === 'dark'? 'bg-black text-white' : 'bg-white text-black'}`}>
       <div className={`p-4 border-b ${theme === 'dark'? 'border-zinc-800' : 'border-gray-200'}`}>
         <h2 className="font-bold text-lg">{loggedUser.username} <span className="text-gray-400">▼</span></h2>
       </div>
-      <div className="p-3">
-        <input value={searchQuery} onChange={e => handleSearch(e.target.value)} placeholder="Search" className={`w-full rounded-full px-4 py-1.5 text-sm outline-none ${theme === 'dark'? 'bg-zinc-800' : 'bg-gray-100'}`} />
-      </div>
+<div className="p-3">
+  <input value={searchQuery} onChange={e => handleSearch(e.target.value)} placeholder="Search" className={`w-300 rounded-full px-4 py-1.5 text-sm outline-none ${theme === 'dark'? 'bg-zinc-800' : 'bg-gray-100'}`} />
+</div>
 
       <div className="flex-1 overflow-y-auto">
         <div className={`px-4 py-2 flex justify-between text-sm ${theme === 'dark'? 'text-white' : ''}`}>
@@ -39,7 +40,8 @@ export default function ChatSidebar({ onSelectForwardUser, theme }) {
           return (
             <div key={user._id} onClick={() =>!isForwarding && setSelectedUser(user)} className={`flex items-center gap-3 px-4 py-2 cursor-pointer hover:bg-gray-50 dark:hover:bg-zinc-800 ${isSelected? "bg-gray-100 dark:bg-zinc-800" : ""}`}>
               <div className="relative">
-                <img src={user.profilePic || "/placeholder.svg"} className="w-14 h-14 rounded-full object-cover" />
+                <img src={user.profilePic || user.profilePicture || "/placeholder.svg"} className="w-14 h-14 rounded-full object-cover shrink-0"onError={(e)=> e.target.src="/placeholder.svg"}
+/>
                 {isOnline && <span className="absolute bottom-0 right-0 w-3.5 h-3.5 bg-green-500 border-2 border-white rounded-full" />}
               </div>
               <div className="flex-1 min-w-0">

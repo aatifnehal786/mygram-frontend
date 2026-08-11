@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import ChatSidebar from './ChatSideBar';
 import ChatWindow from './ChatWindow';
-import { ToastContainer } from 'react-toastify';
+import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { apiFetch } from '../api/apiFetch';
 import './chat.css';
@@ -9,6 +9,7 @@ import { useTheme } from '../contexts/ThemeContext';
 import { getSocket } from "../contexts/SocketContext";
 import useChatStore from "../store/chatStore";
 import useUserStore from '../store/useUserStore';
+import { useNavigate } from 'react-router-dom';
 
 const Chat = () => {
   const socket = getSocket();
@@ -38,16 +39,36 @@ const { selectedUser, setSelectedUser, followedUsers, setFollowedUsers, updateUn
     socket.on("receiveMessage", handleReceiveMessage);
     return () => socket.off("receiveMessage", handleReceiveMessage);
   }, [socket, loggedUser?.userid, updateLastMessage]);
+ const navigate = useNavigate();
 
-    useEffect(() => {
-    if (!loggedUser?.token) return;
-    apiFetch(`api/follow/followers/${loggedUser.userid}`)
-      .then(data => {
-        console.log("followers data:", data); // check once
-        setFollowedUsers(data.followers || data || []);
-      })
-      .catch(err => console.error("Followers fetch failed", err));
-  }, [loggedUser?.token, loggedUser?.userid, setFollowedUsers]);
+  const isGuest = loggedUser?.user?.isGuest;
+
+  // BLOCK GUEST - redirect to login
+  useEffect(() => {
+    if (isGuest) {
+      toast.error("Please login to access messages");
+      navigate("/home");
+    }
+  }, [isGuest]);
+
+  useEffect(() => {
+  if (!loggedUser?.token) return;
+  if (loggedUser?.user?.isGuest) {
+    setFollowedUsers([]); // guest gets empty
+    return;
+  }
+  apiFetch(`api/follow/followers/${loggedUser.userid}`)
+   .then(data => {
+      console.log("followers data:", data);
+      // ensure ALWAYS array
+      const arr = data?.followers || data?.users || data || [];
+      setFollowedUsers(Array.isArray(arr)? arr : []);
+    })
+   .catch(err => {
+      console.error("Followers fetch failed", err);
+      setFollowedUsers([]); // fallback to empty array
+    });
+}, [loggedUser?.token, loggedUser?.userid]);
 
   useEffect(() => {
     if (!socket) return;
@@ -90,18 +111,22 @@ const { selectedUser, setSelectedUser, followedUsers, setFollowedUsers, updateUn
   };
 
   // Filter for forward modal
-  const filteredForwardUsers = followedUsers.filter(u => 
-    u.username?.toLowerCase().includes(searchForward.toLowerCase())
-  );
+const safeFollowedUsers = Array.isArray(followedUsers)? followedUsers : [];
+
+const filteredForwardUsers = safeFollowedUsers.filter(u =>
+  u.username?.toLowerCase().includes(searchForward.toLowerCase())
+);
+
+
 
   if (loggedUser?.user?.isGuest) {
-    return <div className="flex h-[calc(100vh-60px)] items-center justify-center"><div className="text-center"><h2 className="text-xl font-bold">Messages are for logged in users</h2><p className="text-sm text-gray-500 mt-2">Sign up to chat with friends</p></div></div>;
+    return (<div className="flex h-[calc(100vh-60px)] items-center justify-center"><div className="text-center"><h2 className="text-xl font-bold">Messages are for logged in users</h2><p className="text-sm text-gray-500 mt-2">Sign up to chat with friends</p></div></div>);
   }
 
   return (
     <div className={`flex h-[calc(100vh-60px)] w-full max-w- mx-auto border ${theme === "dark"? "border-zinc-800 bg-black" : "border-gray-200 bg-white"}`}>
       
-      <div className={`${selectedUser? "hidden md:flex" : "flex"} w-full md:w- md:min-w- border-r flex-col ${theme === "dark"? "border-zinc-800 bg-black" : "border-gray-200 bg-white"}`}>
+      <div className={`${selectedUser? "hidden md:flex" : "flex"} w-100 md:max-w- md:min-w- border-r flex-col ${theme === "dark"? "border-zinc-800 bg-black" : "border-gray-200 bg-white"}`}>
         <ChatSidebar theme={theme} />
       </div>
 

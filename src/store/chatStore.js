@@ -91,6 +91,10 @@ const useChatStore = create((set) => ({
     }),
 
   clearMessages: () => set({ messages: [] }),
+
+  setFollowedUsers: (data) => set({
+  followedUsers: Array.isArray(data)? data : data?.followers || data?.users || []
+}),
 }));
 
 export default useChatStore;

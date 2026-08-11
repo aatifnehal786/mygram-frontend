@@ -69,11 +69,74 @@ useEffect(() => {
     setShowEditName(false);
   };
 
-  if (!stats) return <div className="p-10 text-center">Loading...</div>;
+  
 
+
+
+
+
+  if (loggedUser?.user?.isGuest) {
+    return (
+      <div className={`min-h-[calc(100vh-60px)] w-full flex flex-col items-center px-4 py-10 ${theme === "dark"? "bg-black text-white" : "bg-[#fafafa] text-black"}`}>
+
+        <div className={`w-full max-w- border rounded-xl p-8 md:p-12 flex flex-col md:flex-row gap-8 items-center ${theme === "dark"? "bg-black border-zinc-800" : "bg-white border-gray-200"}`}>
+          <div className="relative">
+            <div className="w- h- md:w- md:h- rounded-full bg-gradient-to-tr from-yellow-400 via-red-500 to-purple-600 p-">
+              <div className={`w-full h-full rounded-full flex items-center justify-center ${theme === "dark"? "bg-zinc-900" : "bg-gray-100"}`}>
+                <span className="text-3xl md:text-5xl font-bold">
+                  {(loggedUser?.user?.username || "G").charAt(0).toUpperCase()}
+                </span>
+              </div>
+            </div>
+            <div className="absolute -bottom-1 -right-1 bg-zinc-500 text-white text- px-2 py-0.5 rounded-full font-bold border-2 border-white dark:border-black">GUEST</div>
+          </div>
+
+          <div className="flex-1 flex flex-col gap-4 text-center md:text-left">
+            <div className="flex flex-col md:flex-row items-center gap-4">
+              <h1 className="text- font-light">{loggedUser?.user?.username || `guest_${Math.floor(Math.random()*9999)}`}</h1>
+              <span className="text-xs px-2 py-1 rounded bg-gray-100 dark:bg-zinc-800 text-gray-500">Limited Access</span>
+            </div>
+            <div className="flex gap-6 justify-center md:justify-start text-sm">
+              <p><b>0</b> posts</p>
+              <p><b>0</b> followers</p>
+              <p><b>0</b> following</p>
+            </div>
+            <div className="text-sm">
+              <p className="font-semibold">Guest Account</p>
+              <p className="text-gray-500 max-w-">You are browsing as a guest. You can view public posts and stories, but you can't like, comment, follow or message.</p>
+            </div>
+            <div className="flex gap-2 justify-center md:justify-start mt-2">
+              <button onClick={() => navigate("/login")} className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-1.5 rounded-lg text-sm font-semibold">Log In</button>
+              <button onClick={() => navigate("/signup")} className={`px-6 py-1.5 rounded-lg text-sm font-semibold ${theme === "dark"? "bg-zinc-800" : "bg-gray-100"}`}>Sign Up</button>
+            </div>
+          </div>
+        </div>
+
+        <div className="w-full max-w- grid grid-cols-3 gap-1 md:gap-2 mt-10">
+          {[1,2,3,4,5,6].map(i => (
+            <div key={i} className={`aspect-square flex flex-col items-center justify-center gap-2 border ${theme === "dark"? "bg-zinc-900/50 border-zinc-800" : "bg-white border-gray-200"}`}>
+              <span className="text-2xl opacity-30">🔒</span>
+              <span className="text- text-gray-400">Login to view</span>
+            </div>
+          ))}
+        </div>
+
+        <div className="w-full max-w- mt-8 bg-gradient-to-r from-purple-500 via-pink-500 to-yellow-500 rounded-xl p-">
+          <div className={`rounded- p-6 flex flex-col md:flex-row items-center justify-between gap-4 ${theme === "dark"? "bg-black" : "bg-white"}`}>
+            <div>
+              <h3 className="font-bold text-sm md:text-base">Join MyGram to unlock everything ✨</h3>
+              <p className="text-xs text-gray-500 mt-1">Create posts, like, comment, follow friends and chat.</p>
+            </div>
+            <button onClick={() => navigate("/signup")} className="bg-black dark:bg-white dark:text-black text-white px-5 py-2 rounded-full text-sm font-semibold shrink-0">Create Account</button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // NORMAL PROFILE BELOW
   return (
-    <div className={`max-w- mx-auto ${theme === "dark"? "text-white" : "text-black"}`}>
-      {/* Header */}
+    <div className={`max-w- mx-auto ${theme === "dark"? "text-white bg-black" : "text-black bg-[#fafafa]"}`}>
       <div className="flex gap-10 md:gap-24 px-4 py-8 border-b border-gray-200 dark:border-zinc-800">
         <div className="relative">
           <img src={loggedUser?.profilePic || "/placeholder.svg"} className="w-20 h-20 md:w-36 md:h-36 rounded-full object-cover" />
@@ -98,13 +161,11 @@ useEffect(() => {
         </div>
       </div>
 
-      {/* Tabs */}
       <div className="flex justify-center gap-12 border-t text-xs tracking-widest">
-        <button onClick={() => setActiveTab("posts")} className={`py-3 border-t ${activeTab === "posts"? "border-black dark:border-white" : "border-transparent text-gray-400"}`}>POSTS</button>
-        <button onClick={() => setActiveTab("reels")} className={`py-3 border-t ${activeTab === "reels"? "border-black" : "border-transparent text-gray-400"}`}>REELS</button>
+        <button onClick={() => setActiveTab("posts")} className={`py-3 border-t ${activeTab === "posts"? "border-black dark:border-white font-semibold" : "border-transparent text-gray-400"}`}>POSTS</button>
+        <button onClick={() => setActiveTab("reels")} className={`py-3 border-t ${activeTab === "reels"? "border-black dark:border-white font-semibold" : "border-transparent text-gray-400"}`}>REELS</button>
       </div>
 
-      {/* Grid */}
       <div className="grid grid-cols-3 gap-1 md:gap-1">
         {posts.filter(p => activeTab === "posts"? p.mediaType === "image" : p.mediaType === "video").map(post => (
           <div key={post._id} className="aspect-square bg-black relative group cursor-pointer">
@@ -114,33 +175,31 @@ useEffect(() => {
         ))}
       </div>
 
-      {/* Edit Username Modal */}
       {showEditName && (
         <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center">
           <div className={`p-6 rounded-xl w-[90%] max-w-sm ${theme === "dark"? "bg-zinc-900" : "bg-white"}`}>
             <h3 className="font-semibold mb-4">Change username</h3>
-            <input value={newUsername} onChange={e => setNewUsername(e.target.value)} className="w-full border rounded-lg px-3 py-2" />
+            <input value={newUsername} onChange={e => setNewUsername(e.target.value)} className="w-full border rounded-lg px-3 py-2 outline-none" />
             <div className="flex justify-end gap-3 mt-4">
-              <button onClick={() => setShowEditName(false)}>Cancel</button>
-              <button onClick={handleChangeUserName} className="bg-blue-600 text-white px-4 py-1 rounded-lg">Save</button>
+              <button onClick={() => setShowEditName(false)} className="text-sm">Cancel</button>
+              <button onClick={handleChangeUserName} className="bg-blue-600 text-white px-4 py-1.5 rounded-lg text-sm">Save</button>
             </div>
           </div>
         </div>
       )}
 
-      {/* Followers Modal */}
       {showFollowModal && (
         <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4">
           <div className={`w-full max-w-sm rounded-xl overflow-hidden ${theme === "dark"? "bg-zinc-900" : "bg-white"}`}>
-            <div className="flex border-b">
-              <button onClick={() => setModalTab("followers")} className={`flex-1 py-3 text-sm ${modalTab === "followers"? "font-bold border-b" : ""}`}>Followers</button>
-              <button onClick={() => setModalTab("following")} className={`flex-1 py-3 text-sm ${modalTab === "following"? "font-bold border-b" : ""}`}>Following</button>
+            <div className="flex border-b dark:border-zinc-800">
+              <button onClick={() => setModalTab("followers")} className={`flex-1 py-3 text-sm ${modalTab === "followers"? "font-bold border-b border-black dark:border-white" : ""}`}>Followers</button>
+              <button onClick={() => setModalTab("following")} className={`flex-1 py-3 text-sm ${modalTab === "following"? "font-bold border-b border-black dark:border-white" : ""}`}>Following</button>
               <button onClick={() => setShowFollowModal(false)} className="px-4">✕</button>
             </div>
             <div className="max-h- overflow-y-auto p-3 space-y-3">
               {(modalTab === "followers"? followers : following).map(u => (
                 <div key={u._id} className="flex items-center gap-3">
-                  <img src={u.profilePic || "/placeholder.svg"} className="w-8 h-8 rounded-full" />
+                  <img src={u.profilePic || "/placeholder.svg"} className="w-8 h-8 rounded-full object-cover" />
                   <span className="text-sm">{u.username}</span>
                 </div>
               ))}
@@ -151,3 +210,5 @@ useEffect(() => {
     </div>
   );
 }
+
+  

@@ -1,90 +1,67 @@
 import { useEffect, useRef, useState } from "react";
 
-export default function VideoPost({
-  post,
-  currentlyPlayingId,
-  setCurrentlyPlayingId,
-}) {
+export default function VideoPost({ post, currentlyPlayingId, setCurrentlyPlayingId }) {
   const videoRef = useRef(null);
-
-  const [isMuted, setIsMuted] = useState(false);
-
+  const [isMuted, setIsMuted] = useState(true); // start muted like Instagram
   const isCurrent = currentlyPlayingId === post._id;
 
   useEffect(() => {
     const video = videoRef.current;
-
     if (!video) return;
 
     if (isCurrent) {
       video.muted = isMuted;
-
-      const playVideo = async () => {
-        try {
-          await video.play();
-        } catch (err) {
-          console.log("Video play error:", err);
-        }
-      };
-
-      playVideo();
+      video.play().catch(() => {});
     } else {
       video.pause();
-      video.currentTime = 0;
+      // don't reset currentTime - keep thumbnail
     }
-
-    return () => {
-      video.pause();
-    };
   }, [isCurrent, isMuted]);
 
-  const handlePlay = async () => {
-    const video = videoRef.current;
+  useEffect(() => {
+    return () => {
+      if (videoRef.current) videoRef.current.pause();
+    };
+  }, []);
 
-    if (!video) return;
-
-    try {
-      if (!isCurrent) {
-        setCurrentlyPlayingId(post._id);
-
-        await video.play();
-      } else {
-        video.pause();
-
-        setCurrentlyPlayingId(null);
-      }
-    } catch (err) {
-      console.log(err);
+  const handlePlay = () => {
+    if (isCurrent) {
+      // if playing, toggle mute on click (insta behavior) or pause
+      setIsMuted(!isMuted);
+    } else {
+      setCurrentlyPlayingId(post._id);
+      setIsMuted(false);
     }
   };
 
   return (
-    <div className="w-full mx-auto bg-black rounded-xl overflow-hidden shadow-lg">
-      // VideoPost.jsx
-<div className="w-30 h-20">
-  <video  ref={videoRef}
+    <div className="w-full max-w- mx-auto bg-black rounded-lg overflow-hidden">
+      <div className="w-full aspect-square relative flex justify-center items-center bg-black overflow-hidden">
+        <video
+          ref={videoRef}
           src={post.mediaUrl}
           loop
           playsInline
-          muted={isMuted}
-          onClick={handlePlay} className="w-full h-full object-contain" autoPlay muted loop playsInline />
+          muted
+          onClick={handlePlay}
+          className="w-full h-full object-cover cursor-pointer"
+        />
 
-      
-
-        {/* Mute / Unmute */}
-        {isCurrent && (
-          <button
-            onClick={() => setIsMuted(!isMuted)}
-            className="absolute bottom-3 right-3
-                       bg-black/60 hover:bg-black/80
-                       text-white text-lg
-                       rounded-full px-3 py-2
-                       backdrop-blur-md
-                       transition-all duration-200"
-          >
-            {isMuted ? "🔇" : "🔊"}
-          </button>
-        )}
+        {/* Mute Button - always show like Instagram */}
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            if (!isCurrent) {
+              setCurrentlyPlayingId(post._id);
+              setIsMuted(false);
+            } else {
+              setIsMuted(!isMuted);
+            }
+          }}
+          className="absolute bottom-3 right-3 bg-black/60 hover:bg-black/80 text-white rounded-full w-8 h-8 flex items-center justify-center backdrop-blur-md transition"
+        >
+          {isMuted? "🔇" : "🔊"}
+        </button>
       </div>
     </div>
   );
