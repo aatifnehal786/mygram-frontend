@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import ChatSidebar from './ChatSideBar';
 import ChatWindow from './ChatWindow';
 import { ToastContainer } from 'react-toastify';
@@ -14,7 +14,14 @@ const Chat = () => {
   const socket = getSocket();
   const loggedUser = useUserStore((s) => s.loggedUser);
   const { theme } = useTheme();
-  const { selectedUser, setSelectedUser, followedUsers, setFollowedUsers, updateUnreadCount, updateLastMessage, isForwarding, messageToForward, setForwardMode } = useChatStore();
+  // Replace these 4 lines at top
+const [showForwardModal, setShowForwardModal] = useState(false);
+const [forwardMessageData, setForwardMessageData] = useState(null);
+const [selectedForwardUsers, setSelectedForwardUsers] = useState([]);
+const [searchForward, setSearchForward] = useState('');
+
+// In store
+const { selectedUser, setSelectedUser, followedUsers, setFollowedUsers, updateUnreadCount, updateLastMessage } = useChatStore();
 
   useEffect(() => {
     if (!socket) return;
@@ -32,9 +39,14 @@ const Chat = () => {
     return () => socket.off("receiveMessage", handleReceiveMessage);
   }, [socket, loggedUser?.userid, updateLastMessage]);
 
-  useEffect(() => {
+    useEffect(() => {
     if (!loggedUser?.token) return;
-    apiFetch(`api/follow/followers/${loggedUser.userid}`).then(data => setFollowedUsers(data.followers || [])).catch(()=>{});
+    apiFetch(`api/follow/followers/${loggedUser.userid}`)
+      .then(data => {
+        console.log("followers data:", data); // check once
+        setFollowedUsers(data.followers || data || []);
+      })
+      .catch(err => console.error("Followers fetch failed", err));
   }, [loggedUser?.token, loggedUser?.userid, setFollowedUsers]);
 
   useEffect(() => {
@@ -44,38 +56,124 @@ const Chat = () => {
     return () => socket.off("unreadCountUpdated", h);
   }, [socket, updateUnreadCount]);
 
-  const forwardMessageToUsers = async (msg, receiverIds) => {
-    const receivers = Array.isArray(receiverIds)? receiverIds : [receiverIds];
-    setForwardMode(true, msg);
-    try {
-      for (const receiverId of receivers) {
-        if (receiverId === loggedUser.userid) continue;
-        const newMsg = await apiFetch("api/chats/chat/forward", {
-          method: "POST", body: JSON.stringify({ senderId: loggedUser.userid, receiverId, message: msg.message || "", fileUrl: msg.fileUrl || null, fileType: msg.fileType || null, isForwarded: true }),
-        });
-        if (selectedUser?._id === receiverId) useChatStore.getState().addMessage(newMsg);
-      }
-    } finally { setForwardMode(false, null); }
+  // THIS WAS MISSING - TRIGGER FROM CHATWINDOW
+    const triggerForwardMode = (msg) => {
+    setForwardMessageData(msg);
+    setShowForwardModal(true);
+    setSelectedForwardUsers([]);
   };
+
+  const forwardMessageToUsers = async () => {
+    if (!forwardMessageData || selectedForwardUsers.length === 0) return;
+    for (const receiverId of selectedForwardUsers) {
+      if (receiverId === loggedUser.userid) continue;
+      try {
+        const payload = {
+          senderId: loggedUser.userid,
+          receiverId,
+          message: forwardMessageData.message || forwardMessageData.content || "",
+          fileUrl: forwardMessageData.fileUrl || forwardMessageData.imageOrVideoUrl || null,
+          fileType: forwardMessageData.fileType || null,
+          isForwarded: true,
+        };
+        await apiFetch("api/chats/chat/forward", {
+          method: "POST",
+          body: JSON.stringify(payload),
+        });
+        socket.emit("sendMessage", { ...payload });
+      } catch (e) { console.error(e); }
+    }
+    setShowForwardModal(false);
+    setForwardMessageData(null);
+    setSelectedForwardUsers([]);
+    alert(`Forwarded to ${selectedForwardUsers.length} users`);
+  };
+
+  // Filter for forward modal
+  const filteredForwardUsers = followedUsers.filter(u => 
+    u.username?.toLowerCase().includes(searchForward.toLowerCase())
+  );
 
   if (loggedUser?.user?.isGuest) {
     return <div className="flex h-[calc(100vh-60px)] items-center justify-center"><div className="text-center"><h2 className="text-xl font-bold">Messages are for logged in users</h2><p className="text-sm text-gray-500 mt-2">Sign up to chat with friends</p></div></div>;
   }
 
   return (
-    <div className={`flex h-[calc(100vh-60px)] md:h-[calc(100vh-60px)] w-full bg-white dark:bg-black ${theme === "dark"? "bg-black border-zinc-800" : "bg-white border-gray-200"}`}>
-      <div className={`w-[320px] min-w-[320px] border-r flex-col ${theme === "dark"? "border-zinc-800" : "border-gray-200"} ${selectedUser? "hidden md:flex" : "flex"}`}>
-        <ChatSidebar theme={theme} onSelectForwardUser={(ids) => { if (!ids.length) setForwardMode(false, null); else forwardMessageToUsers(messageToForward, ids); }} />
+    <div className={`flex h-[calc(100vh-60px)] w-full max-w- mx-auto border ${theme === "dark"? "border-zinc-800 bg-black" : "border-gray-200 bg-white"}`}>
+      
+      <div className={`${selectedUser? "hidden md:flex" : "flex"} w-full md:w- md:min-w- border-r flex-col ${theme === "dark"? "border-zinc-800 bg-black" : "border-gray-200 bg-white"}`}>
+        <ChatSidebar theme={theme} />
       </div>
-      <div className={`flex-1 ${selectedUser? "flex" : "hidden md:flex"} ${theme === "dark"? "bg-black" : "bg-white"}`}>
-        {selectedUser? <ChatWindow onBack={() => setSelectedUser(null)} theme={theme} /> : (
-          <div className="flex flex-1 flex-col items-center justify-center gap-3">
-            <div className="w-24 h-24 border-2 rounded-full flex items-center justify-center text-3xl">✈</div>
-            <h2 className="text-xl">Your messages</h2>
-            <p className="text-sm text-gray-500">Send private photos and messages to a friend or group</p>
+
+      <div className={`${selectedUser? "flex" : "hidden md:flex"} flex-1 flex-col`}>
+        {selectedUser? (
+          <ChatWindow 
+            onBack={() => setSelectedUser(null)} 
+            theme={theme} 
+            triggerForwardMode={triggerForwardMode} 
+          />
+        ) : (
+          <div className="flex-1 flex items-center justify-center flex-col gap-2">
+            <div className="w-24 h-24 rounded-full border-2 flex items-center justify-center text-4xl">✈️</div>
+            <p className="font-semibold">Your messages</p>
+            <p className="text-sm text-gray-400">Send private photos and messages to a friend or group</p>
           </div>
         )}
       </div>
+
+      {/* FORWARD MODAL */}
+            {showForwardModal && (
+        <div className="fixed inset-0 bg-black/60 z-[100] flex items-center justify-center p-4">
+          <div className={`w-full max-w- rounded-xl ${theme === "dark"? "bg-zinc-900" : "bg-white"} p-0 max-h- flex flex-col overflow-hidden`}>
+            <div className="flex justify-between items-center p-4 border-b dark:border-zinc-800">
+              <h3 className="font-semibold">Forward to</h3>
+              <button onClick={() => setShowForwardModal(false)} className="text-xl w-8 h-8 rounded-full hover:bg-gray-100 dark:hover:bg-zinc-800 flex items-center justify-center">×</button>
+            </div>
+
+            <div className="p-3">
+              <input 
+                value={searchForward} 
+                onChange={e => setSearchForward(e.target.value)}
+                placeholder="Search"
+                className={`w-full rounded-full px-4 py-2 text-sm outline-none ${theme === 'dark'? 'bg-zinc-800' : 'bg-gray-100'}`}
+              />
+            </div>
+
+            <div className="flex-1 overflow-y-auto p-2">
+              {filteredForwardUsers.length === 0? (
+                <p className="text-xs text-gray-400 text-center py-8">No users found. Follow someone to forward.</p>
+              ) : filteredForwardUsers.filter(u => u._id !== (loggedUser.userid || loggedUser._id)).map(u => (
+                <label key={u._id} className="flex items-center gap-3 p-3 hover:bg-gray-50 dark:hover:bg-zinc-800 rounded-lg cursor-pointer">
+                  <input 
+                    type="checkbox" 
+                    checked={selectedForwardUsers.includes(u._id)}
+                    onChange={(e) => {
+                      if (e.target.checked) setSelectedForwardUsers(prev => [...prev, u._id]);
+                      else setSelectedForwardUsers(prev => prev.filter(id => id !== u._id));
+                    }}
+                    className="w-4 h-4"
+                  />
+                  <img src={u.profilePic || u.profilePicture || "/placeholder.svg"} className="w-10 h-10 rounded-full object-cover" />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium truncate">{u.username}</p>
+                    <p className="text-xs text-gray-500">Tap to select</p>
+                  </div>
+                </label>
+              ))}
+            </div>
+
+            <div className="p-4 border-t dark:border-zinc-800">
+              <button 
+                onClick={forwardMessageToUsers} 
+                disabled={selectedForwardUsers.length === 0}
+                className="w-full bg-blue-500 disabled:bg-gray-300 disabled:cursor-not-allowed text-white py-2.5 rounded-lg font-semibold text-sm"
+              >
+                Send ({selectedForwardUsers.length})
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       <ToastContainer />
     </div>
   );

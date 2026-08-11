@@ -55,7 +55,7 @@ export default function Layout() {
       </aside>
 
       {/* MAIN WRAPPER - PADDING 245px LEFT SO CONTENT NOT HIDDEN */}
-      <div className="w-full min-h-screen flex flex-col md:pl-">
+      <div className="w-full min-h-screen flex flex-col md:pl-64">
 
         {/* HEADER - VISIBLE ON BOTH DESKTOP + MOBILE NOW */}
         <div className={`sticky top-0 z-20 border-b ${theme === "dark"? "bg-black border-zinc-800" : "bg-white border-gray-200"}`}>
