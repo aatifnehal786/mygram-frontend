@@ -4,7 +4,6 @@ import ChatWindow from './ChatWindow';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { apiFetch } from '../api/apiFetch';
-import './chat.css';
 import { useTheme } from '../contexts/ThemeContext';
 import { getSocket } from "../contexts/SocketContext";
 import useChatStore from "../store/chatStore";
