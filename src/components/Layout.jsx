@@ -42,29 +42,34 @@ export default function Layout() {
     <div className={`min-h-screen ${theme === "dark"? "bg-black text-white" : "bg-white text-black"}`}>
 
       {/* SIDEBAR DESKTOP - FIXED WIDTH 245px */}
-      <aside className={`hidden md:flex fixed top-0 left-0 h-screen w- border-r flex-col p-3 z-30 ${theme === "dark"? "bg-black border-zinc-800" : "bg-white border-gray-200"}`}>
-        <Link to="/home" className="text- px-3 py-6 font-bold" style={{ fontFamily: 'cursive' }}>MyGram</Link>
+      <aside className={`hidden md:flex fixed top-0 left-0 h-screen w-64 border-r flex-col p-3 z-30 ${theme === "dark"? "bg-black border-zinc-800" : "bg-white border-gray-200"}`}>
+        <Link to="/home" className="text-xl px-3 py-6 font-bold" style={{ fontFamily: 'cursive' }}>MyGram</Link>
         <nav className="flex flex-col gap-1 flex-1">
-          <Link to="/home" className={`flex items-center gap-4 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 ${isActive("/home")? "font-bold" : ""}`}><FaHome className="text-" /> Home</Link>
-          <Link to="/chat" className={`flex items-center gap-4 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 ${isActive("/chat")? "font-bold" : ""}`}><FaRegPaperPlane className="text-" /> Messages</Link>
-          <Link to="/createpost" className={`flex items-center gap-4 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 ${isActive("/createpost")? "font-bold" : ""}`}><FaPlusSquare className="text-" /> Create</Link>
-          {/* <Link to="/getdevices" className={`flex items-center gap-4 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800`}><FaRegHeart className="text-" /> Notifications</Link> */}
+          <Link to="/home" className={`flex items-center gap-4 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 ${isActive("/home")? "font-bold" : ""}`}><FaHome className="text-xl" /> Home</Link>
+          <Link to="/chat" className={`flex items-center gap-4 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 ${isActive("/chat")? "font-bold" : ""}`}><FaRegPaperPlane className="text-xl" /> Messages</Link>
+          <Link to="/createpost" className={`flex items-center gap-4 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 ${isActive("/createpost")? "font-bold" : ""}`}><FaPlusSquare className="text-xl" /> Create</Link>
           <Link to="/profile" className={`flex items-center gap-4 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800`}><img src={myPic} className="w-6 h-6 rounded-full object-cover" /> Profile</Link>
         </nav>
-        <button onClick={toggleTheme} className="p-3 text-left text-sm">{theme === "dark"? "☀ Light mode" : "🌙 Dark mode"}</button>
+        {/* DESKTOP THEME BUTTON */}
+        <button onClick={toggleTheme} className="p-3 text-left text-sm rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 w-full">
+          {theme === "dark"? "☀ Light mode" : "🌙 Dark mode"}
+        </button>
       </aside>
 
-      {/* MAIN WRAPPER - PADDING 245px LEFT SO CONTENT NOT HIDDEN */}
-      <div className="w-full min-h-screen flex flex-col md:pl-64">
+      {/* MOBILE THEME BUTTON - FLOATING VISIBLE */}
+      <button 
+        onClick={toggleTheme} 
+        className="md:hidden fixed bottom-20 right-4 z-50 w-12 h-12 rounded-full bg-white dark:bg-zinc-800 border shadow-lg flex items-center justify-center text-xl"
+      >
+        {theme === "dark" ? "☀" : "🌙"}
+      </button>
 
-        {/* HEADER - VISIBLE ON BOTH DESKTOP + MOBILE NOW */}
+      {/* MAIN WRAPPER */}
+      <div className="w-full min-h-screen flex flex-col md:pl-64">
         <div className={`sticky top-0 z-20 border-b ${theme === "dark"? "bg-black border-zinc-800" : "bg-white border-gray-200"}`}>
           <Header />
         </div>
-
-        {/* CONTENT - CENTERED */}
-        <main className={`w-full min-h-screen ${isChat? "max-w-full" : "max-w- mx-auto w-full"}`}>
-          {/* Extra padding like Instagram */}
+        <main className={`w-full min-h-screen ${isChat? "max-w-full" : "max-w-3xl mx-auto w-full"}`}>
           <div className={`${isChat? "" : "px-0 md:px-8"}`}>
             <Outlet />
           </div>
@@ -81,5 +86,5 @@ export default function Layout() {
 
       <VideoCallManager />
     </div>
-  );
+);
 }
