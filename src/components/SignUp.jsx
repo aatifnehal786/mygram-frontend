@@ -319,13 +319,6 @@ const isFormValid =
         </p>
       </div>
 
-      {/* Email OTP */}
-      <div className="text-center text-sm">
-        <Link to="/emailotp" className="text-gray-500 hover:underline">
-          Verify email to login
-        </Link>
-      </div>
-
       {/* Message */}
       <ToastContainer position="top-right" autoClose={3000} />
     </form>

@@ -48,7 +48,7 @@ export default function Layout() {
           <Link to="/home" className={`flex items-center gap-4 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 ${isActive("/home")? "font-bold" : ""}`}><FaHome className="text-" /> Home</Link>
           <Link to="/chat" className={`flex items-center gap-4 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 ${isActive("/chat")? "font-bold" : ""}`}><FaRegPaperPlane className="text-" /> Messages</Link>
           <Link to="/createpost" className={`flex items-center gap-4 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 ${isActive("/createpost")? "font-bold" : ""}`}><FaPlusSquare className="text-" /> Create</Link>
-          <Link to="/getdevices" className={`flex items-center gap-4 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800`}><FaRegHeart className="text-" /> Notifications</Link>
+          {/* <Link to="/getdevices" className={`flex items-center gap-4 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800`}><FaRegHeart className="text-" /> Notifications</Link> */}
           <Link to="/profile" className={`flex items-center gap-4 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800`}><img src={myPic} className="w-6 h-6 rounded-full object-cover" /> Profile</Link>
         </nav>
         <button onClick={toggleTheme} className="p-3 text-left text-sm">{theme === "dark"? "☀ Light mode" : "🌙 Dark mode"}</button>

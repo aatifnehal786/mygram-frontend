@@ -1,7 +1,6 @@
 
 import React, { useEffect} from 'react';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
-// import { UserProvider } from './contexts/UserContext';
 import { ThemeProvider } from './contexts/ThemeContext';
 import Login from './components/Login';
 import './App.css'
@@ -13,13 +12,9 @@ import Home from './components/Home';
 import NotFound from './components/NotFound'
 import Private from './components/Private'
 import ForgotPassword from './components/ForgotPassword';
-import Otp from './components/Otp';
-import EmailOtp from './components/EmailOtp';
 import Layout from './components/Layout'; // 👈 import the layout
 import ChatSidebar from './components/ChatSideBar';
 import PublicRoute from './components/PublicRoute';
-import Devices from './components/Devices';
-// import { SocketProvider } from './contexts/SocketContext';
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { getSocket } from "./contexts/SocketContext";
@@ -139,14 +134,7 @@ const router = createBrowserRouter(
             </Private>
           ),
         },
-        {
-          path: "/getdevices",
-          element: (
-            <Private>
-              <Devices />
-            </Private>
-          ),
-        },
+       
         {
           path: "/profile",
           element: (
@@ -189,10 +177,6 @@ const router = createBrowserRouter(
     {
       path: "/otp",
       element: <Otp />,
-    },
-    {
-      path: "/emailotp",
-      element: <EmailOtp />,
     },
     {
       path: "*",

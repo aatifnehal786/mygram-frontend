@@ -13,11 +13,8 @@ import useUserStore from "../store/useUserStore";
 export default function Login() {
   // const loggedData = useContext(UserContext);
   const [user, setUser] = useState({ loginId: "", password: "" });
-  const [deviceId, setDeviceId] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isPassword, setIsPassword] = useState(false);
-  const [otpRequired, setOtpRequired] = useState(false);
-  const [otp, setOtp] = useState("");
   const [email, setEmail] = useState("");
   const setLoggedUser = useUserStore((state) => state.setLoggedUser);
  
@@ -37,15 +34,7 @@ export default function Login() {
     }
   };
 
-  // ✅ Persist deviceId
-  useEffect(() => {
-    let savedId = localStorage.getItem("deviceId");
-    if (!savedId) {
-      savedId = uuidv4();
-      localStorage.setItem("deviceId", savedId);
-    }
-    setDeviceId(savedId);
-  }, []);
+  
 
   const handleInput = (e) => {
     setUser((prev) => ({ ...prev, [e.target.name]: e.target.value }));
@@ -68,7 +57,7 @@ export default function Login() {
   try {
     const data = await apiFetch("api/auth/login", {
       method: "POST",
-      body: JSON.stringify({ ...user, deviceId }),
+      body: JSON.stringify({ ...user }),
     });
 
     setIsLoading(false);
@@ -89,14 +78,6 @@ setLoggedUser(data);
      
     }
 
-    // ✅ CASE 2: OTP required
-    else if (data.otpRequired) {
-      setOtpRequired(true);
-      setEmail(data.email);
-      toast.info("OTP sent to your email");
-    }
-
-    // ❌ CASE 3: Error
     else {
       toast.error(data.message || "Login failed");
     }
@@ -109,50 +90,11 @@ setLoggedUser(data);
 };
 
 
-// HANDLE NEW DEVICE VERIFY LOGIN VIA OTP
-const handleVerifyOtp = async () => {
-  setIsLoading(true);
-
-  if (!otp) {
-    toast.error("OTP is required");
-    setIsLoading(false);
-    return;
-  }
-
-  try {
-    const data = await apiFetch("api/verify-device-otp", {
-      method: "POST",
-      body: JSON.stringify({ email, otp, deviceId }),
-    });
-
-    setIsLoading(false);
-
-    if (!data) return;
-
-    // ✅ SUCCESS
-    if (data.token) {
-      setLoggedUser(data);
-
-     
-
-      navigate("/home");
-      toast.success("Device verified & login successful");
-    } else {
-      toast.error(data.error || "OTP verification failed");
-    }
-
-  } catch (err) {
-    console.error(err);
-    toast.error("Server error occurred");
-    setIsLoading(false);
-  }
-};
-
   const showHide = () => setIsPassword((prev) => !prev);
 
   return (
   <section className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-50 to-purple-100 px-4">
-    {!otpRequired ? (
+    
       <form
         onSubmit={handleSubmit}
         className="w-full max-w-md bg-white rounded-2xl shadow-xl p-8 space-y-6"
@@ -236,35 +178,9 @@ const handleVerifyOtp = async () => {
        
       </form>
       
-    ) : (
-      /* OTP FORM */
-      <form className="w-full max-w-sm bg-white rounded-2xl shadow-xl p-8 space-y-6">
-        <h2 className="text-2xl font-bold text-center text-gray-800">
-          Verify OTP
-        </h2>
-
-        <input
-          type="text"
-          placeholder="Enter OTP"
-          required
-          value={otp}
-          onKeyDown={handleEnterKey}
-          onChange={(e) => setOtp(e.target.value)}
-          className="w-full px-4 py-3 rounded-lg border border-gray-300 text-center tracking-widest text-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-        />
-
-        <button
-          type="button"
-          onClick={handleVerifyOtp}
-          disabled={isLoading}
-          className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 rounded-lg transition disabled:opacity-60"
-        >
-          {isLoading ? <Spinner/> : "Verify OTP"}
-        </button>
+    
       
-      </form>
-      
-    )}
+    
    
   </section>
 );

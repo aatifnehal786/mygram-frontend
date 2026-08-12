@@ -52,7 +52,6 @@ export default function Header() {
             <button onClick={() => setShowSearch(!showSearch)}><FaSearch /></button>
             <Link to="/createpost"><FaPlusSquare /></Link>
             <Link to="/chat"><FaRegPaperPlane /></Link>
-            <Link to="/getdevices"><FaRegHeart /></Link>
             <Link to="/profile"><img src={myPic} className="w-7 h-7 rounded-full object-cover" /></Link>
              <button onClick={logOut} className="text-xs bg-red-500 text-white px-3 py-1 rounded">Logout</button>
           </div>
