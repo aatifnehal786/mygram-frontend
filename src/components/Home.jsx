@@ -13,7 +13,7 @@ export default function Home() {
   const [commentTexts, setCommentTexts] = useState({});
   const [expandedPost, setExpandedPost] = useState(null);
 
-  const loggedUser = useUserStore(s => s.loggedUser);
+ const { loggedUser, token } = useUserStore();
   const posts = useUserStore(s => s.posts);
   const publicPosts = useUserStore(s => s.publicPosts);
   const setPosts = useUserStore(s => s.setPosts);
@@ -113,7 +113,7 @@ export default function Home() {
       {/* STORIES */}
       <div className={`w-full border ${theme === "dark"? "bg-black border-zinc-800" : "bg-white border-gray-200"} rounded-lg mb-4`}>
         <div className="flex gap-4 overflow-x-auto scrollbar-hide px-4 py-4">
-          {users.map(user => (
+          {Array.isArray(users) && users.map(user => (
             <div key={user._id} onClick={() => setSelectedProfile(user)} className="flex flex-col items-center gap-1 min-w- cursor-pointer">
               <div className="w-20 h-20 rounded-full p-1 bg-gradient-to-tr from-yellow-400 via-red-500 to-purple-600">
                 <div className="w-full h-full rounded-full bg-white p-1">

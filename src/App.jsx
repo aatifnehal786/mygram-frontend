@@ -175,10 +175,6 @@ const router = createBrowserRouter(
       element: <ForgotPassword />,
     },
     {
-      path: "/otp",
-      element: <Otp />,
-    },
-    {
       path: "*",
       element: <NotFound />,
     },
