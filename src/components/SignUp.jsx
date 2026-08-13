@@ -178,43 +178,46 @@ const isFormValid =
 
 
   return (
-  <section className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
-    <form className="w-full max-w-md bg-white border rounded-lg shadow-sm p-8 space-y-6">
+  <section className="container">
+    <form className="form">
 
-      <h1 className="text-2xl font-semibold text-center">
+      <h1>
         Sign up to create an account
       </h1>
 
       {/* Username */}
-      <input
-        className="w-full px-4 py-2 mt-1 border rounded-xl outline-none focus:ring-2  focus:ring-gray-400"
+      <div className="input-group">
+        <input
         type="text"
-        placeholder="Username"
+        placeholder=""
         required
         name="username"
         value={userDetails.username}
         onChange={handleInput}
         onKeyDown={handleEnterKey}
       />
+       <label>Username</label>
+      </div>
 
       {/* Email */}
-      <input
-        className="w-full px-4 py-2 mt-1 border rounded-xl outline-none focus:ring-2  focus:ring-gray-400"
+      <div className="input-group">
+        <input
         type="email"
-        placeholder="Email"
+        placeholder=""
         required
         name="email"
         value={userDetails.email}
         onChange={handleInput}
         onKeyDown={handleEnterKey}
       />
+       <label>Email</label>
+      </div>
 
       {/* Password */}
-      <div className="relative w-full">
+      <div className="input-group">
         <input
-          className="w-full px-4 py-2 mt-1 border rounded-xl outline-none focus:ring-2 focus:ring-gray-400"
           type={isPassword ? "text" : "password"}
-          placeholder="Password"
+          placeholder=""
           maxLength={16}
           required
           name="password"
@@ -222,64 +225,34 @@ const isFormValid =
           onChange={handleInput}
           onKeyDown={handleEnterKey}
         />
-
+        <label>Password</label>
         <img
           onClick={showHide}
           src={isPassword ? show : hide}
           alt="toggle"
-          className="absolute right-2 top-1/2 -translate-y-1/2 w-5 h-5 cursor-pointer opacity-70 hover:opacity-100"
+          className="pass1"
         />
 
         {/* Strength Bar */}
         
         
       </div>
-      {strength && (
-        <div className="mt-4">
-          <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
-            <div
-              className={`h-full transition-all duration-500 ${getStrengthColor()} ${
-                strength === "weak"
-                  ? "w-1/3"
-                  : strength === "medium"
-                  ? "w-2/3"
-                  : "w-full"
-              }`}
-            />
-          </div>
-
-          <p
-            className={`mt-2 text-sm font-medium ${
-              strength === "weak"
-                ? "text-red-500"
-                : strength === "medium"
-                ? "text-yellow-500"
-                : "text-green-600"
-            }`}
-          >
-            {getStrengthText()}
-          </p>
-          </div>
-        )}
-      <div className="relative">
+      <div className="input-group">
           <input
         type={isConfirmPassword ? "text" : "password"}
         name="confirmPassword"
-        placeholder="Confirm password"
+        placeholder=""
         value={userDetails.confirmPassword}
         onChange={handleInput}
-        className={`w-full px-4 py-2 mt-1 border rounded-xl outline-none focus:ring-2 ${
-          passwordError
-            ? "border-red-500 focus:ring-red-400"
-            : "focus:ring-green-400"
-         }`}
         />
+        <label>Confirm Password</label>
         <img
           onClick={showHide2}
           src={isConfirmPassword ? show : hide}
           alt="toggle"
-          className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 cursor-pointer opacity-70 hover:opacity-100"
+          className="pass1"
         />
+         
         </div>
 
         {/* Error Message */}
@@ -288,10 +261,10 @@ const isFormValid =
         )}
 
       {/* Mobile */}
-      <input
-        className="w-full px-4 py-2 mt-1 border rounded-xl outline-none focus:ring-2  focus:ring-gray-400"
+     <div className="input-group">
+       <input
         type="text"
-        placeholder="Mobile number"
+        placeholder=""
         minLength={12}
         required
         name="mobile"
@@ -299,6 +272,8 @@ const isFormValid =
         onChange={handleInput}
         onKeyDown={handleEnterKey}
       />
+        <label>Mobile</label>
+     </div>
 
       {/* Submit */}
       <button

@@ -155,30 +155,29 @@ const handleResetPassword = async () => {
   };
 
   return (
-  <section className="min-h-screen flex items-center justify-center bg-gray-100 px-4">
-    <div className="w-full max-w-sm bg-white p-6 rounded-xl shadow-md space-y-4">
+  <section className="container">
+    <div className="form">
 
-      <h2 className="text-lg font-semibold text-center">
+      <h2>
         Reset Password
       </h2>
 
-      <p className="text-xs text-gray-500 text-center">
-        Enter your email to receive an OTP and set a new password
-      </p>
-
-      {/* Email */}
+       <h4>Enter your Email to get OTP</h4>
+      <div className="input-group">
+        {/* Email */}
       <input
         type="email"
         name="email"
-        placeholder="Enter your email"
+        placeholder=""
         value={email}
         onChange={(e) => setEmail(e.target.value)}
         onKeyDown={handleDynamicEnter}
         className="
-          w-full px-4 py-2 rounded-lg border text-sm
-          focus:outline-none focus:ring-2 focus:ring-blue-500
+          inp
         "
       />
+      <label>Email</label>
+      </div>
 
       <button
         ref={buttonRef1}
@@ -186,48 +185,47 @@ const handleResetPassword = async () => {
         onClick={Forgotpassword}
         disabled={isLoading}
         className="
-          w-full bg-blue-600 text-white py-2 rounded-lg text-sm
-          hover:bg-blue-700 transition
-          disabled:opacity-50 disabled:cursor-not-allowed
+        btn btn-2
         "
       >
         {isLoading ? <Spinner/> : "Send OTP"}
       </button>
 
-      {/* OTP */}
+      <div className="input-group">
+        {/* OTP */}
       <input
         type="text"
         name="otp"
-        placeholder="Enter OTP"
+        placeholder=""
         value={otp}
         onChange={(e) => setOtp(e.target.value)}
         onKeyDown={handleDynamicEnter}
         className="
-          w-full px-4 py-2 rounded-lg border text-sm tracking-widest
-          focus:outline-none focus:ring-2 focus:ring-blue-500
+          input
         "
       />
+      <label>Enter Otp</label>
+      </div>
 
       {/* New Password */}
-      <div className="relative">
+      <div className="input-group">
         <input
           type={isPassword ? "text" : "password"}
           name="newPassword"
-          placeholder="New password"
+          placeholder=""
           value={newPassword}
           onChange={(e) => setNewPassword(e.target.value)}
           onKeyDown={handleDynamicEnter}
           className="
-            w-full px-4 py-2 rounded-lg border text-sm pr-10
-            focus:outline-none focus:ring-2 focus:ring-blue-500
+            input
           "
         />
-
+        <label>New Password</label>
         <img
           src={isPassword ? show : hide}
           alt="Toggle password"
           onClick={showHide}
-          className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 cursor-pointer opacity-70 hover:opacity-100"
+          className="pass3"
         />
 
         {/* Password Strength */}
@@ -250,9 +248,7 @@ const handleResetPassword = async () => {
         onClick={handleResetPassword}
         disabled={isLoading2}
         className="
-          w-full bg-green-600 text-white py-2 rounded-lg text-sm
-          hover:bg-green-700 transition
-          disabled:opacity-50 disabled:cursor-not-allowed
+          btn btn-1
         "
       >
         {isLoading2 ? <Spinner/> : "Reset Password"}

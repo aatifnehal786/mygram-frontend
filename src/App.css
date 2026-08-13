@@ -1,3 +1,485 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+
+.container{
+  background-color: rgb(73, 65, 65);
+  width: 100%;
+  height: 100vh;
+  color: white;
+  padding: 30px;
+  display: flex;
+  align-items: center;
+}
+
+.form{
+ display: flex;
+ width: 40%;
+ row-gap: 10px;
+ flex-direction: column;
+ align-items: center;
+ box-shadow: 5px 5px 5px 5px rgba(92, 81, 81, 0.582);
+ padding: 2rem;
+ margin: 1rem auto;
+}
+.input-group{
+    margin: 10px 0;
+    
+}
+.input-group{
+  position: relative;
+ }
+
+.input-group .pass2{
+  position: absolute;
+  top: 14px;
+  left: 82%;
+  transform: translateX(80%);
+  width: 25px;
+  margin-top: 5px;
+}
+.input-group .pass1{
+  position: absolute;
+  top: 14px;
+  left: 82%;
+  transform: translateX(80%);
+  width: 25px;
+  margin-top: 5px;
+}
+.input-group .pass3{
+  position: absolute;
+  top: 14px;
+  left: 82%;
+  transform: translateX(80%);
+  width: 25px;
+  margin-top: 5px;
+}
+
+
+.input-group label{
+    position: absolute;
+    transform: translateY(-50%);
+    top: 50%;
+    left: 15px;
+    font-size: 16px;
+    pointer-events: none;
+    color: rgb(218, 223, 223);
+    padding: 0 5px;
+    transition: .5s;
+}
+
+.input-group input{
+    width: 320px;
+    height: 60px;
+    color: #fff;
+    font-size: 16px;
+    padding: 0 15px;
+    border: 1px solid rgb(218, 223, 223);
+    background: transparent;
+    outline: none;
+    border-radius: 5px;
+}
+
+.input-group input:focus+label,.input-group input:not(:placeholder-shown) + label{
+    top: 0;
+    background: #010031;
+    font-size: 14px;
+}
+.form img{
+  position: absolute;
+  width: 18px;
+  top: 44%;
+  left: 97%;
+  transform: translateX(50%);
+
+}
+.btn{
+  padding: 10px 50px;
+  border-radius: 10px;
+  background-color: rgb(128, 128, 221);
+  color: white;
+  font-weight: bold;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+a{
+  text-decoration: none;
+  color: white;
+}
+
+.btn:hover{
+  background-color: rgb(13, 13, 141);
+}
+.not-found{
+  width: 100%;
+  text-align: center;
+}
+.success{
+  background-color: lightgreen;
+  color: green;
+  font-size: large;
+  width: 100%;
+  border-radius: 10px;
+  padding: 10px;
+}
+.error{
+  background-color: lightpink;
+  color: red;
+  font-size: large;
+  width: 100%;
+  border-radius: 10px;
+  padding: 10px;
+}
+
+.strength {
+  margin-top: 10px;
+  font-weight: bold;
+  animation: fadeIn 0.4s ease-in-out;
+  transition: color 0.3s ease;
+}
+
+.weak {
+  color: red;
+}
+
+.medium {
+  color: orange;
+}
+
+.strong {
+  color: green;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* track page css */
+
+.search{
+  width: 100%;
+  padding: 10px;
+  /* background-color: gray; */
+  position: relative;
+}
+.track-container{
+  align-items: flex-start;
+  flex-direction: column;
+}
+
+.search-inp{
+  width: 100%;
+  height: 45px;
+  text-indent: 10px;
+  outline: none;
+  border-radius: 5px;
+  border: 1px solid gray;
+  font-size: 18px;
+  /* cursor: pointer; */
+
+
+
+
+}
+
+.search-results{
+  width: 100%;
+  padding: 10px 5px;
+  background-color: gray;
+  margin-top: 10px;
+  position: absolute;
+
+}
+.nutrient{
+  width: 50%;
+  padding: 10px 0px;
+  /* background-color: green; */
+}
+
+.food{
+  width: 100%;
+  padding: 30px 0;
+  /* background-color: red; */
+  display: flex;
+  flex-wrap: wrap;
+  row-gap: 10px;
+
+}
+.food-img{
+  width: 100%;
+  height: auto;
+  /* background-color: blue; */
+  
+  
+
+
+}
+
+
+.food-image{
+  width: 100%;
+}
+
+.track-control{
+  display: flex;
+  width: 100%;
+  column-gap: 2%;
+}
+
+.track-control > .inp{
+  width: 68%;
+
+}
+.track-control > .btn{
+  width: 30%;
+  padding: 10px 0px;
+
+}
+
+.diet-container{
+  align-items: flex-start;
+  /* display: flex; */
+  flex-direction: column;
+  row-gap: 20px;
+}
+
+.item{
+  width: 100%;
+  padding: 20px;
+  background-color: rgba(12, 210, 25, 0.582);
+  color: rgb(232, 238, 231);
+  border-radius: 10px;
+  margin: 10px;
+  align-items: flex-start;
+  
+}
+.item h3{
+  font-size: large;
+  background-color: green;
+  color: black;
+  text-indent: 15px;
+  border-radius: 10px;
+  margin: 10px;
+}
+.item p{
+  background-color: green;
+  color: black;
+  margin-top: 20px;
+  text-indent: 10px;
+  padding: 10px;
+  border-radius: 10px;
+  font-size: large;
+  font-weight: bold;
+
+}
+
+.lists li{
+  list-style: none;
+  color: aqua;
+  font-size: large;
+  cursor: pointer;
+  margin: 5px;
+  background-color: green;
+  padding: 10px;
+  border-radius: 5px;
+}
+.lists li:hover{
+  background-color: brown;
+  color: black;
+
+}
+.btn-logout{
+  /* display: inline; */
+  position: absolute;
+  top: 5%;
+  left: 50%;
+
+
+}
+.reset{
+  margin: 0 auto;
+}
+
+.reset h4{
+  margin: 10px;
+}
+.reset-content{
+  position: absolute;
+  top: 20%;
+  left: 50%;
+  transform: translate(-50%,-50%);
+}
+.btn-2{
+  margin:20px;
+}
+.btn-1{
+  margin: 20px;
+}
+.input{
+  width: 100%;
+  height: 50px;
+  text-indent: 20px;
+  outline: none;
+  border: 1px solid gray;
+  border-radius: 10px;
+
+}
+.content{
+  position: absolute;
+  top: 20%;
+  left: 50%;
+  transform: translate(-50%,-50%);
+}
+
+.item img{
+  width: auto;
+  height: 100px;
+  overflow: hidden;
+}
+.cont{
+  display: flex;
+  flex-direction: column;
+  row-gap: 10px;
+}
+
+.btn2{
+  color: antiquewhite;
+}
+
+.captcha {
+  width: 100%;
+  display: flex;
+  justify-content: center; /* or left, right */
+  margin-top: 10px;
+  margin-left: 3rem;
+}
+
+.captcha-child {
+  transform: scale(0.85); /* Scale the size */
+  transform-origin: 0 0; /* Adjust origin if needed */
+}
+
+@media (max-width: 600px){
+ 
+  .form img{
+    position: absolute;
+    width: 18px;
+    top: 50%;
+    left: 97%;
+    transform: translateX(50%);
+  }
+}
+
+@media (min-width: 300px) and (max-width: 520px){
+  .container{
+    width: 100%;
+    height: 100%;
+    
+  }
+ .input-group{
+  position: relative;
+ }
+  .container .form{
+    width: 100%;
+  }
+  .input-group input{
+    width: 280px;
+  }
+  .input-group .pass2{
+    position: absolute;
+    top: 20%;
+    left: 81%;
+  }
+.captcha {
+  width: 100%;
+  display: flex;
+  justify-content: center; /* or left, right */
+  margin-top: 10px;
+}
+
+.captcha-child {
+  transform: scale(0.85); /* Scale the size */
+  transform-origin: 0 0; /* Adjust origin if needed */
+}
+
+  
+}
+
+@media (min-width: 481px) and (max-width: 768px){
+  .form{
+    position: relative;
+
+  }
+  .form img{
+    position: absolute;
+    width: 18px;
+    top: 45%;
+    left: 95%;
+    transform: translateX(50%);
+  }
+}
+
+@media (min-width: 769px) and (max-width: 1024px){
+  .form{
+    position: relative;
+
+  }
+  .form img{
+    position: absolute;
+    width: 18px;
+    top: 45%;
+    left: 95%;
+    transform: translateX(50%);
+  }
+}
+
+@media (min-width: 1025px) and (max-width: 1200px){
+  .form{
+    position: relative;
+
+  }
+  .form img{
+    position: absolute;
+    width: 18px;
+    top: 45%;
+    left: 96%;
+    transform: translateX(50%);
+  }
+}
+
+@media (min-width: 1201px){
+  .form{
+    position: relative;
+
+  }
+  .form img{
+    position: absolute;
+    width: 18px;
+    top: 50%;
+    left: 97%;
+    transform: translateX(50%);
+  }
+}
+
+@media (min-width: 1202px) and (max-width: 1600px){
+  .form{
+    position: relative;
+
+  }
+  .form img{
+    position: absolute;
+    width: 18px;
+    top: 44%;
+    left: 97%;
+    transform: translateX(50%);
+  }
+
+}

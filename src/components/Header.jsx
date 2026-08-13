@@ -16,7 +16,7 @@ export default function Header() {
   const isGuest = loggedUser?.user?.isGuest;
   const myPic = loggedUser?.profilePic || loggedUser?.profilePicture || "/placeholder.svg";
 
-  const isActive = (path) => location.pathname === path? "font-bold text-black dark:text-white" : "font-normal";
+  const isActive = (path) => location.pathname === path ? `${theme === "dark" ? "font-bold text-white" : "font-bold text-black"}` : `${theme === "dark" ? "font-bold text-white" : "font-bold text-black"}`;
 
   function logOut() {
     logout();
@@ -47,13 +47,19 @@ export default function Header() {
           </div>
 
           {/* Right Icons - Desktop */}
-          <div className="hidden md:flex items-center gap-5 text-">
+          <div className={`hidden md:flex items-center gap-5 text-${theme === "dark" ? "white" : "black"}`}>
             <Link to="/home" className={isActive("/home")}><FaHome /></Link>
             <button onClick={() => setShowSearch(!showSearch)}><FaSearch /></button>
-            <Link to="/createpost"><FaPlusSquare /></Link>
-            <Link to="/chat"><FaRegPaperPlane /></Link>
-            <Link to="/profile"><img src={myPic} className="w-7 h-7 rounded-full object-cover" /></Link>
-             <button onClick={logOut} className="text-xs bg-red-500 text-white px-3 py-1 rounded">Logout</button>
+            <Link to="/createpost" className={`${theme === "dark" ? "text-white" : "text-black"}`}>
+              <FaPlusSquare />
+            </Link>
+            <Link to="/chat" className={`${theme === "dark" ? "text-white" : "text-black"}`}>
+              <FaRegPaperPlane />
+            </Link>
+            <Link to="/profile" className={`${theme === "dark" ? "text-white" : "text-black"}`}>
+              <img src={myPic} className="w-7 h-7 rounded-full object-cover" />
+            </Link>
+            <button onClick={logOut} className="text-xs bg-red-500 text-white px-3 py-1 rounded">Logout</button>
           </div>
 
           {/* Mobile Menu Button */}
@@ -66,24 +72,16 @@ export default function Header() {
       {/* MOBILE DROPDOWN - OUTSIDE header so not cut off */}
       {menuOpen && (
         <div className={`md:hidden fixed top- left-0 w-full z-40 border-b shadow-lg flex flex-col ${theme === "dark"? "bg-black border-zinc-800 text-white" : "bg-white border-gray-200 text-black"}`}>
-          <Link to="/home" onClick={() => setMenuOpen(false)} className="px-6 py-3 hover:bg-gray-100 dark:hover:bg-zinc-800 flex items-center gap-3"><FaHome/> Home</Link>
-          <Link to="/profile" onClick={() => setMenuOpen(false)} className="px-6 py-3 hover:bg-gray-100 dark:hover:bg-zinc-800 flex items-center gap-3"><img src={myPic} className="w-5 h-5 rounded-full"/> Profile</Link>
-          <Link to="/createpost" onClick={() => setMenuOpen(false)} className="px-6 py-3 hover:bg-gray-100 dark:hover:bg-zinc-800 flex items-center gap-3"><FaPlusSquare/> Create</Link>
-          <Link to="/chat" onClick={() => setMenuOpen(false)} className="px-6 py-3 hover:bg-gray-100 dark:hover:bg-zinc-800 flex items-center gap-3"><FaRegPaperPlane/> Messages</Link>
-          <Link to="/getdevices" onClick={() => setMenuOpen(false)} className="px-6 py-3 hover:bg-gray-100 dark:hover:bg-zinc-800 flex items-center gap-3"><FaRegHeart/> Notifications</Link>
+          <Link to="/home" onClick={() => setMenuOpen(false)} className={`px-6 py-3 hover:bg-gray-100 dark:hover:bg-zinc-800 flex items-center gap-3 ${theme === "dark" ? "text-white" : "text-black"}`}><FaHome/> Home</Link>
+          <Link to="/profile" onClick={() => setMenuOpen(false)} className={`px-6 py-3 hover:bg-gray-100 dark:hover:bg-zinc-800 flex items-center gap-3 ${theme === "dark" ? "text-white" : "text-black"}`}><img src={myPic} className="w-5 h-5 rounded-full"/> Profile</Link>
+          <Link to="/createpost" onClick={() => setMenuOpen(false)} className={`px-6 py-3 hover:bg-gray-100 dark:hover:bg-zinc-800 flex items-center gap-3 ${theme === "dark" ? "text-white" : "text-black"}`}><FaPlusSquare/> Create</Link>
+          <Link to="/chat" onClick={() => setMenuOpen(false)} className={`px-6 py-3 hover:bg-gray-100 dark:hover:bg-zinc-800 flex items-center gap-3 ${theme === "dark" ? "text-white" : "text-black"}`}><FaRegPaperPlane/> Messages</Link>
+          <Link to="/getdevices" onClick={() => setMenuOpen(false)} className={`px-6 py-3 hover:bg-gray-100 dark:hover:bg-zinc-800 flex items-center gap-3 ${theme === "dark" ? "text-white" : "text-black"}`}><FaRegHeart/> Notifications</Link>
           <button onClick={logOut} className="px-6 py-3 text-left text-red-500 font-semibold hover:bg-gray-100 dark:hover:bg-zinc-800">Log Out</button>
         </div>
       )}
 
-      {/* Mobile Bottom Nav - Keep only if you don't have one in Layout.jsx */}
-      {/* DELETE THIS if you already have bottom nav in Layout.jsx to avoid double nav */}
-      <div className={`md:hidden fixed bottom-0 left-0 w-full border-t flex justify-around py-3 z-30 ${theme === "dark"? "bg-black border-zinc-800 text-white" : "bg-white border-gray-200 text-black"}`}>
-        <Link to="/home"><FaHome className="text-xl" /></Link>
-        <button onClick={() => setShowSearch(!showSearch)}><FaSearch className="text-xl" /></button>
-        <Link to="/createpost"><FaPlusSquare className="text-xl" /></Link>
-        <Link to="/chat"><FaRegPaperPlane className="text-xl" /></Link>
-        <Link to="/profile"><img src={myPic} className="w-6 h-6 rounded-full object-cover" /></Link>
-      </div>
+     
     </>
   );
 }

@@ -43,12 +43,12 @@ export default function Layout() {
 
       {/* SIDEBAR DESKTOP - FIXED WIDTH 245px */}
       <aside className={`hidden md:flex fixed top-0 left-0 h-screen w-64 border-r flex-col p-3 z-30 ${theme === "dark"? "bg-black border-zinc-800" : "bg-white border-gray-200"}`}>
-        <Link to="/home" className="text-xl px-3 py-6 font-bold" style={{ fontFamily: 'cursive' }}>MyGram</Link>
+        <Link to="/home" className={`${theme === "dark" ? "text-white" : "text-black"} text-xl px-3 py-6 font-bold`} style={{ fontFamily: 'cursive' }}>MyGram</Link>
         <nav className="flex flex-col gap-1 flex-1">
-          <Link to="/home" className={`flex items-center gap-4 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 ${isActive("/home")? "font-bold" : ""}`}><FaHome className="text-xl" /> Home</Link>
-          <Link to="/chat" className={`flex items-center gap-4 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 ${isActive("/chat")? "font-bold" : ""}`}><FaRegPaperPlane className="text-xl" /> Messages</Link>
-          <Link to="/createpost" className={`flex items-center gap-4 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 ${isActive("/createpost")? "font-bold" : ""}`}><FaPlusSquare className="text-xl" /> Create</Link>
-          <Link to="/profile" className={`flex items-center gap-4 p-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800`}><img src={myPic} className="w-6 h-6 rounded-full object-cover" /> Profile</Link>
+          <Link to="/home" className={`${theme === "dark" ? "hover:bg-zinc-800" : "hover:bg-zinc-100 text-black br-gray-200"} flex items-center gap-4 p-3 rounded-lg ${isActive("/home")? "font-bold" : ""}`}><FaHome className="text-xl" /> Home</Link>
+          <Link to="/chat" className={`${theme === "dark" ? "hover:bg-zinc-800" : "hover:bg-zinc-100 text-black br-gray-200"} flex items-center gap-4 p-3 rounded-lg ${isActive("/chat")? "font-bold" : ""}`}><FaRegPaperPlane className="text-xl" /> Messages</Link>
+          <Link to="/createpost" className={`${theme === "dark" ? "hover:bg-zinc-800" : "hover:bg-zinc-100 text-black br-gray-200"} flex items-center gap-4 p-3 rounded-lg ${isActive("/createpost")? "font-bold" : ""}`}><FaPlusSquare className="text-xl" /> Create</Link>
+          <Link to="/profile" className={`${theme === "dark" ? "hover:bg-zinc-800" : "hover:bg-zinc-100 text-black br-gray-200"} flex items-center gap-4 p-3 rounded-lg`}><img src={myPic} className="w-6 h-6 rounded-full object-cover" /> Profile</Link>
         </nav>
         {/* DESKTOP THEME BUTTON */}
         <button onClick={toggleTheme} className="p-3 text-left text-sm rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 w-full">
@@ -77,10 +77,18 @@ export default function Layout() {
 
         {/* MOBILE BOTTOM NAV */}
         <div className={`md:hidden fixed bottom-0 left-0 w-full border-t flex justify-around py-3 z-30 ${theme === "dark"? "bg-black border-zinc-800" : "bg-white border-gray-200"}`}>
-          <Link to="/home"><FaHome className="text-xl" /></Link>
-          <Link to="/chat"><FaRegPaperPlane className="text-xl" /></Link>
-          <Link to="/createpost"><FaPlusSquare className="text-xl" /></Link>
-          <Link to="/profile"><img src={myPic} className="w-6 h-6 rounded-full" /></Link>
+          <Link to="/home" className={`${theme === "dark" ? "text-white" : "text-black"}`}>
+            <FaHome className="text-xl" />
+          </Link>
+          <Link to="/chat" className={`${theme === "dark" ? "text-white" : "text-black"}`}>
+            <FaRegPaperPlane className="text-xl" />
+          </Link>
+          <Link to="/createpost" className={`${theme === "dark" ? "text-white" : "text-black"}`}>
+            <FaPlusSquare className="text-xl" />
+          </Link>
+          <Link to="/profile" className={`${theme === "dark" ? "text-white" : "text-black"}`}>
+            <img src={myPic} className="w-6 h-6 rounded-full" />
+          </Link>
         </div>
       </div>
 

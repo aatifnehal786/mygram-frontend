@@ -310,7 +310,7 @@ useEffect(() => {
 </div>
       {/* STORIES */}
       <div className={`w-full border ${theme === "dark"? "bg-black border-zinc-800" : "bg-white border-gray-200"} rounded-lg mb-4`}>
-        <div className="flex gap-4 overflow-x-auto scrollbar-hide px-4 py-4">
+        <div className="flex gap-4 overflow-x-auto overflow-y-hidden scrollbar-hide scroll-smooth whitespace-nowrap px-2 py-2">
           {Array.isArray(users) && users.map(user => (
             <div key={user._id} onClick={() => setSelectedProfile(user)} className="flex flex-col items-center gap-1 min-w- cursor-pointer">
               <div className="w-20 h-20 rounded-full p-1 bg-gradient-to-tr from-yellow-400 via-red-500 to-purple-600">
