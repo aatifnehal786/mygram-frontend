@@ -26,6 +26,7 @@ const { selectedUser, setSelectedUser, followedUsers, setFollowedUsers, updateUn
   useEffect(() => {
     if (!socket) return;
     const handleReceiveMessage = (msg) => {
+       const loggedUser = useUserStore((s) => s.loggedUser);
       const { selectedUser: currentSelected, addMessage } = useChatStore.getState();
       const loggedId = loggedUser?.userid;
       const senderId = msg.sender?._id || msg.sender;
