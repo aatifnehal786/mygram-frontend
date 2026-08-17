@@ -158,9 +158,9 @@ const handleCreateStatus = async () => {
     updateFeedPost(postId, { likes: newLikes });
     try {
       if (isLiked) {
-        await apiFetch(`api/post/unlike/${postId}`, { method: "PUT" });
+        await apiFetch(`api/posts/unlike/${postId}`, { method: "PUT" });
       } else {
-        await apiFetch(`api/post/like/${postId}`, { method: "PUT" });
+        await apiFetch(`api/posts/like/${postId}`, { method: "PUT" });
       }
     } catch (err) {
       updateFeedPost(postId, { likes: currentPost.likes });
@@ -181,7 +181,7 @@ const handleCreateStatus = async () => {
     updateFeedPost(postId, { comments: [...(currentPost.comments || []), tempComment] });
     setCommentTexts(prev => ({...prev, [postId]: "" }));
     try {
-      const data = await apiFetch(`api/post/comment/${postId}`, {
+      const data = await apiFetch(`api/posts/comment/${postId}`, {
         method: "POST",
         body: JSON.stringify({ text }),
       });
