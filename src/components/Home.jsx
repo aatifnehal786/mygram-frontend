@@ -463,13 +463,13 @@ if (s.mediaType === 'video' || s.mediaUrl?.includes('video') || s.mediaUrl?.incl
       autoPlay
       controls
       playsInline
-      className="h-25 w-25"
+      className="h-screen w-screen object-contain"
       onEnded={() => nextStatus()} // next only when video ends
       onError={(e) => console.log("Video error:", e)}
     />
   );
 }
-if (s.mediaUrl) return <img src={s.mediaUrl} className="h-30 w-20 object-contain" />;
+if (s.mediaUrl) return <img src={s.mediaUrl} className="h-screen w-screen object-contain" />;
         return (
           <div className="w-full h-full flex items-center justify-center p-10 text-center text-white text-2xl" style={{ background: s.bgColor || '#1a1a1a' }}>
             {s.text}

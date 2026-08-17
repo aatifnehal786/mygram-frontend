@@ -52,18 +52,21 @@ export default function CreatePost() {
     if (!mediaFile) return;
     setLoading(true);
     const fd = new FormData();
-    fd.append("media", mediaFile); // MUST be "media" - matches upload.fields([{name:"media"}])
+    fd.append("media", mediaFile);
     fd.append("caption", caption);
     fd.append("mediaType", mediaType);
-    if (musicFile) fd.append("backgroundMusic", musicFile); // optional
+    if (musicFile) fd.append("backgroundMusic", musicFile);
 
     try {
-      const res = await apiFetch("/api/posts/create", {
+      const data = await apiFetch("/api/uploads/create", {
         method: "POST",
-        body: fd, // DO NOT set Content-Type
+        body: fd,
         credentials: "include",
       });
-      const data = await res.json();
+      
+      // data is already JSON, no need for .json()
+      console.log(data); 
+
       if (data.success) {
         onClose?.();
       }
@@ -107,9 +110,9 @@ export default function CreatePost() {
             ) : (
               <>
                 {mediaType === "image"? (
-                  <img src={mediaPreview} alt="preview" className="w-full h-full object-contain max-h- md:max-h-" />
+                  <img src={mediaPreview} alt="preview" className="w-20 h-20 object-contain" />
                 ) : (
-                  <video src={mediaPreview} controls autoPlay muted loop className="w-full h-full object-contain max-h- md:max-h-" />
+                  <video src={mediaPreview} controls autoPlay muted loop className="w-20 h-20 object-contain" />
                 )}
                 <button
                   onClick={() => mediaRef.current.click()}
