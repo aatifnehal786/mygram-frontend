@@ -13,7 +13,7 @@ export const apiFetch = async (endpoint, options = {}) => {
   };
 
   const cleanEndpoint = endpoint.startsWith("/")? endpoint.slice(1) : endpoint;
-  const apiUrl = "http://localhost:8000";
+  const apiUrl = "https://mygram-mvc.onrender.com";
 
   const response = await fetch(`${apiUrl}/${cleanEndpoint}`, {
    ...options,
