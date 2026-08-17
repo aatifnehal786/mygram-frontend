@@ -5,15 +5,14 @@ const useUserStore = create(
   persist(
     (set) => ({
       loggedUser: null,
-      token: null, // ADD THIS
+      token: null,
       posts: [],
       publicPosts: [],
       users: [],
 
       setLoggedUser: (data) => set({
-        // data can be { token, user } or { token,...user }
         loggedUser: data.user || data.loggedUser || data,
-        token: data.token || data.loggedUser?.token || null
+        token: data.token || data.loggedUser?.token || data.user?.token || null
       }),
 
       setPosts: (updater) => set((state) => ({
@@ -27,20 +26,22 @@ const useUserStore = create(
       setUsers: (users) => set({ users }),
 
       updateFeedPost: (postId, newData) => set((state) => ({
-        posts: state.posts.map(p => p._id === postId? {...p,...newData } : p),
-        publicPosts: state.publicPosts.map(p => p._id === postId? {...p,...newData } : p),
+        posts: state.posts.map(p =>
+          p._id?.toString() === postId?.toString()? {...p,...newData } : p
+        ),
+        publicPosts: state.publicPosts.map(p =>
+          p._id?.toString() === postId?.toString()? {...p,...newData } : p
+        ),
       })),
 
       removeFeedPost: (postId) => set((state) => ({
-        posts: state.posts.filter(p => p._id!== postId),
-        publicPosts: state.publicPosts.filter(p => p._id!== postId),
+        posts: state.posts.filter(p => p._id?.toString()!== postId?.toString()),
+        publicPosts: state.publicPosts.filter(p => p._id?.toString()!== postId?.toString()),
       })),
 
       logout: () => set({ loggedUser: null, token: null, posts: [], publicPosts: [], users: [] }),
     }),
-    {
-      name: "token-auth",
-    }
+    { name: "token-auth" }
   )
 );
 

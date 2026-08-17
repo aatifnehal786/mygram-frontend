@@ -2,8 +2,7 @@ import useUserStore from "../store/useUserStore";
 
 export const apiFetch = async (endpoint, options = {}) => {
   const { token, loggedUser } = useUserStore.getState();
-  // try both new and old structure
-  const finalToken = token || loggedUser?.token;
+  const finalToken = token || loggedUser?.token || loggedUser?.user?.token;
 
   const isFormData = options.body instanceof FormData;
 
@@ -13,22 +12,29 @@ export const apiFetch = async (endpoint, options = {}) => {
    ...options.headers,
   };
 
-  let response;
-  try {
-    const cleanEndpoint = endpoint.startsWith('/')? endpoint.slice(1) : endpoint;
-    const apiUrl = "https://mygram-mvc.onrender.com";
-    response = await fetch(`${apiUrl}/${cleanEndpoint}`, {
-     ...options,
-      headers,
-    });
-  } catch (err) {
-    return { error: "Network error" };
-  }
+  const cleanEndpoint = endpoint.startsWith("/")? endpoint.slice(1) : endpoint;
+  const apiUrl = "http://localhost:8000";
+
+  const response = await fetch(`${apiUrl}/${cleanEndpoint}`, {
+   ...options,
+    headers,
+  });
 
   const text = await response.text();
+  let data;
   try {
-    return JSON.parse(text);
+    data = JSON.parse(text);
   } catch {
-    return { raw: text, status: response.status };
+    data = { raw: text };
   }
+
+  // THIS WAS MISSING - now it will actually throw
+  if (!response.ok) {
+    console.error(`API ERROR ${response.status} on ${cleanEndpoint}:`, data);
+    throw new Error(data.message || data.error || `Failed ${response.status}`);
+  }
+
+  if (data.error) throw new Error(data.error);
+
+  return data;
 };

@@ -52,7 +52,7 @@ useEffect(() => {
   if (!targetId) return;
 
   // Followers - from followRoutes
-  apiFetch(`api/follow/followers/${targetId}`)
+  apiFetch(`api/user/followers/${targetId}`)
    .then(d => {
       console.log("followers res:", d);
       setFollowers(d?.followers || []);
@@ -61,7 +61,7 @@ useEffect(() => {
 
   // Following - you don't have this endpoint, so we fake it from followers for now
   // Add this endpoint in backend, for now set empty
-  apiFetch(`api/follow/following/${targetId}`).then(d => setFollowing(d.following || [])).catch(()=>setFollowing([]));
+  apiFetch(`api/user/following/${targetId}`).then(d => setFollowing(d.following || [])).catch(()=>setFollowing([]));
 }, [targetId]);
 
   const handleFileChange = async (e) => {
@@ -158,7 +158,7 @@ useEffect(() => {
           <img src={loggedUser?.profilePic || "/placeholder.svg"} className="w-20 h-20 md:w-36 md:h-36 rounded-full object-cover" />
           {isOwnProfile && (
             <>
-              <button onClick={() => fileInputRef.current.click()} className="absolute bottom-0 right-0 bg-white border rounded-full px-2 py-1 text-xs">Edit</button>
+              <button onClick={() => fileInputRef.current.click()} className={`absolute bottom-0 right-0 bg-white border rounded-full px-2 py-1 text-xs ${theme === "dark"? "bg-zinc-800" : "bg-gray-100"}`}>Edit</button>
               <input type="file" ref={fileInputRef} onChange={handleFileChange} className="hidden" accept="image/*" />
             </>
           )}
@@ -177,19 +177,51 @@ useEffect(() => {
         </div>
       </div>
 
-      <div className="flex justify-center gap-12 border-t text-xs tracking-widest">
-        <button onClick={() => setActiveTab("posts")} className={`py-3 border-t ${activeTab === "posts"? "border-black dark:border-white font-semibold" : "border-transparent text-gray-400"}`}>POSTS</button>
-        <button onClick={() => setActiveTab("reels")} className={`py-3 border-t ${activeTab === "reels"? "border-black dark:border-white font-semibold" : "border-transparent text-gray-400"}`}>REELS</button>
+     <div className="flex justify-center gap-12 border-t text-xs tracking-widest">
+  <button onClick={() => setActiveTab("posts")} className={`py-3 border-t ${activeTab === "posts"? "border-black dark:border-white font-semibold" : "border-transparent text-gray-400"}`}>POSTS</button>
+  <button onClick={() => setActiveTab("reels")} className={`py-3 border-t ${activeTab === "reels"? "border-black dark:border-white font-semibold" : "border-transparent text-gray-400"}`}>REELS</button>
+</div>
+
+<div className="grid grid-cols-3 gap-1 md:gap-1">
+  {posts.filter(p => activeTab === "posts"? p.mediaType!== "video" : p.mediaType === "video").map(post => (
+    <div key={post._id} className="aspect-square bg-black relative group cursor-pointer overflow-hidden">
+      {/* IMAGE POSTS */}
+      {activeTab === "posts"? (
+        <img
+          src={post.mediaUrl}
+          alt=""
+          className="w-full h-full object-cover"
+          onError={(e) => e.target.src = "/placeholder.svg"}
+        />
+      ) : (
+        // REELS / VIDEO POSTS
+        post.thumbnail? (
+          <img src={post.thumbnail} alt="" className="w-full h-full object-cover" />
+        ) : (
+          <video
+            src={post.mediaUrl}
+            muted
+            autoPlay
+            playsInline
+            preload="metadata"
+            className="w-full h-full object-cover"
+          />
+        )
+      )}
+
+      {/* Hover overlay */}
+      <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white text-sm gap-4 transition-opacity">
+        <span>❤ {post.likes?.length || 0}</span>
+        <span>💬 {post.comments?.length || 0}</span>
       </div>
 
-      <div className="grid grid-cols-3 gap-1 md:gap-1">
-        {posts.filter(p => activeTab === "posts"? p.mediaType === "image" : p.mediaType === "video").map(post => (
-          <div key={post._id} className="aspect-square bg-black relative group cursor-pointer">
-            <img src={post.mediaType === "video"? post.thumbnail || post.mediaUrl : post.mediaUrl} alt="" className="w-full h-full object-cover" />
-            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white text-sm gap-4">❤ {post.likes?.length} 💬 {post.comments?.length}</div>
-          </div>
-        ))}
-      </div>
+      {/* Play icon for video */}
+      {activeTab === "reels" && (
+        <div className="absolute top-2 right-2 text-white text-xs">▶</div>
+      )}
+    </div>
+  ))}
+</div>
 
       {showEditName && (
         <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center">

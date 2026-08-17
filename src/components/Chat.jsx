@@ -57,7 +57,7 @@ const { selectedUser, setSelectedUser, followedUsers, setFollowedUsers, updateUn
     setFollowedUsers([]); // guest gets empty
     return;
   }
-  apiFetch(`api/follow/followers/${loggedUser.userid}`)
+  apiFetch(`api/user/followers/${loggedUser.userid}`)
    .then(data => {
       console.log("followers data:", data);
       // ensure ALWAYS array

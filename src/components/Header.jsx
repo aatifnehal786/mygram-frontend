@@ -48,7 +48,7 @@ export default function Header() {
 
           {/* Right Icons - Desktop */}
           <div className={`hidden md:flex items-center gap-5 text-${theme === "dark" ? "white" : "black"}`}>
-            <Link to="/home" className={isActive("/home")}><FaHome /></Link>
+            {/* <Link to="/home" className={isActive("/home")}><FaHome /></Link>
             <button onClick={() => setShowSearch(!showSearch)}><FaSearch /></button>
             <Link to="/createpost" className={`${theme === "dark" ? "text-white" : "text-black"}`}>
               <FaPlusSquare />
@@ -58,7 +58,7 @@ export default function Header() {
             </Link>
             <Link to="/profile" className={`${theme === "dark" ? "text-white" : "text-black"}`}>
               <img src={myPic} className="w-7 h-7 rounded-full object-cover" />
-            </Link>
+            </Link> */}
             <button onClick={logOut} className="text-xs bg-red-500 text-white px-3 py-1 rounded">Logout</button>
           </div>
 
@@ -72,11 +72,11 @@ export default function Header() {
       {/* MOBILE DROPDOWN - OUTSIDE header so not cut off */}
       {menuOpen && (
         <div className={`md:hidden fixed top- left-0 w-full z-40 border-b shadow-lg flex flex-col ${theme === "dark"? "bg-black border-zinc-800 text-white" : "bg-white border-gray-200 text-black"}`}>
-          <Link to="/home" onClick={() => setMenuOpen(false)} className={`px-6 py-3 hover:bg-gray-100 dark:hover:bg-zinc-800 flex items-center gap-3 ${theme === "dark" ? "text-white" : "text-black"}`}><FaHome/> Home</Link>
-          <Link to="/profile" onClick={() => setMenuOpen(false)} className={`px-6 py-3 hover:bg-gray-100 dark:hover:bg-zinc-800 flex items-center gap-3 ${theme === "dark" ? "text-white" : "text-black"}`}><img src={myPic} className="w-5 h-5 rounded-full"/> Profile</Link>
-          <Link to="/createpost" onClick={() => setMenuOpen(false)} className={`px-6 py-3 hover:bg-gray-100 dark:hover:bg-zinc-800 flex items-center gap-3 ${theme === "dark" ? "text-white" : "text-black"}`}><FaPlusSquare/> Create</Link>
-          <Link to="/chat" onClick={() => setMenuOpen(false)} className={`px-6 py-3 hover:bg-gray-100 dark:hover:bg-zinc-800 flex items-center gap-3 ${theme === "dark" ? "text-white" : "text-black"}`}><FaRegPaperPlane/> Messages</Link>
-          <Link to="/getdevices" onClick={() => setMenuOpen(false)} className={`px-6 py-3 hover:bg-gray-100 dark:hover:bg-zinc-800 flex items-center gap-3 ${theme === "dark" ? "text-white" : "text-black"}`}><FaRegHeart/> Notifications</Link>
+          <Link to="/home" onClick={() => setMenuOpen(false)} className={`px-6 py-3 hover:bg-gray-100 hover:text-white dark:hover:bg-zinc-800 flex items-center gap-3 ${theme === "dark" ? "text-white" : "text-black"}`}><FaHome/> Home</Link>
+          <Link to="/profile" onClick={() => setMenuOpen(false)} className={`px-6 py-3 hover:bg-gray-100 hover:text-white dark:hover:bg-zinc-800 flex items-center gap-3 ${theme === "dark" ? "text-white" : "text-black"}`}><img src={myPic} className="w-5 h-5 rounded-full"/> Profile</Link>
+          <Link to="/createpost" onClick={() => setMenuOpen(false)} className={`px-6 py-3 hover:bg-gray-100 hover:text-white dark:hover:bg-zinc-800 flex items-center gap-3 ${theme === "dark" ? "text-white" : "text-black"}`}><FaPlusSquare/> Create</Link>
+          <Link to="/chat" onClick={() => setMenuOpen(false)} className={`px-6 py-3 hover:bg-gray-100 hover:text-white dark:hover:bg-zinc-800 flex items-center gap-3 ${theme === "dark" ? "text-white" : "text-black"}`}><FaRegPaperPlane/> Messages</Link>
+          {/* <Link to="/getdevices" onClick={() => setMenuOpen(false)} className={`px-6 py-3 hover:bg-gray-100 dark:hover:bg-zinc-800 flex items-center gap-3 ${theme === "dark" ? "text-white" : "text-black"}`}><FaRegHeart/> Notifications</Link> */}
           <button onClick={logOut} className="px-6 py-3 text-left text-red-500 font-semibold hover:bg-gray-100 dark:hover:bg-zinc-800">Log Out</button>
         </div>
       )}

@@ -31,10 +31,11 @@ const [viewingStatusGroup, setViewingStatusGroup] = useState(null);
 const [currentStatusIndex, setCurrentStatusIndex] = useState(0);
 const [statusViewers, setStatusViewers] = useState([]);
 const [showViewers, setShowViewers] = useState(false);
-  const isGuest = loggedUser?.user?.isGuest || loggedUser?.isGuest;
-  const feed = isGuest? publicPosts : posts;
-  const myId = loggedUser?._id || loggedUser?.user?._id || loggedUser?.id || loggedUser?.userid;
-  
+const isGuest = loggedUser?.user?.isGuest || loggedUser?.isGuest;
+const feed = isGuest? publicPosts : posts;
+const myId = loggedUser?._id || loggedUser?.user?._id || loggedUser?.id || loggedUser?.userid;
+const [showCommentsModal, setShowCommentsModal] = useState(null); // will store postId
+const [deletingCommentId, setDeletingCommentId] = useState(null);
 const [statusText, setStatusText] = useState("");
 const [statusFile, setStatusFile] = useState(null);
 
@@ -167,38 +168,79 @@ const handleCreateStatus = async () => {
     }
   };
 
-  const handleAddComment = async (postId) => {
-    const text = commentTexts[postId]?.trim();
-    if (!text) return;
-    const currentPost = feed.find(p => p._id === postId);
-    const tempComment = {
-      _id: Date.now().toString(),
-      text,
-      comment: text,
-      postedBy: { username: loggedUser?.username || loggedUser?.user?.username, profilePic: loggedUser?.profilePic },
+ const handleAddComment = async (postId) => {
+  const text = commentTexts[postId]?.trim();
+  if (!text) return;
+
+  const currentPost = feed.find(p => p._id?.toString() === postId?.toString());
+  if (!currentPost) return;
+
+  const tempComment = {
+    _id: `temp-${Date.now()}`,
+    text,
+    commentedBy: {
+      _id: myId,
       username: loggedUser?.username || loggedUser?.user?.username,
-    };
-    updateFeedPost(postId, { comments: [...(currentPost.comments || []), tempComment] });
-    setCommentTexts(prev => ({...prev, [postId]: "" }));
-    try {
-      const data = await apiFetch(`api/posts/comment/${postId}`, {
-        method: "POST",
-        body: JSON.stringify({ text }),
-      });
-      if (data.comments || data.post?.comments) {
-        updateFeedPost(postId, { comments: data.comments || data.post.comments });
-      }
-    } catch (e) {
-      console.log(e);
-    }
+      profilePic: loggedUser?.profilePic || loggedUser?.user?.profilePic,
+    },
   };
+
+  updateFeedPost(postId, { comments: [...(currentPost.comments || []), tempComment] });
+  setCommentTexts(prev => ({...prev, [postId]: "" }));
+
+  try {
+    const data = await apiFetch(`/api/posts/comment/${postId}`, {
+      method: "POST",
+      body: JSON.stringify({ text }),
+    });
+    console.log("comment response", data); // check this now
+    const finalComments = data.comments || data.post?.comments || data;
+    const arr = Array.isArray(finalComments)? finalComments : finalComments.comments;
+    if (arr) updateFeedPost(postId, { comments: arr });
+
+  } catch (err) {
+    console.error("Comment failed:", err.message);
+    toast.error(err.message);
+    updateFeedPost(postId, { comments: currentPost.comments });
+    setCommentTexts(prev => ({...prev, [postId]: text }));
+  }
+};
+
+
+
+const postForModal = feed.find(p => p._id?.toString() === showCommentsModal?.toString());
+
+const handleDeleteComment = async (postId, commentId) => {
+  if (!window.confirm("Delete this comment?")) return;
+  setDeletingCommentId(commentId);
+  const currentPost = feed.find(p => p._id?.toString() === postId?.toString());
+  const backupComments = currentPost.comments;
+
+  // optimistic remove
+  updateFeedPost(postId, { comments: backupComments.filter(c => c._id?.toString()!== commentId?.toString()) });
+
+  try {
+    const data = await apiFetch(`/api/posts/comment/${postId}/${commentId}`, {
+      method: "DELETE",
+    });
+    const finalComments = data.comments || data.post?.comments || data;
+    const arr = Array.isArray(finalComments)? finalComments : finalComments.comments;
+    if (arr) updateFeedPost(postId, { comments: arr });
+    toast.success("Comment deleted");
+  } catch (err) {
+    toast.error(err.message);
+    updateFeedPost(postId, { comments: backupComments });
+  } finally {
+    setDeletingCommentId(null);
+  }
+};
 
   const handleDeletePost = async (postId) => {
     if (!window.confirm("Delete this post?")) return;
     const backup = [...feed];
     removeFeedPost(postId);
     try {
-      await apiFetch(`api/post/delete-post/${postId}`, { method: "DELETE" });
+      await apiFetch(`api/posts/delete-post/${postId}`, { method: "DELETE" });
       toast.success("Post deleted");
     } catch (err) {
       toast.error("Delete failed");
@@ -340,14 +382,52 @@ useEffect(() => {
                 {post.mediaType === "video"? <VideoPost post={post} currentlyPlayingId={currentlyPlayingId} setCurrentlyPlayingId={setCurrentlyPlayingId} /> : <ImagePostWithMusic post={post} currentlyPlayingId={currentlyPlayingId} setCurrentlyPlayingId={setCurrentlyPlayingId} />}
               </div>
               <div className="px-3 pt-3 pb-1 flex gap-4 items-center">
-                <button onClick={() => handleLikeToggle(post._id)}>{isLiked? <span className="text-red-500">❤</span> : <span>🤍</span>}</button>
-                <button onClick={() => document.getElementById(`comment-${post._id}`)?.focus()}>💬</button>
-              </div>
+              <button onClick={() => handleLikeToggle(post._id)}>{isLiked? "❤" : "🤍"}</button>
+              <button onClick={() => document.getElementById(`comment-${post._id}`)?.focus()}>💬</button>
+            </div>
               <div className="px-3 text-sm font-semibold">{post.likes?.length > 0 && <p>{post.likes.length} likes</p>}</div>
               <div className="px-3 py-1 text-sm"><p><b>{post.postedBy?.username}</b> {post.caption}</p></div>
+              {/* COMMENTS PREVIEW */}
+{post.comments?.length > 0 && (
+  <div className="px-3 py-2 flex flex-col gap-1">
+    {post.comments.slice(-2).map(c => (
+      <p key={c._id} className="text-sm flex justify-between">
+        <span><b className="mr-2">{c.commentedBy?.username}</b>{c.text}</span>
+      </p>
+    ))}
+    {post.comments.length > 2 && (
+      <button
+        onClick={() => setShowCommentsModal(post._id)}
+        className="text-xs text-gray-500 text-left hover:text-gray-700"
+      >
+        View all {post.comments.length} comments
+      </button>
+    )}
+  </div>
+)}
               <div className={`px-3 py-3 border-t mt-2 flex items-center gap-2 ${theme === "dark"? "border-zinc-800" : "border-gray-200"}`}>
-                <input id={`comment-${post._id}`} value={commentTexts[post._id] || ""} onChange={(e) => setCommentTexts(prev => ({...prev, [post._id]: e.target.value }))} onKeyDown={(e) => { if (e.key === "Enter") handleAddComment(post._id) }} placeholder="Add a comment..." className="flex-1 bg-transparent text-sm outline-none" />
-                <button onClick={() => handleAddComment(post._id)} className="text-blue-500 text-sm font-semibold">Post</button>
+               <input
+    id={`comment-${post._id}`}
+    value={commentTexts[post._id] || ""}
+    onChange={(e) => setCommentTexts(prev => ({...prev, [post._id]: e.target.value }))}
+    onKeyDown={(e) => {
+      if (e.key === "Enter" &&!e.shiftKey) {
+        e.preventDefault(); // <-- you were missing this
+        handleAddComment(post._id);
+      }
+    }}
+    placeholder="Add a comment..."
+    className="flex-1 bg-transparent text-sm outline-none"
+  />
+  <button
+    type="button" // <-- you were missing this, default is submit = reload
+    onClick={() => handleAddComment(post._id)}
+    disabled={!commentTexts[post._id]?.trim()}
+    className="text-blue-500 text-sm font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+  >
+    Post
+  </button>
+                
               </div>
             </div>
           );
@@ -507,6 +587,71 @@ if (s.mediaUrl) return <img src={s.mediaUrl} className="h-screen w-screen object
         ))}
       </div>
     )}
+  </div>
+)}
+{/* ALL COMMENTS POPUP */}
+{showCommentsModal && postForModal && (
+  <div className="fixed inset-0 bg-black/70 z-[150] flex items-center justify-center p-4" onClick={() => setShowCommentsModal(null)}>
+    <div
+      className={`w-full max-w-md max-h- rounded-xl flex flex-col ${theme === "dark"? "bg-zinc-900 text-white" : "bg-white text-black"}`}
+      onClick={e => e.stopPropagation()}
+    >
+      {/* Header */}
+      <div className="flex justify-between items-center p-4 border-b border-zinc-800">
+        <h3 className="font-bold">Comments ({postForModal.comments?.length || 0})</h3>
+        <button onClick={() => setShowCommentsModal(null)} className="text-xl">✕</button>
+      </div>
+
+      {/* Comments List */}
+      <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-4">
+        {postForModal.comments?.length === 0 && <p className="text-center text-sm text-gray-500">No comments yet</p>}
+        {postForModal.comments?.map(c => {
+          const isMyComment = c.commentedBy?._id?.toString() === myId?.toString() || c.commentedBy?.toString() === myId?.toString();
+          return (
+            <div key={c._id} className="flex gap-3 items-start">
+              <img src={c.commentedBy?.profilePic || "/placeholder.svg"} className="w-8 h-8 rounded-full object-cover" />
+              <div className="flex-1">
+                <p className="text-sm"><b>{c.commentedBy?.username}</b> <span className="ml-2">{c.text}</span></p>
+                <p className="text- text-gray-500 mt-1">{c.createdAt? new Date(c.createdAt).toLocaleTimeString() : "now"}</p>
+              </div>
+              {isMyComment && (
+                <button
+                  onClick={() => handleDeleteComment(postForModal._id, c._id)}
+                  disabled={deletingCommentId === c._id}
+                  className="text-xs text-red-500 hover:text-red-700 font-semibold"
+                >
+                  {deletingCommentId === c._id? "..." : "Delete"}
+                </button>
+              )}
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Add comment inside modal too */}
+      <div className={`p-3 border-t flex gap-2 items-center ${theme === "dark"? "border-zinc-800" : "border-gray-200"}`}>
+        <input
+          value={commentTexts[postForModal._id] || ""}
+          onChange={(e) => setCommentTexts(prev => ({...prev, [postForModal._id]: e.target.value}))}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" &&!e.shiftKey) {
+              e.preventDefault();
+              handleAddComment(postForModal._id);
+            }
+          }}
+          placeholder="Add a comment..."
+          className="flex-1 bg-transparent text-sm outline-none"
+        />
+        <button
+          type="button"
+          onClick={() => handleAddComment(postForModal._id)}
+          disabled={!commentTexts[postForModal._id]?.trim()}
+          className="text-blue-500 text-sm font-semibold disabled:opacity-30"
+        >
+          Post
+        </button>
+      </div>
+    </div>
   </div>
 )}
 
