@@ -23,22 +23,34 @@ const [searchForward, setSearchForward] = useState('');
 // In store
 const { selectedUser, setSelectedUser, followedUsers, setFollowedUsers, updateUnreadCount, updateLastMessage } = useChatStore();
 
+
   useEffect(() => {
     if (!socket) return;
+
     const handleReceiveMessage = (msg) => {
-       const loggedUser = useUserStore((s) => s.loggedUser);
+      // ✅ NO HOOK HERE - use getState()
       const { selectedUser: currentSelected, addMessage } = useChatStore.getState();
-      const loggedId = loggedUser?.userid;
+      const { loggedUser: currentLoggedUser } = useUserStore.getState(); // or use loggedUser from closure
+      
+      const loggedId = currentLoggedUser?.userid || currentLoggedUser?.user?._id;
       const senderId = msg.sender?._id || msg.sender;
       const receiverId = msg.receiver?._id || msg.receiver;
-      const otherUserId = senderId === loggedId? receiverId : senderId;
-      const isCurrentChat = currentSelected && ((senderId === loggedId && receiverId === currentSelected._id) || (receiverId === loggedId && senderId === currentSelected._id));
+      const otherUserId = senderId === loggedId ? receiverId : senderId;
+
+      const isCurrentChat = currentSelected && (
+        (senderId === loggedId && receiverId === currentSelected._id) || 
+        (receiverId === loggedId && senderId === currentSelected._id)
+      );
+      
       if (isCurrentChat) addMessage(msg);
       updateLastMessage(otherUserId, msg);
     };
+
     socket.on("receiveMessage", handleReceiveMessage);
     return () => socket.off("receiveMessage", handleReceiveMessage);
-  }, [socket, loggedUser?.userid, updateLastMessage]);
+  }, [socket, updateLastMessage]); // remove loggedUser?.userid from deps
+
+
  const navigate = useNavigate();
 
   const isGuest = loggedUser?.user?.isGuest;
