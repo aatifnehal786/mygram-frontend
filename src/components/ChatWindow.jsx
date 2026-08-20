@@ -2,17 +2,10 @@ import React, { useEffect, useRef, useState, useMemo } from "react";
 import { format, isToday, isYesterday } from "date-fns";
 import { apiFetch } from "../api/apiFetch";
 import { getSocket } from "../contexts/SocketContext";
-import {
-  FaVideo,
-  FaArrowLeft,
-  FaRegSmile,
-  FaPaperclip,
-  FaPaperPlane,
-  FaTimes,
-  FaCheck,
-  FaCheckDouble,
-  FaSmile,
-} from "react-icons/fa";
+import {  } from "react-icons/fa"
+
+import { FaVideo, FaArrowLeft, FaRegSmile, FaPaperclip, FaPaperPlane, FaTimes, FaCheck, FaCheckDouble,FaSmile,
+FaFilePdf, FaFileWord, FaFileAlt, FaFileDownload} from "react-icons/fa";
 import { HiDotsVertical } from "react-icons/hi";
 import { FaTrashAlt, FaRegCopy } from "react-icons/fa";
 import EmojiPicker from "emoji-picker-react";
@@ -361,6 +354,23 @@ export default function ChatWindow({ onBack, theme, triggerForwardMode }) {
     initiateCall(selectedUser._id, selectedUser.username, avatarUrl, "video");
   };
 
+  
+const getFileName = (url) => {
+  if (!url) return "Document"
+  try {
+    const parts = url.split('/')
+    const last = parts[parts.length - 1]
+    return decodeURIComponent(last.split('?')[0])
+  } catch { return "Document" }
+}
+
+const getFileIcon = (fileType, url) => {
+  const type = (fileType || url || "").toLowerCase()
+  if (type.includes('pdf')) return <FaFilePdf className="text-red-500 text-2xl" />
+  if (type.includes('word') || type.includes('doc')) return <FaFileWord className="text-blue-500 text-2xl" />
+  return <FaFileAlt className="text-gray-500 text-2xl" />
+}
+
   const quickReactions = ["👍", "❤", "😂", "😮", "😢", "🙏"];
 
   return (
@@ -407,10 +417,45 @@ export default function ChatWindow({ onBack, theme, triggerForwardMode }) {
                     ) : (
                       <>
                         {msg.message && <p className="whitespace-pre-wrap break-words">{renderLinks(msg.message)}</p>}
-                        {msg.fileUrl && msg.fileType?.includes("image") && <img src={msg.fileUrl} className="mt-2 rounded-lg max-w-" alt="" />}
-                        {msg.fileUrl && msg.fileType?.includes("video") && <video src={msg.fileUrl} controls className="mt-2 rounded-lg max-w-" />}
-                        {msg.fileUrl && msg.fileType?.includes("audio") && <audio src={msg.fileUrl} controls className="mt-2 w-full" />}
-                        {msg.fileUrl &&!msg.fileType?.match(/image|video|audio/) && <a href={msg.fileUrl} target="_blank" rel="noreferrer" className="underline text-xs">{msg.fileUrl}</a>}
+                        {/* IMAGE */}
+{msg.fileUrl && msg.fileType?.includes("image") && (
+  <img src={msg.fileUrl} className="mt-2 rounded-lg max-w- cursor-pointer" onClick={() => window.open(msg.fileUrl, '_blank')} alt="" />
+)}
+
+{/* VIDEO */}
+{msg.fileUrl && msg.fileType?.includes("video") && (
+  <video src={msg.fileUrl} controls className="mt-2 rounded-lg max-w-" />
+)}
+
+{/* AUDIO */}
+{msg.fileUrl && msg.fileType?.includes("audio") && (
+  <audio src={msg.fileUrl} controls className="mt-2 w-full" />
+)}
+
+{/* DOCUMENTS - PDF, DOCX, TXT, etc */}
+{msg.fileUrl &&!msg.fileType?.match(/image|video|audio/) && (
+  <div className={`mt-2 flex items-center gap-3 p-3 rounded-lg border ${isOwn? "bg-blue-600/20 border-blue-400/30" : theme === "dark"? "bg-zinc-800 border-zinc-700" : "bg-gray-50 border-gray-200"} min-w-`}>
+    <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${theme === 'dark'? 'bg-zinc-700' : 'bg-white'}`}>
+      {getFileIcon(msg.fileType, msg.fileUrl)}
+    </div>
+    <div className="flex-1 min-w-0">
+      <p className="text-xs font-medium truncate max-w-">{getFileName(msg.fileUrl)}</p>
+      <p className="text- opacity-60 uppercase">{msg.fileType?.split('/')[1] || 'Document'}</p>
+    </div>
+    <a href={msg.fileUrl} target="_blank" rel="noreferrer" download className="p-2 rounded-full hover:bg-black/10">
+      <FaFileDownload />
+    </a>
+  </div>
+)}
+{msg.fileType?.includes('pdf') && (
+  <div className="mt-2">
+    <iframe src={msg.fileUrl} className="w- h- rounded-lg bg-white" title="pdf preview" />
+    <div className="flex gap-2 mt-1">
+      <a href={msg.fileUrl} target="_blank" rel="noreferrer" className="text-xs underline">Open</a>
+      <a href={msg.fileUrl} download className="text-xs underline">Download</a>
+    </div>
+  </div>
+)}
                       </>
                     )}
 
