@@ -1,6 +1,6 @@
 import { Outlet, Link, useLocation } from "react-router-dom";
 import { FaHome, FaPlusSquare, FaRegHeart, FaRegPaperPlane } from "react-icons/fa";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import Header from "./Header";
 import { useTheme } from "../contexts/ThemeContext";
 import { getSocket } from "../contexts/SocketContext";
@@ -9,6 +9,7 @@ import usePresenceStore from "../store/usePresenceStore";
 import VideoCallManager from "./VideoCallManager";
 
 export default function Layout() {
+  const [rateLimitError, setRateLimitError] = useState('');
   const { theme, toggleTheme } = useTheme();
   const socket = getSocket();
   const loggedUser = useUserStore((s) => s.loggedUser);
@@ -38,8 +39,23 @@ export default function Layout() {
     };
   }, [socket, loggedUser]);
 
+  useEffect(() => {
+    const handleRateLimit = (e) => {
+      setRateLimitError(e.detail);
+      setTimeout(() => setRateLimitError(''), 4000); // hide after 4 sec
+    };
+    window.addEventListener('rate-limit-error', handleRateLimit);
+    return () => window.removeEventListener('rate-limit-error', handleRateLimit);
+  }, []);
+
   return (
     <div className={`min-h-screen ${theme === "dark"? "bg-black text-white" : "bg-white text-black"}`}>
+      {/* GLOBAL RATE LIMIT TOAST */}
+      {rateLimitError && (
+        <div className="fixed top-5 left-1/2 -translate-x-1/2 z-[100] bg-red-600 text-white px-6 py-3 rounded-full shadow-lg animate-bounce flex items-center gap-2">
+          <span>🚨</span> {rateLimitError}
+        </div>
+      )}
 
       {/* SIDEBAR DESKTOP - FIXED WIDTH 245px */}
       <aside className={`hidden md:flex fixed top-0 left-0 h-screen w-64 border-r flex-col p-3 z-30 ${theme === "dark"? "bg-black border-zinc-800" : "bg-white border-gray-200"}`}>

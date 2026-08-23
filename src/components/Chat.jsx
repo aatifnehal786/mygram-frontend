@@ -11,14 +11,17 @@ import useUserStore from '../store/useUserStore';
 import { useNavigate } from 'react-router-dom';
 
 const Chat = () => {
-  const socket = getSocket();
-  const loggedUser = useUserStore((s) => s.loggedUser);
-  const { theme } = useTheme();
-  // Replace these 4 lines at top
+const socket = getSocket();
+const loggedUser = useUserStore((s) => s.loggedUser);
+const { theme } = useTheme();
+
 const [showForwardModal, setShowForwardModal] = useState(false);
 const [forwardMessageData, setForwardMessageData] = useState(null);
 const [selectedForwardUsers, setSelectedForwardUsers] = useState([]);
 const [searchForward, setSearchForward] = useState('');
+const navigate = useNavigate();
+
+const isGuest = loggedUser?.user?.isGuest;
 
 // In store
 const { selectedUser, setSelectedUser, followedUsers, setFollowedUsers, updateUnreadCount, updateLastMessage } = useChatStore();
@@ -51,9 +54,20 @@ const { selectedUser, setSelectedUser, followedUsers, setFollowedUsers, updateUn
   }, [socket, updateLastMessage]); // remove loggedUser?.userid from deps
 
 
- const navigate = useNavigate();
+  useEffect(() => {
+  if (!socket) return;
 
-  const isGuest = loggedUser?.user?.isGuest;
+  const handleRateLimit = (data) => {
+    // show same toast you made earlier
+    window.dispatchEvent(new CustomEvent('rate-limit-error', { detail: data.message }));
+  };
+
+  socket.on("rate-limit-error", handleRateLimit);
+
+  return () => socket.off("rate-limit-error", handleRateLimit);
+}, [socket]);
+
+
 
   // BLOCK GUEST - redirect to login
   useEffect(() => {

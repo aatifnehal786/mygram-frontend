@@ -483,7 +483,7 @@ const getFileIcon = (fileType, url) => {
                     </div>
 
                     {showReactionsFor === msg._id && (
-                      <div ref={reactionRef} className="absolute -top-10 left-0 bg-zinc-800 rounded-full px-2 py-1 flex gap-1 z-20">
+                      <div ref={reactionRef} className={`absolute ${isOwn? "-top-4 right-0" : "-top-4 left-0"} top-1/2 -translate-y-1/2 bg-zinc-800 rounded-full px-2 py-1 flex gap-1 z-20`}>
                         {quickReactions.map((e, i) => (
                           <button key={i} onClick={() => handleReaction(msg._id, e)} className="hover:scale-125">
                             {e}
