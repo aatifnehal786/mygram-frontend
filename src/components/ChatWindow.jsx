@@ -26,7 +26,9 @@ const useOutsideClick = (ref, cb) => {
 export default function ChatWindow({ onBack, theme, triggerForwardMode }) {
   const loggedUser = useUserStore((s) => s.loggedUser);
   const socket = getSocket();
-  const currentUserId = loggedUser?.userid || loggedUser?._id;
+  const currentUserId = loggedUser?._id || loggedUser?.user?._id || loggedUser?.userid;
+  const currentUserIdStr = currentUserId?.toString(); // always compare as string
+
 
   const [input, setInput] = useState("");
   const [isTyping, setIsTyping] = useState(false);
@@ -60,6 +62,8 @@ export default function ChatWindow({ onBack, theme, triggerForwardMode }) {
   const { selectedUser, messages, setMessages, addReaction } = useChatStore();
   const { onlineUsers } = usePresenceStore();
   const isUserOnline = onlineUsers.includes(selectedUser?._id);
+  const [isSelectMode, setIsSelectMode] = useState(false);
+const [selectedIds, setSelectedIds] = useState([]); // array of _id
 
   useOutsideClick(emojiRef, () => setShowEmoji(false));
   useOutsideClick(reactionRef, () => setShowReactionsFor(null));
@@ -285,35 +289,89 @@ export default function ChatWindow({ onBack, theme, triggerForwardMode }) {
     );
   };
 
-  const deleteForMe = async () => {
-    try {
-      await apiFetch(`api/chats/delete-for-me/${messageToDelete}`, { method: "DELETE" });
-      setMessages((prev) => prev.filter((m) => m._id!== messageToDelete));
-      setToastMessage("Deleted for you");
-    } catch {
-      setToastMessage("Failed");
-    } finally {
-      setShowConfirmModal(false);
-      setMessageToDelete(null);
-      setDeleteMode(null);
-    }
-  };
 
-  const deleteForEveryone = async () => {
-    try {
-      await apiFetch(`api/chats/delete-for-everyone/${messageToDelete}`, { method: "DELETE" });
-      setMessages((prev) =>
-        prev.map((m) => (m._id === messageToDelete? {...m, isDeleted: true } : m))
-      );
-      setToastMessage("Deleted for everyone");
-    } catch {
-      setToastMessage("Only your messages");
-    } finally {
-      setShowConfirmModal(false);
-      setMessageToDelete(null);
-      setDeleteMode(null);
-    }
+const deleteForMe = async () => {
+  if (!messageToDelete) return;
+  try {
+    await apiFetch(`api/chats/chat/deleteForMe/${messageToDelete}`, { method: "DELETE" });
+    // use zustand - just filter out
+    const { messages } = useChatStore.getState();
+    setMessages(messages.filter(m => m._id !== messageToDelete));
+    setToastMessage("Deleted for you");
+  } catch (err) {
+    console.error("deleteForMe failed", err);
+    setToastMessage("Failed");
+  } finally {
+    setShowConfirmModal(false);
+    setMessageToDelete(null);
+    setDeleteMode(null);
+  }
+};
+
+const deleteForEveryone = async () => {
+  if (!messageToDelete) return;
+  
+  const { messages } = useChatStore.getState();
+  const msg = messages.find(m => m._id === messageToDelete);
+  if (!msg) return;
+
+  // ROBUST sender check
+  const senderId = msg.sender?._id?.toString() || msg.sender?.toString() || msg.senderId?.toString();
+  const myId = currentUserId?.toString();
+
+  console.log("DELETE CHECK", { senderId, myId, msg }); // DEBUG THIS
+
+  if (senderId !== myId) {
+    setToastMessage("You can only delete your own messages");
+    setShowConfirmModal(false);
+    setMessageToDelete(null);
+    setDeleteMode(null);
+    return;
+  }
+
+  try {
+    await apiFetch(`api/chats/chat/deleteForEveryone/${messageToDelete}`, { method: "DELETE" });
+    setMessages((prev) => prev.map((m) => (m._id === messageToDelete ? { ...m, isDeleted: true, message: "", fileUrl: null, fileType: null } : m)));
+    setToastMessage("Deleted for everyone");
+  } catch (err) {
+    console.error("deleteForEveryone 403", err.message);
+    setToastMessage(err.message.includes("403") ? "Only your messages" : "Failed to delete");
+  } finally {
+    setShowConfirmModal(false);
+    setMessageToDelete(null);
+    setDeleteMode(null);
+  }
+};
+
+const toggleSelect = (id) => {
+  setSelectedIds(prev => prev.includes(id)? prev.filter(i => i!== id) : [...prev, id]);
+};
+
+const bulkDeleteForMe = async () => {
+  if (!selectedIds.length) return;
+  try {
+    await apiFetch(`api/chats/chat/deleteForMe/bulk`, {
+      method: "DELETE",
+      body: JSON.stringify({ messageIds: selectedIds })
+    });
+    setMessages(prev => prev.filter(m =>!selectedIds.includes(m._id)));
+    setSelectedIds([]);
+    setIsSelectMode(false);
+    setToastMessage(`${selectedIds.length} deleted for you`);
+  } catch {
+    setToastMessage("Failed bulk delete");
+  }
+};
+
+// socket for bulk
+useEffect(() => {
+  if (!socket) return;
+  const onBulk = ({ messageIds }) => {
+    setMessages(prev => prev.filter(m =>!messageIds.includes(m._id)));
   };
+  socket.on("messagesDeletedForMe", onBulk);
+  return () => socket.off("messagesDeletedForMe", onBulk);
+}, [socket]);
 
   const handleReaction = (messageId, emoji) => {
     socket.emit("addReaction", {
@@ -354,22 +412,83 @@ export default function ChatWindow({ onBack, theme, triggerForwardMode }) {
     initiateCall(selectedUser._id, selectedUser.username, avatarUrl, "video");
   };
 
-  
+ const [previewUrls, setPreviewUrls] = useState({}); // msgId -> blobUrl
+
+const mimeToExt = {
+  "application/pdf": ".pdf",
+  "application/msword": ".doc",
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document": ".docx",
+  "application/vnd.ms-excel": ".xls",
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": ".xlsx",
+  "text/plain": ".txt",
+};
+
 const getFileName = (url) => {
-  if (!url) return "Document"
-  try {
-    const parts = url.split('/')
-    const last = parts[parts.length - 1]
-    return decodeURIComponent(last.split('?')[0])
-  } catch { return "Document" }
-}
+  try { return decodeURIComponent(new URL(url).pathname.split('/').pop() || 'file').split('?')[0]; }
+  catch { return url.split('/').pop()?.split('?')[0] || 'file'; }
+};
+
+const ensureExtension = (name, mime) => {
+  if (/\.[a-z0-9]{2,5}$/i.test(name)) return name;
+  if (mime && mimeToExt[mime]) return name + mimeToExt[mime];
+  if (mime?.includes('/')) {
+    let ext = mime.split('/')[1].split(';')[0];
+    if (ext.includes('wordprocessingml')) ext = 'docx';
+    if (ext.includes('spreadsheetml')) ext = 'xlsx';
+    if (ext.includes('presentationml')) ext = 'pptx';
+    return `${name}.${ext}`;
+  }
+  return name;
+};
 
 const getFileIcon = (fileType, url) => {
-  const type = (fileType || url || "").toLowerCase()
-  if (type.includes('pdf')) return <FaFilePdf className="text-red-500 text-2xl" />
-  if (type.includes('word') || type.includes('doc')) return <FaFileWord className="text-blue-500 text-2xl" />
-  return <FaFileAlt className="text-gray-500 text-2xl" />
-}
+  const type = (fileType || url || "").toLowerCase();
+  if (type.includes('pdf')) return <FaFilePdf className="text-red-500 text-2xl" />;
+  if (type.includes('word') || type.includes('doc')) return <FaFileWord className="text-blue-500 text-2xl" />;
+  return <FaFileAlt className="text-gray-500 text-2xl" />;
+};
+
+const handleDownload = async (msg) => {
+  try {
+    const isCloudinary = msg.fileUrl.startsWith('https://');
+
+    // Cloudinary = public, use direct fetch (no auth)
+    // Your own API files = use apiFetch with token
+    const res = isCloudinary
+     ? await fetch(msg.fileUrl)
+      : await apiFetch(msg.fileUrl, { method: 'GET', isBlob: true });
+
+    if (!res.ok) throw new Error(`Failed ${res.status}`);
+
+    const blob = await res.blob();
+    let fileName = res.headers.get('Content-Disposition')?.match(/filename\*?=(?:UTF-8'')?"?([^";\n]+)"?/i)?.[1];
+    if (fileName) fileName = decodeURIComponent(fileName.trim());
+    else fileName = msg.fileName || getFileName(msg.fileUrl) || 'document';
+
+    fileName = ensureExtension(fileName, blob.type || msg.fileType);
+
+    const blobUrl = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = blobUrl;
+    a.download = fileName;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(blobUrl), 1000);
+  } catch (e) { console.error('download failed', e); }
+};
+const togglePdfPreview = async (msg) => {
+  if (previewUrls[msg._id]) {
+    URL.revokeObjectURL(previewUrls[msg._id]);
+    setPreviewUrls(prev => { const n = {...prev}; delete n[msg._id]; return n; });
+    return;
+  }
+  const res = await apiFetch(msg.fileUrl, { method: 'GET', isBlob: true });
+  const blob = await res.blob();
+  const blobUrl = URL.createObjectURL(blob);
+  setPreviewUrls(prev => ({...prev, [msg._id]: blobUrl}));
+};
+
 
   const quickReactions = ["👍", "❤", "😂", "😮", "😢", "🙏"];
 
@@ -377,161 +496,188 @@ const getFileIcon = (fileType, url) => {
     <div className={`flex flex-col h-full relative ${theme === "dark"? "bg-black text-white" : "bg-white text-black"}`}>
       {/* Header */}
       <div className={`flex items-center gap-3 p-3 border-b shrink-0 ${theme === "dark"? "border-zinc-800" : "border-gray-200"}`}>
-        <button onClick={onBack} className="md:hidden">
-          <FaArrowLeft />
-        </button>
-        <img src={selectedUser.profilePic || "/placeholder.svg"} className="w-8 h-8 rounded-full object-cover" alt="" />
-        <div className="flex-1">
-          <h3 className="text-sm font-semibold">{selectedUser.username}</h3>
-          <p className="text-xs text-gray-500">{isTyping? "Typing..." : isUserOnline? "Active now" : "Offline"}</p>
-        </div>
-        <button onClick={handleVideoCall}>
-          <FaVideo className={isUserOnline? "text-green-500" : "text-gray-400"} />
-        </button>
+  {isSelectMode? (
+    <>
+      <button onClick={() => { setIsSelectMode(false); setSelectedIds([]); }}>
+        <FaTimes />
+      </button>
+      <span className="text-sm font-semibold">{selectedIds.length} selected</span>
+      <div className="flex-1" />
+      <button onClick={bulkDeleteForMe} className="px-3 py-1 bg-red-600 text-white rounded-lg text-xs flex items-center gap-1">
+        <FaTrashAlt /> Delete for me
+      </button>
+    </>
+  ) : (
+    // your normal header
+    <>
+      <button onClick={onBack} className="md:hidden"><FaArrowLeft /></button>
+      <img src={selectedUser.profilePic || "/placeholder.svg"} className="w-8 h-8 rounded-full object-cover" alt="" />
+      <div className="flex-1">
+        <h3 className="text-sm font-semibold">{selectedUser.username}</h3>
+        <p className="text-xs text-gray-500">{isTyping? "Typing..." : isUserOnline? "Active now" : "Offline"}</p>
       </div>
+      <button onClick={() => setIsSelectMode(true)} className="text-xs border px-2 py-1 rounded">Select</button>
+      <button onClick={handleVideoCall}><FaVideo /></button>
+    </>
+  )}
+</div>
 
       {/* Messages */}
       <div ref={chatContainerRef} className="flex-1 overflow-y-auto px-4 py-2">
         {loadingMore && <div className="text-center text- text-gray-400 py-2">Loading more...</div>}
         {!hasMore && messages.length > 0 && <div className="text-center text- text-gray-400 py-2">No more messages</div>}
 
-        {Object.entries(groupedMessages).map(([date, msgs]) => (
-          <React.Fragment key={date}>
-            {renderDateSeparator(new Date(date))}
-            {msgs.map((msg) => {
-              const senderId = msg.sender?._id || msg.sender;
-              const isOwn = senderId?.toString() === currentUserId?.toString();
-              if (msg.deletedFor?.some((id) => id.toString() === currentUserId?.toString())) return null;
-              return (
-                <div key={msg._id} className={`flex group relative mb-1 ${isOwn? "justify-end" : "justify-start"}`}>
-                  <div className={`relative max-w-[65%] px-3 py-2 rounded-2xl text-sm ${isOwn? "bg-blue-500 text-white rounded-br-sm" : theme === "dark"? "bg-zinc-800 rounded-bl-sm" : "bg-gray-100 rounded-bl-sm"}`}>
-                    <button
-                      onClick={() => setOpenDropdownId(openDropdownId === msg._id? null : msg._id)}
-                      className="absolute -top-1 -left-6 opacity-0 group-hover:opacity-100"
-                    >
-                      <HiDotsVertical />
-                    </button>
+       {Object.entries(groupedMessages).map(([date, msgs]) => (
+  <React.Fragment key={date}>
+    {renderDateSeparator(new Date(date))}
+    {msgs.map((msg) => {
+      const senderId = msg.sender?._id?.toString() || msg.sender?.toString();
+      const isOwn = senderId === currentUserIdStr;
+      const isSelected = selectedIds.includes(msg._id);
 
-                    {msg.isDeleted? (
-                      <span className="italic text-xs opacity-70">🚫 This message was deleted</span>
-                    ) : (
-                      <>
-                        {msg.message && <p className="whitespace-pre-wrap break-words">{renderLinks(msg.message)}</p>}
-                        {/* IMAGE */}
-{msg.fileUrl && msg.fileType?.includes("image") && (
-  <img src={msg.fileUrl} className="mt-2 rounded-lg max-w- cursor-pointer" onClick={() => window.open(msg.fileUrl, '_blank')} alt="" />
-)}
+      // SINGLE CHECK - use Str version only
+      if (msg.deletedFor?.some((id) => id.toString() === currentUserIdStr)) return null;
 
-{/* VIDEO */}
-{msg.fileUrl && msg.fileType?.includes("video") && (
-  <video src={msg.fileUrl} controls className="mt-2 rounded-lg max-w-" />
-)}
+      return (
+        <div
+          key={msg._id}
+          className={`flex group relative mb-1 ${isOwn? "justify-end" : "justify-start"} ${isSelectMode? "items-center gap-2" : ""}`}
+        >
+          {/* CHECKBOX WHEN SELECT MODE */}
+          {isSelectMode && (
+            <input
+              type="checkbox"
+              checked={isSelected}
+              onChange={() => toggleSelect(msg._id)}
+              className="w-4 h-4 accent-blue-600 cursor-pointer shrink-0"
+            />
+          )}
 
-{/* AUDIO */}
-{msg.fileUrl && msg.fileType?.includes("audio") && (
-  <audio src={msg.fileUrl} controls className="mt-2 w-full" />
-)}
+          <div
+            onClick={() => isSelectMode && toggleSelect(msg._id)}
+            className={`relative max-w-[65%] px-3 py-2 rounded-2xl text-sm cursor-pointer
+              ${isOwn? "bg-blue-500 text-white rounded-br-sm" : theme === "dark"? "bg-zinc-800 rounded-bl-sm" : "bg-gray-100 rounded-bl-sm"}
+              ${isSelected? "ring-2 ring-blue-500" : ""}
+            `}
+          >
+            {!isSelectMode && (
+              <button
+                onClick={(e) => { e.stopPropagation(); setOpenDropdownId(openDropdownId === msg._id? null : msg._id); }}
+                className="absolute -top-1 -left-6 opacity-0 group-hover:opacity-100"
+              >
+                <HiDotsVertical />
+              </button>
+            )}
 
-{/* DOCUMENTS - PDF, DOCX, TXT, etc */}
-{msg.fileUrl &&!msg.fileType?.match(/image|video|audio/) && (
-  <div className={`mt-2 flex items-center gap-3 p-3 rounded-lg border ${isOwn? "bg-blue-600/20 border-blue-400/30" : theme === "dark"? "bg-zinc-800 border-zinc-700" : "bg-gray-50 border-gray-200"} min-w-`}>
-    <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${theme === 'dark'? 'bg-zinc-700' : 'bg-white'}`}>
-      {getFileIcon(msg.fileType, msg.fileUrl)}
-    </div>
-    <div className="flex-1 min-w-0">
-      <p className="text-xs font-medium truncate max-w-">{getFileName(msg.fileUrl)}</p>
-      <p className="text- opacity-60 uppercase">{msg.fileType?.split('/')[1] || 'Document'}</p>
-    </div>
-    <a href={msg.fileUrl} target="_blank" rel="noreferrer" download className="p-2 rounded-full hover:bg-black/10">
-      <FaFileDownload />
-    </a>
-  </div>
-)}
-{msg.fileType?.includes('pdf') && (
-  <div className="mt-2">
-    <iframe src={msg.fileUrl} className="w- h- rounded-lg bg-white" title="pdf preview" />
-    <div className="flex gap-2 mt-1">
-      <a href={msg.fileUrl} target="_blank" rel="noreferrer" className="text-xs underline">Open</a>
-      <a href={msg.fileUrl} download className="text-xs underline">Download</a>
-    </div>
-  </div>
-)}
-                      </>
-                    )}
+            {msg.isDeleted? (
+              <span className="italic text-xs opacity-70">🚫 This message was deleted</span>
+            ) : (
+              <>
+                {msg.message && <p className="whitespace-pre-wrap break-words">{renderLinks(msg.message)}</p>}
 
-                    {msg.reactions?.length > 0 && (
-                      <div className={`absolute -bottom-3 ${isOwn? "right-2" : "left-2"} ${theme === "dark"? "bg-zinc-700" : "bg-gray-200"} rounded-full px-2 py-0.5 text-xs`}>
-                        {msg.reactions.map((r, i) => (
-                          <span key={i}>{r.emoji}</span>
-                        ))}
+                {msg.fileUrl && msg.fileType?.includes("image") && (
+                  <img src={msg.fileUrl} className="mt-2 rounded-lg max-w-full cursor-pointer" onClick={() =>!isSelectMode && window.open(msg.fileUrl, '_blank')} alt="" />
+                )}
+
+                {msg.fileUrl && msg.fileType?.includes("video") && (
+                  <video src={msg.fileUrl} controls className="mt-2 rounded-lg max-w-full" />
+                )}
+
+                {msg.fileUrl && msg.fileType?.includes("audio") && (
+                  <audio src={msg.fileUrl} controls className="mt-2 w-full" />
+                )}
+
+                {msg.fileUrl &&!msg.fileType?.match(/image|video|audio/) && (
+                  <div className={`mt-2 flex flex-col gap-2 p-3 rounded-lg border ${isOwn? "bg-blue-600/20 border-blue-400/30" : theme === "dark"? "bg-zinc-800 border-zinc-700" : "bg-gray-50 border-gray-200"} min-w-`}>
+                    <div className="flex items-center gap-3">
+                      <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${theme === 'dark'? 'bg-zinc-700' : 'bg-white'}`}>
+                        {getFileIcon(msg.fileType, msg.fileUrl)}
                       </div>
-                    )}
-
-                    <div className="flex items-center justify-end gap-1 text- opacity-70 mt-1">
-                      <span>{msg.createdAt? format(new Date(msg.createdAt), "HH:mm") : ""}</span>
-                      {isOwn && (
-                        <>
-                          {msg.isSeen? <FaCheckDouble size={10} className="text-blue-200" /> : msg.isDelivered? <FaCheckDouble size={10} /> : <FaCheck size={10} />}
-                        </>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs font-medium truncate max-w-">{getFileName(msg.fileUrl)}</p>
+                        <p className="text- opacity-60 uppercase">{msg.fileType?.split('/')[1] || 'Document'}</p>
+                      </div>
+                      {!isSelectMode && (
+                        <button onClick={(e) => { e.stopPropagation(); handleDownload(msg); }} className="p-2 rounded-full hover:bg-black/10">
+                          <FaFileDownload />
+                        </button>
                       )}
                     </div>
 
-                    <div className={`absolute ${isOwn? "-left-10" : "-right-10"} top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 flex`}>
-                      <button onClick={() => setShowReactionsFor(showReactionsFor === msg._id? null : msg._id)} className="p-1.5 bg-white dark:bg-zinc-700 rounded-full shadow">
-                        <FaSmile className="text-xs" />
-                      </button>
-                    </div>
-
-                    {showReactionsFor === msg._id && (
-                      <div ref={reactionRef} className={`absolute ${isOwn? "-top-4 right-0" : "-top-4 left-0"} top-1/2 -translate-y-1/2 bg-zinc-800 rounded-full px-2 py-1 flex gap-1 z-20`}>
-                        {quickReactions.map((e, i) => (
-                          <button key={i} onClick={() => handleReaction(msg._id, e)} className="hover:scale-125">
-                            {e}
+                    {msg.fileType?.includes('pdf') &&!isSelectMode && (
+                      <>
+                        <div className="flex gap-3 text-xs">
+                          <button onClick={(e) => { e.stopPropagation(); togglePdfPreview(msg); }} className="underline">
+                            {previewUrls[msg._id]? 'Hide' : 'Preview'}
                           </button>
-                        ))}
-                        <button onClick={() => { setShowEmojiForMsg(msg._id); setShowReactionsFor(null); }} className="text-white text-xs">+</button>
-                      </div>
-                    )}
-
-                    {openDropdownId === msg._id && (
-                      <div ref={dropdownRef} className="absolute top-8 right-0 w-44 bg-white dark:bg-zinc-800 border dark:border-zinc-700 rounded-xl shadow-lg text-xs z-30 overflow-hidden">
-                        {/* COPY ONLY IF TEXT AND NO FILE */}
-                        {msg.message?.trim() &&!msg.fileUrl && (
-                          <button
-                            onClick={() => {
-                              navigator.clipboard.writeText(msg.message);
-                              setToastMessage("Copied");
-                              setOpenDropdownId(null);
-                            }}
-                            className="flex gap-2 w-full px-3 py-2 text-sm hover:bg-gray-100 dark:hover:bg-zinc-700"
-                          >
-                            <FaRegCopy /> Copy
-                          </button>
+                          <button onClick={(e) => { e.stopPropagation(); handleDownload(msg); }} className="underline">Download</button>
+                        </div>
+                        {previewUrls[msg._id] && (
+                          <iframe src={previewUrls[msg._id]} className="w-full h- rounded-lg bg-white border mt-1" title="pdf preview" />
                         )}
-                        <button onClick={() => { triggerForwardMode(msg); setOpenDropdownId(null); }} className="flex gap-2 w-full px-3 py-2 hover:bg-gray-100 dark:hover:bg-zinc-700">
-                          Forward
-                        </button>
-                        <button onClick={() => { setMessageToDelete(msg._id); setDeleteMode("me"); setShowConfirmModal(true); setOpenDropdownId(null); }} className="flex gap-2 w-full px-3 py-2 hover:bg-gray-100 dark:hover:bg-zinc-700">
-                          <FaTrashAlt /> Delete for me
-                        </button>
-                        {isOwn && (
-                          <button onClick={() => { setMessageToDelete(msg._id); setDeleteMode("everyone"); setShowConfirmModal(true); setOpenDropdownId(null); }} className="flex gap-2 w-full px-3 py-2 text-red-500 hover:bg-gray-100 dark:hover:bg-zinc-700">
-                            <FaTrashAlt /> Delete for everyone
-                          </button>
-                        )}
-                        {msg.fileUrl && (
-                          <a href={msg.fileUrl} download className="flex gap-2 w-full px-3 py-2 hover:bg-gray-100 dark:hover:bg-zinc-700">
-                            Download
-                          </a>
-                        )}
-                      </div>
+                      </>
                     )}
                   </div>
+                )}
+              </>
+            )}
+
+            {msg.reactions?.length > 0 && (
+              <div className={`absolute -bottom-3 ${isOwn? "right-2" : "left-2"} ${theme === "dark"? "bg-zinc-700" : "bg-gray-200"} rounded-full px-2 py-0.5 text-xs`}>
+                {msg.reactions.map((r, i) => <span key={i}>{r.emoji}</span>)}
+              </div>
+            )}
+
+            <div className="flex items-center justify-end gap-1 text- opacity-70 mt-1">
+              <span>{msg.createdAt? format(new Date(msg.createdAt), "HH:mm") : ""}</span>
+              {isOwn &&!isSelectMode && (
+                <>{msg.isSeen? <FaCheckDouble size={10} className="text-blue-200" /> : msg.isDelivered? <FaCheckDouble size={10} /> : <FaCheck size={10} />}</>
+              )}
+            </div>
+
+            {/* REACTIONS - hide in select mode */}
+            {!isSelectMode && (
+              <>
+                <div className={`absolute ${isOwn? "-left-10" : "-right-10"} top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 flex`}>
+                  <button onClick={(e) => { e.stopPropagation(); setShowReactionsFor(showReactionsFor === msg._id? null : msg._id); }} className="p-1.5 bg-white dark:bg-zinc-700 rounded-full shadow">
+                    <FaSmile className="text-xs" />
+                  </button>
                 </div>
-              );
-            })}
-          </React.Fragment>
-        ))}
+
+                {showReactionsFor === msg._id && (
+                  <div ref={reactionRef} className={`absolute ${isOwn? "-top-4 right-0" : "-top-4 left-0"} bg-zinc-800 rounded-full px-2 py-1 flex gap-1 z-20`}>
+                    {quickReactions.map((e, i) => (
+                      <button key={i} onClick={(e2) => { e2.stopPropagation(); handleReaction(msg._id, e); }} className="hover:scale-125">{e}</button>
+                    ))}
+                    <button onClick={(e) => { e.stopPropagation(); setShowEmojiForMsg(msg._id); setShowReactionsFor(null); }} className="text-white text-xs">+</button>
+                  </div>
+                )}
+
+                {openDropdownId === msg._id && (
+                  <div ref={dropdownRef} className="absolute top-8 right-0 w-44 bg-white dark:bg-zinc-800 border dark:border-zinc-700 rounded-xl shadow-lg text-xs z-30 overflow-hidden">
+                    {msg.message?.trim() &&!msg.fileUrl && (
+                      <button onClick={(e) => { e.stopPropagation(); navigator.clipboard.writeText(msg.message); setToastMessage("Copied"); setOpenDropdownId(null); }} className="flex gap-2 w-full px-3 py-2 text-sm hover:bg-gray-100 dark:hover:bg-zinc-700">
+                        <FaRegCopy /> Copy
+                      </button>
+                    )}
+                    <button onClick={(e) => { e.stopPropagation(); triggerForwardMode(msg); setOpenDropdownId(null); }} className="flex gap-2 w-full px-3 py-2 hover:bg-gray-100 dark:hover:bg-zinc-700">Forward</button>
+                    <button onClick={(e) => { e.stopPropagation(); setMessageToDelete(msg._id); setDeleteMode("me"); setShowConfirmModal(true); setOpenDropdownId(null); }} className="flex gap-2 w-full px-3 py-2 hover:bg-gray-100 dark:hover:bg-zinc-700"><FaTrashAlt /> Delete for me</button>
+                    {isOwn && (
+                      <button onClick={(e) => { e.stopPropagation(); setMessageToDelete(msg._id); setDeleteMode("everyone"); setShowConfirmModal(true); setOpenDropdownId(null); }} className="flex gap-2 w-full px-3 py-2 text-red-500 hover:bg-gray-100 dark:hover:bg-zinc-700"><FaTrashAlt /> Delete for everyone</button>
+                    )}
+                    {msg.fileUrl && (
+                      <button onClick={(e) => { e.stopPropagation(); handleDownload(msg); }} className="flex gap-2 w-full px-3 py-2 hover:bg-gray-100 dark:hover:bg-zinc-700">Download</button>
+                    )}
+                  </div>
+                )}
+              </>
+            )}
+          </div>
+        </div>
+      );
+    })}
+  </React.Fragment>
+))}
         <div ref={messagesEndRef} />
       </div>
 
