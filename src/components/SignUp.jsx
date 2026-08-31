@@ -176,128 +176,158 @@ const isFormValid =
 
     console.log(isFormValid)
 
-
   return (
-  <section className="container">
-    <form className="form">
+    <section className="min-h-screen bg-[#fafafa] flex flex-col items-center pt-3">
+      <div className="w-full max-w- flex flex-col gap-2.5 mt-3">
+        {/* Main Card */}
+        <form className="bg-white border border-[#dbdbdb] flex flex-col items-center px-10 pt-7 pb-6">
+          <h1 style={{ fontFamily: "'Grand Hotel', cursive" }} className="text- mb-1">
+            Instagram
+          </h1>
 
-      <h1>
-        Sign up to create an account
-      </h1>
+          <h2 className="text- font-semibold text-[#8e8e8e] text-center leading- mb-4">
+            Sign up to see photos and videos from your friends.
+          </h2>
 
-      {/* Username */}
-      <div className="input-group">
-        <input
-        type="text"
-        placeholder=""
-        required
-        name="username"
-        value={userDetails.username}
-        onChange={handleInput}
-        onKeyDown={handleEnterKey}
-      />
-       <label>Username</label>
-      </div>
+          <button
+            type="button"
+            className="w-full h-8 bg-[#0095f6] text-white rounded-lg text-sm font-semibold flex items-center justify-center gap-1 mb-4"
+          >
+            <span className="text-">f</span> Log in with Facebook
+          </button>
 
-      {/* Email */}
-      <div className="input-group">
-        <input
-        type="email"
-        placeholder=""
-        required
-        name="email"
-        value={userDetails.email}
-        onChange={handleInput}
-        onKeyDown={handleEnterKey}
-      />
-       <label>Email</label>
-      </div>
+          <div className="flex items-center w-full gap-4 mb-4">
+            <div className="h- bg-[#dbdbdb] flex-1" />
+            <span className="text- font-semibold text-[#8e8e8e]">OR</span>
+            <div className="h- bg-[#dbdbdb] flex-1" />
+          </div>
 
-      {/* Password */}
-      <div className="input-group">
-        <input
-          type={isPassword ? "text" : "password"}
-          placeholder=""
-          maxLength={16}
-          required
-          name="password"
-          value={userDetails.password}
-          onChange={handleInput}
-          onKeyDown={handleEnterKey}
-        />
-        <label>Password</label>
-        <img
-          onClick={showHide}
-          src={isPassword ? show : hide}
-          alt="toggle"
-          className="pass1"
-        />
+          <div className="w-full flex flex-col gap-1.5">
+            {/* Mobile */}
+            <input
+              type="text"
+              placeholder="Mobile number"
+              required
+              name="mobile"
+              value={userDetails.mobile}
+              onChange={handleInput}
+              onKeyDown={handleEnterKey}
+              className="w-full h- bg-[#fafafa] border border-[#dbdbdb] rounded- px-2 text- outline-none focus:border-[#a8a8a8]"
+            />
 
-        {/* Strength Bar */}
-        
-        
-      </div>
-      <div className="input-group">
-          <input
-        type={isConfirmPassword ? "text" : "password"}
-        name="confirmPassword"
-        placeholder=""
-        value={userDetails.confirmPassword}
-        onChange={handleInput}
-        />
-        <label>Confirm Password</label>
-        <img
-          onClick={showHide2}
-          src={isConfirmPassword ? show : hide}
-          alt="toggle"
-          className="pass1"
-        />
-         
+            {/* Email */}
+            <input
+              type="email"
+              placeholder="Email"
+              required
+              name="email"
+              value={userDetails.email}
+              onChange={handleInput}
+              onKeyDown={handleEnterKey}
+              className="w-full h- bg-[#fafafa] border border-[#dbdbdb] rounded- px-2 text- outline-none focus:border-[#a8a8a8]"
+            />
+
+            {/* Username */}
+            <input
+              type="text"
+              placeholder="Username"
+              required
+              name="username"
+              value={userDetails.username}
+              onChange={handleInput}
+              onKeyDown={handleEnterKey}
+              className="w-full h- bg-[#fafafa] border border-[#dbdbdb] rounded- px-2 text- outline-none focus:border-[#a8a8a8]"
+            />
+
+            {/* Password */}
+            <div className="relative">
+              <input
+                type={isPassword? "text" : "password"}
+                placeholder="Password"
+                maxLength={16}
+                required
+                name="password"
+                value={userDetails.password}
+                onChange={handleInput}
+                onKeyDown={handleEnterKey}
+                className="w-full h- bg-[#fafafa] border border-[#dbdbdb] rounded- px-2 pr-10 text- outline-none focus:border-[#a8a8a8]"
+              />
+              <img
+                onClick={showHide}
+                src={isPassword? show : hide}
+                alt="toggle"
+                className="absolute right-2 top-1/2 -translate-y-1/2 w-5 h-5 cursor-pointer opacity-60"
+              />
+            </div>
+
+            {/* Confirm Password */}
+            <div className="relative">
+              <input
+                type={isConfirmPassword? "text" : "password"}
+                name="confirmPassword"
+                placeholder="Confirm Password"
+                value={userDetails.confirmPassword}
+                onChange={handleInput}
+                className="w-full h- bg-[#fafafa] border border-[#dbdbdb] rounded- px-2 pr-10 text- outline-none focus:border-[#a8a8a8]"
+              />
+              <img
+                onClick={showHide2}
+                src={isConfirmPassword? show : hide}
+                alt="toggle"
+                className="absolute right-2 top-1/2 -translate-y-1/2 w-5 h-5 cursor-pointer opacity-60"
+              />
+            </div>
+
+            {passwordError && (
+              <p className="text-red-500 text- text-center">{passwordError}</p>
+            )}
+
+            <p className="text- text-[#8e8e8e] text-center leading- mt-2">
+              People who use our service may have uploaded your contact information to Instagram.{" "}
+              <span className="text-[#00376b]">Learn More</span>
+            </p>
+
+            <p className="text- text-[#8e8e8e] text-center leading- mt-2">
+              By signing up, you agree to our Terms, Privacy Policy and Cookies Policy.
+            </p>
+
+            <button
+              onClick={handleSubmit}
+              disabled={isLoading ||!isFormValid}
+              className="w-full h-8 bg-[#0095f6] hover:bg-[#1877f2] text-white rounded-lg text-sm font-semibold mt-3 disabled:opacity-60"
+            >
+              {isLoading? <Spinner /> : "Sign up"}
+            </button>
+          </div>
+        </form>
+
+        {/* Login Card */}
+        <div className="bg-white border border-[#dbdbdb] h- flex items-center justify-center text-">
+          <p>
+            Have an account?{" "}
+            <Link to="/login" className="text-[#0095f6] font-semibold">
+              Log in
+            </Link>
+          </p>
         </div>
 
-        {/* Error Message */}
-        {passwordError && (
-        <p className="text-red-500 text-sm mt-2">{passwordError}</p>
-        )}
-
-      {/* Mobile */}
-     <div className="input-group">
-       <input
-        type="text"
-        placeholder=""
-        minLength={12}
-        required
-        name="mobile"
-        value={userDetails.mobile}
-        onChange={handleInput}
-        onKeyDown={handleEnterKey}
-      />
-        <label>Mobile</label>
-     </div>
-
-      {/* Submit */}
-      <button
-        onClick={handleSubmit}
-        disabled={isLoading || !isFormValid}
-        className="w-full bg-indigo-600 text-white py-2 rounded-md font-medium hover:bg-indigo-700 transition disabled:opacity-60"
-      >
-        {isLoading ? <Spinner/> : "Join"}
-      </button>
-
-      {/* Login link */}
-      <div className="text-center text-sm">
-        <p>
-          Already registered?{" "}
-          <Link to="/login" className="text-indigo-600 hover:underline">
-            Log in
-          </Link>
-        </p>
+        <div className="flex flex-col items-center mt-2">
+          <p className="text- mb-3">Get the app.</p>
+          <div className="flex gap-2">
+            <img src="https://static.cdninstagram.com/rsrc.php/v3/yz/r/c5Rp7Ym-Klz.png" className="h-10" alt="" />
+            <img src="https://static.cdninstagram.com/rsrc.php/v3/yu/r/EHY6QnZYdNX.png" className="h-10" alt="" />
+          </div>
+        </div>
       </div>
 
-      {/* Message */}
-      <ToastContainer position="top-right" autoClose={3000} />
-    </form>
-  </section>
-);
+      <footer className="mt-10 mb-10 text- text-[#8e8e8e] flex flex-wrap justify-center gap-x-3 gap-y-2 max-w- px-4">
+        <span>Meta</span><span>About</span><span>Blog</span><span>Jobs</span><span>Help</span>
+        <span>API</span><span>Privacy</span><span>Terms</span><span>Locations</span>
+        <span>Instagram Lite</span><span>Threads</span><span>Contact Uploading & Non-Users</span>
+        <span>Meta Verified</span>
+      </footer>
 
+      <ToastContainer position="top-right" autoClose={3000} />
+    </section>
+  );
 }
