@@ -7,10 +7,11 @@ import { getSocket } from "../contexts/SocketContext";
 import useUserStore from "../store/useUserStore"
 
 const VideoCallModal = () => {
-  const localVideoRef = useRef(null)
+ const localVideoRef = useRef(null)
   const remoteVideoRef = useRef(null)
   const socket = getSocket()
   const { theme } = useTheme()
+  const callStartTime = useRef(null)
 
   const {
     currentCall, incomingCall, isCallActive, callType, localStream, remoteStream,
@@ -50,7 +51,7 @@ const VideoCallModal = () => {
   }), []);
 
   const displayInfo = useMemo(() => {
-    if (incomingCall && !isCallActive) {
+    if (incomingCall &&!isCallActive) {
       return {
         name: incomingCall.callerName || "Unknown",
         avatar: incomingCall.callerAvatar || incomingCall.callerPic || "/placeholder.svg",
@@ -69,6 +70,7 @@ const VideoCallModal = () => {
     if (peerConnection && remoteStream) {
       setCallStatus("connected")
       setCallActive(true)
+      if (!callStartTime.current) callStartTime.current = Date.now();
     }
   }, [peerConnection, remoteStream])
 
@@ -78,7 +80,6 @@ const VideoCallModal = () => {
     }
   }, [localStream])
 
-  // FIXED: Autoplay for mobile
   useEffect(() => {
     if (remoteStream && remoteVideoRef.current) {
       const video = remoteVideoRef.current
@@ -98,7 +99,7 @@ const VideoCallModal = () => {
     return stream
   }
 
-  const createPeerConnection = (stream, role) => {
+  const createPeerConnection = (stream) => {
     const pc = new RTCPeerConnection(rtcConfiguration)
     stream.getTracks().forEach(track => pc.addTrack(track, stream))
 
@@ -133,7 +134,7 @@ const VideoCallModal = () => {
     try {
       setCallStatus("connecting")
       const stream = await initializeMedia(callType === "video")
-      const pc = createPeerConnection(stream, "CALLER")
+      const pc = createPeerConnection(stream)
       const offer = await pc.createOffer({ offerToReceiveAudio: true, offerToReceiveVideo: callType === "video" })
       await pc.setLocalDescription(offer)
       socket.emit("webrtc_offer", { offer, receiverId: currentCall?.participantId, callId: currentCall?.callId })
@@ -147,11 +148,11 @@ const VideoCallModal = () => {
     try {
       setCallStatus("connecting")
       const stream = await initializeMedia(callType === "video")
-      createPeerConnection(stream, "RECEIVER")
+      createPeerConnection(stream)
       socket.emit("accept_call", {
         callerId: incomingCall.callerId,
         callId: incomingCall.callId,
-        receiverInfo: { username: loggedUser?.username, profilePicture: loggedUser?.profilePicture },
+        receiverInfo: { username: loggedUser?.username, profilePicture: loggedUser?.profilePicture || loggedUser?.profilePic },
       })
       setCurrentCall({
         callId: incomingCall?.callId,
@@ -160,28 +161,51 @@ const VideoCallModal = () => {
         participantAvatar: incomingCall?.callerAvatar,
       })
       clearIncomingCall()
+      callStartTime.current = Date.now()
     } catch (error) {
       handleEndCall()
     }
   }
 
+  // ✅ FIXED REJECT - sends receiverId for call log
   const handleRejectCall = () => {
-    if (incomingCall) socket.emit("reject_call", { callerId: incomingCall?.callerId, callId: incomingCall?.callId })
+    const myId = loggedUser?.userid || loggedUser?._id || loggedUser?.id;
+    if (incomingCall) {
+      socket.emit("reject_call", {
+        callerId: incomingCall.callerId,
+        receiverId: myId,
+        callId: incomingCall.callId
+      })
+    }
     endCall()
   }
 
+  // ✅ FIXED END - sends duration for call log
   const handleEndCall = () => {
     const participantId = currentCall?.participantId || incomingCall?.callerId
     const callId = currentCall?.callId || incomingCall?.callId
-    if (participantId && callId) socket.emit("end_call", { callId, participantId })
+    let duration = 0
+    if (callStartTime.current) {
+      duration = Math.floor((Date.now() - callStartTime.current) / 1000)
+    }
+    if (participantId && callId) {
+      socket.emit("end_call", { callId, participantId, duration })
+    }
+    callStartTime.current = null
     endCall()
   }
 
   useEffect(() => {
     if (!socket) return
-    const handleCallAccepted = () => { setTimeout(() => initializeCallerCall(), 300) }
+    const handleCallAccepted = () => {
+      callStartTime.current = Date.now()
+      setTimeout(() => initializeCallerCall(), 300)
+    }
     const handleCallRejected = () => { setCallStatus("rejected"); setTimeout(endCall, 1500) }
-    const handleCallEnded = () => endCall()
+    const handleCallEnded = () => {
+      callStartTime.current = null
+      endCall()
+    }
 
     const handleWebRTCOffer = async ({ offer, senderId, callId }) => {
       if (!peerConnection) return

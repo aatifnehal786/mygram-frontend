@@ -537,6 +537,18 @@ const togglePdfPreview = async (msg) => {
 
       // SINGLE CHECK - use Str version only
       if (msg.deletedFor?.some((id) => id.toString() === currentUserIdStr)) return null;
+      if (msg.messageType === "call_log") {
+  const isMissed = msg.callInfo?.type === "missed" || msg.callInfo?.type === "rejected";
+  return (
+    <div key={msg._id} className="flex justify-center my-3">
+      <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full text- border ${theme === "dark"? "bg-zinc-800 border-zinc-700 text-zinc-300" : "bg-gray-100 border-gray-200"}`}>
+        <FaVideo className={isMissed? "text-red-500" : "text-green-600"} size={12} />
+        <span>{msg.message}</span>
+        <span className="opacity-60">{msg.createdAt? format(new Date(msg.createdAt), "HH:mm") : ""}</span>
+      </div>
+    </div>
+  );
+}
 
       return (
         <div
