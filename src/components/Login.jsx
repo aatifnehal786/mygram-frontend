@@ -15,9 +15,10 @@ export default function Login() {
   const setLoggedUser = useUserStore((state) => state.setLoggedUser);
   const navigate = useNavigate();
 
-  const handleInput = (e) => {
-    setUser((prev) => ({ ...prev, [e.target.name]: e.target.value }));
-  };
+const handleInput = (e) => {
+  setUser((prev) => ({...prev, [e.target.name]: e.target.value.trim()
+  }));
+};
 
   const handleSubmit = async (e) => {
     e.preventDefault();
