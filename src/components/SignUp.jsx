@@ -113,8 +113,10 @@ export default function SignUp() {
       });
 
       toast.success(data.message || "Account created successfully!");
-      setUserDetails({ username: "", email: "", password: "", mobile: "", confirmPassword: "" });
-      setStrength("");
+      setTimeout(() => {
+        setUserDetails({ username: "", email: "", password: "", mobile: "", confirmPassword: "" });
+        setStrength("");
+      },5000);
       navigate("/login");
     } catch (error) {
       toast.error(error.message || "An error occurred. Please try again.");
