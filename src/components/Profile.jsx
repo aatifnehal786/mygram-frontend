@@ -20,6 +20,8 @@ export default function Profile() {
   const targetId = id || loggedUser.userid;
   const [newUsername, setNewUsername] = useState("");
   const [showEditName, setShowEditName] = useState(false);
+  
+ const [uploading, setUploading] = useState(false);
   const [loading, setLoading] = useState(true);
 
  useEffect(() => {
@@ -64,14 +66,26 @@ useEffect(() => {
   apiFetch(`api/user/following/${targetId}`).then(d => setFollowing(d.following || [])).catch(()=>setFollowing([]));
 }, [targetId]);
 
-  const handleFileChange = async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
+
+const handleFileChange = async (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  setUploading(true);
+  try {
     const fd = new FormData();
     fd.append("profilePic", file);
     const data = await apiFetch("api/uploads/profile", { method: "POST", body: fd });
     setStats(p => ({...p, profilePic: data.profilePic}));
-  };
+  } catch (err) {
+    console.error(err);
+    // toast.error("Failed to update profile picture")
+  } finally {
+    setUploading(false);
+    // reset input so same file can be selected again
+    e.target.value = "";
+  }
+};
 
   const handleChangeUserName = async () => {
     const data = await apiFetch("api/user/updateprofile", { method: "PUT", body: JSON.stringify({ newUsername }) });
@@ -85,7 +99,7 @@ useEffect(() => {
 
 
 
-  if (loggedUser?.user?.isGuest) {
+  if (loggedUser?.user?.isGuest || loading) {
     return (
       <div className={`min-h-[calc(100vh-60px)] w-full flex flex-col items-center px-4 py-10 ${theme === "dark"? "bg-black text-white" : "bg-[#fafafa] text-black"}`}>
 
@@ -157,11 +171,32 @@ useEffect(() => {
         <div className="relative">
           <img src={loggedUser?.profilePic || "/placeholder.svg"} className="w-20 h-20 md:w-36 md:h-36 rounded-full object-cover" />
           {isOwnProfile && (
-            <>
-              <button onClick={() => fileInputRef.current.click()} className={`absolute bottom-0 right-0 bg-white border rounded-full px-2 py-1 text-xs ${theme === "dark"? "bg-zinc-800" : "bg-gray-100"}`}>Edit</button>
-              <input type="file" ref={fileInputRef} onChange={handleFileChange} className="hidden" accept="image/*" />
-            </>
-          )}
+  <>
+    <button
+      onClick={() => fileInputRef.current.click()}
+      disabled={uploading}
+      className={`absolute bottom-0 right-0 bg-white border rounded-full px-2 py-1 text-xs flex items-center gap-1 disabled:opacity-60 ${theme === "dark"? "bg-zinc-800" : "bg-gray-100"}`}
+    >
+      {uploading? (
+        <>
+          <span className="w-3 h-3 border-2 border-current border-t-transparent rounded-full animate-spin"></span>
+          Uploading...
+        </>
+      ) : (
+        "Edit"
+      )}
+    </button>
+
+    <input type="file" ref={fileInputRef} onChange={handleFileChange} className="hidden" accept="image/*" />
+
+    {/* Full avatar loader overlay - put this inside your avatar wrapper which should be `relative` */}
+    {uploading && (
+      <div className="absolute inset-0 bg-black/50 rounded-full flex items-center justify-center">
+        <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    )}
+  </>
+)}
         </div>
         <div className="flex-1">
           <div className="flex items-center gap-4 mb-4">
