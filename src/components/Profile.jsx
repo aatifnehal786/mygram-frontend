@@ -71,18 +71,33 @@ const handleFileChange = async (e) => {
   const file = e.target.files[0];
   if (!file) return;
 
+  // 1. Instant preview - so user sees it immediately
+  const previewUrl = URL.createObjectURL(file);
+  setStats(p => ({...p, profilePic: previewUrl }));
+
   setUploading(true);
   try {
     const fd = new FormData();
     fd.append("profilePic", file);
-    const data = await apiFetch("api/uploads/profile", { method: "POST", body: fd });
-    setStats(p => ({...p, profilePic: data.profilePic}));
+
+    // IMPORTANT: Don't set Content-Type header manually for FormData
+    const data = await apiFetch("api/uploads/profile", {
+      method: "POST",
+      body: fd
+    });
+
+    console.log("upload response:", data); // Check this in console
+
+    // data.profilePic might be data.url or data.path - check your backend
+    const newUrl = data.profilePic || data.url || data.path;
+
+    // 2. Add cache-buster so browser doesn't show old cached image
+    setStats(p => ({...p, profilePic: `${newUrl}?t=${Date.now()}` }));
+
   } catch (err) {
     console.error(err);
-    // toast.error("Failed to update profile picture")
   } finally {
     setUploading(false);
-    // reset input so same file can be selected again
     e.target.value = "";
   }
 };
@@ -169,8 +184,8 @@ const handleFileChange = async (e) => {
     <div className={`max-w- mx-auto ${theme === "dark"? "text-white bg-black" : "text-black bg-[#fafafa]"}`}>
       <div className="flex gap-10 md:gap-24 px-4 py-8 border-b border-gray-200 dark:border-zinc-800">
         <div className="relative">
-          <img src={loggedUser?.profilePic || "/placeholder.svg"} className="w-20 h-20 md:w-36 md:h-36 rounded-full object-cover" />
-          {isOwnProfile && (
+          <img  key={stats.profilePic} src={stats.profilePic} alt="profile" className="w-20 h-20 md:w-36 md:h-36 rounded-full object-cover" />
+    {isOwnProfile && (
   <>
     <button
       onClick={() => fileInputRef.current.click()}
