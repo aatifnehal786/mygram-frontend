@@ -88,114 +88,43 @@ function NotificationListener() {
  
 
 const router = createBrowserRouter(
-  [ 
+  [
     {
       path: "/",
-      element: (
-        <PublicRoute>
-          <Login />
-        </PublicRoute>
-      ),
+      element: <PublicRoute><Login /></PublicRoute>,
       errorElement: <NotFound />,
     },
     {
       path: "/register",
-      element: (
-        <PublicRoute>
-          <SignUp />
-        </PublicRoute>
-      ),
+      element: <PublicRoute><SignUp /></PublicRoute>,
     },
     {
       path: "/login",
-      element: (
-        <PublicRoute>
-          <Login />
-        </PublicRoute>
-      ),
+      element: <PublicRoute><Login /></PublicRoute>,
     },
     {
       path: "/guest-login",
-      element: (
-        <PublicRoute>
-          <GuestLogin />
-        </PublicRoute>
-      ),
+      element: <PublicRoute><GuestLogin /></PublicRoute>,
     },
     {
       path: "/verify-email",
-      element: (
-        <PublicRoute>
-          <EmailVerification />
-        </PublicRoute>
-      ),
+      element: <EmailVerification />, // <--- NO PublicRoute here, it handles its own logic
     },
-    
-
     {
-      element: <Layout />, // Wrap private routes with Header
+      element: <Layout />,
       children: [
-        {
-          path: "/home",
-          element: (
-            <Private>
-              <Home />
-            </Private>
-          ),
-        },
-       
-        {
-          path: "/profile",
-          element: (
-            <Private>
-              <Profile />
-            </Private>
-          ),
-        },
-        {
-          path: "/chat",
-          element: (
-            <Private>
-              <Chat />
-            </Private>
-          ),
-        },
-        {
-          path: "/chatsidebar",
-          element: (
-            <Private>
-              <ChatSidebar />
-            </Private>
-          ),
-        },
-        {
-          path: "/createpost",
-          element: (
-            <Private>
-              <CreatePost />
-            </Private>
-          ),
-        },
-        
+        { path: "/home", element: <Private><Home /></Private> },
+        { path: "/profile", element: <Private><Profile /></Private> },
+        { path: "/chat", element: <Private><Chat /></Private> },
+        { path: "/chatsidebar", element: <Private><ChatSidebar /></Private> },
+        { path: "/createpost", element: <Private><CreatePost /></Private> },
       ],
     },
-    {
-      path: "/forgot-password",
-      element: <ForgotPassword />,
-    },
-    {
-      path: "*",
-      element: <NotFound />,
-    },
+    { path: "/forgot-password", element: <ForgotPassword /> },
+    { path: "*", element: <NotFound /> },
   ],
-  {
-    future: {
-      v7_relativeSplatPath: true,
-      v7_startTransition: true,
-    },
-  }
+  { future: { v7_relativeSplatPath: true, v7_startTransition: true } }
 );
-
 
 
  return (

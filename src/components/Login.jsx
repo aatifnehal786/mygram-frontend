@@ -43,7 +43,7 @@ const handleInput = (e) => {
       navigate("/home");
     }
 
-    const isVerified = data.user?.isEmailVerified || data.isEmailVerified;
+    const isVerified = data.isEmailVerified;
   if (!isVerified) {
     navigate("/verify-email", { replace: true });
   } else {
