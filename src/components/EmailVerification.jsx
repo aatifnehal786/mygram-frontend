@@ -2,7 +2,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import useUserStore from "../store/useUserStore";
-import { apiFetch } from "../store/apiFetch";
+import { apiFetch } from "../api/apiFetch";
 
 export default function EmailVerification() {
   const navigate = useNavigate();
