@@ -71,37 +71,37 @@ const handleFileChange = async (e) => {
   const file = e.target.files[0];
   if (!file) return;
 
-  // 1. Instant preview - so user sees it immediately
   const previewUrl = URL.createObjectURL(file);
+
+  // optimistic update both places
   setStats(p => ({...p, profilePic: previewUrl }));
+  setLoggedUser({...loggedUser, profilePic: previewUrl });
 
   setUploading(true);
   try {
     const fd = new FormData();
     fd.append("profilePic", file);
 
-    // IMPORTANT: Don't set Content-Type header manually for FormData
     const data = await apiFetch("api/uploads/profile", {
       method: "POST",
       body: fd
     });
 
-    console.log("upload response:", data); // Check this in console
+    const newUrl = data.profilePic || data.url;
 
-    // data.profilePic might be data.url or data.path - check your backend
-    const newUrl = data.profilePic || data.url || data.path;
-
-    // 2. Add cache-buster so browser doesn't show old cached image
-    setStats(p => ({...p, profilePic: `${newUrl}?t=${Date.now()}` }));
+    // update both with REAL url from server (without cache-buster in store)
+    setStats(p => ({...p, profilePic: newUrl }));
+    setLoggedUser({...loggedUser, profilePic: newUrl });
 
   } catch (err) {
     console.error(err);
+    // revert on fail if you want
+    // setLoggedUser(loggedUser)
   } finally {
     setUploading(false);
     e.target.value = "";
   }
 };
-
   const handleChangeUserName = async () => {
     const data = await apiFetch("api/user/updateprofile", { method: "PUT", body: JSON.stringify({ newUsername }) });
     setStats(p => ({...p, username: data.newUsername}));
