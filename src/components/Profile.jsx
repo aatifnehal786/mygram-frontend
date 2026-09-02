@@ -20,7 +20,7 @@ export default function Profile() {
   const targetId = id || loggedUser.userid;
   const [newUsername, setNewUsername] = useState("");
   const [showEditName, setShowEditName] = useState(false);
-  
+  const updateProfilePic = useUserStore(s => s.updateProfilePic);
  const [uploading, setUploading] = useState(false);
   const [loading, setLoading] = useState(true);
 
@@ -75,7 +75,7 @@ const handleFileChange = async (e) => {
 
   // optimistic update both places
   setStats(p => ({...p, profilePic: previewUrl }));
-  setLoggedUser({...loggedUser, profilePic: previewUrl });
+  
 
   setUploading(true);
   try {
@@ -87,12 +87,11 @@ const handleFileChange = async (e) => {
       body: fd
     });
 
-    const newUrl = data.profilePic || data.url;
 
-    // update both with REAL url from server (without cache-buster in store)
-    setStats(p => ({...p, profilePic: newUrl }));
-    setLoggedUser({...loggedUser, profilePic: newUrl });
-
+    const newUrl = data.profilePic;
+    setStats(p => ({...p, profilePic: newUrl}));
+    updateProfilePic(newUrl);
+    
   } catch (err) {
     console.error(err);
     // revert on fail if you want
@@ -102,6 +101,8 @@ const handleFileChange = async (e) => {
     e.target.value = "";
   }
 };
+
+
   const handleChangeUserName = async () => {
     const data = await apiFetch("api/user/updateprofile", { method: "PUT", body: JSON.stringify({ newUsername }) });
     setStats(p => ({...p, username: data.newUsername}));
@@ -184,7 +185,7 @@ const handleFileChange = async (e) => {
     <div className={`max-w- mx-auto ${theme === "dark"? "text-white bg-black" : "text-black bg-[#fafafa]"}`}>
       <div className="flex gap-10 md:gap-24 px-4 py-8 border-b border-gray-200 dark:border-zinc-800">
         <div className="relative">
-          <img  key={stats.profilePic} src={stats.profilePic} alt="profile" className="w-20 h-20 md:w-36 md:h-36 rounded-full object-cover" />
+          <img   src={loggedUser?.profilePic || "/default-avatar.png"} alt="profile" className="w-20 h-20 md:w-36 md:h-36 rounded-full object-cover" />
     {isOwnProfile && (
   <>
     <button

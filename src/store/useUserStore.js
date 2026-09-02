@@ -39,6 +39,28 @@ const useUserStore = create(
         publicPosts: state.publicPosts.filter(p => p._id?.toString()!== postId?.toString()),
       })),
 
+      // ADD THIS
+      updateProfilePic: (newUrl) => set((state) => ({
+        loggedUser: state.loggedUser
+          ? { ...state.loggedUser, profilePic: newUrl }
+          : null,
+        // optional: update your pic instantly in feed too
+        posts: state.posts.map(p => {
+          const authorId = p.author?._id || p.author;
+          if (authorId?.toString() === state.loggedUser?._id?.toString()) {
+            return { ...p, author: typeof p.author === 'object' ? {...p.author, profilePic: newUrl} : p.author };
+          }
+          return p;
+        }),
+        publicPosts: state.publicPosts.map(p => {
+          const authorId = p.author?._id || p.author;
+          if (authorId?.toString() === state.loggedUser?._id?.toString()) {
+            return { ...p, author: typeof p.author === 'object' ? {...p.author, profilePic: newUrl} : p.author };
+          }
+          return p;
+        }),
+      })),
+
       logout: () => set({ loggedUser: null, token: null, posts: [], publicPosts: [], users: [] }),
     }),
     { name: "token-auth" }
