@@ -10,11 +10,26 @@ export default function Private({ children }) {
     return <Navigate to="/login" replace />;
   }
 
-  const isVerified = loggedUser.isEmailVerified || loggedUser.user?.isEmailVerified;
+  // Check all possible shapes (you store user in different ways)
+  const actualUser = loggedUser.user || loggedUser;
 
-  // If trying to access home but not verified -> to verify page
-  if (!isVerified && location.pathname!== "/verify-email") {
+  const isGuest = actualUser.isGuest || actualUser.role === "guest";
+  
+  // Guest is always considered verified
+  if (isGuest) {
+    return children;
+  }
+
+  const isVerified = actualUser.isEmailVerified || actualUser.isVerified;
+
+  // If not verified and not already on verify page -> redirect to verify
+  if (!isVerified && location.pathname !== "/verify-email") {
     return <Navigate to="/verify-email" replace />;
+  }
+
+  // If verified but trying to go to verify page -> go home
+  if (isVerified && location.pathname === "/verify-email") {
+    return <Navigate to="/home" replace />;
   }
 
   return children;

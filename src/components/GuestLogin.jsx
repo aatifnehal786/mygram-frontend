@@ -15,28 +15,39 @@ export default function GuestLogin() {
     const navigate = useNavigate();
     const setLoggedUser = useUserStore((state) => state.setLoggedUser);
 
-    const handleGuestLogin = async () => {
-        setLoading(true);
-        try {
-            const response = await apiFetch("api/auth/guest-login", {
-                method: "POST",
-                body: JSON.stringify({ fullName }),
-            }); 
-            console.log("Guest login response:", response);
+   const handleGuestLogin = async () => {
+  setLoading(true);
+  try {
+    const response = await apiFetch("api/auth/guest-login", {
+      method: "POST",
+      body: JSON.stringify({ fullName }),
+    }); 
+    console.log("Guest login response:", response);
 
-            if (response.success) {
-                setLoggedUser(response);
-                toast.success("Logged in as guest!");
-                navigate("/home");
-            }
-        } catch (error) {
-            console.error("Error during guest login:", error);
-            toast.error("Failed to log in as guest. Please try again.");
-        } finally {
-            setLoading(false);
-        }
-    };
+    if (response.success) {
+      // FIX: Add verification flags so Private.jsx lets you through
+      const guestUserWithFlags = {
+        ...response.user,
+        isGuest: true,
+        isVerified: true,
+        isEmailVerified: true, // THIS IS WHAT Private.jsx CHECKS
+      };
 
+      setLoggedUser({
+        user: guestUserWithFlags,
+        token: response.token
+      });
+
+      toast.success("Logged in as guest!");
+      navigate("/home", { replace: true });
+    }
+  } catch (error) {
+    console.error("Error during guest login:", error);
+    toast.error("Failed to log in as guest. Please try again.");
+  } finally {
+    setLoading(false);
+  }
+};
 
 
     return (
