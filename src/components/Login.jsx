@@ -42,6 +42,13 @@ const handleInput = (e) => {
       toast.success("Login Successful");
       navigate("/home");
     }
+
+    const isVerified = data.user?.isEmailVerified || data.isEmailVerified;
+  if (!isVerified) {
+    navigate("/verify-email", { replace: true });
+  } else {
+    navigate("/", { replace: true });
+  }
   } catch (err) {
     console.error(err);
     // err.message will be "Incorrect password" from apiFetch

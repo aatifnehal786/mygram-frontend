@@ -19,6 +19,7 @@ import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { getSocket } from "./contexts/SocketContext";
 import GuestLogin from './components/GuestLogin';
+import EmailVerification from './components/EmailVerification';
 
 
 
@@ -118,6 +119,14 @@ const router = createBrowserRouter(
       element: (
         <PublicRoute>
           <GuestLogin />
+        </PublicRoute>
+      ),
+    },
+    {
+      path: "/verify-email",
+      element: (
+        <PublicRoute>
+          <EmailVerification />
         </PublicRoute>
       ),
     },
