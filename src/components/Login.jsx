@@ -3,7 +3,7 @@ import { useState } from "react";
 import hide from "../assets/hide.png";
 import show from "../assets/show.png";
 import { apiFetch } from '../api/apiFetch'
-import { toast } from "react-toastify";
+import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Spinner from "../Spinner";
 import useUserStore from "../store/useUserStore";
@@ -20,39 +20,36 @@ const handleInput = (e) => {
   }));
 };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setIsLoading(true);
+ const handleSubmit = async (e) => {
+  e.preventDefault();
+  setIsLoading(true);
 
-    if (!user.loginId || !user.password) {
-      toast.error("All fields are required");
-      setIsLoading(false);
-      return;
+  if (!user.loginId || !user.password) {
+    toast.error("All fields are required");
+    setIsLoading(false);
+    return;
+  }
+
+  try {
+    const data = await apiFetch("api/auth/login", {
+      method: "POST",
+      body: JSON.stringify({ ...user }),
+    });
+
+    console.log("Login response:", data);
+    if (data.token) {
+      setLoggedUser(data);
+      toast.success("Login Successful");
+      navigate("/home");
     }
-
-    try {
-      const data = await apiFetch("api/auth/login", {
-        method: "POST",
-        body: JSON.stringify({ ...user }),
-      });
-
-      setIsLoading(false);
-      console.log("Login response:", data);
-      if (!data) return;
-
-      if (data.token) {
-        setLoggedUser(data);
-        toast.success("Login Successful");
-        navigate("/home");
-      } else {
-        toast.error(data.message || "Login failed");
-      }
-    } catch (err) {
-      console.error(err);
-      setIsLoading(false);
-      toast.error("Server error occurred");
-    }
-  };
+  } catch (err) {
+    console.error(err);
+    // err.message will be "Incorrect password" from apiFetch
+    toast.error(err.message || "Login failed");
+  } finally {
+    setIsLoading(false);
+  }
+};
 
   const showHide = () => setIsPassword((prev) => !prev);
 
@@ -140,9 +137,9 @@ const handleInput = (e) => {
 
               <Link
                 to="/guest-login"
-                className="w-full h-8 border border-[#dbdbdb] rounded-lg flex items-center justify-center gap-2 text-[14px] font-semibold mt-3 hover:bg-[#fafafa]"
+                className="w-full h-8 border border-[#dbdbdb] bg-[#fafafa] text-[#00376b] rounded-lg flex items-center justify-center gap-2 text-[14px] font-semibold mt-3 hover:bg-[#f0f0f0]"
               >
-                <span className="text-lg">👤</span> Continue as Guest
+                <span className="text-lg text-blue-500 hover:text-green-500">👤</span> Continue as Guest
               </Link>
             </div>
           </form>
