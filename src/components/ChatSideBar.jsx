@@ -12,6 +12,8 @@ export default function ChatSidebar({ onSelectForwardUser, theme }) {
   const { onlineUsers } = usePresenceStore();
   const loggedUser = useUserStore(s => s.loggedUser);
 
+  console.log(selectedUser);
+
   const handleSearch = async (q) => {
     setSearchQuery(q);
     if (!q.trim()) return setResults([]);
@@ -36,9 +38,11 @@ const usersToDisplay = searchQuery? (Array.isArray(results)? results : []) : saf
         </div>
         {usersToDisplay.map(user => {
           const isOnline = onlineUsers.includes(user._id);
+          
           const isSelected = selectedUser?._id === user._id;
+          console.log(isSelected, selectedUser?._id, user?._id);
           return (
-            <div key={user._id} onClick={() =>!isForwarding && setSelectedUser(user)} className={`flex items-center gap-3 px-4 py-2 cursor-pointer hover:bg-gray-50 dark:hover:bg-zinc-800 ${isSelected? "bg-gray-100 dark:bg-zinc-800" : ""}`}>
+            <div key={user._id} onClick={() =>!isForwarding && setSelectedUser(user)} className={`flex items-center gap-3 px-4 py-2 cursor-pointer hover:bg-gray-50 hover:text-white dark:hover:bg-zinc-800 ${isSelected ? "" : "bg-white"} ${theme === 'dark'? 'bg-white text-black' : 'text-black'}`}>
               <div className="relative">
                 <img src={user.profilePic || user.profilePicture || "/placeholder.svg"} className="w-14 h-14 rounded-full object-cover shrink-0"onError={(e)=> e.target.src="/placeholder.svg"}
 />

@@ -67,7 +67,7 @@ export default function Layout() {
           <Link to="/profile" className={`${theme === "dark" ? "hover:bg-zinc-800" : "hover:bg-zinc-100 text-black br-gray-200"} flex items-center gap-4 p-3 rounded-lg`}><img src={myPic} className="w-6 h-6 rounded-full object-cover" /> Profile</Link>
         </nav>
         {/* DESKTOP THEME BUTTON */}
-        <button onClick={toggleTheme} className="p-3 text-left text-sm rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 w-full">
+        <button onClick={toggleTheme} className={`p-3 text-left text-sm rounded-lg  w-full ${theme === 'dark' ? 'bg-black text-white' : ''}`}>
           {theme === "dark"? "☀ Light mode" : "🌙 Dark mode"}
         </button>
       </aside>

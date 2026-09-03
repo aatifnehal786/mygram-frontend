@@ -11,6 +11,10 @@ export default function Otp() {
     const [isLoading2, setIsLoading2] = useState(false);
 
 
+const handleEnterKey = (e) => {
+    if (e.key === "Enter") verifyOtp(e);
+  };
+
 // HANDLE MOBILE SENDING OTP
 
 const sendOtp = async (e) => {
@@ -92,6 +96,7 @@ const verifyOtp = async (e) => {
         required
         name="mobile"
         value={mobile}
+        onKeyDown={handleEnterKey}
         className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500"
       />
 
@@ -102,6 +107,7 @@ const verifyOtp = async (e) => {
         placeholder="Enter OTP"
         name="otp"
         value={otp}
+        onKeyDown={handleEnterKey}
         className="w-full px-4 py-3 rounded-lg border border-gray-300 text-center tracking-widest text-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
       />
 

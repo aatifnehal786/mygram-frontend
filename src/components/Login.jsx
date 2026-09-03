@@ -15,6 +15,11 @@ export default function Login() {
   const setLoggedUser = useUserStore((state) => state.setLoggedUser);
   const navigate = useNavigate();
 
+
+const handleEnterKey = (e) => {
+    if (e.key === "Enter") handleSubmit(e);
+  };
+
 const handleInput = (e) => {
   setUser((prev) => ({...prev, [e.target.name]: e.target.value.trim()
   }));
@@ -98,6 +103,7 @@ const handleInput = (e) => {
                   name="loginId"
                   value={user.loginId}
                   className="w-full h-[38px] bg-[#fafafa] border border-[#dbdbdb] rounded-[3px] px-2 text-[12px] outline-none focus:border-[#a8a8a8]"
+                  onKeyDown={handleEnterKey}
                 />
               </div>
 
@@ -111,6 +117,7 @@ const handleInput = (e) => {
                   name="password"
                   value={user.password}
                   className="w-full h-[38px] bg-[#fafafa] border border-[#dbdbdb] rounded-[3px] px-2 pr-16 text-[12px] outline-none focus:border-[#a8a8a8]"
+                  onKeyDown={handleEnterKey}
                 />
                 <button
                   type="button"

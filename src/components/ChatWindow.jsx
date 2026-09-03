@@ -3,7 +3,6 @@ import { format, isToday, isYesterday } from "date-fns";
 import { apiFetch } from "../api/apiFetch";
 import { getSocket } from "../contexts/SocketContext";
 import {  } from "react-icons/fa"
-
 import { FaVideo, FaArrowLeft, FaRegSmile, FaPaperclip, FaPaperPlane, FaTimes, FaCheck, FaCheckDouble,FaSmile,
 FaFilePdf, FaFileWord, FaFileAlt, FaFileDownload} from "react-icons/fa";
 import { HiDotsVertical } from "react-icons/hi";
@@ -13,6 +12,7 @@ import useChatStore from "../store/chatStore";
 import useUserStore from "../store/useUserStore";
 import usePresenceStore from "../store/usePresenceStore";
 import useVideoCallStore from "../store/VideoCallStore";
+
 
 const isValidDate = (d) => d instanceof Date &&!isNaN(d);
 const useOutsideClick = (ref, cb) => {
@@ -666,7 +666,7 @@ const togglePdfPreview = async (msg) => {
                 )}
 
                 {openDropdownId === msg._id && (
-                  <div ref={dropdownRef} className="absolute top-8 right-0 w-44 bg-white dark:bg-zinc-800 border dark:border-zinc-700 rounded-xl shadow-lg text-xs z-30 overflow-hidden">
+                  <div ref={dropdownRef} className={`absolute top-8 right-0 w-44 bg-white dark:bg-zinc-800 border dark:border-zinc-700 rounded-xl shadow-lg text-xs z-30 overflow-hidden ${theme === "dark"? "bg-zinc-800 border-zinc-700" : "bg-white border-gray-200"}`}>
                     {msg.message?.trim() &&!msg.fileUrl && (
                       <button onClick={(e) => { e.stopPropagation(); navigator.clipboard.writeText(msg.message); setToastMessage("Copied"); setOpenDropdownId(null); }} className="flex gap-2 w-full px-3 py-2 text-sm hover:bg-gray-100 dark:hover:bg-zinc-700">
                         <FaRegCopy /> Copy

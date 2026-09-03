@@ -82,8 +82,10 @@ export default function CreatePost() {
       <div className="bg-white w-full max-w- rounded-xl overflow-hidden flex flex-col">
         {/* Header */}
         <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200">
-          <button onClick={onClose} className="text-xl">✕</button>
-          <h2 className="font-semibold text-lg">Create new post</h2>
+          <button onClick={onClose} className={`p-2 rounded-full ${theme === 'dark' ? 'bg-gray-800 text-white' : 'bg-gray-200 text-black'}`}>
+            ✕
+          </button>
+          <h2 className={`font-semibold text-lg rounded-lg p-2 ${theme === 'dark' ? 'bg-gray-800 text-white' : 'bg-gray-200 text-black'}`}>Create new post</h2>
           <button
             onClick={handleShare}
             disabled={!mediaFile || loading}

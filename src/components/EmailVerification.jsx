@@ -87,6 +87,14 @@ export default function EmailVerification() {
     }
   };
 
+  const handleEnterKey = (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      handleVerify(e);
+      verifyWithCode(otp.join(""));
+    }
+  };
+
   const verifyWithCode = async (code) => {
     try {
       setLoading(true); setError("");
@@ -159,7 +167,7 @@ export default function EmailVerification() {
             {timer > 0? (
               <span className="text-zinc-400">Resend in {Math.floor(timer/60)}:{String(timer%60).padStart(2,'0')}</span>
             ) : (
-              <button onClick={handleSendOtp} disabled={sending} className="text-[#0095f6] font-semibold">
+              <button onClick={handleSendOtp} onKeyDown={handleEnterKey} disabled={sending} className="text-[#0095f6] font-semibold">
                 {sending? "Sending..." : "Resend Code"}
               </button>
             )}

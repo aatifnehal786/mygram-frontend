@@ -15,6 +15,12 @@ export default function GuestLogin() {
     const navigate = useNavigate();
     const setLoggedUser = useUserStore((state) => state.setLoggedUser);
 
+    const handleEnterKey = (e) => {
+        if (e.key === "Enter") {
+            handleGuestLogin();
+        }
+    };
+
    const handleGuestLogin = async () => {
   setLoading(true);
   try {
@@ -87,6 +93,7 @@ export default function GuestLogin() {
 
             <button
               onClick={handleGuestLogin}
+              onKeyDown={handleEnterKey}
               disabled={loading ||!fullName.trim()}
               className="w-full h-8 bg-[#0095f6] hover:bg-[#1877f2] text-white rounded-lg text-sm font-semibold disabled:opacity-60 disabled:pointer-events-none"
             >
