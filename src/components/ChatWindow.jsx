@@ -673,12 +673,20 @@ const handleDownload = async (msg) => {
 
       {filePreview && selectedFile && (
   <div className="relative p-3 border-t bg-gray-50 dark:bg-zinc-900">
-    <button
-      onClick={() => { setSelectedFile(null); setFilePreview(null); }}
-      className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1.5 z-10 hover:bg-red-600"
+     <button
+      onClick={clearFile}
+      className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1.5 z-20"
     >
       <FaTimes size={10} />
     </button>
+
+    {/* LOADER OVERLAY WHILE SENDING */}
+    {isSending && (
+      <div className="absolute inset-0 bg-white/70 dark:bg-black/60 z-10 flex flex-col items-center justify-center rounded">
+        <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+        <p className="text-xs mt-2 font-medium">Sending...</p>
+      </div>
+    )}
 
     {/* IMAGE */}
     {selectedFile.type?.startsWith("image/") && (
@@ -810,36 +818,7 @@ const handleDownload = async (msg) => {
         </div>
       )}
 
-      {filePreview && selectedFile && (
-  <div className="relative p-3 border-t bg-gray-50 dark:bg-zinc-900">
-
-    {/* Close button - calls clearFile */}
-    <button
-      onClick={clearFile}
-      className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1.5 z-20"
-    >
-      <FaTimes size={10} />
-    </button>
-
-    {/* LOADER OVERLAY WHILE SENDING */}
-    {isSending && (
-      <div className="absolute inset-0 bg-white/70 dark:bg-black/60 z-10 flex flex-col items-center justify-center rounded">
-        <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-        <p className="text-xs mt-2 font-medium">Sending...</p>
-      </div>
-    )}
-
-    {/* Your preview content here */}
-    {selectedFile.type?.startsWith("image/") && (
-      <img src={filePreview} className="w-64 h-64 object-cover rounded-lg" alt="" />
-    )}
-    {selectedFile.type?.startsWith("video/") && (
-      <video src={filePreview} controls className="w-64 h-64 object-cover rounded-lg" />
-    )}
-    {/*... other previews same as before... */}
-
-  </div>
-)}
+     
 
       {toastMessage && <div className="fixed bottom-20 left-1/2 -translate-x-1/2 bg-black text-white text-xs px-4 py-2 rounded-full z-50">{toastMessage}</div>}
     </div>
