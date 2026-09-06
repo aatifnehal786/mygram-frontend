@@ -4,7 +4,7 @@ import { apiFetch } from "../api/apiFetch";
 import { getSocket } from "../contexts/SocketContext";
 import {  } from "react-icons/fa"
 import { FaVideo, FaArrowLeft, FaRegSmile, FaPaperclip, FaPaperPlane, FaTimes, FaCheck, FaCheckDouble,FaSmile,
-FaFilePdf, FaFileWord, FaFileAlt, FaFileDownload} from "react-icons/fa";
+FaFilePdf, FaFileWord, FaFileAlt,FaFileExcel,FaFileAudio, FaFile} from "react-icons/fa";
 import { HiDotsVertical } from "react-icons/hi";
 import { FaTrashAlt, FaRegCopy } from "react-icons/fa";
 import EmojiPicker from "emoji-picker-react";
@@ -64,6 +64,7 @@ export default function ChatWindow({ onBack, theme, triggerForwardMode }) {
   const isUserOnline = onlineUsers.includes(selectedUser?._id);
   const [isSelectMode, setIsSelectMode] = useState(false);
 const [selectedIds, setSelectedIds] = useState([]); // array of _id
+const [isSending, setIsSending] = useState(false);
 
   useOutsideClick(emojiRef, () => setShowEmoji(false));
   useOutsideClick(reactionRef, () => setShowReactionsFor(null));
@@ -235,32 +236,55 @@ const [selectedIds, setSelectedIds] = useState([]); // array of _id
     );
   };
 
-  const handleFileChange = (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    setSelectedFile(file);
-    if (file.type.startsWith("image/") || file.type.startsWith("video/"))
-      setFilePreview(URL.createObjectURL(file));
-    else setFilePreview(file.name);
-    setShowFileMenu(false);
-  };
+const handleFileChange = (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
 
-  const sendMessage = async () => {
+  if (filePreview && filePreview.startsWith("blob:")) {
+    URL.revokeObjectURL(filePreview);
+  }
+
+  setSelectedFile(file);
+
+  if (
+    file.type.startsWith("image/") ||
+    file.type.startsWith("video/") ||
+    file.type.startsWith("audio/") ||
+    file.type === "application/pdf"
+  ) {
+    setFilePreview(URL.createObjectURL(file));
+  } else {
+    setFilePreview(file.name);
+  }
+
+  setShowFileMenu(false);
+};
+// when you clear
+const clearFile = () => {
+  if (filePreview && filePreview.startsWith("blob:")) {
+    URL.revokeObjectURL(filePreview);
+  }
+  setSelectedFile(null);
+  setFilePreview(null);
+};
+
+
+
+const sendMessage = async () => {
   if (!selectedFile && !input.trim()) return;
+
+  const { addMessage, updateLastMessage, selectedUser } = useChatStore.getState();
+  setIsSending(true);
 
   try {
     let fileData = {};
-
     if (selectedFile) {
       const fd = new FormData();
       fd.append("file", selectedFile);
-
-      // this now returns originalFileName, filePublicId, fileSize also
       const uploadRes = await apiFetch("api/chats/upload", {
         method: "POST",
         body: fd,
       });
-
       fileData = {
         fileUrl: uploadRes.fileUrl,
         fileType: uploadRes.fileType,
@@ -270,8 +294,8 @@ const [selectedIds, setSelectedIds] = useState([]); // array of _id
       };
     }
 
-    // ✅ Call REST controller instead of socket.emit
-    await apiFetch("api/chats/send", {
+    // Controller returns plain message object
+    const newMessage = await apiFetch("api/chats/send", {
       method: "POST",
       body: JSON.stringify({
         receiverId: selectedUser._id,
@@ -280,14 +304,18 @@ const [selectedIds, setSelectedIds] = useState([]); // array of _id
       }),
     });
 
-    // controller will emit receiveMessage via socket, so no need to emit here
+    // ✅ INSTANT FIX - don't wait for socket, add directly
+    addMessage(newMessage);
+    updateLastMessage(selectedUser._id, newMessage);
+
     setInput("");
-    setSelectedFile(null);
-    setFilePreview(null);
+    clearFile();
 
   } catch (err) {
     console.error(err);
     setToastMessage("Failed to send");
+  } finally {
+    setIsSending(false);
   }
 };
 
@@ -643,14 +671,94 @@ const handleDownload = async (msg) => {
         <div ref={messagesEndRef} />
       </div>
 
-      {filePreview && (
-        <div className="relative p-2 border-t bg-gray-50 dark:bg-zinc-900">
-          <button onClick={() => { setSelectedFile(null); setFilePreview(null); }} className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1">
-            <FaTimes size={10} />
-          </button>
-          {selectedFile?.type?.startsWith("video/")? <video src={filePreview} controls className="w-64 mx-auto rounded" /> : selectedFile?.type?.startsWith("image/")? <img src={filePreview} className="w-64 mx-auto rounded" alt="" /> : <p className="text-xs text-center">{filePreview}</p>}
+      {filePreview && selectedFile && (
+  <div className="relative p-3 border-t bg-gray-50 dark:bg-zinc-900">
+    <button
+      onClick={() => { setSelectedFile(null); setFilePreview(null); }}
+      className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1.5 z-10 hover:bg-red-600"
+    >
+      <FaTimes size={10} />
+    </button>
+
+    {/* IMAGE */}
+    {selectedFile.type?.startsWith("image/") && (
+      <img src={filePreview} className="w-64 h-64 object-cover rounded-lg" alt="" />
+    )}
+
+    {/* VIDEO */}
+    {selectedFile.type?.startsWith("video/") && (
+      <video src={filePreview} controls className="w-64 h-64 object-cover rounded-lg" />
+    )}
+
+    {/* AUDIO */}
+    {selectedFile.type?.startsWith("audio/") && (
+      <div className="w-80 bg-white dark:bg-zinc-800 p-3 rounded-lg flex items-center gap-3">
+        <div className="bg-blue-500 p-3 rounded-full"><FaFileAudio className="text-white" /></div>
+        <div className="flex-1 overflow-hidden">
+          <p className="text-sm font-medium truncate">{selectedFile.name}</p>
+          <audio src={filePreview} controls className="w-full mt-1 h-8" />
         </div>
-      )}
+      </div>
+    )}
+
+    {/* PDF */}
+    {selectedFile.type === "application/pdf" && (
+      <div className="w-80">
+        <div className="bg-white dark:bg-zinc-800 p-3 rounded-t-lg flex items-center gap-3 border">
+          <FaFilePdf className="text-red-500 text-2xl" />
+          <div className="flex-1 overflow-hidden">
+            <p className="text-sm font-medium truncate">{selectedFile.name}</p>
+            <p className="text-xs text-gray-500">{(selectedFile.size / 1024 / 1024).toFixed(2)} MB</p>
+          </div>
+        </div>
+        <iframe src={filePreview} className="w-full h-64 rounded-b-lg border-x border-b" title="PDF Preview" />
+      </div>
+    )}
+
+    {/* WORD */}
+    {(selectedFile.type === "application/msword" ||
+      selectedFile.type === "application/vnd.openxmlformats-officedocument.wordprocessingml.document") && (
+      <div className="w-80 bg-white dark:bg-zinc-800 p-4 rounded-lg flex items-center gap-3 border">
+        <FaFileWord className="text-blue-600 text-3xl" />
+        <div className="flex-1 overflow-hidden">
+          <p className="text-sm font-medium truncate">{selectedFile.name}</p>
+          <p className="text-xs text-gray-500">{(selectedFile.size / 1024).toFixed(1)} KB • Word Document</p>
+        </div>
+      </div>
+    )}
+
+    {/* EXCEL / SHEET */}
+    {(selectedFile.type.includes("sheet") || selectedFile.type.includes("excel")) && (
+      <div className="w-80 bg-white dark:bg-zinc-800 p-4 rounded-lg flex items-center gap-3 border">
+        <FaFileExcel className="text-green-600 text-3xl" />
+        <div className="flex-1 overflow-hidden">
+          <p className="text-sm font-medium truncate">{selectedFile.name}</p>
+          <p className="text-xs text-gray-500">{(selectedFile.size / 1024).toFixed(1)} KB • Spreadsheet</p>
+        </div>
+      </div>
+    )}
+
+    {/* OTHER DOCUMENTS - TXT, ZIP, etc */}
+    {!selectedFile.type?.startsWith("image/") &&
+    !selectedFile.type?.startsWith("video/") &&
+    !selectedFile.type?.startsWith("audio/") &&
+     selectedFile.type!== "application/pdf" &&
+    !selectedFile.type.includes("word") &&
+    !selectedFile.type.includes("sheet") &&
+    !selectedFile.type.includes("excel") && (
+      <div className="w-80 bg-white dark:bg-zinc-800 p-4 rounded-lg flex items-center gap-3 border">
+        {selectedFile.name.endsWith('.zip') || selectedFile.name.endsWith('.rar')?
+          <FaFileAlt className="text-yellow-500 text-3xl" /> :
+          <FaFile className="text-gray-500 text-3xl" />
+        }
+        <div className="flex-1 overflow-hidden">
+          <p className="text-sm font-medium truncate">{selectedFile.name}</p>
+          <p className="text-xs text-gray-500">{(selectedFile.size / 1024).toFixed(1)} KB</p>
+        </div>
+      </div>
+    )}
+  </div>
+)}
 
       <div className={`p-3 border-t flex items-center gap-2 ${theme === "dark"? "border-zinc-800 bg-black" : "border-gray-200 bg-white"}`}>
         <button onClick={() => setShowEmoji(!showEmoji)}>
@@ -668,9 +776,13 @@ const handleDownload = async (msg) => {
           )}
         </div>
         <input value={input} onChange={(e) => handleTyping(e.target.value)} onKeyDown={(e) => e.key === "Enter" && sendMessage()} placeholder="Message..." className="flex-1 bg-transparent outline-none text-sm" />
-        <button onClick={sendMessage} className="text-blue-600">
-          <FaPaperPlane />
-        </button>
+        <button
+  onClick={sendMessage}
+  disabled={isSending}
+  className="disabled:opacity-50"
+>
+  {isSending? <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> : <FaPaperPlane />}
+</button>
         {showEmoji && (
           <div ref={emojiRef} className="absolute bottom-16 right-10 z-50">
             <EmojiPicker onEmojiClick={(e) => { setInput((p) => p + e.emoji); setShowEmoji(false); }} />
@@ -697,6 +809,37 @@ const handleDownload = async (msg) => {
           </div>
         </div>
       )}
+
+      {filePreview && selectedFile && (
+  <div className="relative p-3 border-t bg-gray-50 dark:bg-zinc-900">
+
+    {/* Close button - calls clearFile */}
+    <button
+      onClick={clearFile}
+      className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1.5 z-20"
+    >
+      <FaTimes size={10} />
+    </button>
+
+    {/* LOADER OVERLAY WHILE SENDING */}
+    {isSending && (
+      <div className="absolute inset-0 bg-white/70 dark:bg-black/60 z-10 flex flex-col items-center justify-center rounded">
+        <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+        <p className="text-xs mt-2 font-medium">Sending...</p>
+      </div>
+    )}
+
+    {/* Your preview content here */}
+    {selectedFile.type?.startsWith("image/") && (
+      <img src={filePreview} className="w-64 h-64 object-cover rounded-lg" alt="" />
+    )}
+    {selectedFile.type?.startsWith("video/") && (
+      <video src={filePreview} controls className="w-64 h-64 object-cover rounded-lg" />
+    )}
+    {/*... other previews same as before... */}
+
+  </div>
+)}
 
       {toastMessage && <div className="fixed bottom-20 left-1/2 -translate-x-1/2 bg-black text-white text-xs px-4 py-2 rounded-full z-50">{toastMessage}</div>}
     </div>
