@@ -246,36 +246,50 @@ const [selectedIds, setSelectedIds] = useState([]); // array of _id
   };
 
   const sendMessage = async () => {
-    if (!selectedFile &&!input.trim()) return;
-    try {
-      if (selectedFile) {
-        const fd = new FormData();
-        fd.append("file", selectedFile);
-        const { fileUrl, fileType } = await apiFetch("api/chats/upload", {
-          method: "POST",
-          body: fd,
-        });
-        socket.emit("sendMessage", {
-          senderId: currentUserId,
-          receiverId: selectedUser._id,
-          fileUrl,
-          fileType,
-          message: input.trim(),
-        });
-      } else {
-        socket.emit("sendMessage", {
-          senderId: currentUserId,
-          receiverId: selectedUser._id,
-          message: input.trim(),
-        });
-      }
-      setInput("");
-      setSelectedFile(null);
-      setFilePreview(null);
-    } catch {
-      setToastMessage("Failed to send");
+  if (!selectedFile && !input.trim()) return;
+
+  try {
+    let fileData = {};
+
+    if (selectedFile) {
+      const fd = new FormData();
+      fd.append("file", selectedFile);
+
+      // this now returns originalFileName, filePublicId, fileSize also
+      const uploadRes = await apiFetch("api/chats/upload", {
+        method: "POST",
+        body: fd,
+      });
+
+      fileData = {
+        fileUrl: uploadRes.fileUrl,
+        fileType: uploadRes.fileType,
+        originalFileName: uploadRes.originalFileName,
+        filePublicId: uploadRes.filePublicId,
+        fileSize: uploadRes.fileSize,
+      };
     }
-  };
+
+    // ✅ Call REST controller instead of socket.emit
+    await apiFetch("api/chats/send", {
+      method: "POST",
+      body: JSON.stringify({
+        receiverId: selectedUser._id,
+        message: input.trim(),
+        ...fileData,
+      }),
+    });
+
+    // controller will emit receiveMessage via socket, so no need to emit here
+    setInput("");
+    setSelectedFile(null);
+    setFilePreview(null);
+
+  } catch (err) {
+    console.error(err);
+    setToastMessage("Failed to send");
+  }
+};
 
   const handleTyping = (t) => {
     setInput(t);
@@ -412,34 +426,7 @@ useEffect(() => {
     initiateCall(selectedUser._id, selectedUser.username, avatarUrl, "video");
   };
 
- const [previewUrls, setPreviewUrls] = useState({}); // msgId -> blobUrl
 
-const mimeToExt = {
-  "application/pdf": ".pdf",
-  "application/msword": ".doc",
-  "application/vnd.openxmlformats-officedocument.wordprocessingml.document": ".docx",
-  "application/vnd.ms-excel": ".xls",
-  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": ".xlsx",
-  "text/plain": ".txt",
-};
-
-const getFileName = (url) => {
-  try { return decodeURIComponent(new URL(url).pathname.split('/').pop() || 'file').split('?')[0]; }
-  catch { return url.split('/').pop()?.split('?')[0] || 'file'; }
-};
-
-const ensureExtension = (name, mime) => {
-  if (/\.[a-z0-9]{2,5}$/i.test(name)) return name;
-  if (mime && mimeToExt[mime]) return name + mimeToExt[mime];
-  if (mime?.includes('/')) {
-    let ext = mime.split('/')[1].split(';')[0];
-    if (ext.includes('wordprocessingml')) ext = 'docx';
-    if (ext.includes('spreadsheetml')) ext = 'xlsx';
-    if (ext.includes('presentationml')) ext = 'pptx';
-    return `${name}.${ext}`;
-  }
-  return name;
-};
 
 const getFileIcon = (fileType, url) => {
   const type = (fileType || url || "").toLowerCase();
@@ -448,46 +435,29 @@ const getFileIcon = (fileType, url) => {
   return <FaFileAlt className="text-gray-500 text-2xl" />;
 };
 
+
+// Download Function For Files 
 const handleDownload = async (msg) => {
-  try {
-    const isCloudinary = msg.fileUrl.startsWith('https://');
+  const url = msg.fileUrl;
+  const fileName = msg.originalFileName || url.split('/').pop().split('?')[0];
 
-    // Cloudinary = public, use direct fetch (no auth)
-    // Your own API files = use apiFetch with token
-    const res = isCloudinary
-     ? await fetch(msg.fileUrl)
-      : await apiFetch(msg.fileUrl, { method: 'GET', isBlob: true });
+  // add fl_attachment flag if cloudinary url
+  const downloadUrl = url.includes('cloudinary.com') &&!url.includes('fl_attachment')
+   ? url.replace('/upload/', `/upload/fl_attachment:${encodeURIComponent(fileName)}/`)
+    : url;
 
-    if (!res.ok) throw new Error(`Failed ${res.status}`);
-
-    const blob = await res.blob();
-    let fileName = res.headers.get('Content-Disposition')?.match(/filename\*?=(?:UTF-8'')?"?([^";\n]+)"?/i)?.[1];
-    if (fileName) fileName = decodeURIComponent(fileName.trim());
-    else fileName = msg.fileName || getFileName(msg.fileUrl) || 'document';
-
-    fileName = ensureExtension(fileName, blob.type || msg.fileType);
-
-    const blobUrl = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = blobUrl;
-    a.download = fileName;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    setTimeout(() => URL.revokeObjectURL(blobUrl), 1000);
-  } catch (e) { console.error('download failed', e); }
-};
-const togglePdfPreview = async (msg) => {
-  if (previewUrls[msg._id]) {
-    URL.revokeObjectURL(previewUrls[msg._id]);
-    setPreviewUrls(prev => { const n = {...prev}; delete n[msg._id]; return n; });
-    return;
-  }
-  const res = await apiFetch(msg.fileUrl, { method: 'GET', isBlob: true });
+  const res = await fetch(downloadUrl);
   const blob = await res.blob();
   const blobUrl = URL.createObjectURL(blob);
-  setPreviewUrls(prev => ({...prev, [msg._id]: blobUrl}));
+
+  const a = document.createElement('a');
+  a.href = blobUrl;
+  a.download = fileName; // Will save as original name in Downloads
+  a.click();
+  URL.revokeObjectURL(blobUrl);
 };
+
+
 
 
   const quickReactions = ["👍", "❤", "😂", "😮", "😢", "🙏"];
@@ -534,6 +504,7 @@ const togglePdfPreview = async (msg) => {
       const senderId = msg.sender?._id?.toString() || msg.sender?.toString();
       const isOwn = senderId === currentUserIdStr;
       const isSelected = selectedIds.includes(msg._id);
+      console.log(msg);
 
       // SINGLE CHECK - use Str version only
       if (msg.deletedFor?.some((id) => id.toString() === currentUserIdStr)) return null;
@@ -575,7 +546,7 @@ const togglePdfPreview = async (msg) => {
             {!isSelectMode && (
               <button
                 onClick={(e) => { e.stopPropagation(); setOpenDropdownId(openDropdownId === msg._id? null : msg._id); }}
-                className="absolute -top-1 -left-6 opacity-0 group-hover:opacity-100"
+                className={`absolute -top-1 -left-6 opacity-0 group-hover:opacity-100 ${theme === "dark"? "text-zinc-400 hover:text-white" : "text-gray-400 hover:text-black"} transition`}
               >
                 <HiDotsVertical />
               </button>
@@ -604,31 +575,10 @@ const togglePdfPreview = async (msg) => {
                     <div className="flex items-center gap-3">
                       <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${theme === 'dark'? 'bg-zinc-700' : 'bg-white'}`}>
                         {getFileIcon(msg.fileType, msg.fileUrl)}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-xs font-medium truncate max-w-">{getFileName(msg.fileUrl)}</p>
-                        <p className="text- opacity-60 uppercase">{msg.fileType?.split('/')[1] || 'Document'}</p>
-                      </div>
-                      {!isSelectMode && (
-                        <button onClick={(e) => { e.stopPropagation(); handleDownload(msg); }} className="p-2 rounded-full hover:bg-black/10">
-                          <FaFileDownload />
-                        </button>
-                      )}
+                      </div> 
                     </div>
 
-                    {msg.fileType?.includes('pdf') &&!isSelectMode && (
-                      <>
-                        <div className="flex gap-3 text-xs">
-                          <button onClick={(e) => { e.stopPropagation(); togglePdfPreview(msg); }} className="underline">
-                            {previewUrls[msg._id]? 'Hide' : 'Preview'}
-                          </button>
-                          <button onClick={(e) => { e.stopPropagation(); handleDownload(msg); }} className="underline">Download</button>
-                        </div>
-                        {previewUrls[msg._id] && (
-                          <iframe src={previewUrls[msg._id]} className="w-full h- rounded-lg bg-white border mt-1" title="pdf preview" />
-                        )}
-                      </>
-                    )}
+                    
                   </div>
                 )}
               </>
