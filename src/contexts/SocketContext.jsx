@@ -5,48 +5,52 @@ import usePresenceStore from "../store/usePresenceStore";
 let socket = null;
 
 export const initializeSocket = () => {
-  if (socket?.connected) return socket;
-  if (socket) {
-    socket.disconnect();
-    socket = null;
-  }
-
   const user = useUserStore.getState().loggedUser;
-  const myId = user?._id || user?.id; // FIX: _id not userid
-  if (!myId) return null;
+  const myId = user?._id?.toString(); // FIXED HERE
+  if (!myId) {
+    console.log("No logged user for socket");
+    return null;
+  }
+  if (socket?.connected && socket.userId === myId) return socket;
+  
+  if(socket) socket.disconnect();
 
   const BACKEND_URL = "https://mygram-mvc.onrender.com";
+  console.log("Connecting socket for:", myId);
 
   socket = io(BACKEND_URL, {
     withCredentials: true,
-    autoConnect: true,
-    transports: ["websocket", "polling"],
+    transports: ["polling", "websocket"], // polling first for Render.com
   });
 
-  const { setOnlineUsers, addOnlineUser, removeOnlineUser } = usePresenceStore.getState();
+  socket.userId = myId;
 
   socket.on("connect", () => {
     console.log("Socket connected:", socket.id);
-    socket.emit("join", myId.toString());
+    socket.emit("join", myId);
   });
 
-  // Re-join on reconnect
-  socket.on("reconnect", () => {
-    socket.emit("join", myId.toString());
+  socket.on("online-users", (users) => {
+    console.log("Online users received:", users);
+    usePresenceStore.getState().setOnlineUsers(users);
   });
 
-  socket.on("online-users", (users) => setOnlineUsers(users));
-  socket.on("user-online", ({ userId }) => addOnlineUser(userId));
-  socket.on("user-offline", ({ userId }) => removeOnlineUser(userId));
+  socket.on("user-online", ({ userId }) => {
+    console.log("User came online:", userId);
+    usePresenceStore.getState().addOnlineUser(userId);
+  });
+
+  socket.on("user-offline", ({ userId }) => {
+    console.log("User went offline:", userId);
+    usePresenceStore.getState().removeOnlineUser(userId);
+  });
+
+  socket.on("connect_error", (err) => console.log("Socket error:", err.message));
 
   return socket;
 };
 
-export const getSocket = () => {
-  if (!socket) return initializeSocket();
-  return socket;
-};
-
+export const getSocket = () => socket || initializeSocket();
 export const disconnectSocket = () => {
   if (socket) {
     socket.disconnect();

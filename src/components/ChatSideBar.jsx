@@ -37,10 +37,10 @@ const usersToDisplay = searchQuery? (Array.isArray(results)? results : []) : saf
         </div>
         {usersToDisplay.map(user => {
          
-        const loggedIdStr = loggedUser?._id?.toString();
+        const { onlineUsers } = usePresenceStore();
+console.log("Current onlineUsers:", onlineUsers); // should show array of ids
 
-        const userIdStr = user._id.toString();
-        const isOnline = onlineUsers.includes(userIdStr) && userIdStr !== loggedUser?._id?.toString();
+const isOnline = onlineUsers.includes(user._id.toString());
           
           const isSelected = selectedUser?._id === user._id;
          

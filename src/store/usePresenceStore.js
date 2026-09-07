@@ -1,5 +1,4 @@
 import { create } from "zustand";
-
 const usePresenceStore = create((set) => ({
   onlineUsers: [],
   setOnlineUsers: (users) => set({ onlineUsers: (users || []).map(id => id.toString()) }),
@@ -12,5 +11,4 @@ const usePresenceStore = create((set) => ({
     set((s) => ({ onlineUsers: s.onlineUsers.filter(id => id !== uid) }));
   },
 }));
-
 export default usePresenceStore;

@@ -7,6 +7,7 @@ import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Spinner from "../Spinner";
 import useUserStore from "../store/useUserStore";
+import { initializeSocket } from "../contexts/SocketContext";
 
 export default function Login() {
   const [user, setUser] = useState({ loginId: "", password: "" });
@@ -44,6 +45,7 @@ const handleInput = (e) => {
     console.log("Login response:", data);
     if (data.token) {
       setLoggedUser(data);
+      initializeSocket(); // Initialize socket after successful login
       toast.success("Login Successful");
       navigate("/home");
     }
