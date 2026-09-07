@@ -325,8 +325,8 @@ const handleEmojiSelect = (e) => {
   // FIX: Emit typing event here too
   if (socket && selectedUser?._id) {
     socket.emit("typing", { 
-      receiverId: selectedUser._id,
-      senderId: loggedUser._id || loggedUser.userid 
+      receiverId: selectedUser?._id,
+      senderId: loggedUser?.userid 
     });
   }
   
