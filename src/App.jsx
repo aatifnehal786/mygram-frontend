@@ -12,7 +12,7 @@ import Home from './components/Home';
 import NotFound from './components/NotFound'
 import Private from './components/Private'
 import ForgotPassword from './components/ForgotPassword';
-import Layout from './components/Layout'; // 👈 import the layout
+import Layout from './components/Layout';
 import ChatSidebar from './components/ChatSideBar';
 import PublicRoute from './components/PublicRoute';
 import { ToastContainer } from "react-toastify";
@@ -20,7 +20,7 @@ import "react-toastify/dist/ReactToastify.css";
 import { getSocket } from "./contexts/SocketContext";
 import GuestLogin from './components/GuestLogin';
 import EmailVerification from './components/EmailVerification';
-import usePresenceStore from "../store/usePresenceStore";
+
 
 
 
@@ -87,21 +87,6 @@ function NotificationListener() {
 
 
 
-function useSocketPresence() {
-  const { setOnlineUsers, addOnlineUser, removeOnlineUser } = usePresenceStore();
-
-  useEffect(() => {
-    socket.on("online-users", setOnlineUsers);
-    socket.on("user-online", ({ userId }) => addOnlineUser(userId));
-    socket.on("user-offline", ({ userId }) => removeOnlineUser(userId));
-
-    return () => {
-      socket.off("online-users");
-      socket.off("user-online");
-      socket.off("user-offline");
-    };
-  }, []);
-}
  
 
 const router = createBrowserRouter(

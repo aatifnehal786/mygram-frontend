@@ -36,11 +36,11 @@ const usersToDisplay = searchQuery? (Array.isArray(results)? results : []) : saf
           <span className="font-semibold">Messages</span><span className="text-gray-500 text-xs">Requests</span>
         </div>
         {usersToDisplay.map(user => {
-          const userIdStr = user._id.toString();
-          const loggedIdStr = loggedUser?._id?.toString();
+         
+        const loggedIdStr = loggedUser?._id?.toString();
 
-          // Don't show yourself as online + string comparison
-         const isOnline = onlineUsers.includes(user._id.toString()) && user._id.toString() !== loggedUser._id.toString();
+        const userIdStr = user._id.toString();
+        const isOnline = onlineUsers.includes(userIdStr) && userIdStr !== loggedUser?._id?.toString();
           
           const isSelected = selectedUser?._id === user._id;
          
