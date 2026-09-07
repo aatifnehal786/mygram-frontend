@@ -319,6 +319,20 @@ const sendMessage = async () => {
   }
 };
 
+const handleEmojiSelect = (e) => {
+  setInput((p) => p + e.emoji);
+  
+  // FIX: Emit typing event here too
+  if (socket && selectedUser?._id) {
+    socket.emit("typing", { 
+      receiverId: selectedUser._id,
+      senderId: loggedUser._id || loggedUser.userid 
+    });
+  }
+  
+  // Keep input focused so typing continues
+  inputRef.current?.focus();
+};
   const handleTyping = (t) => {
     setInput(t);
     if (!socket) return;
@@ -793,12 +807,7 @@ const handleDownload = async (msg) => {
 </button>
         {showEmoji && (
   <div ref={emojiRef} className="absolute bottom-16 right-10 z-50">
-    <EmojiPicker 
-      onEmojiClick={(e) => { 
-        setInput((p) => p + e.emoji); 
-        // DON'T close - let user pick multiple
-      }} 
-    />
+    <EmojiPicker onEmojiClick={handleEmojiSelect} />
   </div>
 )}
 {showEmojiForMsg && (
