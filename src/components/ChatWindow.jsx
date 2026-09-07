@@ -792,15 +792,25 @@ const handleDownload = async (msg) => {
   {isSending? <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> : <FaPaperPlane />}
 </button>
         {showEmoji && (
-          <div ref={emojiRef} className="absolute bottom-16 right-10 z-50">
-            <EmojiPicker onEmojiClick={(e) => { setInput((p) => p + e.emoji); setShowEmoji(false); }} />
-          </div>
-        )}
-        {showEmojiForMsg && (
-          <div className="absolute bottom-20 right-10 z-50">
-            <EmojiPicker onEmojiClick={(e) => { handleReaction(showEmojiForMsg, e.emoji); setShowEmojiForMsg(null); }} />
-          </div>
-        )}
+  <div ref={emojiRef} className="absolute bottom-16 right-10 z-50">
+    <EmojiPicker 
+      onEmojiClick={(e) => { 
+        setInput((p) => p + e.emoji); 
+        // DON'T close - let user pick multiple
+      }} 
+    />
+  </div>
+)}
+{showEmojiForMsg && (
+  <div className="absolute bottom-20 right-10 z-50">
+    <EmojiPicker 
+      onEmojiClick={(e) => { 
+        handleReaction(showEmojiForMsg, e.emoji); 
+        setShowEmojiForMsg(null); // For reactions, close after 1 is OK
+      }} 
+    />
+  </div>
+)}
       </div>
 
       {showConfirmModal && (
