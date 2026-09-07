@@ -330,8 +330,6 @@ const handleEmojiSelect = (e) => {
     });
   }
   
-  // Keep input focused so typing continues
-  inputRef.current?.focus();
 };
   const handleTyping = (t) => {
     setInput(t);
