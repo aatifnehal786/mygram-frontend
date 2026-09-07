@@ -26,7 +26,7 @@ const handleInput = (e) => {
   }));
 };
 
- const handleSubmit = async (e) => {
+const handleSubmit = async (e) => {
   e.preventDefault();
   setIsLoading(true);
 
@@ -43,22 +43,22 @@ const handleInput = (e) => {
     });
 
     console.log("Login response:", data);
+    
     if (data.token) {
-      setLoggedUser(data);
-      initializeSocket(); // Initialize socket after successful login
+      setLoggedUser(data); // this saves to localStorage key "token-auth"
       toast.success("Login Successful");
-      navigate("/home");
-    }
+      
+      // Remove initializeSocket() - SocketContext will do it automatically
 
-    const isVerified = data.isEmailVerified;
-  if (!isVerified) {
-    navigate("/verify-email", { replace: true });
-  } else {
-    navigate("/", { replace: true });
-  }
+      const isVerified = data.user?.isEmailVerified ?? data.isEmailVerified;
+      if (!isVerified) {
+        navigate("/verify-email", { replace: true });
+      } else {
+        navigate("/", { replace: true }); // only ONE navigate
+      }
+    }
   } catch (err) {
     console.error(err);
-    // err.message will be "Incorrect password" from apiFetch
     toast.error(err.message || "Login failed");
   } finally {
     setIsLoading(false);
