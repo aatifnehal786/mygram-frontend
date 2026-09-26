@@ -18,12 +18,18 @@ export default function EmailVerification() {
   const inputRefs = useRef([]);
 
   useEffect(() => {
-    if (!loggedUser) return navigate("/login", { replace: true });
+    if (!loggedUser) {
+      navigate("/login", { replace: true });
+      return;
+    }
     const isVerified = loggedUser.isEmailVerified || loggedUser.user?.isEmailVerified;
-    if (isVerified) return navigate("/home", { replace: true });
-
+    if (isVerified) {
+      navigate("/home", { replace: true });
+      return;
+    }
     handleSendOtp();
-  }, []);
+    inputRefs.current[0]?.focus();
+  }, []); // eslint-disable-line
 
   useEffect(() => {
     if (timer > 0) {
@@ -48,63 +54,16 @@ export default function EmailVerification() {
     }
   };
 
-  const handleChange = (e, index) => {
-    const value = e.target.value.replace(/\D/g, "");
-    if (!value) return;
-    const newOtp = [...otp];
-    // handle paste of full code
-    if (value.length > 1) {
-      const chars = value.slice(0, 6).split("");
-      chars.forEach((char, i) => {
-        if (index + i < 6) newOtp[index + i] = char;
-      });
-      setOtp(newOtp);
-      const nextIndex = Math.min(index + chars.length, 5);
-      inputRefs.current[nextIndex]?.focus();
-      // Auto verify if all 6 filled via paste
-      if (newOtp.join("").length === 6) {
-        verifyWithCode(newOtp.join(""));
-      }
-      return;
-    }
-    newOtp[index] = value;
-    setOtp(newOtp);
-    if (index < 5) inputRefs.current[index + 1]?.focus();
-    // Auto verify when last digit filled
-    if (newOtp.join("").length === 6 && index === 4) {
-      verifyWithCode(newOtp.join(""));
-    }
-  };
-
-  const handleKeyDown = (e, index) => {
-    if (e.key === "Backspace") {
-      if (!otp[index] && index > 0) {
-        inputRefs.current[index - 1]?.focus();
-      }
-      const newOtp = [...otp];
-      newOtp[index] = "";
-      setOtp(newOtp);
-    }
-  };
-
-  const handleEnterKey = (e) => {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      handleVerify(e);
-      verifyWithCode(otp.join(""));
-    }
-  };
-
   const verifyWithCode = async (code) => {
+    if (code.length!== 6) return;
     try {
       setLoading(true); setError("");
       await apiFetch("api/otp/verify-email-otp", {
         method: "POST",
         body: JSON.stringify({ email, otp: code }),
       });
-
       const updatedUser = {
-       ...loggedUser,
+      ...loggedUser,
         isEmailVerified: true,
         user: loggedUser.user? {...loggedUser.user, isEmailVerified: true } : undefined,
       };
@@ -118,6 +77,50 @@ export default function EmailVerification() {
     }
   };
 
+  const handleChange = (e, index) => {
+    const value = e.target.value.replace(/\D/g, "");
+    if (!value) return;
+
+    const newOtp = [...otp];
+    if (value.length > 1) {
+      const chars = value.slice(0, 6).split("");
+      chars.forEach((char, i) => {
+        if (index + i < 6) newOtp[index + i] = char;
+      });
+      setOtp(newOtp);
+      const nextIndex = Math.min(index + chars.length, 5);
+      inputRefs.current[nextIndex]?.focus();
+      if (newOtp.join("").length === 6) verifyWithCode(newOtp.join(""));
+      return;
+    }
+
+    newOtp[index] = value.slice(-1); // take last typed
+    setOtp(newOtp);
+    if (index < 5) {
+      inputRefs.current[index + 1]?.focus();
+    }
+    // auto verify when all 6 filled
+    const fullCode = newOtp.join("");
+    if (fullCode.length === 6) {
+      verifyWithCode(fullCode);
+    }
+  };
+
+  const handleKeyDown = (e, index) => {
+    if (e.key === "Backspace") {
+      if (!otp[index] && index > 0) {
+        inputRefs.current[index - 1]?.focus();
+      }
+      const newOtp = [...otp];
+      newOtp[index] = "";
+      setOtp(newOtp);
+    }
+    if (e.key === "Enter") {
+      e.preventDefault();
+      verifyWithCode(otp.join(""));
+    }
+  };
+
   const handleVerify = (e) => {
     e.preventDefault();
     verifyWithCode(otp.join(""));
@@ -125,8 +128,7 @@ export default function EmailVerification() {
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-white p-4">
-      <div className="w-full max-w-">
-        {/* Instagram style lock icon */}
+      <div className="w-full max-w-sm">
         <div className="border border-zinc-300 rounded-sm p-8 flex flex-col items-center text-center">
           <div className="w-24 h-24 rounded-full border-2 border-black flex items-center justify-center mb-4">
             <span className="text-5xl">🔒</span>
@@ -146,6 +148,7 @@ export default function EmailVerification() {
                   key={index}
                   ref={(el) => (inputRefs.current[index] = el)}
                   type="text"
+                  inputMode="numeric"
                   maxLength={1}
                   value={digit}
                   onChange={(e) => handleChange(e, index)}
@@ -167,7 +170,7 @@ export default function EmailVerification() {
             {timer > 0? (
               <span className="text-zinc-400">Resend in {Math.floor(timer/60)}:{String(timer%60).padStart(2,'0')}</span>
             ) : (
-              <button onClick={handleSendOtp} onKeyDown={handleEnterKey} disabled={sending} className="text-[#0095f6] font-semibold">
+              <button onClick={handleSendOtp} disabled={sending} className="text-[#0095f6] font-semibold">
                 {sending? "Sending..." : "Resend Code"}
               </button>
             )}
