@@ -14,7 +14,7 @@ export const apiFetch = async (endpoint, options = {}) => {
   };
 
   // FIX 1: Use import.meta.env for Vite, not process.env
-  const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000/';
+  const apiUrl = "https://mygram-mvc.onrender.com/" || 'http://localhost:8000/';
 
   // FIX 2: Build full URL correctly
   const isAbsoluteUrl = endpoint.startsWith('http://') || endpoint.startsWith('https://');
