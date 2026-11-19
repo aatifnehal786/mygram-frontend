@@ -7,6 +7,8 @@ import { apiFetch } from "../api/apiFetch";
 import Spinner from "../Spinner";
 import useUserStore from "../store/useUserStore";
 import {useState} from 'react'
+import { useTheme } from '../contexts/ThemeContext';
+
 
 export default function GuestLogin() {
     
@@ -14,6 +16,7 @@ export default function GuestLogin() {
     const [fullName, setFullName] = useState("");
     const navigate = useNavigate();
     const setLoggedUser = useUserStore((state) => state.setLoggedUser);
+    const { theme } = useTheme();
 
     const handleEnterKey = (e) => {
         if (e.key === "Enter") {
