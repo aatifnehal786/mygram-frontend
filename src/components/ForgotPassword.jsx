@@ -6,6 +6,7 @@ import { apiFetch } from "../api/apiFetch";
 import { toast,ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Spinner from "../Spinner";
+import { useTheme } from '../contexts/ThemeContext';
 
 export default function ForgotPassword() {
   const [email, setEmail] = useState("");
@@ -16,7 +17,7 @@ export default function ForgotPassword() {
   const [isPassword, setIsPassword] = useState(false);
   const [strength, setStrength] = useState("");
   const [typingTimeout, setTypingTimeout] = useState(null);
-
+  const {theme} = useTheme();
   const buttonRef1 = useRef();
   const buttonRef2 = useRef();
 
