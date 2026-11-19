@@ -150,83 +150,104 @@ const filteredForwardUsers = safeFollowedUsers.filter(u =>
   }
 
   return (
-    <div className={`flex h-[calc(100vh-60px)] w-full max-w- mx-auto border ${theme === "dark"? "border-zinc-800 bg-black" : "border-gray-200 bg-white"}`}>
-      
-      <div className={`${selectedUser? "hidden md:flex" : "flex"} w-100 md:max-w- md:min-w- border-r flex-col ${theme === "dark"? "border-zinc-800 bg-black" : "border-gray-200 bg-white"}`}>
-        <ChatSidebar theme={theme} />
-      </div>
+   <div className={`flex h-[calc(100vh-60px)] w-full max-w- mx-auto border-x ${theme === "dark" ? "border-[#374045] bg-[#111B21]" : "border-gray-200 bg-[#ECE5DD]"}`}>
+  
+  {/* LEFT - Sidebar */}
+  <div className={`${selectedUser ? "hidden md:flex" : "flex"} w-full md:max-w- md:min-w- border-r flex-col ${theme === "dark" ? "border-[#374045] bg-[#202C33]" : "border-gray-200 bg-white"}`}>
+    <ChatSidebar theme={theme} />
+  </div>
 
-      <div className={`${selectedUser? "flex" : "hidden md:flex"} flex-1 flex-col`}>
-        {selectedUser? (
-          <ChatWindow 
-            onBack={() => setSelectedUser(null)} 
-            theme={theme} 
-            triggerForwardMode={triggerForwardMode} 
-          />
-        ) : (
-          <div className="flex-1 flex items-center justify-center flex-col gap-2">
-            <div className="w-24 h-24 rounded-full border-2 flex items-center justify-center text-4xl">✈️</div>
-            <p className="font-semibold">Your messages</p>
-            <p className="text-sm text-gray-400">Send private photos and messages to a friend or group</p>
-          </div>
-        )}
-      </div>
-
-      {/* FORWARD MODAL */}
-            {showForwardModal && (
-        <div className="fixed inset-0 bg-black/60 z-[100] flex items-center justify-center p-4">
-          <div className={`w-full max-w- rounded-xl ${theme === "dark"? "bg-zinc-900" : "bg-white"} p-0 max-h- flex flex-col overflow-hidden`}>
-            <div className="flex justify-between items-center p-4 border-b dark:border-zinc-800">
-              <h3 className="font-semibold">Forward to</h3>
-              <button onClick={() => setShowForwardModal(false)} className="text-xl w-8 h-8 rounded-full hover:bg-gray-100 dark:hover:bg-zinc-800 flex items-center justify-center">×</button>
-            </div>
-
-            <div className="p-3">
-              <input 
-                value={searchForward} 
-                onChange={e => setSearchForward(e.target.value)}
-                placeholder="Search"
-                className={`w-full rounded-full px-4 py-2 text-sm outline-none ${theme === 'dark'? 'bg-zinc-800' : 'bg-gray-100'}`}
-              />
-            </div>
-
-            <div className="flex-1 overflow-y-auto p-2">
-              {filteredForwardUsers.length === 0? (
-                <p className="text-xs text-gray-400 text-center py-8">No users found. Follow someone to forward.</p>
-              ) : filteredForwardUsers.filter(u => u._id !== (loggedUser.userid || loggedUser._id)).map(u => (
-                <label key={u._id} className="flex items-center gap-3 p-3 hover:bg-gray-50 dark:hover:bg-zinc-800 rounded-lg cursor-pointer">
-                  <input 
-                    type="checkbox" 
-                    checked={selectedForwardUsers.includes(u._id)}
-                    onChange={(e) => {
-                      if (e.target.checked) setSelectedForwardUsers(prev => [...prev, u._id]);
-                      else setSelectedForwardUsers(prev => prev.filter(id => id !== u._id));
-                    }}
-                    className="w-4 h-4"
-                  />
-                  <img src={u.profilePic || u.profilePicture || "/placeholder.svg"} className="w-10 h-10 rounded-full object-cover" />
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium truncate">{u.username}</p>
-                    <p className="text-xs text-gray-500">Tap to select</p>
-                  </div>
-                </label>
-              ))}
-            </div>
-
-            <div className="p-4 border-t dark:border-zinc-800">
-              <button 
-                onClick={forwardMessageToUsers} 
-                disabled={selectedForwardUsers.length === 0}
-                className="w-full bg-blue-500 disabled:bg-gray-300 disabled:cursor-not-allowed text-white py-2.5 rounded-lg font-semibold text-sm"
-              >
-                Send ({selectedForwardUsers.length})
-              </button>
-            </div>
-          </div>
+  {/* RIGHT - Chat Window / Empty State */}
+  <div className={`${selectedUser ? "flex" : "hidden md:flex"} flex-1 flex-col bg-[#ECE5DD] dark:bg-[#0B141A] wa-chat-bg`}>
+    {selectedUser ? (
+      <ChatWindow 
+        onBack={() => setSelectedUser(null)} 
+        theme={theme} 
+        triggerForwardMode={triggerForwardMode} 
+      />
+    ) : (
+      <div className="flex-1 flex items-center justify-center flex-col gap-3 px-6 text-center">
+        {/* WhatsApp Empty State */}
+        <div className="w- h- rounded-full bg-[#DCF8C6] dark:bg-[#005C4B] flex items-center justify-center text- mb-2">
+          💬
         </div>
-      )}
-      <ToastContainer />
+        <p className="font-bold text- text-[#111B21] dark:text-white">WhatsApp Web</p>
+        <p className="text-sm text-[#8696A0] max-w- leading-5">
+          Now send and receive messages without keeping your phone online.<br />
+          Select a chat to start messaging.
+        </p>
+        <div className="w- h- bg-[#D1D7DB] dark:bg-[#374045] my-2" />
+        <p className="text- text-[#8696A0] flex items-center gap-1">
+          🔒 End-to-end encrypted • MyGram Chat
+        </p>
+        <button
+          onClick={() => document.querySelector('input[placeholder="Search"]')?.focus()}
+          className="mt-2 bg-[#25D366] hover:bg-[#1EBE5A] text-white px-6 py-2.5 rounded-full text-sm font-semibold transition"
+        >
+          Start New Chat
+        </button>
+      </div>
+    )}
+  </div>
+
+  {/* FORWARD MODAL - WhatsApp Style */}
+  {showForwardModal && (
+    <div className="fixed inset-0 bg-black/60 z-[100] flex items-center justify-center p-4">
+      <div className={`w-full max-w- rounded-xl ${theme === "dark" ? "bg-[#202C33]" : "bg-white"} p-0 max-h- flex flex-col overflow-hidden shadow-2xl`}>
+        <div className={`flex justify-between items-center p-4 ${theme === "dark" ? "bg-[#202C33] border-[#374045]" : "bg-[#075E54] text-white"} border-b`}>
+          <h3 className="font-semibold">Forward to</h3>
+          <button onClick={() => setShowForwardModal(false)} className="text-xl w-8 h-8 rounded-full hover:bg-white/20 flex items-center justify-center">×</button>
+        </div>
+
+        <div className="p-3">
+          <input 
+            value={searchForward} 
+            onChange={e => setSearchForward(e.target.value)}
+            placeholder="Search"
+            className={`w-full rounded-full px-4 py-2.5 text-sm outline-none ${theme === 'dark' ? 'bg-[#2A3942] text-white placeholder:text-[#8696A0] focus:ring-2 focus:ring-[#25D366]/30' : 'bg-[#F0F2F5] focus:ring-2 focus:ring-[#25D366]/30'}`}
+          />
+        </div>
+
+        <div className="flex-1 overflow-y-auto p-2">
+          {filteredForwardUsers.length === 0 ? (
+            <p className="text-xs text-[#8696A0] text-center py-8">No users found. Follow someone to forward.</p>
+          ) : filteredForwardUsers.filter(u => u._id !== (loggedUser.userid || loggedUser._id)).map(u => (
+            <label key={u._id} className="flex items-center gap-3 p-3 hover:bg-[#F0F2F5] dark:hover:bg-[#2A3942] rounded-lg cursor-pointer">
+              <input 
+                type="checkbox" 
+                checked={selectedForwardUsers.includes(u._id)}
+                onChange={(e) => {
+                  if (e.target.checked) setSelectedForwardUsers(prev => [...prev, u._id]);
+                  else setSelectedForwardUsers(prev => prev.filter(id => id !== u._id));
+                }}
+                className="w-4 h-4 accent-[#25D366]"
+              />
+              <img src={u.profilePic || u.profilePicture || "/placeholder.svg"} className="w-10 h-10 rounded-full object-cover border-2 border-[#25D366]" />
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium truncate">{u.username}</p>
+                <p className="text-xs text-[#8696A0]">Tap to select</p>
+              </div>
+              {selectedForwardUsers.includes(u._id) && (
+                <span className="w-6 h-6 bg-[#25D366] text-white rounded-full flex items-center justify-center text-xs">✓</span>
+              )}
+            </label>
+          ))}
+        </div>
+
+        <div className={`p-4 border-t ${theme === "dark" ? "border-[#374045] bg-[#202C33]" : "border-gray-200 bg-[#F0F2F5]"}`}>
+          <button 
+            onClick={forwardMessageToUsers} 
+            disabled={selectedForwardUsers.length === 0}
+            className="w-full bg-[#25D366] hover:bg-[#1EBE5A] disabled:bg-gray-300 disabled:cursor-not-allowed text-white py-3 rounded-full font-semibold text-sm transition"
+          >
+            Send ({selectedForwardUsers.length})
+          </button>
+        </div>
+      </div>
     </div>
+  )}
+  <ToastContainer />
+</div>
   );
 };
 export default Chat;

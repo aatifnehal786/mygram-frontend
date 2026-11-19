@@ -40,42 +40,65 @@ export default function ImagePostWithMusic({ post, currentlyPlayingId, setCurren
   };
 
   return (
-    <div className="w-full max-w- mx-auto bg-black rounded-lg overflow-hidden">
-      <div className="w-full aspect-square relative flex justify-center items-center bg-black overflow-hidden">
-        <img
-          src={post.mediaUrl}
-          alt="Post"
-          onClick={handlePlay}
-          className="w-full h-full object-cover cursor-pointer"
-        />
+    <div className="w-full max-w- mx-auto bg-black rounded-xl overflow-hidden border border-[#374045] dark:border-[#374045] border-gray-200">
+  <div className="w-full aspect-square relative flex justify-center items-center bg-black overflow-hidden group">
+    <img
+      src={post.mediaUrl}
+      alt="Post"
+      onClick={handlePlay}
+      className="w-full h-full object-cover cursor-pointer"
+    />
 
-        {post.backgroundMusic && (
-          <audio ref={audioRef} src={post.backgroundMusic} loop preload="auto" />
-        )}
+    {/* WhatsApp Gradient Overlay - Bottom for controls */}
+    <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-black/70 to-transparent pointer-events-none" />
 
-        {/* Play icon if not playing */}
-        {!isCurrent && post.backgroundMusic && (
-          <button
-            onClick={handlePlay}
-            className="absolute inset-0 flex items-center justify-center"
-          >
-            <span className="bg-black/50 text-white rounded-full p-4 text-xl">🎵</span>
-          </button>
-        )}
+    {post.backgroundMusic && (
+      <audio ref={audioRef} src={post.backgroundMusic} loop preload="auto" />
+    )}
 
-        {/* Mute / Unmute */}
-        {isCurrent && post.backgroundMusic && (
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              setIsMuted(!isMuted);
-            }}
-            className="absolute bottom-3 right-3 bg-black/60 hover:bg-black/80 text-white rounded-full w-8 h-8 flex items-center justify-center backdrop-blur-md"
-          >
-            {isMuted? "🔇" : "🔊"}
-          </button>
-        )}
+    {/* Play icon if not playing - WhatsApp Green */}
+    {!isCurrent && post.backgroundMusic && (
+      <button
+        onClick={handlePlay}
+        className="absolute inset-0 flex items-center justify-center"
+      >
+        <span className="bg-[#25D366] text-white rounded-full w- h- flex items-center justify-center text- shadow-2xl hover:bg-[#1EBE5A] transition scale-100 hover:scale-110">
+          ▶️
+        </span>
+        <span className="absolute bottom-4 left-4 bg-black/60 text-white text-xs px-3 py-1 rounded-full flex items-center gap-1 backdrop-blur-md">
+          🎵 Tap to play music
+        </span>
+      </button>
+    )}
+
+    {/* Playing Indicator - Top Left */}
+    {isCurrent && post.backgroundMusic && (
+      <div className="absolute top-3 left-3 bg-[#075E54] text-white text-xs px-3 py-1.5 rounded-full flex items-center gap-2 backdrop-blur-md">
+        <span className="w-2 h-2 bg-[#25D366] rounded-full animate-pulse"></span>
+        Playing Music
       </div>
-    </div>
+    )}
+
+    {/* Mute / Unmute - WhatsApp Style */}
+    {isCurrent && post.backgroundMusic && (
+      <button
+        onClick={(e) => {
+          e.stopPropagation();
+          setIsMuted(!isMuted);
+        }}
+        className="absolute bottom-3 right-3 bg-[#202C33]/90 hover:bg-[#075E54] text-white rounded-full w-10 h-10 flex items-center justify-center backdrop-blur-md border border-white/20 transition"
+      >
+        {isMuted ? "🔇" : "🔊"}
+      </button>
+    )}
+
+    {/* Music Note Badge - Bottom Left when muted/paused */}
+    {post.backgroundMusic && !isCurrent && (
+      <div className="absolute top-3 right-3 bg-black/60 text-white text-xs px-2 py-1 rounded-full backdrop-blur-md">
+        🎵 Music
+      </div>
+    )}
+  </div>
+</div>
   );
 }

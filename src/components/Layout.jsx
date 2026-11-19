@@ -49,7 +49,7 @@ export default function Layout() {
   }, []);
 
   return (
-    <div className={`min-h-screen ${theme === "dark"? "bg-black text-white" : "bg-white text-black"}`}>
+    <div className={`min-h-screen ${theme === "dark"? "bg-black text-white" : "bg-rgb(122, 187, 58) text-black"}`}>
       {/* GLOBAL RATE LIMIT TOAST */}
       {rateLimitError && (
         <div className="fixed top-5 left-1/2 -translate-x-1/2 z-[100] bg-red-600 text-white px-6 py-3 rounded-full shadow-lg animate-bounce flex items-center gap-2">

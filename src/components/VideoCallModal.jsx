@@ -254,17 +254,17 @@ const VideoCallModal = () => {
    
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75">
-      <div
-        className={`relative w-full h-full max-w-4xl max-h-3xl rounded-lg overflow-hidden ${
-          theme === "dark" ? "bg-gray-900" : "bg-white"
-        }`}
-      >
-        {/* Incoming Call UI */}
-        {incomingCall && !isCallActive && (
-          <div className="flex flex-col items-center justify-center h-full p-8">
-            <div className="text-center mb-8">
-              <div className="w-32 h-32 rounded-full bg-gray-300 mx-auto mb-4 overflow-hidden">
+   <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-0 md:p-4">
+  <div
+    className={`relative w-full h-full md:max-w- md:max-h- md:rounded-2xl overflow-hidden shadow-2xl ${theme === "dark" ? "bg-[#0B141A]" : "bg-[#111B21]"}`}
+  >
+    {/* Incoming Call UI - WhatsApp Style */}
+    {incomingCall && !isCallActive && (
+      <div className="flex flex-col items-center justify-center h-full p-8 bg-[#111B21]">
+        <div className="text-center mb-8">
+          <div className="relative mx-auto mb-5 w-fit">
+            <div className="w-32 h-32 rounded-full bg-[#25D366] p- animate-pulse">
+              <div className="w-full h-full rounded-full overflow-hidden bg-[#202C33]">
                 <img
                   src={displayInfo?.avatar || "/placeholder.svg?height=128&width=128"}
                   alt={displayInfo?.name || "Unknown"}
@@ -274,138 +274,181 @@ const VideoCallModal = () => {
                   }}
                 />
               </div>
-              <h2 className={`text-2xl font-semibold mb-2 ${theme === "dark" ? "text-white" : "text-gray-900"}`}>
-                {displayInfo?.name || "Unknown"}
-              </h2>
-              <p className={`text-lg ${theme === "dark" ? "text-gray-300" : "text-gray-600"}`}>
-                Incoming {callType} call...
-              </p>
             </div>
-
-            <div className="flex space-x-6">
-              <button
-                onClick={handleRejectCall}
-                className="w-16 h-16 bg-red-500 hover:bg-red-600 rounded-full flex items-center justify-center text-white transition-colors"
-              >
-                <FaPhoneSlash className="w-6 h-6" />
-              </button>
-              <button
-                onClick={handleAnswerCall}
-                className="w-16 h-16 bg-green-500 hover:bg-green-600 rounded-full flex items-center justify-center text-white transition-colors"
-              >
-                <FaVideo className="w-6 h-6" />
-              </button>
-            </div>
+            <span className="absolute bottom-1 right-1 w-5 h-5 bg-[#25D366] border- border-[#111B21] rounded-full"></span>
           </div>
+          <h2 className="text- font-semibold mb-1 text-white">
+            {displayInfo?.name || "Unknown"}
+          </h2>
+          <p className="text- text-[#25D366] font-medium flex items-center justify-center gap-1.5">
+            <span className="w-2 h-2 bg-[#25D366] rounded-full animate-ping"></span>
+            Incoming {callType} call...
+          </p>
+          <p className="text-xs text-[#8696A0] mt-2">MyGram Video Call • End-to-end encrypted</p>
+        </div>
+
+        <div className="flex items-center gap-8">
+          <div className="flex flex-col items-center gap-2">
+            <button
+              onClick={handleRejectCall}
+              className="w- h- bg-[#EA0038] hover:bg-[#C9002F] rounded-full flex items-center justify-center text-white transition shadow-lg hover:scale-105 active:scale-95"
+            >
+              <FaPhoneSlash className="w-6 h-6" />
+            </button>
+            <span className="text-xs text-[#8696A0]">Decline</span>
+          </div>
+          <div className="flex flex-col items-center gap-2">
+            <button
+              onClick={handleAnswerCall}
+              className="w- h- bg-[#25D366] hover:bg-[#1EBE5A] rounded-full flex items-center justify-center text-white transition shadow-lg shadow-[#25D366]/30 hover:scale-105 active:scale-95"
+            >
+              <FaVideo className="w-6 h-6" />
+            </button>
+            <span className="text-xs text-white">Accept</span>
+          </div>
+        </div>
+
+        <div className="absolute bottom-6 left-0 right-0 flex justify-center gap-2">
+          <span className="text- text-[#8696A0] bg-white/5 px-3 py-1.5 rounded-full">💬 Message &nbsp;•&nbsp; 🔇 Mute &nbsp;•&nbsp; 📹 Video</span>
+        </div>
+      </div>
+    )}
+
+    {/* Active Call UI */}
+    {shouldShowActiveCall && (
+      <div className="relative w-full h-full bg-[#0B141A]">
+        {/* Remote Video */}
+        {callType === "video" && (
+          <video
+            ref={remoteVideoRef}
+            autoPlay
+            playsInline
+            className={`w-full h-full object-cover bg-[#0B141A] ${remoteStream ? "block" : "hidden"}`}
+          />
         )}
 
-        {/* Active Call UI */}
-        {shouldShowActiveCall && (
-          <div className="relative w-full h-full">
-            {/* Remote Video */}
-            {callType === "video" && (
-              <video
-                ref={remoteVideoRef}
-                autoPlay
-                playsInline
-                className={`w-full h-full object-cover bg-gray-800 ${remoteStream ? "block" : "hidden"}`}
-              />
-            )}
-
-            {/* Avatar/Status Display */}
-            {(!remoteStream || callType !== "video") && (
-              <div className="w-full h-full bg-gray-800 flex items-center justify-center">
-                <div className="text-center">
-                  <div className="w-32 h-32 rounded-full bg-gray-600 mx-auto mb-4 overflow-hidden">
-                    <img
-                      src={displayInfo?.avatar || "/placeholder.svg?height=128&width=128"}
-                      alt={displayInfo?.name || "Unknown"}
-                      className="w-full h-full object-cover"
-                      onError={(e) => {
-                        e.target.src = "/placeholder.svg?height=128&width=128"
-                      }}
-                    />
-                  </div>
-                  <p className="text-white text-xl">
-                    {callStatus === "calling"
-                      ? `Calling ${displayInfo?.name || "User"}...`
-                      : callStatus === "connecting"
-                        ? "Connecting..."
-                        : callStatus === "connected"
-                          ? displayInfo?.name || "Connected"
-                          : callStatus === "failed"
-                            ? "Connection failed"
-                            : displayInfo?.name || "Unknown"}
-                  </p>
+        {/* Avatar/Status Display */}
+        {(!remoteStream || callType !== "video") && (
+          <div className="w-full h-full bg-[#111B21] flex items-center justify-center">
+            <div className="text-center px-6">
+              <div className="w-32 h-32 rounded-full bg-[#25D366] p- mx-auto mb-4">
+                <div className="w-full h-full rounded-full overflow-hidden bg-[#202C33]">
+                  <img
+                    src={displayInfo?.avatar || "/placeholder.svg?height=128&width=128"}
+                    alt={displayInfo?.name || "Unknown"}
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      e.target.src = "/placeholder.svg?height=128&width=128"
+                    }}
+                  />
                 </div>
               </div>
-            )}
-
-            {/* Local Video (Picture-in-Picture) */}
-            {callType === "video" && localStream && (
-              <div className="absolute top-4 right-4 w-48 h-36 bg-gray-800 rounded-lg overflow-hidden border-2 border-white">
-                <video ref={localVideoRef} autoPlay playsInline muted className="w-full h-full object-cover" />
-              </div>
-            )}
-
-            {/* Call Status */}
-            <div className="absolute top-4 left-4">
-              <div className={`px-4 py-2 rounded-full ${theme === "dark" ? "bg-gray-800" : "bg-white"} bg-opacity-75`}>
-                <p className={`text-sm ${theme === "dark" ? "text-white" : "text-gray-900"}`}>
-                  {callStatus === "connected" ? "Connected" : callStatus}
-                </p>
-              </div>
-            </div>
-
-            {/* Call Controls */}
-            <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2">
-              <div className="flex space-x-4">
-                {callType === "video" && (
-                  <button
-                    onClick={toggleVideo}
-                    className={`w-12 h-12 rounded-full flex items-center justify-center transition-colors ${
-                      isVideoEnabled
-                        ? "bg-gray-600 hover:bg-gray-700 text-white"
-                        : "bg-red-500 hover:bg-red-600 text-white"
-                    }`}
-                  >
-                    {isVideoEnabled ? <FaVideo className="w-5 h-5" /> : <FaVideoSlash className="w-5 h-5" />}
-                  </button>
-                )}
-
-                <button
-                  onClick={toggleAudio}
-                  className={`w-12 h-12 rounded-full flex items-center justify-center transition-colors ${
-                    isAudioEnabled
-                      ? "bg-gray-600 hover:bg-gray-700 text-white"
-                      : "bg-red-500 hover:bg-red-600 text-white"
-                  }`}
-                >
-                  {isAudioEnabled ? <FaMicrophone className="w-5 h-5" /> : <FaMicrophoneSlash className="w-5 h-5" />}
-                </button>
-
-                <button
-                  onClick={handleEndCall}
-                  className="w-12 h-12 bg-red-500 hover:bg-red-600 rounded-full flex items-center justify-center text-white transition-colors"
-                >
-                  <FaPhoneSlash className="w-5 h-5" />
-                </button>
-              </div>
+              <p className="text-white text- font-semibold">
+                {callStatus === "calling"
+                  ? `Calling ${displayInfo?.name || "User"}...`
+                  : callStatus === "connecting"
+                    ? "Connecting..."
+                    : callStatus === "connected"
+                      ? displayInfo?.name || "Connected"
+                      : callStatus === "failed"
+                        ? "Connection failed"
+                        : displayInfo?.name || "Unknown"}
+              </p>
+              <p className="text-[#8696A0] text-sm mt-1">
+                {callStatus === "calling" ? "Ringing..." : callStatus === "connecting" ? "Please wait..." : callStatus === "connected" ? "● 00:00 • Encrypted" : ""}
+              </p>
+              {callStatus === "calling" && (
+                <div className="flex justify-center gap-1.5 mt-4">
+                  <span className="w-2 h-2 bg-[#25D366] rounded-full animate-bounce"></span>
+                  <span className="w-2 h-2 bg-[#25D366] rounded-full animate-bounce delay-100"></span>
+                  <span className="w-2 h-2 bg-[#25D366] rounded-full animate-bounce delay-200"></span>
+                </div>
+              )}
             </div>
           </div>
         )}
 
-        {/* Close button for calling state */}
-        {callStatus === "calling" && (
-          <button
-            onClick={handleEndCall}
-            className="absolute top-4 right-4 w-8 h-8 bg-gray-600 hover:bg-gray-700 rounded-full flex items-center justify-center text-white transition-colors"
-          >
-            <FaTimes className="w-4 h-4" />
-          </button>
+        {/* Local Video (Picture-in-Picture) - WhatsApp Style */}
+        {callType === "video" && localStream && (
+          <div className="absolute top-4 right-4 w-32 md:w-48 h-44 md:h-36 bg-[#202C33] rounded-xl overflow-hidden border-2 border-white/20 shadow-xl">
+            <video ref={localVideoRef} autoPlay playsInline muted className="w-full h-full object-cover" />
+            <span className="absolute bottom-1.5 left-1.5 bg-black/60 text-white text- px-2 py-0.5 rounded-full backdrop-blur">You</span>
+          </div>
         )}
+
+        {/* Call Status - Top Left */}
+        <div className="absolute top-4 left-4">
+          <div className="px-3.5 py-1.5 rounded-full bg-black/50 backdrop-blur flex items-center gap-2">
+            <span className={`w-2 h-2 rounded-full ${callStatus === "connected" ? "bg-[#25D366]" : "bg-yellow-400 animate-pulse"}`}></span>
+            <p className="text- text-white font-medium capitalize">
+              {callStatus === "connected" ? "Connected • Encrypted" : callStatus}
+            </p>
+          </div>
+        </div>
+
+        {/* Name Top Center - WhatsApp Style */}
+        <div className="absolute top-4 left-1/2 -translate-x-1/2 hidden md:block">
+          <div className="bg-black/50 backdrop-blur px-4 py-1.5 rounded-full">
+            <p className="text- text-white font-medium">{displayInfo?.name || "Unknown"}</p>
+          </div>
+        </div>
+
+        {/* Call Controls - WhatsApp Style */}
+        <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2">
+          <div className="flex items-end gap-3 bg-black/40 backdrop-blur px-4 py-3 rounded-full">
+            {callType === "video" && (
+              <div className="flex flex-col items-center gap-1">
+                <button
+                  onClick={toggleVideo}
+                  className={`w-12 h-12 rounded-full flex items-center justify-center transition active:scale-95 ${isVideoEnabled
+                    ? "bg-white/20 hover:bg-white/30 text-white"
+                    : "bg-white text-black"
+                    }`}
+                >
+                  {isVideoEnabled ? <FaVideo className="w-5 h-5" /> : <FaVideoSlash className="w-5 h-5" />}
+                </button>
+                <span className="text- text-white/70">Video</span>
+              </div>
+            )}
+
+            <div className="flex flex-col items-center gap-1">
+              <button
+                onClick={toggleAudio}
+                className={`w-12 h-12 rounded-full flex items-center justify-center transition active:scale-95 ${isAudioEnabled
+                  ? "bg-white/20 hover:bg-white/30 text-white"
+                  : "bg-white text-black"
+                  }`}
+              >
+                {isAudioEnabled ? <FaMicrophone className="w-5 h-5" /> : <FaMicrophoneSlash className="w-5 h-5" />}
+              </button>
+              <span className="text- text-white/70">Mute</span>
+            </div>
+
+            <div className="flex flex-col items-center gap-1">
+              <button
+                onClick={handleEndCall}
+                className="w- h- bg-[#EA0038] hover:bg-[#C9002F] rounded-full flex items-center justify-center text-white transition shadow-lg hover:scale-105 active:scale-95"
+              >
+                <FaPhoneSlash className="w-5 h-5" />
+              </button>
+              <span className="text- text-white/70">End</span>
+            </div>
+          </div>
+        </div>
       </div>
-    </div>
+    )}
+
+    {/* Close button for calling state */}
+    {callStatus === "calling" && (
+      <button
+        onClick={handleEndCall}
+        className="absolute top-4 right-4 w-9 h-9 bg-white/20 hover:bg-white/30 backdrop-blur rounded-full flex items-center justify-center text-white transition"
+      >
+        <FaTimes className="w-4 h-4" />
+      </button>
+    )}
+  </div>
+</div>
   )
  
 }

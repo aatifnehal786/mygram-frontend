@@ -79,110 +79,128 @@ export default function CreatePost() {
 
   return (
     <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
-      <div className="bg-white w-full max-w- rounded-xl overflow-hidden flex flex-col">
-        {/* Header */}
-        <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200">
-          <button onClick={onClose} className={`p-2 rounded-full ${theme === 'dark' ? 'bg-gray-800 text-white' : 'bg-gray-200 text-black'}`}>
-            ✕
-          </button>
-          <h2 className={`font-semibold text-lg rounded-lg p-2 ${theme === 'dark' ? 'bg-gray-800 text-white' : 'bg-gray-200 text-black'}`}>Create new post</h2>
-          <button
-            onClick={handleShare}
-            disabled={!mediaFile || loading}
-            className="text-[#0095f6] font-semibold text-sm disabled:opacity-40"
-          >
-            {loading? "Sharing..." : "Share"}
-          </button>
+  <div className={`w-full max-w- max-h- rounded-2xl overflow-hidden flex flex-col shadow-2xl ${theme === 'dark' ? 'bg-[#202C33] text-white' : 'bg-white text-black'}`}>
+    {/* Header - WhatsApp Style */}
+    <div className={`flex items-center justify-between px-4 py-3 border-b shrink-0 ${theme === 'dark' ? 'bg-[#202C33] border-[#374045]' : 'bg-[#075E54] text-white border-[#075E54]'}`}>
+      <button onClick={onClose} className={`w-9 h-9 rounded-full flex items-center justify-center transition ${theme === 'dark' ? 'bg-[#2A3942] text-white hover:bg-[#374045]' : 'bg-white/20 text-white hover:bg-white/30'}`}>
+        ✕
+      </button>
+      <h2 className="font-semibold text-">Create new post</h2>
+      <button
+        onClick={handleShare}
+        disabled={!mediaFile || loading}
+        className="bg-[#25D366] hover:bg-[#1EBE5A] text-white px-5 py-2 rounded-full font-semibold text-sm disabled:opacity-40 disabled:cursor-not-allowed transition"
+      >
+        {loading ? "Sharing..." : "Share"}
+      </button>
+    </div>
+
+    <div className="flex flex-col md:flex-row flex-1 min-h-0 overflow-y-auto md:overflow-hidden">
+      {/* LEFT - Preview */}
+      <div className={`w-full md:w-[60%] flex items-center justify-center aspect-square md:aspect-auto relative shrink-0 ${theme === 'dark' ? 'bg-black' : 'bg-[#0B141A]'}`}>
+        {!mediaPreview ? (
+          <div className="flex flex-col items-center text-white p-8 text-center">
+            <div className="w-20 h-20 bg-[#25D366] rounded-full flex items-center justify-center text-4xl mb-4">📷</div>
+            <p className="text-xl font-light mb-1">Drag photos and videos here</p>
+            <p className="text-sm text-white/60 mb-4">Share a moment with your friends</p>
+            <button
+              onClick={() => mediaRef.current.click()}
+              className="bg-[#25D366] hover:bg-[#1EBE5A] text-white px-5 py-2.5 rounded-full text-sm font-semibold transition"
+            >
+              Select from computer
+            </button>
+          </div>
+        ) : (
+          <>
+            {mediaType === "image" ? (
+              <img src={mediaPreview} alt="preview" className="w-full h-full object-contain max-h-" />
+            ) : (
+              <video src={mediaPreview} controls autoPlay muted loop className="w-full h-full object-contain max-h-" />
+            )}
+            <button
+              onClick={() => mediaRef.current.click()}
+              className="absolute top-3 right-3 bg-black/60 hover:bg-black/80 text-white px-3 py-1.5 rounded-full text-xs font-medium backdrop-blur"
+            >
+              Change
+            </button>
+            {mediaType === "video" && (
+              <span className="absolute top-3 left-3 bg-[#25D366] text-white px-2.5 py-1 rounded-full text- font-semibold">VIDEO</span>
+            )}
+          </>
+        )}
+        <input ref={mediaRef} type="file" accept="image/*,video/*" hidden onChange={handleMediaChange} />
+      </div>
+
+      {/* RIGHT - Caption + Music */}
+      <div className="w-full md:w-[40%] flex flex-col flex-1 min-h-">
+        <div className="p-4 flex items-center gap-3">
+          <img src={user?.profilePic || "/placeholder.svg"} className="w-9 h-9 rounded-full object-cover border-2 border-[#25D366]" />
+          <div>
+            <span className="font-semibold text-sm block">{user?.name || "username"}</span>
+            <span className="text- text-[#8696A0]">Posting to feed</span>
+          </div>
         </div>
 
-        <div className="flex flex-col md:flex-row min-h-">
-          {/* LEFT - Preview - THIS WAS BROKEN */}
-          <div className="w-full md:w-[60%] bg-black flex items-center justify-center aspect-square md:aspect-auto relative">
-            {!mediaPreview? (
-              <div className="flex flex-col items-center text-white p-8 text-center">
-                <div className="text-6xl mb-4">📷</div>
-                <p className="text-xl font-light mb-4">Drag photos and videos here</p>
-                <button
-                  onClick={() => mediaRef.current.click()}
-                  className="bg-[#0095f6] text-white px-4 py-1.5 rounded-lg text-sm font-semibold"
-                >
-                  Select from computer
-                </button>
-              </div>
+        <textarea
+          value={caption}
+          onChange={(e) => setCaption(e.target.value)}
+          placeholder="Write a caption..."
+          maxLength={2200}
+          className={`w-full px-4 py-2 text-sm outline-none resize-none h- bg-transparent ${theme === 'dark' ? 'placeholder:text-[#8696A0]' : 'placeholder:text-[#8696A0]'}`}
+        />
+
+        <div className="px-4 flex justify-between items-center">
+          <span className="text-xs text-[#8696A0]">{caption.length > 2000 ? "Almost full" : "Add hashtags, mention friends"}</span>
+          <span className={`text-xs ${caption.length > 2000 ? "text-red-500 font-semibold" : "text-[#8696A0]"}`}>{caption.length}/2,200</span>
+        </div>
+
+        <div className={`border-t mt-3 ${theme === 'dark' ? 'border-[#374045]' : 'border-gray-200'}`} />
+
+        {/* OPTIONAL BACKGROUND MUSIC */}
+        <div className="p-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <span className="w-8 h-8 bg-[#25D366]/10 rounded-full flex items-center justify-center text-base">🎵</span>
+              <span className="text-sm font-medium">Add background music</span>
+              <span className={`text- font-semibold px-2 py-0.5 rounded-full ${theme === 'dark' ? 'bg-[#2A3942] text-[#8696A0]' : 'bg-[#F0F2F5] text-[#8696A0]'}`}>Optional</span>
+            </div>
+            {!musicFile ? (
+              <button onClick={() => musicRef.current.click()} className="text-xs font-semibold text-[#25D366] hover:text-[#1EBE5A]">Add</button>
             ) : (
-              <>
-                {mediaType === "image"? (
-                  <img src={mediaPreview} alt="preview" className="w-20 h-20 object-contain" />
-                ) : (
-                  <video src={mediaPreview} controls autoPlay muted loop className="w-20 h-20 object-contain" />
-                )}
-                <button
-                  onClick={() => mediaRef.current.click()}
-                  className="absolute top-3 right-3 bg-black/60 text-white p-2 rounded-full text-xs"
-                >
-                  Change
-                </button>
-              </>
+              <button onClick={() => { setMusicFile(null); setMusicName(""); }} className="text-xs text-red-500 font-semibold">Remove</button>
             )}
-            <input ref={mediaRef} type="file" accept="image/*,video/*" hidden onChange={handleMediaChange} />
           </div>
 
-          {/* RIGHT - Caption + Music */}
-          <div className="w-full md:w-[40%] flex flex-col">
-            <div className="p-4 flex items-center gap-3">
-              <img src={user?.profilePic} className="w-7 h-7 rounded-full" />
-              <span className="font-semibold text-sm">{user?.name || "username"}</span>
-            </div>
-
-            <textarea
-              value={caption}
-              onChange={(e) => setCaption(e.target.value)}
-              placeholder="Write a caption..."
-              maxLength={2200}
-              className="w-full px-4 py-2 text-sm outline-none resize-none h- placeholder:text-gray-500"
-            />
-
-            <div className="px-4 flex justify-end">
-              <span className="text-xs text-gray-400">{caption.length}/2,200</span>
-            </div>
-
-            <div className="border-t border-gray-200 mt-2" />
-
-            {/* OPTIONAL BACKGROUND MUSIC */}
-            <div className="p-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <span className="text-lg">🎵</span>
-                  <span className="text-sm font-medium">Add background music</span>
-                  <span className="text- bg-gray-100 px-1.5 py-0.5 rounded">Optional</span>
-                </div>
-                {!musicFile? (
-                  <button onClick={() => musicRef.current.click()} className="text-xs font-semibold text-[#0095f6]">Add</button>
-                ) : (
-                  <button onClick={() => { setMusicFile(null); setMusicName(""); }} className="text-xs text-red-500">Remove</button>
-                )}
+          {musicFile && (
+            <div className={`mt-3 rounded-xl p-2.5 flex items-center gap-3 ${theme === 'dark' ? 'bg-[#2A3942]' : 'bg-[#F0F2F5]'}`}>
+              <div className="w-10 h-10 bg-[#25D366] rounded-lg flex items-center justify-center text-white text-sm shrink-0">♪</div>
+              <div className="flex-1 min-w-0">
+                <p className="text-xs font-medium truncate">{musicName}</p>
+                <p className="text- text-[#8696A0]">Will play with post</p>
               </div>
-
-              {musicFile && (
-                <div className="mt-3 bg-gray-50 rounded-lg p-2.5 flex items-center gap-3">
-                  <div className="w-8 h-8 bg-black rounded flex items-center justify-center text-white text-xs">♪</div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-xs font-medium truncate">{musicName}</p>
-                    <p className="text- text-gray-500">Will play with post</p>
-                  </div>
-                  <audio controls className="h-8 w-24" src={musicFile? URL.createObjectURL(musicFile) : ""} />
-                </div>
-              )}
-              <input ref={musicRef} type="file" accept="audio/*" hidden onChange={handleMusicChange} />
+              <audio controls className="h-8 w-24" src={musicFile ? URL.createObjectURL(musicFile) : ""} />
             </div>
+          )}
+          <input ref={musicRef} type="file" accept="audio/*" hidden onChange={handleMusicChange} />
+        </div>
 
-            <div className="border-t border-gray-200" />
-            <div className="p-4">
-              <input placeholder="Add location" className="w-full text-sm outline-none placeholder:text-gray-500" />
-            </div>
+        <div className={`border-t ${theme === 'dark' ? 'border-[#374045]' : 'border-gray-200'}`} />
+        <div className="p-4">
+          <div className="flex items-center gap-2">
+            <span className="text-[#8696A0]">📍</span>
+            <input placeholder="Add location" className="w-full text-sm outline-none bg-transparent placeholder:text-[#8696A0]" />
+          </div>
+        </div>
+
+        {/* WhatsApp Tip */}
+        <div className="mt-auto p-4">
+          <div className={`rounded-xl p-3 flex items-center gap-2 text-xs ${theme === 'dark' ? 'bg-[#005C4B]/30 text-[#A9E8C8]' : 'bg-[#DCF8C6] text-[#075E54]'}`}>
+            <span>✅</span> Your post will appear in Home feed with WhatsApp styling.
           </div>
         </div>
       </div>
     </div>
+  </div>
+</div>
   );
 }

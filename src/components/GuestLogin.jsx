@@ -57,77 +57,93 @@ export default function GuestLogin() {
 
 
     return (
-    <section className="min-h-screen bg-[#fafafa] flex flex-col items-center">
-      <div className="w-full bg-white border-b border-[#dbdbdb] h-[60px] flex items-center justify-center">
-        <h1 style={{ fontFamily: "'Grand Hotel', cursive" }} className="text-[32px]">Instagram</h1>
+    <section className={`min-h-screen flex flex-col items-center ${theme === 'dark' ? 'bg-[#0B141A]' : 'bg-[#ECE5DD]'}`}>
+  {/* Top Nav - WhatsApp Style */}
+  <div className={`w-full h- flex items-center justify-center shadow-sm ${theme === 'dark' ? 'bg-[#202C33]' : 'bg-[#075E54]'}`}>
+    <h1 className="text- font-bold text-white tracking-tight flex items-center gap-2">
+      <span className="w-9 h-9 bg-[#25D366] rounded-full flex items-center justify-center text-">💬</span>
+      MyGram
+    </h1>
+  </div>
+
+  <div className="w-full max-w- mt-10 px-4 flex flex-col gap-3">
+    <div className={`border rounded-2xl flex flex-col items-center px-8 py-8 shadow-lg ${theme === 'dark' ? 'bg-[#202C33] border-[#374045]' : 'bg-white border-gray-200'}`}>
+
+      {/* Guest Avatar - WhatsApp Green */}
+      <div className="w- h- rounded-full bg-[#25D366] p- flex items-center justify-center mb-4">
+        <span className={`text- w- h- rounded-full flex items-center justify-center ${theme === 'dark' ? 'bg-[#2A3942]' : 'bg-[#F0F2F5]'}`}>👤</span>
       </div>
 
-      <div className="w-full max-w-[350px] mt-14 flex flex-col gap-2.5">
-        <div className="bg-white border border-[#dbdbdb] flex flex-col items-center px-10 py-8">
+      <h2 className="text- font-bold mb-1">Continue as Guest</h2>
+      <p className="text- text-[#8696A0] text-center leading- mb-4 px-2">
+        You are logging in as a guest. You can browse posts, but likes, comments & messages are limited.
+      </p>
 
-          {/* Guest Avatar */}
-          <div className="w-[96px] h-[96px] rounded-full bg-gradient-to-tr from-yellow-400 via-pink-500 to-purple-600 flex items-center justify-center mb-4">
-            <span className="text-[42px] bg-white w-[90px] h-[90px] rounded-full flex items-center justify-center">👤</span>
-          </div>
-
-          <h2 className="text-[16px] font-semibold mb-1">Continue as Guest</h2>
-          <p className="text-[12px] text-[#8e8e8e] text-center leading-[16px] mb-4 px-2">
-            You are logging in as a guest. You can browse posts, but likes, comments & messages are limited.
-          </p>
-
-          <div className="w-full bg-[#fff8e6] border border-[#ffe7a8] rounded-[4px] p-2.5 mb-4">
-            <p className="text-[11px] text-[#8a6d3b] text-center">
-              ⚠️ Guest mode • Some features may be limited
-            </p>
-          </div>
-
-          <div className="w-full flex flex-col gap-3">
-            <input
-              type="text"
-              placeholder="Enter a guest username"
-              name="fullName"
-              value={fullName}
-              onChange={(e) => setFullName(e.target.value)}
-              className="w-full h-[38px] bg-[#fafafa] border border-[#dbdbdb] rounded-[3px] px-2 text-[12px] outline-none focus:border-[#a8a8a8] placeholder:text-[12px]"
-            />
-
-            <button
-              onClick={handleGuestLogin}
-              onKeyDown={handleEnterKey}
-              disabled={loading ||!fullName.trim()}
-              className="w-full h-8 bg-[#0095f6] hover:bg-[#1877f2] text-white rounded-lg text-sm font-semibold disabled:opacity-60 disabled:pointer-events-none"
-            >
-              {loading? <Spinner /> : "Continue as Guest"}
-            </button>
-
-            <div className="flex items-center my-2 gap-4">
-              <div className="h-[1px] bg-[#dbdbdb] flex-1" />
-              <span className="text-[13px] font-semibold text-[#8e8e8e]">OR</span>
-              <div className="h-[1px] bg-[#dbdbdb] flex-1" />
-            </div>
-
-            <Link
-              to="/login"
-              className="w-full h-8 border border-[#dbdbdb] bg-[#fafafa] text-[#00376b] rounded-lg flex items-center justify-center gap-2 text-[14px] font-semibold mt-3 hover:bg-[#f0f0f0]"
-            >
-              <span className="text-lg text-blue-500 hover:text-green-500">🔑</span>Log in with an account
-            </Link>
-
-            <Link
-              to="/register"
-              className="w-full h-8 bg-white text-[#0095f6] text-[14px] font-semibold flex items-center justify-center"
-            >
-              Create new account
-            </Link>
-          </div>
-        </div>
-
-        <div className="bg-white border border-[#dbdbdb] h-[63px] flex items-center justify-center text-[14px] px-6 text-center">
-          <p className="text-[#8e8e8e] text-[12px] leading-[14px]">
-            Guest profiles are temporary and will be removed after 24 hours. Create an account to save your data.
-          </p>
-        </div>
+      <div className={`w-full rounded-xl p-3 mb-4 flex items-center justify-center gap-2 ${theme === 'dark' ? 'bg-[#005C4B]/30 border border-[#25D366]/30' : 'bg-[#DCF8C6] border border-[#25D366]/30'}`}>
+        <span className="text-sm">⚠</span>
+        <p className={`text- text-center font-medium ${theme === 'dark' ? 'text-[#A9E8C8]' : 'text-[#075E54]'}`}>
+          Guest mode • Some features may be limited
+        </p>
       </div>
-    </section>
+
+      <div className="w-full flex flex-col gap-3">
+        <label className="text-xs font-semibold text-[#8696A0] -mb-1">Guest Username</label>
+        <input
+          type="text"
+          placeholder="Enter a guest username"
+          name="fullName"
+          value={fullName}
+          onChange={(e) => setFullName(e.target.value)}
+          onKeyDown={handleEnterKey}
+          maxLength={20}
+          className={`w-full h- rounded-full px-4 text- outline-none border transition ${theme === 'dark' ? 'bg-[#2A3942] border-[#374045] placeholder:text-[#8696A0] focus:border-[#25D366]' : 'bg-[#F0F2F5] border-transparent focus:border-[#25D366] focus:bg-white placeholder:text-[#8696A0]'}`}
+        />
+        {fullName && (
+          <p className="text- text-[#8696A0] -mt-1.5 ml-1">You will appear as <span className="font-semibold text-[#25D366]">{fullName}</span> • {fullName.length}/20</p>
+        )}
+
+        <button
+          onClick={handleGuestLogin}
+          onKeyDown={handleEnterKey}
+          disabled={loading || !fullName.trim()}
+          className="w-full h- bg-[#25D366] hover:bg-[#1EBE5A] text-white rounded-full text-sm font-semibold disabled:opacity-60 disabled:pointer-events-none transition shadow-sm flex items-center justify-center gap-2"
+        >
+          {loading ? <Spinner /> : <>👤 Continue as Guest</>}
+        </button>
+
+        <div className="flex items-center my-1 gap-4">
+          <div className={`h- flex-1 ${theme === 'dark' ? 'bg-[#374045]' : 'bg-gray-200'}`} />
+          <span className="text- font-semibold text-[#8696A0]">OR</span>
+          <div className={`h- flex-1 ${theme === 'dark' ? 'bg-[#374045]' : 'bg-gray-200'}`} />
+        </div>
+
+        <Link
+          to="/login"
+          className={`w-full h- rounded-full flex items-center justify-center gap-2 text- font-semibold transition ${theme === 'dark' ? 'bg-[#2A3942] hover:bg-[#374045]' : 'bg-[#F0F2F5] hover:bg-gray-200'}`}
+        >
+          <span className="text-lg">🔑</span> Log in with an account
+        </Link>
+
+        <Link
+          to="/register"
+          className="w-full h- text-[#25D366] hover:text-[#1EBE5A] text- font-semibold flex items-center justify-center"
+        >
+          Create new account →
+        </Link>
+      </div>
+    </div>
+
+    <div className={`rounded-2xl py-4 px-6 flex items-center justify-center text-center shadow-sm ${theme === 'dark' ? 'bg-[#202C33] border border-[#374045]' : 'bg-white border border-gray-200'}`}>
+      <p className="text-[#8696A0] text- leading-">
+        ⏳ Guest profiles are temporary and will be removed after 24 hours.<br />
+        <Link to="/register" className="text-[#25D366] font-semibold">Create an account</Link> to save your data.
+      </p>
+    </div>
+
+    <p className="text-center text- text-[#8696A0] mt-1">
+      No email needed for guest mode • Browse instantly
+    </p>
+  </div>
+</section>
   );
 }

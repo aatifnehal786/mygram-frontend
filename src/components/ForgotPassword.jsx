@@ -155,116 +155,134 @@ const handleResetPassword = async () => {
   };
 
  return (
-    <section className="min-h-screen bg-[#fafafa] flex flex-col items-center">
-      {/* Top Nav like Instagram */}
-      <div className="w-full bg-white border-b border-[#dbdbdb] h-[60px] flex items-center justify-center">
-        <h1 style={{ fontFamily: "'Grand Hotel', cursive" }} className="text-[32px]">Instagram</h1>
+    <section className={`min-h-screen flex flex-col items-center ${theme === 'dark' ? 'bg-[#0B141A]' : 'bg-[#ECE5DD]'}`}>
+  {/* Top Nav - WhatsApp Style */}
+  <div className={`w-full h- flex items-center justify-center shadow-sm ${theme === 'dark' ? 'bg-[#202C33]' : 'bg-[#075E54]'}`}>
+    <h1 className="text- font-bold text-white tracking-tight flex items-center gap-2">
+      <span className="w-9 h-9 bg-[#25D366] rounded-full flex items-center justify-center text-">💬</span>
+      MyGram
+    </h1>
+  </div>
+
+  <div className="w-full max-w- mt-10 px-4 flex flex-col gap-3">
+    <div className={`border rounded-2xl flex flex-col items-center px-8 py-8 shadow-lg ${theme === 'dark' ? 'bg-[#202C33] border-[#374045]' : 'bg-white border-gray-200'}`}>
+      {/* Lock Icon - WhatsApp Green */}
+      <div className="w- h- rounded-full bg-[#25D366]/10 border-2 border-[#25D366] flex items-center justify-center mb-4">
+        <span className="text-">🔒</span>
       </div>
 
-      <div className="w-full max-w-[388px] mt-12 flex flex-col gap-2.5">
-        <div className="bg-white border border-[#dbdbdb] flex flex-col items-center px-10 py-8">
-          {/* Lock Icon Circle */}
-          <div className="w-[96px] h-[96px] rounded-full border-2 border-black flex items-center justify-center mb-4">
-            <span className="text-[48px]">🔒</span>
-          </div>
+      <h2 className="text- font-bold mb-2">Trouble logging in?</h2>
+      <p className="text- text-[#8696A0] text-center leading- mb-5">
+        Enter your email and we'll send you an OTP to get back into your account.
+      </p>
 
-          <h2 className="text-[16px] font-semibold mb-2">Trouble logging in?</h2>
-          <p className="text-[14px] text-[#8e8e8e] text-center leading-[18px] mb-4">
-            Enter your email and we'll send you an OTP to get back into your account.
-          </p>
+      <div className="w-full flex flex-col gap-2.5">
+        <label className="text-xs font-semibold text-[#8696A0] -mb-1">Email address</label>
+        <input
+          type="email"
+          name="email"
+          placeholder="Enter your email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          onKeyDown={handleDynamicEnter}
+          className={`w-full h- rounded-full px-4 text- outline-none border transition ${theme === 'dark' ? 'bg-[#2A3942] border-[#374045] placeholder:text-[#8696A0] focus:border-[#25D366]' : 'bg-[#F0F2F5] border-transparent focus:border-[#25D366] focus:bg-white placeholder:text-[#8696A0]'}`}
+        />
 
-          <div className="w-full flex flex-col gap-2">
-            <input
-              type="email"
-              name="email"
-              placeholder="Email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              onKeyDown={handleDynamicEnter}
-              className="w-full h-[38px] bg-[#fafafa] border border-[#dbdbdb] rounded-[3px] px-2 text-[12px] outline-none focus:border-[#a8a8a8]"
-            />
+        <button
+          ref={buttonRef1}
+          type="button"
+          onClick={Forgotpassword}
+          disabled={isLoading || !email}
+          className="w-full h- bg-[#25D366] hover:bg-[#1EBE5A] text-white rounded-full text-sm font-semibold mt-1 disabled:opacity-60 disabled:cursor-not-allowed transition shadow-sm flex items-center justify-center"
+        >
+          {isLoading ? <Spinner /> : "Send OTP"}
+        </button>
 
-            <button
-              ref={buttonRef1}
-              type="button"
-              onClick={Forgotpassword}
-              disabled={isLoading ||!email}
-              className="w-full h-8 bg-[#0095f6] hover:bg-[#1877f2] text-white rounded-lg text-sm font-semibold mt-2 disabled:opacity-60"
-            >
-              {isLoading? <Spinner /> : "Send OTP"}
-            </button>
-
-            <div className="flex items-center my-3 gap-4">
-              <div className="h-[1px] bg-[#dbdbdb] flex-1" />
-              <span className="text-[13px] font-semibold text-[#8e8e8e]">OR</span>
-              <div className="h-[1px] bg-[#dbdbdb] flex-1" />
-            </div>
-
-            <input
-              type="text"
-              name="otp"
-              placeholder="Enter OTP"
-              value={otp}
-              onChange={(e) => setOtp(e.target.value)}
-              onKeyDown={handleDynamicEnter}
-              className="w-full h-[38px] bg-[#fafafa] border border-[#dbdbdb] rounded-[3px] px-2 text-[12px] outline-none focus:border-[#a8a8a8]"
-            />
-
-            <div className="relative mt-2">
-              <input
-                type={isPassword? "text" : "password"}
-                name="newPassword"
-                placeholder="New Password"
-                value={newPassword}
-                onChange={(e) => setNewPassword(e.target.value)}
-                onKeyDown={handleDynamicEnter}
-                className="w-full h-[38px] bg-[#fafafa] border border-[#dbdbdb] rounded-[3px] px-2 pr-10 text-[12px] outline-none focus:border-[#a8a8a8]"
-              />
-              <img
-                src={isPassword? show : hide}
-                alt="Toggle"
-                onClick={showHide}
-                className="absolute right-2 top-1/2 -translate-y-1/2 w-5 h-5 cursor-pointer opacity-60"
-              />
-            </div>
-
-            {/* Strength Text Instagram style */}
-            {newPassword && (
-              <p className={`text-[11px] mt-1 font-medium
-                ${strength === "weak" && "text-red-500"}
-                ${strength === "medium" && "text-yellow-500"}
-                ${strength === "strong" && "text-green-600"}`}>
-                {getStrengthText()}
-              </p>
-            )}
-
-            <button
-              ref={buttonRef2}
-              type="button"
-              onClick={handleResetPassword}
-              disabled={isLoading2 ||!otp ||!newPassword}
-              className="w-full h-8 bg-[#0095f6] hover:bg-[#1877f2] text-white rounded-lg text-sm font-semibold mt-3 disabled:opacity-60"
-            >
-              {isLoading2? <Spinner /> : "Reset Password"}
-            </button>
-          </div>
-
-          <div className="w-full h-[1px] bg-[#dbdbdb] my-6" />
-
-          <Link to="/register" className="text-[14px] font-semibold text-[#262626]">
-            Create new account
-          </Link>
+        <div className="flex items-center my-2 gap-4">
+          <div className={`h- flex-1 ${theme === 'dark' ? 'bg-[#374045]' : 'bg-gray-200'}`} />
+          <span className="text- font-semibold text-[#8696A0]">OR</span>
+          <div className={`h- flex-1 ${theme === 'dark' ? 'bg-[#374045]' : 'bg-gray-200'}`} />
         </div>
 
-        <div className="bg-white border border-[#dbdbdb] h-[63px] flex items-center justify-center">
-          <Link to="/login" className="text-[14px] font-semibold text-[#262626] border border-[#dbdbdb] w-full h-full flex items-center justify-center hover:bg-[#fafafa]">
-            Back to login
-          </Link>
+        <label className="text-xs font-semibold text-[#8696A0] -mb-1">OTP Code</label>
+        <input
+          type="text"
+          name="otp"
+          placeholder="Enter 6-digit OTP"
+          value={otp}
+          onChange={(e) => setOtp(e.target.value)}
+          onKeyDown={handleDynamicEnter}
+          maxLength={6}
+          inputMode="numeric"
+          className={`w-full h- rounded-full px-4 text- tracking- font-semibold text-center outline-none border transition ${theme === 'dark' ? 'bg-[#2A3942] border-[#374045] placeholder:text-[#8696A0] placeholder:tracking-normal placeholder:font-normal focus:border-[#25D366]' : 'bg-[#F0F2F5] border-transparent focus:border-[#25D366] focus:bg-white placeholder:text-[#8696A0] placeholder:tracking-normal placeholder:font-normal'}`}
+        />
+
+        <label className="text-xs font-semibold text-[#8696A0] -mb-1 mt-1">New Password</label>
+        <div className="relative">
+          <input
+            type={isPassword ? "text" : "password"}
+            name="newPassword"
+            placeholder="Create new password"
+            value={newPassword}
+            onChange={(e) => setNewPassword(e.target.value)}
+            onKeyDown={handleDynamicEnter}
+            className={`w-full h- rounded-full px-4 pr-11 text- outline-none border transition ${theme === 'dark' ? 'bg-[#2A3942] border-[#374045] placeholder:text-[#8696A0] focus:border-[#25D366]' : 'bg-[#F0F2F5] border-transparent focus:border-[#25D366] focus:bg-white placeholder:text-[#8696A0]'}`}
+          />
+          <img
+            src={isPassword ? show : hide}
+            alt="Toggle"
+            onClick={showHide}
+            className="absolute right-3.5 top-1/2 -translate-y-1/2 w-5 h-5 cursor-pointer opacity-60 hover:opacity-100"
+          />
         </div>
+
+        {/* Strength - WhatsApp Colors */}
+        {newPassword && (
+          <>
+            <div className="w-full h-1.5 rounded-full bg-gray-200 dark:bg-[#2A3942] overflow-hidden mt-1">
+              <div className={`h-full rounded-full transition-all ${strength === "weak" ? "w-1/3 bg-red-500" : strength === "medium" ? "w-2/3 bg-yellow-500" : "w-full bg-[#25D366]"}`} />
+            </div>
+            <p className={`text- font-medium
+              ${strength === "weak" && "text-red-500"}
+              ${strength === "medium" && "text-yellow-500"}
+              ${strength === "strong" && "text-[#25D366]"}`}>
+              {getStrengthText()}
+            </p>
+          </>
+        )}
+
+        <button
+          ref={buttonRef2}
+          type="button"
+          onClick={handleResetPassword}
+          disabled={isLoading2 || !otp || !newPassword}
+          className="w-full h- bg-[#25D366] hover:bg-[#1EBE5A] text-white rounded-full text-sm font-semibold mt-2 disabled:opacity-60 disabled:cursor-not-allowed transition shadow-sm flex items-center justify-center"
+        >
+          {isLoading2 ? <Spinner /> : "Reset Password"}
+        </button>
       </div>
 
-      <ToastContainer position="top-right" autoClose={3000} />
-    </section>
+      <div className={`w-full h- my-5 ${theme === 'dark' ? 'bg-[#374045]' : 'bg-gray-200'}`} />
+
+      <Link to="/register" className="text- font-semibold text-[#25D366] hover:text-[#1EBE5A]">
+        Create new account
+      </Link>
+      <p className="text-xs text-[#8696A0] mt-1 text-center">Don't have an account? Sign up free</p>
+    </div>
+
+    <div className={`rounded-2xl h- flex items-center justify-center shadow-sm overflow-hidden ${theme === 'dark' ? 'bg-[#202C33] border border-[#374045]' : 'bg-white border border-gray-200'}`}>
+      <Link to="/login" className={`text- font-semibold w-full h-full flex items-center justify-center gap-2 transition ${theme === 'dark' ? 'hover:bg-[#2A3942]' : 'hover:bg-[#F0F2F5]'}`}>
+        <span>←</span> Back to login
+      </Link>
+    </div>
+
+    <p className="text-center text- text-[#8696A0] mt-1">
+      Protected by MyGram • Your OTP is valid for 10 minutes
+    </p>
+  </div>
+
+  <ToastContainer position="top-right" autoClose={3000} />
+</section>
   );
 
 }
