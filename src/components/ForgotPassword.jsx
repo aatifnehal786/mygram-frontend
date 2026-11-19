@@ -7,6 +7,7 @@ import { toast,ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Spinner from "../Spinner";
 import { useTheme } from '../contexts/ThemeContext';
+import ThemeToggle from "../components/ThemeToggle";
 
 export default function ForgotPassword() {
   const [email, setEmail] = useState("");
@@ -156,7 +157,10 @@ const handleResetPassword = async () => {
   };
 
  return (
-    <section className={`min-h-screen flex flex-col items-center ${theme === 'dark' ? 'bg-[#0B141A]' : 'bg-[#ECE5DD]'}`}>
+    <section className={`min-h-screen flex flex-col items-center ${theme === 'dark' ? 'bg-[#0B141A]' : 'bg-[#ECE5DD]'} relative`}>
+      <div className="absolute top-4 right-4 z-50">
+        <ThemeToggle />
+      </div>
   {/* Top Nav - WhatsApp Style */}
   <div className={`w-full h- flex items-center justify-center shadow-sm ${theme === 'dark' ? 'bg-[#202C33]' : 'bg-[#075E54]'}`}>
     <h1 className="text- font-bold text-white tracking-tight flex items-center gap-2">

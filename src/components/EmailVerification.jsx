@@ -3,6 +3,7 @@ import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import useUserStore from "../store/useUserStore";
 import { apiFetch } from "../api/apiFetch";
+import ThemeToggle from "../components/ThemeToggle";
 
 export default function EmailVerification() {
   const navigate = useNavigate();
@@ -127,7 +128,10 @@ export default function EmailVerification() {
   };
 
   return (
-   <div className="min-h-screen flex flex-col items-center bg-[#ECE5DD] dark:bg-[#111B21] p-4">
+   <div className="min-h-screen flex flex-col items-center bg-[#ECE5DD] dark:bg-[#111B21] p-4 relative">
+    <div className="absolute top-4 right-4 z-50">
+      <ThemeToggle />
+    </div>
   {/* WhatsApp Top Header Bar */}
   <div className="w-full bg-[#075E54] dark:bg-[#202C33] py-4 flex justify-center -m-4 mb-8">
     <div className="flex items-center gap-2 text-white">

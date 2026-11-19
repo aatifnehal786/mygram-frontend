@@ -7,7 +7,7 @@ import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Spinner from "../Spinner";
 import useUserStore from "../store/useUserStore";
-import { initializeSocket } from "../contexts/SocketContext";
+import ThemeToggle from "../components/ThemeToggle";
 
 export default function Login() {
   const [user, setUser] = useState({ loginId: "", password: "" });
@@ -68,7 +68,12 @@ const handleSubmit = async (e) => {
   const showHide = () => setIsPassword((prev) => !prev);
 
  return (
-    <section className="min-h-screen bg-[#ECE5DD] dark:bg-[#111B21] flex flex-col justify-center items-center">
+    <section className="min-h-screen bg-[#ECE5DD] dark:bg-[#111B21] flex flex-col justify-center items-center relative">
+      
+
+  <div className="absolute top-4 right-4 z-50">
+  <ThemeToggle />
+</div>
   {/* WhatsApp Top Header Bar */}
   <div className="w-full bg-[#075E54] dark:bg-[#202C33] py-4 flex justify-center">
     <div className="flex items-center gap-2 text-white">

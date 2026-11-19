@@ -7,6 +7,7 @@ import { getSocket } from "../contexts/SocketContext";
 import useUserStore from "../store/useUserStore";
 import usePresenceStore from "../store/usePresenceStore";
 import VideoCallManager from "./VideoCallManager";
+import ThemeToggle from "../components/ThemeToggle";
 
 export default function Layout() {
   const [rateLimitError, setRateLimitError] = useState('');
@@ -49,7 +50,10 @@ export default function Layout() {
   }, []);
 
   return (
-    <div className={`min-h-screen ${theme === "dark"? "bg-black text-white" : "bg-rgb(122, 187, 58) text-black"}`}>
+    <div className={`min-h-screen ${theme === "dark"? "bg-black text-white" : "bg-rgb(122, 187, 58) text-black"} relative`}>
+      <div className="absolute top-30 z-50 right-0">
+        <ThemeToggle />
+      </div>
       {/* GLOBAL RATE LIMIT TOAST */}
       {rateLimitError && (
         <div className="fixed top-5 left-1/2 -translate-x-1/2 z-[100] bg-red-600 text-white px-6 py-3 rounded-full shadow-lg animate-bounce flex items-center gap-2">
@@ -67,18 +71,11 @@ export default function Layout() {
           <Link to="/profile" className={`${theme === "dark" ? "hover:bg-zinc-800" : "hover:bg-zinc-100 text-black br-gray-200"} flex items-center gap-4 p-3 rounded-lg`}><img src={myPic} className="w-6 h-6 rounded-full object-cover" /> Profile</Link>
         </nav>
         {/* DESKTOP THEME BUTTON */}
-        <button onClick={toggleTheme} className={`p-3 text-left text-sm rounded-lg  w-full ${theme === 'dark' ? 'bg-black text-white' : ''}`}>
-          {theme === "dark"? "☀ Light mode" : "🌙 Dark mode"}
-        </button>
+       
       </aside>
 
       {/* MOBILE THEME BUTTON - FLOATING VISIBLE */}
-      <button 
-        onClick={toggleTheme} 
-        className="md:hidden fixed bottom-20 right-4 z-50 w-12 h-12 rounded-full bg-white dark:bg-zinc-800 border shadow-lg flex items-center justify-center text-xl"
-      >
-        {theme === "dark" ? "☀" : "🌙"}
-      </button>
+      
 
       {/* MAIN WRAPPER */}
       <div className="w-full min-h-screen flex flex-col md:pl-64">

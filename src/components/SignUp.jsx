@@ -1,11 +1,10 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import hide from '../assets/hide.png'
-import show from '../assets/show.png'
 import { apiFetch } from "../api/apiFetch";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Spinner from "../Spinner";
+import ThemeToggle from "../components/ThemeToggle";
 
 export default function SignUp() {
   const navigate = useNavigate();
@@ -135,7 +134,11 @@ export default function SignUp() {
     userDetails.mobile.trim()!== "";
 
   return (
-    <section className="min-h-screen bg-[#ECE5DD] dark:bg-[#111B21] flex flex-col items-center">
+    <section className="min-h-screen bg-[#ECE5DD] dark:bg-[#111B21] flex flex-col items-center relative">
+      <div className="absolute top-4 right-4 z-50">
+        <ThemeToggle />
+      </div>
+      
   {/* 【entity-WhatsApp¦canonical_name=WhatsApp】 Top Header Bar */}
   <div className="w-full bg-[#075E54] dark:bg-[#202C33] py-4 flex justify-center">
     <div className="flex items-center gap-2 text-white">
